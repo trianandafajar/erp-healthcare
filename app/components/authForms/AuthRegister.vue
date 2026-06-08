@@ -35,7 +35,7 @@ function validate() {
 
     <div class="d-flex justify-space-between align-center">
         <h3 class="text-h3 text-center mb-0">Sign up</h3>
-        <nuxtLink to="/login1" class="text-primary text-decoration-none">Already have an account?</nuxtLink>
+        <NuxtLink to="/login1" class="text-primary text-decoration-none">Already have an account?</NuxtLink>
     </div>
 
     <v-form ref="Regform" lazy-validation action="/dashboards/analytical" class="mt-7 loginForm">
@@ -86,13 +86,13 @@ function validate() {
         <div class="d-sm-inline-flex align-center mt-2 mb-7 mb-sm-0 font-weight-bold">
             <h6 class="text-caption">
                 By Signing up, you agree to our
-                <nuxtLink to="/register" class="text-primary link-hover font-weight-medium">
+                <NuxtLink to="/register" class="text-primary link-hover font-weight-medium">
                     Terms of Service
-                </nuxtLink>
+                </NuxtLink>
                 and
-                <nuxtLink to="/register" class="text-primary link-hover font-weight-medium">
+                <NuxtLink to="/register" class="text-primary link-hover font-weight-medium">
                     Privacy Policy
-                </nuxtLink>
+                </NuxtLink>
             </h6>
         </div>
         <v-btn color="primary" block class="mt-4" variant="flat" size="large" @click="validate()">Create Account</v-btn>
