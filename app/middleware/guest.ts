@@ -5,6 +5,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const user = await getUser()
 
     if (user && to.path !== '/reset-password') {
-        return navigateTo('/')
+        return navigateTo('/dashboard')
     }
 })

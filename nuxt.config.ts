@@ -22,6 +22,7 @@ export default defineNuxtConfig({
       noExternal: ['vuetify'],
     },
   },
+  modules: ['@pinia/nuxt'],
 
   runtimeConfig: {
     public: {
