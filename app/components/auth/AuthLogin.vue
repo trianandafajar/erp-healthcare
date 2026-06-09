@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-// import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
+
+const { login } = useAuth()
 
 const checkbox = ref(false)
 const valid = ref(false)
@@ -15,10 +16,6 @@ const passwordRules = [
     (v: string) => v === v.trim() || 'Password cannot start or end with spaces',
 ]
 
-onMounted(() => {
-    console.log('AuthLogin component mounted')
-})
-
 const emailRules = [
     (v: string) => !!v.trim() || 'E-mail is required',
     (v: string) => {
@@ -29,26 +26,22 @@ const emailRules = [
 ]
 
 async function validate() {
-    console.log('klik login')
     isSubmitting.value = true
     apiError.value = ''
 
     try {
-        const supabase = useSupabaseClient()
-
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: username.value.trim(),
-            password: password.value
+        await $fetch('/api/auth/login', {
+            method: 'POST',
+            body: {
+                email: username.value.trim(),
+                password: password.value
+            }
         })
 
-        if (error) throw error
-
-        console.log('login berhasil:', data)
         await navigateTo('/')
 
     } catch (err: any) {
-        console.log('Error:', err)
-        apiError.value = err.message || 'Login failed.'
+        apiError.value = err?.data?.message || err?.message || 'Login failed.'
     } finally {
         isSubmitting.value = false
     }

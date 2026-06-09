@@ -65,7 +65,7 @@ useSeoMeta({
         <!-- Login Part-->
 
         <v-col cols="12">
-            <v-container class="pt-0 pb-5">
+            <v-container class="pt-0 pb-4">
                 <AuthFooter />
             </v-container>
         </v-col>

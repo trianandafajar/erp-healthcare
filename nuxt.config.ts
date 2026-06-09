@@ -1,3 +1,5 @@
+declare const process: { env: { SUPABASE_URL?: string; SUPABASE_KEY?: string } }
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -21,15 +23,10 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: [
-    '@nuxtjs/supabase',
-  ],
-
-  supabase: {
-    redirectOptions: {
-      login: '/login',
-      callback: '/confirm',
-      exclude: ['/login', '/register', '/forgot-password', '/reset-password']
+  runtimeConfig: {
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseKey: process.env.SUPABASE_KEY,
     }
-  }
+  },
 })
