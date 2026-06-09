@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLogo from '~/components/AppLogo.vue'
 import AuthFooter from '~/components/auth/AuthFooter.vue'
-import AuthForgot from '~/components/authForms/AuthForgot.vue';
+import AuthForgot from '~/components/auth/AuthForgot.vue';
 
 definePageMeta({
     layout: false,

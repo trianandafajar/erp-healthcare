@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 const valid = ref(false)
-const username = ref('')
+const email = ref('')
 const isSubmitting = ref(false)
 const apiError = ref('')
 const isSuccess = ref(false)
@@ -18,9 +18,9 @@ const emailRules = [
 ]
 
 async function validate() {
-    if (!username.value) return
+    if (!email.value) return
 
-    username.value = username.value.trim()
+    email.value = email.value.trim()
     isSubmitting.value = true
     apiError.value = ''
     isSuccess.value = false
@@ -29,13 +29,11 @@ async function validate() {
         await $fetch('/api/auth/forgot-password', {
             method: 'POST',
             body: {
-                email: username.value,
+                email: email.value,
             },
         })
 
         isSuccess.value = true
-        // Opsional: Jika ingin otomatis pindah halaman setelah berhasil, aktifkan kode di bawah ini:
-        // await navigateTo('/login')
     } catch (err: any) {
         apiError.value = err?.data?.message || err?.message || 'Failed to send reset email. Please try again.'
     } finally {
@@ -53,7 +51,7 @@ async function validate() {
     <v-form @submit.prevent="validate" class="mt-7 loginForm">
         <div class="mb-6">
             <v-label>Email Address</v-label>
-            <v-text-field aria-label="email address" v-model="username" :rules="emailRules" class="mt-2" required
+            <v-text-field aria-label="email address" v-model="email" :rules="emailRules" class="mt-2" required
                 hide-details="auto" variant="outlined" color="primary"></v-text-field>
         </div>
 

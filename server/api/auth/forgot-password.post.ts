@@ -1,9 +1,7 @@
-import { serverSupabaseClient } from '#supabase/server'
-
 export default defineEventHandler(async (event) => {
     const { email } = await readBody(event)
 
-    const supabase = await serverSupabaseClient(event)
+    const supabase = await serverSupabase(event)
 
     const baseURL = getRequestURL(event).origin
 
@@ -19,6 +17,6 @@ export default defineEventHandler(async (event) => {
     }
 
     return {
-        message: 'Email reset password telah dikirim'
+        message: 'Reset link has been sent to your email address.'
     }
 })
