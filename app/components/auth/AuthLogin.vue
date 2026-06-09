@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
+// import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
 const checkbox = ref(false)
 const valid = ref(false)
@@ -10,13 +10,15 @@ const username = ref('')
 const isSubmitting = ref(false)
 const apiError = ref('')
 
-// Password validation rules
 const passwordRules = [
     (v: string) => !!v || 'Password is required',
     (v: string) => v === v.trim() || 'Password cannot start or end with spaces',
 ]
 
-// Email validation rules
+onMounted(() => {
+    console.log('AuthLogin component mounted')
+})
+
 const emailRules = [
     (v: string) => !!v.trim() || 'E-mail is required',
     (v: string) => {
@@ -27,26 +29,26 @@ const emailRules = [
 ]
 
 async function validate() {
-    username.value = username.value.trim()
-
+    console.log('klik login')
     isSubmitting.value = true
     apiError.value = ''
 
     try {
-        const { session } = await $fetch('/api/auth/login', {
-            method: 'POST',
-            body: {
-                email: username.value,
-                password: password.value
-            },
+        const supabase = useSupabaseClient()
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: username.value.trim(),
+            password: password.value
         })
 
-        const token = useCookie('sb-token')
-        token.value = session.access_token
+        if (error) throw error
 
+        console.log('login berhasil:', data)
         await navigateTo('/')
+
     } catch (err: any) {
-        apiError.value = err.data?.message || 'Login failed. Please check your credentials.'
+        console.log('Error:', err)
+        apiError.value = err.message || 'Login failed.'
     } finally {
         isSubmitting.value = false
     }
@@ -69,15 +71,13 @@ async function validate() {
         <div>
             <v-label>Password</v-label>
             <v-text-field aria-label="password" v-model="password" :rules="passwordRules" required variant="outlined"
-                color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2"
-                @input="password">
+                color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
-                    <v-btn color="secondary" icon rounded variant="text">
-                        <EyeInvisibleOutlined :style="{ color: 'rgb(var(--v-theme-secondary))' }"
-                            v-if="showPassword == false" @click="showPassword = !showPassword" />
-                        <EyeOutlined :style="{ color: 'rgb(var(--v-theme-secondary))' }" v-if="showPassword == true"
-                            @click="showPassword = !showPassword" />
-                    </v-btn>
+                    <span @click="showPassword = !showPassword"
+                        style="cursor: pointer; display: flex; align-items: center; color: rgb(var(--v-theme-secondary))">
+                        <EyeOutlined v-if="showPassword" />
+                        <EyeInvisibleOutlined v-else />
+                    </span>
                 </template>
             </v-text-field>
         </div>
@@ -90,8 +90,7 @@ async function validate() {
             </div>
         </div>
 
-        <v-btn color="primary" :loading="isSubmitting" block class="mt-5" variant="flat" size="large" :disabled="valid"
-            type="submit">
+        <v-btn color="primary" :loading="isSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
             Login
         </v-btn>
 

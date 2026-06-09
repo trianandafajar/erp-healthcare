@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLogo from '~/components/AppLogo.vue'
-import AuthRegister from '~/components/authForms/AuthRegister.vue';
+import AuthRegister from '~/components/auth/AuthRegister.vue'
 </script>
 
 <template>
