@@ -1,5 +1,3 @@
-import { serverSupabaseClient } from '#supabase/server'
-
 export default defineEventHandler(async (event) => {
     const { email, password, full_name, role } = await readBody(event)
 
@@ -10,14 +8,15 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const supabase = await serverSupabaseClient(event)
+    const supabase = serverSupabase(event)
+
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
             data: {
                 full_name,
-                role: role ?? 'patient',
+                role: role ?? 'admin',
             },
         },
     })

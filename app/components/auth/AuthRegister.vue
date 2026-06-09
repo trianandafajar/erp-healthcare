@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
+const firstname = ref('')
+const lastname = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
@@ -10,8 +12,10 @@ const loading = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
+const firstRules = [(v: string) => !!v || 'First name is required']
+const lastRules = [(v: string) => !!v || 'Last name is required']
+
 async function register() {
-    console.log('diklik')
     if (password.value !== confirmPassword.value) {
         errorMsg.value = 'Password tidak sama'
         return
@@ -23,7 +27,11 @@ async function register() {
     try {
         await $fetch('/api/auth/register', {
             method: 'POST',
-            body: { email: email.value, password: password.value },
+            body: {
+                email: email.value,
+                password: password.value,
+                full_name: `${firstname.value} ${lastname.value}`
+            },
         })
 
         await navigateTo('/login')
@@ -44,6 +52,23 @@ async function register() {
     <v-alert v-if="errorMsg" type="error" class="mt-4">{{ errorMsg }}</v-alert>
 
     <v-form class="mt-7 loginForm">
+        <v-row class="my-0">
+            <v-col cols="12" sm="6" class="py-0">
+                <div class="mb-6">
+                    <v-label>First Name*</v-label>
+                    <v-text-field v-model="firstname" :rules="firstRules" hide-details="auto" required
+                        variant="outlined" class="mt-2" color="primary" placeholder="John"></v-text-field>
+                </div>
+            </v-col>
+            <v-col cols="12" sm="6" class="py-0">
+                <div class="mb-6">
+                    <v-label>Last Name*</v-label>
+                    <v-text-field v-model="lastname" :rules="lastRules" hide-details="auto" required variant="outlined"
+                        class="mt-2" color="primary" placeholder="Doe"></v-text-field>
+                </div>
+            </v-col>
+        </v-row>
+
         <div class="mb-6">
             <v-label>Email Address*</v-label>
             <v-text-field v-model="email" placeholder="demo@company.com" class="mt-2" required hide-details="auto"
