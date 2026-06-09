@@ -1,52 +1,64 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
-const checkbox = ref(false)
-const valid = ref(false)
-const showPassword = ref(false)
+definePageMeta({
+    layout: false,
+    middleware: 'guest'
+})
+
 const password = ref('')
-const username = ref('')
+const confirmPassword = ref('')
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 const isSubmitting = ref(false)
 const apiError = ref('')
 
-// Password validation rules
+onMounted(async () => {
+    const supabase = useSupabase()
+    if (!supabase) return navigateTo('/forgot-password')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return navigateTo('/forgot-password')
+})
+
 const passwordRules = [
     (v: string) => !!v || 'Password is required',
+    (v: string) => v.length >= 8 || 'Password of at least 8 characters',
     (v: string) => v === v.trim() || 'Password cannot start or end with spaces',
 ]
 
-// Email validation rules
-const emailRules = [
-    (v: string) => !!v.trim() || 'E-mail is required',
-    (v: string) => {
-        const trimmedEmail = v.trim()
-        return !/\s/.test(trimmedEmail) || 'E-mail must not contain spaces'
-    },
-    (v: string) => /.+@.+\..+/.test(v.trim()) || 'E-mail must be valid'
+const confirmRules = [
+    (v: string) => !!v || 'Confirm password is required',
+    (v: string) => v === password.value || 'Passwords are not the same',
 ]
 
 async function validate() {
-    username.value = username.value.trim()
+    if (password.value !== confirmPassword.value) {
+        apiError.value = 'Passwords are not the same'
+        return
+    }
 
     isSubmitting.value = true
     apiError.value = ''
 
     try {
-        const { session } = await $fetch('/api/auth/login', {
-            method: 'POST',
-            body: {
-                email: username.value,
-                password: password.value
-            },
+        const supabase = useSupabase()
+        if (!supabase) throw new Error('Supabase not available')
+
+        const { error } = await supabase.auth.updateUser({
+            password: password.value
         })
 
-        const token = useCookie('sb-token')
-        token.value = session.access_token
+        if (error) {
+            apiError.value = error.message
+            return
+        }
 
-        await navigateTo('/')
+        await supabase.auth.signOut()
+        await navigateTo('/login?reset=true')
     } catch (err: any) {
-        apiError.value = err.data?.message || 'Login failed. Please check your credentials.'
+        apiError.value = err.message || 'Password reset failed.'
     } finally {
         isSubmitting.value = false
     }
@@ -62,38 +74,34 @@ async function validate() {
     <v-form @submit.prevent="validate" class="mt-7 loginForm">
         <div class="mb-6">
             <v-label>New Password</v-label>
-            <v-text-field aria-label="password" v-model="password" :rules="passwordRules" required variant="outlined"
-                color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2"
-                @input="password">
+            <v-text-field v-model="password" :rules="passwordRules" required variant="outlined" color="primary"
+                hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
-                    <v-btn color="secondary" icon rounded variant="text">
-                        <EyeInvisibleOutlined :style="{ color: 'rgb(var(--v-theme-secondary))' }"
-                            v-if="showPassword == false" @click="showPassword = !showPassword" />
-                        <EyeOutlined :style="{ color: 'rgb(var(--v-theme-secondary))' }" v-if="showPassword == true"
-                            @click="showPassword = !showPassword" />
+                    <v-btn color="secondary" icon rounded variant="text" @click="showPassword = !showPassword">
+                        <EyeInvisibleOutlined v-if="!showPassword"
+                            :style="{ color: 'rgb(var(--v-theme-secondary))' }" />
+                        <EyeOutlined v-else :style="{ color: 'rgb(var(--v-theme-secondary))' }" />
                     </v-btn>
                 </template>
             </v-text-field>
         </div>
 
-        <div>
+        <div class="mb-6">
             <v-label>Confirm Password</v-label>
-            <v-text-field aria-label="password" v-model="password" :rules="passwordRules" required variant="outlined"
-                color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2"
-                @input="password">
+            <v-text-field v-model="confirmPassword" :rules="confirmRules" required variant="outlined" color="primary"
+                hide-details="auto" :type="showConfirmPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
-                    <v-btn color="secondary" icon rounded variant="text">
-                        <EyeInvisibleOutlined :style="{ color: 'rgb(var(--v-theme-secondary))' }"
-                            v-if="showPassword == false" @click="showPassword = !showPassword" />
-                        <EyeOutlined :style="{ color: 'rgb(var(--v-theme-secondary))' }" v-if="showPassword == true"
-                            @click="showPassword = !showPassword" />
+                    <v-btn color="secondary" icon rounded variant="text"
+                        @click="showConfirmPassword = !showConfirmPassword">
+                        <EyeInvisibleOutlined v-if="!showConfirmPassword"
+                            :style="{ color: 'rgb(var(--v-theme-secondary))' }" />
+                        <EyeOutlined v-else :style="{ color: 'rgb(var(--v-theme-secondary))' }" />
                     </v-btn>
                 </template>
             </v-text-field>
         </div>
 
-        <v-btn color="primary" :loading="isSubmitting" block class="mt-5" variant="flat" size="large" :disabled="valid"
-            type="submit">
+        <v-btn color="primary" :loading="isSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
             Reset Password
         </v-btn>
 

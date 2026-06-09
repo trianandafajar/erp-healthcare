@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLogo from '~/components/AppLogo.vue'
 import AuthFooter from '~/components/auth/AuthFooter.vue'
-import AuthReset from '~/components/authForms/AuthReset.vue';
+import AuthReset from '~/components/auth/AuthReset.vue';
 
 definePageMeta({
     layout: false,
@@ -9,7 +9,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-    title: 'Forgot Password Page',
+    title: 'Reset Password Page',
     ogTitle: 'My Amazing Site',
     description: 'This is my amazing site, let me tell you all about it.',
     ogDescription: 'This is my amazing site, let me tell you all about it.',

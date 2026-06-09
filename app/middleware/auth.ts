@@ -1,7 +1,13 @@
-export default defineNuxtRouteMiddleware(() => {
-    const token = useCookie('sb-token')
+export default defineNuxtRouteMiddleware(async () => {
+    const supabase = useSupabase()
 
-    if (!token.value) {
+    if (!supabase) {
+        return navigateTo('/login')
+    }
+
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session) {
         return navigateTo('/login')
     }
 })

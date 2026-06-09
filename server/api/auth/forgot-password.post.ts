@@ -1,8 +1,7 @@
 export default defineEventHandler(async (event) => {
     const { email } = await readBody(event)
 
-    const supabase = await serverSupabase(event)
-
+    const supabase = serverSupabase(event)
     const baseURL = getRequestURL(event).origin
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
