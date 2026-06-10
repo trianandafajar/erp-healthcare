@@ -25,6 +25,12 @@ const light: ThemeDefinition = {
         borderLight: '#e6ebf1',
         containerBg: '#fafafb',
         surface: '#fff',
+        roleAdmin: '#7265E6',
+        roleDoctor: '#1D9E75',
+        roleSpecialist: '#378ADD',
+        rolePharmacy: '#EF9F27',
+        roleStaff: '#888780',
+        rolePatient: '#E24B4A',
     }
 }
 

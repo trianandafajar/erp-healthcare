@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import WidgetFive from '~/components/dashboard/WidgetFive.vue';
+import TableUser from '~/components/dashboard/users/tableUser.vue';
 
 definePageMeta({
     layout: 'default',
@@ -8,5 +8,5 @@ definePageMeta({
 </script>
 
 <template>
-    <WidgetFive />
+    <TableUser />
 </template>

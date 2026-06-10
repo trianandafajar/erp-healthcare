@@ -1,4 +1,10 @@
-declare const process: { env: { SUPABASE_URL?: string; SUPABASE_KEY?: string } }
+declare const process: {
+  env: {
+    SUPABASE_URL?: string;
+    SUPABASE_KEY?: string;
+    SUPABASE_SERVICE_KEY?: string;
+  }
+}
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -11,6 +17,7 @@ export default defineNuxtConfig({
     '@fontsource/public-sans/700.css',
     '@mdi/font/css/materialdesignicons.css',
     '~/assets/scss/style.scss',
+    '~/assets/css/tailwind.css'
   ],
 
   build: {
@@ -22,9 +29,10 @@ export default defineNuxtConfig({
       noExternal: ['vuetify'],
     },
   },
-  modules: ['@pinia/nuxt'],
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
 
   runtimeConfig: {
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseKey: process.env.SUPABASE_KEY,

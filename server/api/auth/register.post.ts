@@ -30,6 +30,6 @@ export default defineEventHandler(async (event) => {
 
     return {
         user: data.user,
-        session: data.session,
+        // session: data.session,
     }
 })
