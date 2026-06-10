@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
+import UserModal from './UserModal.vue';
 
 const search = ref('');
 const selectedRole = ref('all');
@@ -80,13 +81,63 @@ function onRoleChange() {
 function onSearch() {
     currentPage.value = 1;
 }
+
+// modal
+const dialog = ref(false)
+const modalMode = ref<'add' | 'edit' | 'delete'>('add')
+const selectedUser = ref<any>(null)
+
+function openAdd() {
+    selectedUser.value = null
+    modalMode.value = 'add'
+    dialog.value = true
+}
+
+function openEdit(user: any) {
+    selectedUser.value = user
+    modalMode.value = 'edit'
+    dialog.value = true
+}
+
+function openDelete(user: any) {
+    selectedUser.value = user
+    modalMode.value = 'delete'
+    dialog.value = true
+}
+
+function closeModal() {
+    dialog.value = false
+    selectedUser.value = null
+}
+
+async function handleSubmit(payload: any) {
+    if (modalMode.value === 'add') {
+        await $fetch('/api/users', {
+            method: 'POST',
+            body: {
+                email: payload.email,
+                password: 'Password123',
+                full_name: payload.full_name,
+                role: payload.role
+            }
+        })
+    }
+    // } else if (modalMode.value === 'edit') {
+    //     await $fetch(`/api/users/${payload.id}`, { method: 'PATCH', body: payload })
+    // } else if (modalMode.value === 'delete') {
+    //     await $fetch(`/api/users/${payload.id}`, { method: 'DELETE' })
+    // }
+    await refreshNuxtData()
+    closeModal()
+}
 </script>
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
         <div class="d-flex justify-space-between align-center">
             <v-card-title class="text-h3">Management Users</v-card-title>
-            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable">
+            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable"
+                @click="openAdd">
                 Add User
             </v-btn>
         </div>
@@ -172,4 +223,9 @@ function onSearch() {
                 size="small" />
         </div>
     </UiTitleCard>
+    <div class="text-xs-center">
+        <v-dialog v-model="dialog" width="480" persistent>
+            <UserModal :mode="modalMode" :user="selectedUser" @submit="handleSubmit" @cancel="closeModal" />
+        </v-dialog>
+    </div>
 </template>
