@@ -14,13 +14,37 @@ export default defineEventHandler(async (event) => {
         email,
         password,
         email_confirm: true,
-        user_metadata: { full_name, role: role ?? 'staff' },
+        user_metadata: { full_name },
     })
 
     if (error) throw createError({ statusCode: 400, message: error.message })
 
-    if (status && data.user) {
-        await admin.from('profiles').update({ status }).eq('id', data.user.id)
+    const userId = data.user.id
+
+    // update status
+    if (status) {
+        await admin.from('profiles').update({ status }).eq('id', userId)
+    }
+
+    // assign role ke user_roles
+    if (role) {
+        const { data: roleData, error: roleError } = await admin
+            .from('roles')
+            .select('id')
+            .eq('name', role)
+            .single()
+
+        if (roleError || !roleData) {
+            throw createError({ statusCode: 400, message: `Role '${role}' not found` })
+        }
+
+        const { error: userRoleError } = await admin
+            .from('user_roles')
+            .insert({ user_id: userId, role_id: roleData.id })
+
+        if (userRoleError) {
+            throw createError({ statusCode: 400, message: userRoleError.message })
+        }
     }
 
     return { user: data.user }
