@@ -10,7 +10,7 @@ const itemsPerPage = 10;
 
 const roles = [
     { value: 'all', label: 'All' },
-    { value: 'admin', label: 'Admin' },
+    // { value: 'admin', label: 'Admin' },
     { value: 'doctor', label: 'Doctor' },
     { value: 'specialist', label: 'Specialist' },
     { value: 'pharmacy', label: 'Pharmacy' },
