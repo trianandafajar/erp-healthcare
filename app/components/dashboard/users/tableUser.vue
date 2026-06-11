@@ -118,12 +118,22 @@ async function handleSubmit(payload: any) {
                 email: payload.email,
                 password: 'Password123',
                 full_name: payload.full_name,
-                role: payload.role
+                role: payload.role,
+                status: payload.status
             }
         })
     }
-    // } else if (modalMode.value === 'edit') {
-    //     await $fetch(`/api/users/${payload.id}`, { method: 'PATCH', body: payload })
+    else if (modalMode.value === 'edit') {
+        await $fetch('/api/users', {
+            method: 'PUT',
+            body: {
+                id: payload.id,
+                full_name: payload.full_name,
+                role: payload.role,
+                status: payload.status
+            }
+        })
+    }
     // } else if (modalMode.value === 'delete') {
     //     await $fetch(`/api/users/${payload.id}`, { method: 'DELETE' })
     // }
@@ -207,7 +217,7 @@ async function handleSubmit(payload: any) {
                     </td>
                     <td class="py-3 text-right">
                         <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                            density="comfortable" />
+                            density="comfortable" @click="openEdit(user)" />
                         <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error"
                             density="comfortable" />
                     </td>
