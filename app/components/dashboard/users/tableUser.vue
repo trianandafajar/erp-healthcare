@@ -150,14 +150,16 @@ async function handleSubmit(payload: any) {
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
         <div class="d-flex justify-space-between align-center">
-            <v-card-title class="text-h3">Management Users</v-card-title>
+            <div>
+                <v-card-title class="text-h3">User Management</v-card-title>
+                <v-card-subtitle class="mt-1">Manage and organize user accounts</v-card-subtitle>
+            </div>
             <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable"
                 @click="openAdd">
                 Add User
             </v-btn>
         </div>
     </v-card-item>
-
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
         <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
             <v-text-field v-model="search" placeholder="Search by name or email..." prepend-inner-icon="mdi-magnify"
@@ -234,8 +236,7 @@ async function handleSubmit(payload: any) {
             <span class="text-caption text-medium-emphasis">
                 Showing {{ paginatedUsers.length }} of {{ filteredUsers.length }} users
             </span>
-            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
-                size="small" />
+            <v- v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact" size="small" />
         </div>
     </UiTitleCard>
     <div class="text-xs-center">

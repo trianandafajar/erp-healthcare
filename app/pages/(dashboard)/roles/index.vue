@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import TableUser from '~/components/dashboard/users/TableUser.vue';
+import TableRole from '~/components/dashboard/roles/TableRole.vue';
+
 
 definePageMeta({
     layout: 'default',
@@ -7,7 +8,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-    title: 'User Management Page',
+    title: 'Roles Management Page',
     ogTitle: 'My Amazing Site',
     description: 'This is my amazing site, let me tell you all about it.',
     ogDescription: 'This is my amazing site, let me tell you all about it.',
@@ -17,5 +18,5 @@ useSeoMeta({
 </script>
 
 <template>
-    <TableUser />
+    <TableRole />
 </template>
