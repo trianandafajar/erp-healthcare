@@ -134,9 +134,14 @@ async function handleSubmit(payload: any) {
             }
         })
     }
-    // } else if (modalMode.value === 'delete') {
-    //     await $fetch(`/api/users/${payload.id}`, { method: 'DELETE' })
-    // }
+    else if (modalMode.value === 'delete') {
+        await $fetch('/api/users', {
+            method: 'DELETE',
+            body: {
+                id: payload.id
+            }
+        })
+    }
     await refreshNuxtData()
     closeModal()
 }
@@ -218,8 +223,8 @@ async function handleSubmit(payload: any) {
                     <td class="py-3 text-right">
                         <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
                             density="comfortable" @click="openEdit(user)" />
-                        <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error"
-                            density="comfortable" />
+                        <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
+                            @click="openDelete(user)" />
                     </td>
                 </tr>
             </tbody>
