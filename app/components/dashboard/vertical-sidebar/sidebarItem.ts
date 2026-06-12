@@ -3,6 +3,7 @@ import {
   DashboardOutlined,
   UserOutlined,
   SafetyCertificateOutlined,
+  KeyOutlined,
 } from '@ant-design/icons-vue';
 
 export interface menu {
@@ -35,6 +36,11 @@ const sidebarItem: menu[] = [
     to: '/users-management'
   },
   { header: 'Role & Permission' },
+  {
+    title: 'Permissions',
+    icon: KeyOutlined,
+    to: '/permissions'
+  },
   {
     title: 'Roles',
     icon: SafetyCertificateOutlined,

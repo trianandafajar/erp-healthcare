@@ -9,8 +9,10 @@ export default defineEventHandler(async () => {
     if (error) throw createError({ statusCode: 400, message: error.message })
 
     const grouped = data.reduce((acc: Record<string, any[]>, perm) => {
-        if (!acc[perm.module]) acc[perm.module] = []
-        acc[perm.module].push(perm)
+        const moduleKey = perm.module ?? 'unknown'
+        const group = acc[moduleKey] ?? []
+        group.push(perm)
+        acc[moduleKey] = group
         return acc
     }, {})
 
