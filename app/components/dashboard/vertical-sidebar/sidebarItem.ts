@@ -4,6 +4,7 @@ import {
   UserOutlined,
   SafetyCertificateOutlined,
   KeyOutlined,
+  MedicineBoxOutlined,
   ApartmentOutlined,
 } from '@ant-design/icons-vue';
 
@@ -36,6 +37,18 @@ const sidebarItem: menu[] = [
     icon: UserOutlined,
     to: '/users-management'
   },
+  { header: 'Departments' },
+  {
+    title: 'Department',
+    icon: ApartmentOutlined,
+    to: '/departments'
+  },
+  { header: 'Doctors' },
+  {
+    title: 'Doctor',
+    icon: MedicineBoxOutlined,
+    to: '/doctors'
+  },
   { header: 'Role & Permission' },
   {
     title: 'Permissions',
@@ -46,12 +59,6 @@ const sidebarItem: menu[] = [
     title: 'Roles',
     icon: SafetyCertificateOutlined,
     to: '/roles'
-  },
-  { header: 'Departments' },
-  {
-    title: 'Department',
-    icon: ApartmentOutlined,
-    to: '/departments'
   },
 ];
 
