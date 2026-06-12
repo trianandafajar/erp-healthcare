@@ -141,12 +141,12 @@ async function handleSubmit(payload: any) {
                         <span class="font-weight-medium">{{ permission.label }}</span>
                     </td>
                     <td class="py-3">
-                        <v-chip variant="tonal" color="primary" size="small" class="font-mono">
+                        <v-chip variant="tonal" color="primary" size="small" class="font-mono" label>
                             {{ permission.name }}
                         </v-chip>
                     </td>
                     <td class="py-3">
-                        <v-chip variant="tonal" color="secondary" size="small" class="text-capitalize">
+                        <v-chip variant="tonal" color="secondary" size="small" class="text-capitalize" label>
                             {{ permission.module }}
                         </v-chip>
                     </td>

@@ -159,7 +159,7 @@ async function handleSubmit(payload: any) {
                         </div>
                     </td>
                     <td class="py-3">
-                        <v-chip variant="tonal" color="primary" size="small" class="font-mono">
+                        <v-chip variant="tonal" color="primary" size="small" class="font-mono" label>
                             {{ role.name }}
                         </v-chip>
                     </td>
@@ -175,11 +175,12 @@ async function handleSubmit(payload: any) {
                             No permissions
                         </div>
                         <div v-else class="d-flex flex-wrap gap-1">
-                            <v-chip v-for="perm in role.permissions.slice(0, 3)" :key="perm.id" size="x-small"
+                            <v-chip v-for="perm in role.permissions.slice(0, 3)" :key="perm.id" size="x-small" label
                                 variant="tonal">
                                 {{ perm.name }}
                             </v-chip>
-                            <v-chip v-if="role.permissions.length > 3" size="x-small" variant="tonal" color="success">
+                            <v-chip v-if="role.permissions.length > 3" size="x-small" variant="tonal" color="success"
+                                label>
                                 +{{ role.permissions.length - 3 }} more
                             </v-chip>
                         </div>

@@ -210,12 +210,14 @@ async function handleSubmit(payload: any) {
                         </div>
                     </td>
                     <td class="py-3">
-                        <v-chip :color="roleColors[user.role]" variant="tonal" size="small" class="text-capitalize">
+                        <v-chip size="small" variant="tonal" :color="roleColors[user.role]" label
+                            class="text-capitalize">
                             {{ user.role }}
                         </v-chip>
                     </td>
                     <td class="py-3">
-                        <v-chip :color="user.status === 'active' ? 'success' : 'default'" variant="tonal" size="small">
+                        <v-chip :color="user.status === 'active' ? 'success' : 'default'" variant="tonal" size="small"
+                            label>
                             {{ user.status === 'active' ? 'Active' : 'Inactive' }}
                         </v-chip>
                     </td>

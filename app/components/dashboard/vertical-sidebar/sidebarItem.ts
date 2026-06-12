@@ -1,9 +1,10 @@
 // icons
 import {
-  DashboardOutlined,
+  AppstoreOutlined,
   UserOutlined,
   SafetyCertificateOutlined,
   KeyOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons-vue';
 
 export interface menu {
@@ -26,7 +27,7 @@ const sidebarItem: menu[] = [
   { header: 'Dashboard' },
   {
     title: 'Dashboard',
-    icon: DashboardOutlined,
+    icon: AppstoreOutlined,
     to: '/dashboard'
   },
   { header: 'User Management' },
@@ -45,7 +46,13 @@ const sidebarItem: menu[] = [
     title: 'Roles',
     icon: SafetyCertificateOutlined,
     to: '/roles'
-  }
+  },
+  { header: 'Departments' },
+  {
+    title: 'Department',
+    icon: ApartmentOutlined,
+    to: '/departments'
+  },
 ];
 
 export default sidebarItem;
