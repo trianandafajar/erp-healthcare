@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
+import RoleModal from './RoleModal.vue'
 
 interface Permission {
     id: string
@@ -35,6 +36,65 @@ const paginatedRoles = computed(() => {
 })
 
 const totalPages = computed(() => Math.ceil(roles.value.length / itemsPerPage))
+
+// modal
+const dialog = ref(false)
+const modalMode = ref<'add' | 'edit' | 'delete'>('add')
+const selectedRole = ref<Role | null>(null)
+
+function openAdd() {
+    modalMode.value = 'add'
+    selectedRole.value = null
+    dialog.value = true
+}
+
+function openEdit(role: Role) {
+    modalMode.value = 'edit'
+    selectedRole.value = role
+    dialog.value = true
+}
+
+function openDelete(role: Role) {
+    modalMode.value = 'delete'
+    selectedRole.value = role
+    dialog.value = true
+}
+
+async function handleSubmit(payload: any) {
+    if (modalMode.value === 'add') {
+        const permissionIds = payload.permissions.map((p: any) => typeof p === 'string' ? p : p.id)
+        await $fetch('/api/roles', {
+            method: 'POST',
+            body: {
+                name: payload.name,
+                label: payload.label,
+                permissions: permissionIds,
+            }
+        })
+    }
+    else if (modalMode.value === 'edit') {
+        const permissionIds = payload.permissions.map((p: any) => typeof p === 'string' ? p : p.id)
+        await $fetch('/api/roles', {
+            method: 'PUT',
+            body: {
+                id: payload.id,
+                name: payload.name,
+                label: payload.label,
+                permissions: permissionIds
+            }
+        })
+    }
+    else if (modalMode.value === 'delete') {
+        await $fetch('/api/roles', {
+            method: 'DELETE',
+            body: {
+                id: payload.id
+            }
+        })
+    }
+    await refreshNuxtData()
+    dialog.value = false
+}
 </script>
 
 <template>
@@ -44,7 +104,8 @@ const totalPages = computed(() => Math.ceil(roles.value.length / itemsPerPage))
                 <v-card-title class="text-h3">Roles & Permissions</v-card-title>
                 <v-card-subtitle class="mt-1">Manage roles and assign permissions to each role</v-card-subtitle>
             </div>
-            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable">
+            <v-btn color="primary" @click="openAdd" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable">
                 Add Role
             </v-btn>
         </div>
@@ -124,13 +185,14 @@ const totalPages = computed(() => Math.ceil(roles.value.length / itemsPerPage))
                         </div>
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                            density="comfortable" />
+                        <v-btn @click="openEdit(role)" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" />
                         <v-tooltip :text="role.user_count > 0 ? 'Role still in use' : 'Delete role'" location="top">
                             <template #activator="{ props }">
                                 <span v-bind="props">
-                                    <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error"
-                                        density="comfortable" :disabled="role.user_count > 0" />
+                                    <v-btn @click="openDelete(role)" icon="mdi-delete-outline" variant="text"
+                                        size="small" color="error" density="comfortable"
+                                        :disabled="role.user_count > 0" />
                                 </span>
                             </template>
                         </v-tooltip>
@@ -146,4 +208,9 @@ const totalPages = computed(() => Math.ceil(roles.value.length / itemsPerPage))
                 size="small" />
         </div>
     </UiTitleCard>
+
+    <v-dialog v-model="dialog" max-width="700" persistent>
+        <RoleModal :mode="modalMode" :role="selectedRole" :grouped-permissions="groupedPermissions"
+            @submit="handleSubmit" @cancel="dialog = false" />
+    </v-dialog>
 </template>

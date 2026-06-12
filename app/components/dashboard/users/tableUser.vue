@@ -236,7 +236,8 @@ async function handleSubmit(payload: any) {
             <span class="text-caption text-medium-emphasis">
                 Showing {{ paginatedUsers.length }} of {{ filteredUsers.length }} users
             </span>
-            <v- v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact" size="small" />
+            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
+                size="small" />
         </div>
     </UiTitleCard>
     <div class="text-xs-center">
