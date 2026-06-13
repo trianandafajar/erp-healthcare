@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DashboardCharts from '~/components/dashboard/DashboardCharts.vue';
 import WidgetFive from '~/components/dashboard/WidgetFive.vue';
 
 definePageMeta({
@@ -19,4 +20,6 @@ useSeoMeta({
 
 <template>
     <WidgetFive />
+
+    <DashboardCharts />
 </template>
