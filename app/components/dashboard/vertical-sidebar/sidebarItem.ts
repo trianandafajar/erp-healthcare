@@ -8,6 +8,7 @@ import {
   MedicineBoxOutlined,
   UsergroupAddOutlined,
   SolutionOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons-vue';
 export interface menu {
   header?: string;
@@ -76,7 +77,15 @@ const sidebarItem: menu[] = [
     title: 'Permissions',
     icon: KeyOutlined,
     to: '/permissions'
-  }
+  },
+  {
+    header: 'Log'
+  },
+  {
+    title: 'Log Activity',
+    icon: HistoryOutlined,
+    to: '/log-activity'
+  },
 ]
 
 export default sidebarItem;
