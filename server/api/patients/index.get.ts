@@ -4,30 +4,22 @@ export default defineEventHandler(async () => {
     const { data, error } = await admin
         .from('patients')
         .select(`
-            id,
-            medical_record_number,
-            full_name,
-            date_of_birth,
-            gender,
-            phone,
+        id,
+        medical_record_number,
+        profile_id,
+        full_name,
+        date_of_birth,
+        gender,
+        phone,
+        address,
+        blood_type,
+        created_at,
+        updated_at,
+        profiles (
             email,
-            address,
-            blood_type,
-            allergies,
-            emergency_contact_name,
-            emergency_contact_phone,
-            insurance_type,
-            insurance_number,
-            photo_url,
-            status,
-            created_at,
-            updated_at,
-            profiles (
-                full_name,
-                email,
-                status
-            )
-        `)
+            status
+        )
+    `)
         .order('created_at', { ascending: false })
         .returns<any[]>()
 
@@ -35,9 +27,9 @@ export default defineEventHandler(async () => {
 
     const result = data.map(p => ({
         ...p,
-        full_name: p.profiles?.full_name ?? p.full_name,
-        email: p.profiles?.email ?? p.email,
-        profiles: undefined,
+        email: p.profiles?.email ?? null,
+        has_account: !!p.profile_id,
+        profiles: undefined
     }))
 
     return { patients: result }
