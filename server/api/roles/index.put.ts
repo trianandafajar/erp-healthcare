@@ -6,6 +6,14 @@ export default defineEventHandler(async (event) => {
     }
 
     const admin = supabaseAdmin()
+    const supabase = serverSupabase(event)
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { data: before } = await admin
+        .from('roles')
+        .select('*')
+        .eq('id', id)
+        .single()
 
     const { error: roleError } = await admin
         .from('roles')
@@ -30,6 +38,18 @@ export default defineEventHandler(async (event) => {
             if (permError) throw createError({ statusCode: 400, message: permError.message })
         }
     }
+
+    await admin.rpc('log_activity', {
+        p_actor_id: user?.id,
+        p_action: 'update',
+        p_module: 'roles',
+        p_entity_id: id,
+        p_description: `Updated role '${label ?? before?.label}'`,
+        p_metadata: {
+            before: before ?? null,
+            after: { name, label, permissions }
+        }
+    })
 
     return { message: 'Role updated successfully' }
 })

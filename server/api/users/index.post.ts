@@ -9,6 +9,8 @@ export default defineEventHandler(async (event) => {
     }
 
     const admin = supabaseAdmin()
+    const supabase = serverSupabase(event)
+    const { data: { user } } = await supabase.auth.getUser()
 
     const { data, error } = await admin.auth.admin.createUser({
         email,
@@ -21,12 +23,10 @@ export default defineEventHandler(async (event) => {
 
     const userId = data.user.id
 
-    // update status
     if (status) {
         await admin.from('profiles').update({ status }).eq('id', userId)
     }
 
-    // assign role ke user_roles
     if (role) {
         const { data: roleData, error: roleError } = await admin
             .from('roles')
@@ -46,6 +46,15 @@ export default defineEventHandler(async (event) => {
             throw createError({ statusCode: 400, message: userRoleError.message })
         }
     }
+
+    await admin.rpc('log_activity', {
+        p_actor_id: user?.id,
+        p_action: 'create',
+        p_module: 'users',
+        p_entity_id: userId,
+        p_description: `Created user '${full_name}' (${email}) with role '${role ?? '-'}'`,
+        p_metadata: { after: { email, full_name, role, status } }
+    })
 
     return { user: data.user }
 })

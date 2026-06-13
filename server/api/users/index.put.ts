@@ -6,20 +6,26 @@ export default defineEventHandler(async (event) => {
     }
 
     const admin = supabaseAdmin()
+    const supabase = serverSupabase(event)
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { data: before } = await admin
+        .from('profiles')
+        .select('full_name, status, email')
+        .eq('id', id)
+        .single()
 
     const { error: authError } = await admin.auth.admin.updateUserById(id, {
         user_metadata: { full_name },
     })
     if (authError) throw createError({ statusCode: 400, message: authError.message })
 
-    // update profile
     const { error: profileError } = await admin
         .from('profiles')
         .update({ full_name, status })
         .eq('id', id)
     if (profileError) throw createError({ statusCode: 400, message: profileError.message })
 
-    // update role di user_roles
     if (role) {
         const { data: roleData, error: roleError } = await admin
             .from('roles')
@@ -31,7 +37,6 @@ export default defineEventHandler(async (event) => {
             throw createError({ statusCode: 400, message: `Role '${role}' not found` })
         }
 
-        // hapus role lama, insert role baru
         await admin.from('user_roles').delete().eq('user_id', id)
 
         const { error: userRoleError } = await admin
@@ -42,6 +47,18 @@ export default defineEventHandler(async (event) => {
             throw createError({ statusCode: 400, message: userRoleError.message })
         }
     }
+
+    await admin.rpc('log_activity', {
+        p_actor_id: user?.id,
+        p_action: 'update',
+        p_module: 'users',
+        p_entity_id: id,
+        p_description: `Updated user '${full_name ?? before?.full_name}' (${before?.email ?? '-'})`,
+        p_metadata: {
+            before: before ?? null,
+            after: { full_name, role, status }
+        }
+    })
 
     return { message: 'User updated successfully' }
 })

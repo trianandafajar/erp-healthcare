@@ -16,6 +16,8 @@ export default defineEventHandler(async (event) => {
   if (!id) throw createError({ statusCode: 400, message: 'User ID is required' })
 
   const admin = supabaseAdmin()
+  const supabase = serverSupabase(event)
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { data: hasRole } = await admin
     .from('user_roles')
@@ -47,6 +49,15 @@ export default defineEventHandler(async (event) => {
     .single()
 
   if (error) throw createError({ statusCode: 400, message: error.message })
+
+  await admin.rpc('log_activity', {
+    p_actor_id: user?.id,
+    p_action: 'create',
+    p_module: 'doctors',
+    p_entity_id: data.id,
+    p_description: `Created doctor profile for ${specialization ?? 'a doctor'}`,
+    p_metadata: null
+  })
 
   return { doctor: data }
 })
