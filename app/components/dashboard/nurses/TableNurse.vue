@@ -199,7 +199,7 @@ async function handleSubmit(payload: any) {
                 </tr>
                 <tr v-else-if="paginatedNurses.length === 0">
                     <td colspan="6" class="text-center py-8 text-medium-emphasis">
-                        <v-icon icon="mdi-account-injury-outline" size="32" class="mb-2 d-block mx-auto" />
+                        <v-icon icon="mdi-doctor" size="32" class="mb-2 d-block mx-auto" />
                         No nurses found
                     </td>
                 </tr>

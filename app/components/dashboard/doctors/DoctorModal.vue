@@ -200,8 +200,8 @@ function onSubmit() {
                             Specialization
                         </v-label>
 
-                        <v-text-field v-model="form.specialization" placeholder="e.g. Dokter Spesialis Anak"
-                            variant="outlined" density="compact" hide-details />
+                        <v-text-field v-model="form.specialization" placeholder="e.g. Pediatrician" variant="outlined"
+                            density="compact" hide-details />
                     </v-col>
 
                     <v-col cols="12" sm="6" class="mt-3">

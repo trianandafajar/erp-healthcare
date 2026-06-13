@@ -241,7 +241,7 @@ async function handleSubmit(payload: any) {
                 </tr>
                 <tr v-else-if="paginatedDoctors.length === 0">
                     <td colspan="7" class="text-center py-8 text-medium-emphasis">
-                        <v-icon icon="mdi-doctor" size="32" class="mb-2 d-block mx-auto" />
+                        <v-icon icon="mdi-stethoscope" size="32" class="mb-2 d-block mx-auto" />
                         No doctors found
                     </td>
                 </tr>
