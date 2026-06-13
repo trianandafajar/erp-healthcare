@@ -7,6 +7,7 @@ import {
   ApartmentOutlined,
   MedicineBoxOutlined,
   UsergroupAddOutlined,
+  SolutionOutlined,
 } from '@ant-design/icons-vue';
 export interface menu {
   header?: string;
@@ -51,6 +52,11 @@ const sidebarItem: menu[] = [
     title: 'Nurses',
     icon: UsergroupAddOutlined,
     to: '/nurses'
+  },
+  {
+    title: 'Patient',
+    icon: SolutionOutlined,
+    to: '/patients'
   },
 
   {
