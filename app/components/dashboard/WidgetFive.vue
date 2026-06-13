@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RiseOutlined, FallOutlined } from '@ant-design/icons-vue';
 
-const { data } = await useFetch<{ profiles: any[] }>('/api/users')
+const { data } = await useFetch<{
+    profiles: any[],
+    stats: { patients: number, doctors: number, nurses: number, departments: number }
+}>('/api/dashboard/stats')
 
 const totalUsers = computed(() => data.value?.profiles?.length ?? 0)
 
@@ -32,6 +36,8 @@ const growthPercent = computed(() => {
 
 const isGrowth = computed(() => thisMonthUsers.value >= lastMonthUsers.value)
 
+const stats = computed(() => data.value?.stats ?? { patients: 0, doctors: 0, nurses: 0, departments: 0 })
+
 const fivecards = computed(() => [
     {
         name: 'Total Users',
@@ -39,62 +45,69 @@ const fivecards = computed(() => [
         percent: growthPercent.value,
         color: isGrowth.value ? 'primary' : 'error',
         icon: isGrowth.value ? RiseOutlined : FallOutlined,
-        text: thisMonthUsers.value.toLocaleString()
+        text: thisMonthUsers.value.toLocaleString() + ' new users this month'
     },
     {
-        name: 'Total Page Views',
-        earn: '4,42,236',
-        percent: '59.3%',
+        name: 'Total Patients',
+        earn: stats.value.patients.toLocaleString(),
+        percent: null,
         color: 'success',
-        icon: RiseOutlined,
-        text: '35,000'
+        icon: null,
+        text: 'Registered & walk-in'
     },
     {
-        name: 'Total Order',
-        earn: '18,800',
-        percent: '27.4%',
+        name: 'Total Doctors',
+        earn: stats.value.doctors.toLocaleString(),
+        percent: null,
         color: 'warning',
-        icon: FallOutlined,
-        text: '1,943'
+        icon: null,
+        text: 'Active doctor profiles'
     },
     {
-        name: 'Total Sales',
-        earn: '$35,078',
-        percent: '27.4%',
-        color: 'error',
-        icon: FallOutlined,
-        text: '$20,395'
+        name: 'Total Nurses',
+        earn: stats.value.nurses.toLocaleString(),
+        percent: null,
+        color: 'secondary',
+        icon: null,
+        text: 'Active nurse profiles'
+    },
+    {
+        name: 'Total Departments',
+        earn: stats.value.departments.toLocaleString(),
+        percent: null,
+        color: 'info',
+        icon: null,
+        text: 'Poli / departments'
     }
 ]);
 </script>
 
 <template>
     <v-row class="my-0">
-        <v-col cols="12" sm="6" md="3" v-for="(card5, i) in fivecards" :key="i" :value="card5">
+        <v-col cols="6" sm="4" md="" v-for="(card5, i) in fivecards" :key="i" :style="{ flex: '1 1 0' }"
+            class="flex-grow-1">
             <v-card elevation="0">
-                <v-card>
-                    <v-card-text>
-                        <div class="d-flex align-items-center justify-space-between">
-                            <div>
-                                <h6 class="text-h6 text-lightText mb-1">{{ card5.name }}</h6>
-                                <h4 class="text-h4 d-flex align-center mb-0">
-                                    {{ card5.earn }}
-                                    <v-chip :color="card5.color" :border="`${card5.color} solid thin opacity-50`"
-                                        class="ml-2" size="small" label>
-                                        <template v-slot:prepend>
-                                            <component :is="card5.icon" :style="{ fontSize: '12px' }"
-                                                :class="'mr-1 text-' + card5.color" />
-                                        </template>
-                                        {{ card5.percent }}
-                                    </v-chip>
-                                </h4>
-                                <span class="text-lightText text-caption pt-5 d-block">
-                                    <span :class="'text-' + card5.color">{{ card5.text }}</span> new users this month
-                                </span>
-                            </div>
+                <v-card-text>
+                    <div class="d-flex align-items-center justify-space-between">
+                        <div>
+                            <h6 class="text-h6 text-lightText mb-1">{{ card5.name }}</h6>
+                            <h4 class="text-h4 d-flex align-center mb-0">
+                                {{ card5.earn }}
+                                <v-chip v-if="card5.percent" :color="card5.color"
+                                    :border="`${card5.color} solid thin opacity-50`" class="ml-2" size="small" label>
+                                    <template v-slot:prepend>
+                                        <component :is="card5.icon" :style="{ fontSize: '12px' }"
+                                            :class="'mr-1 text-' + card5.color" />
+                                    </template>
+                                    {{ card5.percent }}
+                                </v-chip>
+                            </h4>
+                            <span class="text-lightText text-caption pt-5 d-block">
+                                {{ card5.text }}
+                            </span>
                         </div>
-                    </v-card-text>
-                </v-card>
+                    </div>
+                </v-card-text>
             </v-card>
         </v-col>
     </v-row>
