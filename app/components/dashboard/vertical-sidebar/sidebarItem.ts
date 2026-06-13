@@ -1,13 +1,13 @@
 // icons
 import {
   AppstoreOutlined,
-  UserOutlined,
+  TeamOutlined,
   SafetyCertificateOutlined,
   KeyOutlined,
-  MedicineBoxOutlined,
   ApartmentOutlined,
+  MedicineBoxOutlined,
+  UsergroupAddOutlined,
 } from '@ant-design/icons-vue';
-
 export interface menu {
   header?: string;
   title?: string;
@@ -25,41 +25,52 @@ export interface menu {
 }
 
 const sidebarItem: menu[] = [
-  { header: 'Dashboard' },
+  {
+    header: 'Dashboard'
+  },
   {
     title: 'Dashboard',
     icon: AppstoreOutlined,
     to: '/dashboard'
   },
-  { header: 'User Management' },
+
   {
-    title: 'Users',
-    icon: UserOutlined,
-    to: '/users-management'
+    header: 'Master Data'
   },
-  { header: 'Departments' },
   {
-    title: 'Department',
+    title: 'Departments',
     icon: ApartmentOutlined,
     to: '/departments'
   },
-  { header: 'Doctors' },
   {
-    title: 'Doctor',
+    title: 'Doctors',
     icon: MedicineBoxOutlined,
     to: '/doctors'
   },
-  { header: 'Role & Permission' },
   {
-    title: 'Permissions',
-    icon: KeyOutlined,
-    to: '/permissions'
+    title: 'Nurses',
+    icon: UsergroupAddOutlined,
+    to: '/nurses'
+  },
+
+  {
+    header: 'Access Management'
+  },
+  {
+    title: 'Users',
+    icon: TeamOutlined,
+    to: '/users-management'
   },
   {
     title: 'Roles',
     icon: SafetyCertificateOutlined,
     to: '/roles'
   },
-];
+  {
+    title: 'Permissions',
+    icon: KeyOutlined,
+    to: '/permissions'
+  }
+]
 
 export default sidebarItem;
