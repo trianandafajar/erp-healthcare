@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DashboardCharts from '~/components/dashboard/DashboardCharts.vue';
+import RecentActivity from '~/components/dashboard/RecentActivity.vue';
 import WidgetFive from '~/components/dashboard/WidgetFive.vue';
 
 definePageMeta({
@@ -22,4 +23,6 @@ useSeoMeta({
     <WidgetFive />
 
     <DashboardCharts />
+
+    <RecentActivity/>
 </template>
