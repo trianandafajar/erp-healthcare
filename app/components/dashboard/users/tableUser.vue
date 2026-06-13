@@ -8,24 +8,31 @@ const selectedRole = ref('all');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
-const roles = [
-    { value: 'all', label: 'All' },
-    // { value: 'admin', label: 'Admin' },
-    { value: 'doctor', label: 'Doctor' },
-    { value: 'specialist', label: 'Specialist' },
-    { value: 'pharmacy', label: 'Pharmacy' },
-    { value: 'staff', label: 'Staff' },
-    { value: 'patient', label: 'Patient' }
-];
+interface RoleOption {
+    value: string
+    label: string
+}
 
-const roleColors: Record<string, string> = {
-    admin: 'roleAdmin',
-    doctor: 'roleDoctor',
-    specialist: 'roleSpecialist',
-    pharmacy: 'rolePharmacy',
-    staff: 'roleStaff',
-    patient: 'rolePatient'
-};
+const { data: rolesData } = await useFetch<{ roles: { name: string; label?: string }[] }>('/api/roles')
+
+const roles = computed<RoleOption[]>(() => {
+    const apiRoles: RoleOption[] = (rolesData.value?.roles ?? []).map((r) => ({
+        value: r.name,
+        label: r.label ?? r.name
+    }))
+    return [{ value: 'all', label: 'All' }, ...apiRoles]
+})
+
+const colorPalette: string[] = ['primary', 'secondary', 'success', 'info', 'warning', 'error', 'purple', 'teal']
+const roleColors = computed<Record<string, string>>(() => {
+    const map: Record<string, string> = {}
+    roles.value.forEach((r, i) => {
+        if (r.value !== 'all') {
+            map[r.value] = colorPalette[i % colorPalette.length] ?? 'primary'
+        }
+    })
+    return map
+})
 
 const { data, pending } = await useFetch<{ profiles: any[] }>('/api/users')
 
@@ -165,12 +172,8 @@ async function handleSubmit(payload: any) {
             <v-text-field v-model="search" placeholder="Search by name or email..." prepend-inner-icon="mdi-magnify"
                 variant="outlined" density="compact" hide-details clearable style="max-width: 280px"
                 @update:model-value="onSearch" />
-            <v-btn-toggle v-model="selectedRole" density="compact" variant="tonal" divided mandatory color="primary"
-                class="flex-wrap" @update:model-value="onRoleChange">
-                <v-btn v-for="role in roles" :key="role.value" :value="role.value" size="small">
-                    {{ role.label }}
-                </v-btn>
-            </v-btn-toggle>
+            <v-select v-model="selectedRole" :items="roles" item-title="label" item-value="value" variant="outlined"
+                density="compact" hide-details style="max-width: 200px" @update:model-value="onRoleChange" />
         </div>
 
         <v-divider />

@@ -14,14 +14,15 @@ const emit = defineEmits<{
     (e: 'submit', data: any): void
     (e: 'cancel'): void
 }>()
+const { data } = await useFetch<{ roles: any[] }>('/api/roles')
 
-const roles = [
-    { value: 'doctor', label: 'Doctor' },
-    { value: 'specialist', label: 'Specialist' },
-    { value: 'pharmacy', label: 'Pharmacy' },
-    { value: 'staff', label: 'Staff' },
-    { value: 'patient', label: 'Patient' }
-]
+const roles = computed(() =>
+    (data.value?.roles ?? []).map((r) => ({
+        id: r.id,
+        name: r.name ?? '-',
+        label: r.label ?? '-',
+    }))
+)
 
 const form = ref({
     full_name: '',
@@ -104,7 +105,7 @@ function onSubmit() {
                     </v-col>
                     <v-col cols="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Role</v-label>
-                        <v-select v-model="form.role" :items="roles" item-title="label" item-value="value"
+                        <v-select v-model="form.role" :items="roles" item-title="label" item-value="name"
                             variant="outlined" density="compact" hide-details />
                     </v-col>
                     <v-col cols="6" class="mt-3">
