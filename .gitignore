@@ -6,6 +6,11 @@
 .cache
 dist
 
+# ai
+.agents/
+AGENTS.md
+skills-lock.json
+
 # Node dependencies
 node_modules
 

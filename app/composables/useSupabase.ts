@@ -1,6 +1,6 @@
-export const useSupabase = () => {
-    if (import.meta.server) return null
+import type { SupabaseClient } from '@supabase/supabase-js'
 
+export const useSupabase = (): SupabaseClient | null => {
     const nuxtApp = useNuxtApp()
-    return nuxtApp.$supabase
+    return nuxtApp.$supabase ?? null
 }

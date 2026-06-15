@@ -4,7 +4,6 @@ export const useAuth = () => {
     const user = useState<User | null>('user', () => null)
 
     const getUser = async () => {
-        if (import.meta.server) return null
         const supabase = useSupabase()
         if (!supabase) return null
 
