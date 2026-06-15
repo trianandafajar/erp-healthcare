@@ -1,0 +1,174 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
+
+definePageMeta({ middleware: ['auth'] })
+
+interface Appointment {
+    id: string
+    appointment_date: string
+    appointment_time: string
+    type: string
+    status: string
+    chief_complaint: string | null
+    notes: string | null
+    created_at: string
+    patients: {
+        full_name: string
+        medical_record_number: string
+    } | null
+}
+
+const currentPage = ref(1)
+const itemsPerPage = 10
+
+const { data, pending, refresh } = await useFetch<{ appointments: any[] }>(
+    '/api/doctor/appointments/today'
+)
+
+const appointments = computed<Appointment[]>(() =>
+    data.value?.appointments ?? []
+)
+
+const paginatedAppointments = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage
+    return appointments.value.slice(start, start + itemsPerPage)
+})
+
+const totalPages = computed(() =>
+    Math.ceil(appointments.value.length / itemsPerPage)
+)
+
+function formatTime(timeStr?: string) {
+    if (!timeStr) return '-'
+    return timeStr.slice(0, 5)
+}
+
+function formatDate(dateStr?: string) {
+    if (!dateStr) return '-'
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+        day: 'numeric', month: 'short', year: 'numeric'
+    })
+}
+
+function getInitials(name: string) {
+    return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+}
+
+function statusColor(status: string) {
+    const map: Record<string, string> = {
+        waiting: 'warning',
+        in_progress: 'info',
+        done: 'success',
+        cancelled: 'error'
+    }
+    return map[status] ?? 'default'
+}
+
+const snackbar = ref(false)
+const snackbarMsg = ref('')
+const snackbarColor = ref('success')
+
+function notify(msg: string, color = 'success') {
+    snackbarMsg.value = msg
+    snackbarColor.value = color
+    snackbar.value = true
+}
+</script>
+
+<template>
+    <v-card-item class="pb-2 px-0 pt-0">
+        <div class="d-flex justify-space-between align-center">
+            <div>
+                <v-card-title class="text-h3">Today's Appointments</v-card-title>
+                <v-card-subtitle class="mt-1">
+                    List of patients scheduled today
+                </v-card-subtitle>
+            </div>
+        </div>
+    </v-card-item>
+
+    <UiTitleCard class-name="px-0 pb-0 rounded-md">
+        <v-table class="bordered-table" hover density="comfortable">
+            <thead class="bg-containerBg">
+                <tr>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">time</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Type</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Complaint</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-if="pending">
+                    <td colspan="6" class="text-center py-8">
+                        <v-progress-circular indeterminate color="primary" />
+                    </td>
+                </tr>
+                <tr v-else-if="paginatedAppointments.length === 0">
+                    <td colspan="6" class="text-center py-8 text-medium-emphasis">
+                        <v-icon icon="mdi-calendar-blank" size="32" class="mb-2 d-block mx-auto" />
+                        No appointments today
+                    </td>
+                </tr>
+
+                <tr v-else v-for="appt in paginatedAppointments" :key="appt.id">
+                    <td class="py-3">
+                        <div class="d-flex align-center ga-3">
+                            <v-avatar size="34" color="primary" variant="tonal">
+                                <span class="text-caption font-weight-bold">
+                                    {{ getInitials(appt.patients?.full_name ?? '?') }}
+                                </span>
+                            </v-avatar>
+                            <div>
+                                <div class="text-body-2 font-weight-medium">
+                                    {{ appt.patients?.full_name ?? '-' }}
+                                </div>
+                                <div class="text-caption text-medium-emphasis">
+                                    {{ appt.patients?.medical_record_number ?? '-' }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 text-body-2">
+                        {{ formatDate(appt.appointment_date) }}
+                    </td>
+                    <td class="py-3 text-body-2">
+                        {{ formatTime(appt.appointment_time) }}
+                    </td>
+                    <td class="py-3">
+                        <v-chip v-if="appt.type" size="small" variant="tonal" color="secondary" label>
+                            {{ appt.type }}
+                        </v-chip>
+                        <span v-else class="text-medium-emphasis">-</span>
+                    </td>
+                    <td class="py-3">
+                        <v-chip :color="statusColor(appt.status)" variant="tonal" size="small">
+                            {{ appt.status }}
+                        </v-chip>
+                    </td>
+                    <td class="py-3 text-body-2 text-medium-emphasis">
+                        {{ appt.chief_complaint ?? '-' }}
+                    </td>
+                </tr>
+            </tbody>
+        </v-table>
+
+        <div class="d-flex align-center justify-space-between px-4 py-2">
+            <span class="text-caption text-medium-emphasis">
+                Showing {{ paginatedAppointments.length }}
+                of {{ appointments.length }} appointments
+            </span>
+            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
+                size="small" />
+        </div>
+    </UiTitleCard>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" :timeout="3000">
+        {{ snackbarMsg }}
+        <template #actions>
+            <v-btn variant="text" icon="mdi-close" @click="snackbar = false" />
+        </template>
+    </v-snackbar>
+</template>
