@@ -35,7 +35,31 @@ async function validate() {
             }
         })
 
-        await navigateTo('/')
+        const supabase = useSupabase()
+        if (!supabase) {
+            throw new Error('Supabase client is unavailable')
+        }
+
+        const { data: { user } } = await supabase.auth.getUser()
+
+        const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('roles(name)')
+            .eq('user_id', user!.id)
+            .returns<any[]>()
+
+        const role = (roleData as any)?.[0]?.roles?.name
+
+        const redirectMap: Record<string, string> = {
+            admin: '/dashboard',
+            doctor: '/doctor/dashboard',
+            specialist: '/doctor/dashboard',
+            pharmacy: '/pharmacy/dashboard',
+            nurse: '/nurse/dashboard',
+            patient: '/patient/dashboard',
+        }
+
+        await navigateTo(redirectMap[role] ?? '/dashboard')
 
     } catch (err: any) {
         apiError.value = err?.data?.message || err?.message || 'Login failed.'

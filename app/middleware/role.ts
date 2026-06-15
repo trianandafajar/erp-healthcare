@@ -1,0 +1,27 @@
+export default defineNuxtRouteMiddleware(async () => {
+    const supabase = useSupabase()
+
+    if (!supabase) return navigateTo('/login')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return navigateTo('/login')
+
+    const { data } = await supabase
+        .from('user_roles')
+        .select('roles(name)')
+        .eq('user_id', session.user.id)
+        .returns<any[]>()
+
+    const role = (data as any)?.[0]?.roles?.name
+
+    const redirectMap: Record<string, string> = {
+        admin: '/dashboard',
+        doctor: '/doctor/dashboard',
+        specialist: '/doctor/dashboard',
+        pharmacy: '/pharmacy/dashboard',
+        nurse: '/nurse/dashboard',
+        patient: '/patient/dashboard',
+    }
+
+    return navigateTo(redirectMap[role] ?? '/dashboard')
+})
