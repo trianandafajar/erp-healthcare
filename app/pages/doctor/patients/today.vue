@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TableAppoint from '~/components/doctor/Appointment/TableAppoint.vue';
+import TableAppoint from '~/components/doctor/appointment/TableAppoint.vue';
 
 
 definePageMeta({

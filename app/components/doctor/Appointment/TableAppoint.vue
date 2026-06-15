@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
+import ApptModal from './ApptModal.vue'
 
 definePageMeta({ middleware: ['auth'] })
 
 interface Appointment {
     id: string
+    patient_id: string
     appointment_date: string
     appointment_time: string
     type: string
@@ -24,6 +26,12 @@ const itemsPerPage = 10
 
 const { data, pending, refresh } = await useFetch<{ appointments: any[] }>(
     '/api/doctor/appointments/today'
+)
+
+const { data: patientData } = await useFetch('/api/patients')
+
+const patients = computed(() =>
+    patientData.value?.patients ?? []
 )
 
 const appointments = computed<Appointment[]>(() =>
@@ -65,6 +73,34 @@ function statusColor(status: string) {
     return map[status] ?? 'default'
 }
 
+const dialog = ref(false)
+const modalMode = ref<'add' | 'edit' | 'delete'>('add')
+const selectedAppointment = ref<Appointment | null>(null)
+const loading = ref(false)
+
+function openAdd() {
+    modalMode.value = 'add'
+    selectedAppointment.value = null
+    dialog.value = true
+}
+
+function openEdit(appointment: Appointment) {
+    modalMode.value = 'edit'
+    selectedAppointment.value = appointment
+    dialog.value = true
+}
+
+function openDelete(appointment: Appointment) {
+    modalMode.value = 'delete'
+    selectedAppointment.value = appointment
+    dialog.value = true
+}
+
+function closeModal() {
+    dialog.value = false
+    selectedAppointment.value = null
+}
+
 const snackbar = ref(false)
 const snackbarMsg = ref('')
 const snackbarColor = ref('success')
@@ -73,6 +109,74 @@ function notify(msg: string, color = 'success') {
     snackbarMsg.value = msg
     snackbarColor.value = color
     snackbar.value = true
+}
+
+async function handleSubmit(payload: any) {
+    loading.value = true
+
+    try {
+        if (modalMode.value === 'add') {
+            await $fetch('/api/doctor/appointments/today', {
+                method: 'POST',
+                body: {
+                    patient_id: payload.patient_id,
+                    appointment_date: payload.appointment_date,
+                    appointment_time: payload.appointment_time,
+                    type: payload.type,
+                    status: payload.status,
+                    chief_complaint: payload.chief_complaint,
+                    notes: payload.notes,
+                }
+            })
+
+            notify('Appointment created successfully')
+        }
+
+        else if (modalMode.value === 'edit') {
+            await $fetch('/api/doctor/appointments/today', {
+                method: 'PUT',
+                body: {
+                    id: payload.id,
+                    patient_id: payload.patient_id,
+                    appointment_date: payload.appointment_date,
+                    appointment_time: payload.appointment_time,
+                    type: payload.type,
+                    status: payload.status,
+                    chief_complaint: payload.chief_complaint,
+                    notes: payload.notes,
+                }
+            })
+
+            notify('Appointment updated successfully')
+        }
+
+        else if (modalMode.value === 'delete') {
+            await $fetch('/api/doctor/appointments/today', {
+                method: 'DELETE',
+                body: {
+                    id: payload.id,
+                }
+            })
+
+            notify('Appointment deleted successfully')
+        }
+
+        await refresh()
+        closeModal()
+    }
+
+    catch (e: any) {
+        notify(
+            e?.data?.message ??
+            e?.message ??
+            'Something went wrong',
+            'error'
+        )
+    }
+
+    finally {
+        loading.value = false
+    }
 }
 </script>
 
@@ -85,6 +189,10 @@ function notify(msg: string, color = 'success') {
                     List of patients scheduled today
                 </v-card-subtitle>
             </div>
+            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable"
+                @click="openAdd">
+                Add Appointment
+            </v-btn>
         </div>
     </v-card-item>
 
@@ -98,6 +206,7 @@ function notify(msg: string, color = 'success') {
                     <th class="text-left text-caption font-weight-bold text-uppercase">Type</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Complaint</th>
+                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -151,6 +260,12 @@ function notify(msg: string, color = 'success') {
                     <td class="py-3 text-body-2 text-medium-emphasis">
                         {{ appt.chief_complaint ?? '-' }}
                     </td>
+                    <td class="py-3 text-right">
+                        <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
+                            density="comfortable" @click="openEdit(appt)" />
+                        <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
+                            @click="openDelete(appt)" />
+                    </td>
                 </tr>
             </tbody>
         </v-table>
@@ -164,6 +279,11 @@ function notify(msg: string, color = 'success') {
                 size="small" />
         </div>
     </UiTitleCard>
+
+    <v-dialog v-model="dialog" max-width="480" persistent>
+        <ApptModal :mode="modalMode" :appointment="selectedAppointment" :patients="patients" @submit="handleSubmit"
+            @cancel="closeModal" />
+    </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" :timeout="3000">
         {{ snackbarMsg }}

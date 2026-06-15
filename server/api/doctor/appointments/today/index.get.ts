@@ -22,6 +22,7 @@ export default defineEventHandler(async (event) => {
         .from('appointments')
         .select(`
             id,
+            patient_id,
             appointment_date,
             appointment_time,
             type,
