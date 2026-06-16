@@ -63,11 +63,6 @@ const doctorSidebarItem: menu[] = [
         to: '/doctor/examination'
     },
     {
-        title: 'Prescriptions',
-        icon: MedicineBoxOutlined,
-        to: '/doctor/prescriptions'
-    },
-    {
         title: 'Medical Records',
         icon: FileTextOutlined,
         to: '/doctor/medical-records'

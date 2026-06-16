@@ -13,21 +13,30 @@ export default defineEventHandler(async (event) => {
     const { data, error } = await admin
         .from('medical_records')
         .select(`
-      *,
-      patients (
-        id,
-        full_name,
-        medical_record_number,
-        gender
-      ),
-      appointments (
-        id,
-        appointment_date,
-        appointment_time,
-        type,
-        status
-      )
-    `)
+            *,
+            patients (
+                id,
+                full_name,
+                medical_record_number,
+                gender
+            ),
+            appointments (
+                id,
+                appointment_date,
+                appointment_time,
+                type,
+                status
+            ),
+            prescriptions (
+                id,
+                medication_name,
+                dosage,
+                frequency,
+                duration,
+                instructions,
+                created_at
+            )
+        `)
         .eq('id', id)
         .single()
 

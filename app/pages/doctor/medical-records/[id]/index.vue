@@ -152,4 +152,79 @@ function formatTime(timeStr?: string) {
 
         </div>
     </UiTitleCard>
+
+    <UiTitleCard class-name="px-0 pb-0 rounded-md mt-4">
+        <v-card-item class="pb-2">
+            <v-card-title class="text-subtitle-1">
+                Prescriptions
+            </v-card-title>
+
+            <v-card-subtitle>
+                Medication prescribed for this patient
+            </v-card-subtitle>
+        </v-card-item>
+
+        <v-table class="bordered-table" hover density="comfortable">
+            <thead class="bg-containerBg">
+                <tr>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                        Medication
+                    </th>
+
+                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                        Dosage
+                    </th>
+
+                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                        Frequency
+                    </th>
+
+                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                        Duration
+                    </th>
+
+                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                        Instructions
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr v-if="!record.prescriptions?.length">
+                    <td colspan="5" class="text-center py-8 text-medium-emphasis">
+                        <v-icon icon="mdi-pill" size="32" class="mb-2 d-block mx-auto" />
+                        No prescriptions found
+                    </td>
+                </tr>
+
+                <tr v-for="prescription in record.prescriptions" :key="prescription.id">
+                    <td class="py-3">
+                        <div class="font-weight-medium">
+                            {{ prescription.medication_name }}
+                        </div>
+                    </td>
+
+                    <td class="py-3">
+                        <v-chip size="small" label color="primary" variant="tonal">
+                            {{ prescription.dosage }} mg
+                        </v-chip>
+                    </td>
+
+                    <td class="py-3">
+                        <v-chip size="small" label color="success" variant="tonal">
+                            {{ prescription.frequency }}x/day
+                        </v-chip>
+                    </td>
+
+                    <td class="py-3">
+                        {{ prescription.duration }} days
+                    </td>
+
+                    <td class="py-3">
+                        {{ prescription.instructions }}
+                    </td>
+                </tr>
+            </tbody>
+        </v-table>
+    </UiTitleCard>
 </template>
