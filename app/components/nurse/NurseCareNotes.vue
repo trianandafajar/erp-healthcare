@@ -226,7 +226,7 @@ function closeDialog() {
 </script>
 
 <template>
-     <v-card-item class="pb-2 px-0 pt-0">
+    <v-card-item class="pb-2 px-0 pt-0">
         <div class="d-flex flex-wrap align-center justify-space-between ga-3">
             <div>
                 <div class="text-caption text-uppercase text-medium-emphasis">Nurse Care</div>

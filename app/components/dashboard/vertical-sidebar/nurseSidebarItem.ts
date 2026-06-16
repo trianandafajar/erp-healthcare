@@ -33,6 +33,11 @@ const nurseSidebarItem: menu[] = [
         to: '/nurse/dashboard',
     },
     {
+        title: 'Monitoring',
+        icon: SolutionOutlined,
+        to: '/nurse/monitoring',
+    },
+    {
         header: 'Nurse Care',
     },
     {
@@ -54,14 +59,6 @@ const nurseSidebarItem: menu[] = [
         title: 'Procedure Schedule',
         icon: CalendarOutlined,
         to: '/nurse/procedures',
-    },
-    {
-        title: 'Monitoring',
-        icon: SolutionOutlined,
-        to: '/nurse/monitoring',
-    },
-    {
-        header: 'Logs',
     },
 ]
 
