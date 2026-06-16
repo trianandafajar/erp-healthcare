@@ -18,8 +18,15 @@ onMounted(async () => {
     const supabase = useSupabase()
     if (!supabase) return navigateTo('/forgot-password')
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return navigateTo('/forgot-password')
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        subscription.unsubscribe()
+
+        if (event === 'PASSWORD_RECOVERY' || session) {
+            return
+        }
+
+        await navigateTo('/forgot-password')
+    })
 })
 
 const passwordRules = [
