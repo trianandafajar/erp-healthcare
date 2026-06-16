@@ -23,7 +23,7 @@ const genderFilter = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending, refresh } = await useFetch<{ patients: NursePatient[] }>('/api/nurse/patients')
+const { data, pending, refresh } = useLazyFetch<{ patients: NursePatient[] }>('/api/nurse/patients')
 
 const patients = computed(() => data.value?.patients ?? [])
 
@@ -89,33 +89,48 @@ function onGenderChange() {
 </script>
 
 <template>
-    <v-card elevation="0" class="mb-4 bg-transparent">
-        <v-card-text class="d-flex flex-wrap align-center justify-space-between ga-4 bg-transparent">
+    <v-card-item class="pb-2 px-0 pt-0">
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
             <div>
                 <div class="text-caption text-uppercase text-medium-emphasis">Nurse Care</div>
-                <h3 class="text-h4 mb-1">Patient List</h3>
-                <p class="text-body-2 text-medium-emphasis mb-0">Live patient records from the database.</p>
+                <v-card-title class="text-h4">Patient List</v-card-title>
+                <v-card-subtitle class="mt-1">Live patient records from the database.</v-card-subtitle>
             </div>
-        </v-card-text>
-    </v-card>
+        </div>
+    </v-card-item>
 
     <v-card elevation="0">
-        <div class="d-flex align-center p-4 ga-3 flex-wrap justify-space-between" style="flex: 1 1 560px">
-            <v-text-field v-model="search" density="comfortable" hide-details
-                placeholder="Search by name, MRN, or phone..." prepend-inner-icon="mdi-magnify" variant="outlined"
-                clearable style="min-width: 340px; max-width: 420px; flex: 1 1 360px" @update:model-value="onSearch" />
-            <div class="d-flex align-center ga-2">
-                <v-btn-toggle v-model="genderFilter" density="comfortable" variant="tonal" divided mandatory
-                    color="primary" class="flex-wrap" @update:model-value="onGenderChange">
+        <div class="d-flex align-center p-4 ga-3 flex-wrap justify-space-between">
+            <v-text-field
+                v-model="search"
+                density="comfortable"
+                hide-details
+                placeholder="Search by name, MRN, or phone..."
+                prepend-inner-icon="mdi-magnify"
+                variant="outlined"
+                clearable
+                style="min-width: 340px; max-width: 420px; flex: 1 1 360px"
+                @update:model-value="onSearch"
+            />
+            <div class="d-flex align-center ga-2 flex-wrap">
+                <v-btn-toggle
+                    v-model="genderFilter"
+                    density="comfortable"
+                    variant="tonal"
+                    divided
+                    mandatory
+                    color="primary"
+                    class="flex-wrap"
+                    @update:model-value="onGenderChange"
+                >
                     <v-btn v-for="option in genderOptions" :key="option.value" :value="option.value" size="default">
                         {{ option.label }}
                     </v-btn>
                 </v-btn-toggle>
-                <v-btn icon="mdi-refresh" variant="text" color="primary" size="default" :loading="pending"
-                    @click="refresh" />
+                <v-btn icon="mdi-refresh" variant="text" color="primary" size="default" :loading="pending" @click="refresh" />
             </div>
-
         </div>
+
         <v-table hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>

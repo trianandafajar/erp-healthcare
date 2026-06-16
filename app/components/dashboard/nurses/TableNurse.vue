@@ -159,14 +159,21 @@ async function handleSubmit(payload: any) {
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
-        <div class="d-flex justify-space-between align-center">
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
             <div>
-                <v-card-title class="text-h3">Nurses Management</v-card-title>
-                <v-card-subtitle class="mt-1">Manage nurse profiles and departments</v-card-subtitle>
+                <div class="text-caption text-uppercase text-medium-emphasis">Nurse Directory</div>
+                <v-card-title class="text-h4">Nurses Management</v-card-title>
+                <v-card-subtitle class="mt-1">Manage nurse profiles and departments.</v-card-subtitle>
             </div>
-            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable"
-                @click="openAdd">
-                Add Nurse
+            <v-btn
+                color="primary"
+                variant="flat"
+                size="large"
+                prepend-icon="mdi-plus"
+                density="comfortable"
+                @click="openAdd"
+            >
+                Create Nurse
             </v-btn>
         </div>
     </v-card-item>

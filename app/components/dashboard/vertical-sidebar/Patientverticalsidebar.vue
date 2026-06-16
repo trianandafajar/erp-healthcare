@@ -18,7 +18,7 @@ const sidebarMenu = shallowRef(patientSidebarItem);
         <div class="pa-5">
             <Logo />
         </div>
-        <perfect-scrollbar class="scrollnavbar">
+        <div class="scrollnavbar">
             <v-list aria-busy="true" aria-label="patient menu list">
                 <template v-for="(item, i) in sidebarMenu" :key="i">
                     <NavGroup :item="item" v-if="item.header" :key="item.title" />
@@ -28,6 +28,6 @@ const sidebarMenu = shallowRef(patientSidebarItem);
                 </template>
             </v-list>
             <div class="pa-4" />
-        </perfect-scrollbar>
+        </div>
     </v-navigation-drawer>
 </template>

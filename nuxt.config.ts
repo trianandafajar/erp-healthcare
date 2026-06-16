@@ -1,19 +1,10 @@
-declare const process: {
-  env: {
-    SUPABASE_URL?: string
-    SUPABASE_KEY?: string
-    SUPABASE_SERVICE_KEY?: string
-  }
-}
-
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: {
+    enabled: true,
 
-  app: {
-    pageTransition: {
-      name: 'fade',
-      mode: 'out-in',
+    timeline: {
+      enabled: true,
     },
   },
 
@@ -22,7 +13,7 @@ export default defineNuxtConfig({
     '@fontsource/public-sans/500.css',
     '@fontsource/public-sans/600.css',
     '@fontsource/public-sans/700.css',
-    '@mdi/font/css/materialdesignicons.css',
+    '@mdi/font/css/materialdesignicons.min.css',
     '~/assets/scss/style.scss',
     '~/assets/css/tailwind.css',
   ],
@@ -34,6 +25,9 @@ export default defineNuxtConfig({
   vite: {
     ssr: {
       noExternal: ['vuetify'],
+    },
+    optimizeDeps: {
+      include: ['vuetify'],
     },
   },
 

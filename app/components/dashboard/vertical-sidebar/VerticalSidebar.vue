@@ -21,7 +21,7 @@ const sidebarMenu = shallowRef(sidebarItems);
     <!-- ---------------------------------------------- -->
     <!---Navigation -->
     <!-- ---------------------------------------------- -->
-    <perfect-scrollbar class="scrollnavbar">
+    <div class="scrollnavbar">
       <v-list aria-busy="true" aria-label="menu list">
         <!---Menu Loop -->
         <template v-for="(item, i) in sidebarMenu" :key="i">
@@ -39,6 +39,6 @@ const sidebarMenu = shallowRef(sidebarItems);
       <div class="pa-4">
         <!-- <ExtraBox /> -->
       </div>
-    </perfect-scrollbar>
+    </div>
   </v-navigation-drawer>
 </template>

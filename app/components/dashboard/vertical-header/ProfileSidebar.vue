@@ -106,7 +106,7 @@ async function submitPasswordChange() {
             <v-btn icon="mdi-close" variant="text" density="comfortable" @click="isOpen = false" />
         </div>
 
-        <perfect-scrollbar style="height: calc(100vh - 64px)">
+        <div class="scroll-shell" style="height: calc(100vh - 64px); overflow-y: auto;">
             <div class="pa-4 text-center border-b">
                 <v-avatar size="72" color="primary" variant="tonal" class="mb-3">
                     <span class="text-h6 font-weight-bold">{{ getInitials(profile?.full_name ?? '') }}</span>
@@ -180,6 +180,6 @@ async function submitPasswordChange() {
                     </div>
                 </v-expand-transition>
             </div>
-        </perfect-scrollbar>
+        </div>
     </v-navigation-drawer>
 </template>

@@ -43,7 +43,7 @@ function deactivateItem() {
         </div>
       </div>
       <v-divider></v-divider>
-      <perfect-scrollbar style="height: calc(100vh - 300px); max-height: 265px">
+      <div class="scroll-shell" style="height: calc(100vh - 300px); max-height: 265px; overflow-y: auto;">
         <v-list class="py-0" lines="two" aria-label="notification list" aria-busy="true">
           <v-list-item value="1" color="secondary" class="no-spacer py-1" :active="isActive">
             <template v-slot:prepend>
@@ -103,7 +103,7 @@ function deactivateItem() {
             <p class="text-caption text-medium-emphasis my-0">Daily scrum meeting time</p>
           </v-list-item>
         </v-list>
-      </perfect-scrollbar>
+      </div>
       <v-divider></v-divider>
       <div class="pa-2 text-center">
         <v-btn color="primary" variant="text">View All</v-btn>

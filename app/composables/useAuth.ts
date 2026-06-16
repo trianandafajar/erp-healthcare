@@ -2,13 +2,23 @@ import type { User } from '@supabase/supabase-js'
 
 export const useAuth = () => {
     const user = useState<User | null>('user', () => null)
+    const role = useState<{ userId: string | null; name: string | null }>('user-role-cache', () => ({
+        userId: null,
+        name: null,
+    }))
+    const userLoaded = useState('user-loaded', () => false)
 
     const getUser = async () => {
+        if (userLoaded.value) {
+            return user.value
+        }
+
         const supabase = useSupabase()
         if (!supabase) return null
 
         const { data } = await supabase.auth.getUser()
         user.value = data.user
+        userLoaded.value = true
         return data.user
     }
 
@@ -21,6 +31,11 @@ export const useAuth = () => {
             password
         })
         if (data.user) user.value = data.user
+        userLoaded.value = true
+        role.value = {
+            userId: data.user?.id ?? null,
+            name: null,
+        }
         return { data, error }
     }
 
@@ -30,7 +45,12 @@ export const useAuth = () => {
 
         await supabase.auth.signOut()
         user.value = null
+        userLoaded.value = false
+        role.value = {
+            userId: null,
+            name: null,
+        }
     }
 
-    return { user, login, logout, getUser }
+    return { user, role, userLoaded, login, logout, getUser }
 }

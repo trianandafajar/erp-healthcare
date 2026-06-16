@@ -11,7 +11,7 @@ import ProfileSidebar from './ProfileSidebar.vue';
 
 const customizer = useCustomizerStore();
 
-const { data, pending, refresh } = await useFetch<{
+const { data, pending, refresh } = useLazyFetch<{
   user: { id: string; email: string }
   profile: any
   roles: { id: string; label: string }[]

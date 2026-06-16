@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import FooterPanel from '~/components/dashboard/footer/FooterPanel.vue';
-import LoaderWrapper from '~/components/dashboard/LoaderWrapper.vue';
 import VerticalHeaderVue from '~/components/dashboard/vertical-header/VerticalHeader.vue'
 import Doctorverticalsidebar from '~/components/dashboard/vertical-sidebar/Doctorverticalsidebar.vue';
 </script>
@@ -14,9 +13,6 @@ import Doctorverticalsidebar from '~/components/dashboard/vertical-sidebar/Docto
             <v-main class="page-wrapper">
                 <v-container fluid>
                     <div>
-                        <!-- Loader start -->
-                        <LoaderWrapper />
-                        <!-- Loader end -->
                         <slot />
                     </div>
                 </v-container>

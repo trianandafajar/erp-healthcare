@@ -78,7 +78,7 @@ async function confirmLogout() {
       </v-tab>
     </v-tabs>
 
-    <perfect-scrollbar style="height: calc(100vh - 300px); max-height: 240px">
+    <div class="scroll-shell" style="height: calc(100vh - 300px); max-height: 240px; overflow-y: auto;">
       <v-window v-model="tab">
         <v-window-item value="111">
           <v-list class="py-0" aria-label="profile list" aria-busy="true">
@@ -158,7 +158,7 @@ async function confirmLogout() {
           </v-list>
         </v-window-item>
       </v-window>
-    </perfect-scrollbar>
+    </div>
   </div>
 
   <v-dialog v-model="dialog" max-width="500" persistent>
