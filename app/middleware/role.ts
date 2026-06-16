@@ -3,13 +3,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     if (!supabase) return navigateTo('/login')
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return navigateTo('/login')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return navigateTo('/login')
 
     const { data } = await supabase
         .from('user_roles')
         .select('roles(name)')
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .returns<any[]>()
 
     const role = (data as any)?.[0]?.roles?.name

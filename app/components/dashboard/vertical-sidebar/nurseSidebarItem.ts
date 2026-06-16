@@ -5,7 +5,6 @@ import {
     FormOutlined,
     CalendarOutlined,
     SolutionOutlined,
-    HistoryOutlined,
 } from '@ant-design/icons-vue'
 
 export interface menu {
@@ -64,11 +63,6 @@ const nurseSidebarItem: menu[] = [
     {
         header: 'Logs',
     },
-    {
-        title: 'Activity Log',
-        icon: HistoryOutlined,
-        to: '/nurse/log-activity',
-    }
 ]
 
 export default nurseSidebarItem

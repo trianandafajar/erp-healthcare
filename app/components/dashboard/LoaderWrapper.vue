@@ -1,19 +1,17 @@
 <script setup lang="ts">
-// import { storeToRefs } from 'pinia';
-// import { useUIStore } from '@/stores/ui';
-
-// const uiStore = useUIStore();
-// const { isLoading } = storeToRefs(uiStore);
+const isLoading = ref(false)
 </script>
 
 <template>
-  <div :class="{
-    'page-loader': true,
-    loading: isLoading,
-    hidden: !isLoading
-  }">
-    <div class="bar" />
-  </div>
+    <div
+        :class="{
+            'page-loader': true,
+            loading: isLoading,
+            hidden: !isLoading,
+        }"
+    >
+        <div class="bar" />
+    </div>
 </template>
 
 <style scoped>
