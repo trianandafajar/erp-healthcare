@@ -25,6 +25,10 @@ const props = defineProps<{
   roles?: { id: string; label: string }[]
 }>()
 
+const emit = defineEmits<{
+  'open-profile': [mode: 'view' | 'edit']
+}>()
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -78,14 +82,14 @@ async function confirmLogout() {
       <v-window v-model="tab">
         <v-window-item value="111">
           <v-list class="py-0" aria-label="profile list" aria-busy="true">
-            <v-list-item color="primary" rounded="0" value="Edit profile">
+            <v-list-item @click="emit('open-profile', 'edit')" color="primary" rounded="0" value="Edit profile">
               <template v-slot:prepend>
                 <EditOutlined :style="{ fontSize: '14px' }" class="mr-4" />
               </template>
               <v-list-item-title class="text-h6">Edit Profile</v-list-item-title>
             </v-list-item>
 
-            <v-list-item color="primary" rounded="0" value="View Profile">
+            <v-list-item @click="emit('open-profile', 'view')" color="primary" rounded="0" value="View Profile">
               <template v-slot:prepend>
                 <UserOutlined :style="{ fontSize: '14px' }" class="mr-4" />
               </template>

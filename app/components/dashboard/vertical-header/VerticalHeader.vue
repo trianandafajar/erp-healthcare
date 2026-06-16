@@ -7,6 +7,7 @@ import { MenuFoldOutlined, SearchOutlined, GithubOutlined } from '@ant-design/ic
 import NotificationDD from './NotificationDD.vue';
 import Searchbar from './SearchBarPanel.vue';
 import ProfileDD from './ProfileDD.vue';
+import ProfileSidebar from './ProfileSidebar.vue';
 
 const customizer = useCustomizerStore();
 
@@ -17,6 +18,17 @@ const { data, pending, refresh } = await useFetch<{
 }>('/api/profile')
 const profile = computed(() => data.value?.profile)
 const roles = computed(() => data.value?.roles ?? [])
+
+const profileSidebarOpen = ref(false)
+const profileSidebarMode = ref<'view' | 'edit'>('view')
+
+const profileMenuOpen = ref(false)
+
+function openProfileSidebar(mode: 'view' | 'edit') {
+  profileMenuOpen.value = false
+  profileSidebarMode.value = mode
+  profileSidebarOpen.value = true
+}
 
 function getInitials(name: string) {
   return name
@@ -86,7 +98,7 @@ function getInitials(name: string) {
     <!-- ---------------------------------------------- -->
     <!-- User Profile -->
     <!-- ---------------------------------------------- -->
-    <v-menu :close-on-content-click="false" offset="8, 0">
+    <v-menu v-model="profileMenuOpen" :close-on-content-click="false" offset="8, 0">
       <template v-slot:activator="{ props }">
         <v-btn class="profileBtn" variant="text" rounded="sm" v-bind="props">
           <div class="d-flex align-center">
@@ -102,8 +114,11 @@ function getInitials(name: string) {
         </v-btn>
       </template>
       <v-sheet rounded="md" width="290">
-        <ProfileDD :profile="profile" :roles="roles" />
+        <ProfileDD :profile="profile" :roles="roles" @open-profile="openProfileSidebar" />
       </v-sheet>
     </v-menu>
   </v-app-bar>
+
+  <ProfileSidebar v-model="profileSidebarOpen" :mode="profileSidebarMode" :profile="profile" :roles="roles"
+    @refresh="refresh" />
 </template>
