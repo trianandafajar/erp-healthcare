@@ -62,9 +62,12 @@ const nurseSidebarItem: menu[] = [
         to: '/nurse/monitoring',
     },
     {
+        header: 'Logs',
+    },
+    {
         title: 'Activity Log',
         icon: HistoryOutlined,
-        to: '/log-activity',
+        to: '/nurse/log-activity',
     }
 ]
 
