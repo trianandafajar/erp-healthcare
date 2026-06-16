@@ -12,10 +12,11 @@ const props = defineProps({ item: Object, level: Number });
     color="primary"
     :disabled="item.disabled"
     :target="item.type === 'external' ? '_blank' : ''"
-  >
+    >
     <!---If icon-->
     <template v-slot:prepend>
-      <component :is="props.item.icon" class="iconClass" :level="props.level"></component>
+      <v-icon v-if="typeof props.item.icon === 'string'" :icon="props.item.icon" class="iconClass" />
+      <component v-else :is="props.item.icon" class="iconClass" :level="props.level"></component>
     </template>
     <v-list-item-title>{{ item.title }}</v-list-item-title>
     <!---If Caption-->

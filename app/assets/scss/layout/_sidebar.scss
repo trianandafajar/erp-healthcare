@@ -35,7 +35,9 @@
         .v-list-item--link,
         .v-list-item {
           .v-list-item__prepend {
-            margin-inline-end: 1px;
+            margin-inline-end: 2px !important;
+            width: 24px !important;
+            min-width: 24px !important;
           }
         }
       }
@@ -51,9 +53,11 @@
   .v-list-group__items .v-list-item,
   .v-list-item {
     border-radius: 0;
-    padding-inline-start: calc(20px + var(--indent-padding) / 2) !important;
+    padding-inline-start: calc(12px + var(--indent-padding) / 2) !important;
     .v-list-item__prepend {
-      margin-inline-end: 13px;
+      margin-inline-end: 2px !important;
+      min-width: 24px !important;
+      width: 24px !important;
     }
     .v-list-item__append {
       font-size: 0.875rem;
@@ -106,18 +110,20 @@
   .scrollnavbar {
     .v-list-item {
       .v-list-item__prepend {
-        margin-left: 8px;
+        margin-left: 0 !important;
+        width: 24px !important;
+        min-width: 24px !important;
         .anticon {
           svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
           }
         }
       }
     }
     .v-list-group__items .v-list-item,
     .v-list-item {
-      padding-inline-start: calc(12px + var(--indent-padding) / 2) !important;
+      padding-inline-start: calc(8px + var(--indent-padding) / 2) !important;
     }
     .ExtraBox {
       display: none;
