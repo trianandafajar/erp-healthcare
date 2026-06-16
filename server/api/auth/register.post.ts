@@ -8,16 +8,13 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const supabase = serverSupabase(event)
     const admin = supabaseAdmin()
 
-    // register user
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await admin.auth.admin.createUser({
         email,
         password,
-        options: {
-            data: { full_name },
-        },
+        user_metadata: { full_name },
+        email_confirm: true,
     })
 
     if (error) throw createError({ statusCode: 401, message: error.message })
