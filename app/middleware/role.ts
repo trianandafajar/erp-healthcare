@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware(async () => {
+export default defineNuxtRouteMiddleware(async (to) => {
     const supabase = useSupabase()
 
     if (!supabase) return navigateTo('/login')
@@ -13,6 +13,15 @@ export default defineNuxtRouteMiddleware(async () => {
         .returns<any[]>()
 
     const role = (data as any)?.[0]?.roles?.name
+    const requiredRoles = to.meta.role
+        ? [to.meta.role]
+        : Array.isArray(to.meta.roles)
+            ? to.meta.roles
+            : null
+
+    if (requiredRoles && requiredRoles.includes(role)) {
+        return
+    }
 
     const redirectMap: Record<string, string> = {
         admin: '/dashboard',
