@@ -57,7 +57,7 @@ function getInitials(name: string) {
 }
 
 function openDetail(record: MedicalRecord) {
-    navigateTo(`/medical-records/${record.id}`)
+    navigateTo(`/doctor/medical-records/${record.id}`)
 }
 </script>
 
