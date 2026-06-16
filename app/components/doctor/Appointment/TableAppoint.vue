@@ -211,12 +211,12 @@ async function handleSubmit(payload: any) {
             </thead>
             <tbody>
                 <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
+                    <td colspan="7" class="text-center py-8">
                         <v-progress-circular indeterminate color="primary" />
                     </td>
                 </tr>
                 <tr v-else-if="paginatedAppointments.length === 0">
-                    <td colspan="6" class="text-center py-8 text-medium-emphasis">
+                    <td colspan="7" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-calendar-blank" size="32" class="mb-2 d-block mx-auto" />
                         No appointments today
                     </td>
