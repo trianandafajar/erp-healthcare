@@ -205,7 +205,7 @@ function onSubmit() {
                         </v-label>
 
                         <template v-if="mode === 'add'">
-                            <div class="d-flex ga-2 align-start">
+                            <div class="d-flex ga-2 align-center">
                                 <v-select v-model="form.id" :items="availableUsers ?? []" item-title="full_name"
                                     item-value="id" placeholder="Select a doctor account" variant="outlined"
                                     density="compact" hide-details="auto" no-data-text="No available doctor accounts"
@@ -215,7 +215,7 @@ function onSubmit() {
                                     </template>
                                 </v-select>
 
-                                <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus"
+                                <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus" height="40"
                                     @click="openCreateUserDialog">
                                     Create User
                                 </v-btn>
