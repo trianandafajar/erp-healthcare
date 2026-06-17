@@ -549,6 +549,156 @@ set medical_record_id = excluded.medical_record_id,
     updated_at = excluded.updated_at;
 
 -- -------------------------------------------------------------------
+-- Pharmacy inventory
+-- -------------------------------------------------------------------
+insert into public.medicine_stocks (
+    id,
+    medicine_name,
+    dosage,
+    supplier,
+    batch_number,
+    expired_date,
+    quantity,
+    minimum_stock,
+    unit,
+    created_at,
+    updated_at
+)
+values
+    (
+        'dddddddd-eeee-ffff-0000-111111111111',
+        'Amoxicillin',
+        '500 mg',
+        'PT Medika Prima',
+        'B-AX-2606',
+        date '2027-06-30',
+        48,
+        20,
+        'capsule',
+        now() - interval '2 days',
+        now() - interval '2 days'
+    ),
+    (
+        'dddddddd-eeee-ffff-0000-222222222222',
+        'Paracetamol',
+        '500 mg',
+        'PT Sehat Sentosa',
+        'B-PR-2606',
+        date '2027-02-28',
+        128,
+        30,
+        'tablet',
+        now() - interval '2 days',
+        now() - interval '2 days'
+    ),
+    (
+        'dddddddd-eeee-ffff-0000-333333333333',
+        'Ondansetron',
+        '4 mg',
+        'PT Maju Farma',
+        'B-ON-2605',
+        date '2026-12-31',
+        11,
+        15,
+        'tablet',
+        now() - interval '2 days',
+        now() - interval '2 days'
+    ),
+    (
+        'dddddddd-eeee-ffff-0000-444444444444',
+        'Ranitidine',
+        '150 mg',
+        'PT Karya Sehat',
+        'B-RN-2605',
+        date '2026-11-30',
+        19,
+        20,
+        'tablet',
+        now() - interval '2 days',
+        now() - interval '2 days'
+    )
+on conflict (id) do update
+set medicine_name = excluded.medicine_name,
+    dosage = excluded.dosage,
+    supplier = excluded.supplier,
+    batch_number = excluded.batch_number,
+    expired_date = excluded.expired_date,
+    quantity = excluded.quantity,
+    minimum_stock = excluded.minimum_stock,
+    unit = excluded.unit,
+    updated_at = excluded.updated_at;
+
+insert into public.medicine_stock_movements (
+    id,
+    medicine_stock_id,
+    movement_type,
+    medicine_name,
+    dosage,
+    quantity,
+    reason_or_supplier,
+    reference,
+    note,
+    batch_number,
+    expired_date,
+    created_at
+)
+values
+    (
+        'eeeeeeee-ffff-0000-1111-111111111111',
+        'dddddddd-eeee-ffff-0000-222222222222',
+        'Incoming',
+        'Paracetamol',
+        '500 mg',
+        200,
+        'PT Medika Prima',
+        'GRN-260616-01',
+        'Restocked for ward requests',
+        'B-PR-2606',
+        date '2027-02-28',
+        now() - interval '1 day'
+    ),
+    (
+        'eeeeeeee-ffff-0000-1111-222222222222',
+        'dddddddd-eeee-ffff-0000-111111111111',
+        'Outgoing',
+        'Amoxicillin',
+        '500 mg',
+        24,
+        'Dispensed to Ward A',
+        'ISS-260616-02',
+        'Postoperative patient supply',
+        'B-AX-2606',
+        date '2027-06-30',
+        now() - interval '12 hours'
+    ),
+    (
+        'eeeeeeee-ffff-0000-1111-333333333333',
+        'dddddddd-eeee-ffff-0000-333333333333',
+        'Incoming',
+        'Ondansetron',
+        '4 mg',
+        50,
+        'PT Sehat Sentosa',
+        'GRN-260615-03',
+        'Small batch top-up',
+        'B-ON-2605',
+        date '2026-12-31',
+        now() - interval '1 day'
+    )
+on conflict (id) do update
+set medicine_stock_id = excluded.medicine_stock_id,
+    movement_type = excluded.movement_type,
+    medicine_name = excluded.medicine_name,
+    dosage = excluded.dosage,
+    quantity = excluded.quantity,
+    reason_or_supplier = excluded.reason_or_supplier,
+    reference = excluded.reference,
+    note = excluded.note,
+    batch_number = excluded.batch_number,
+    expired_date = excluded.expired_date,
+    created_at = excluded.created_at;
+
+-- -------------------------------------------------------------------
 -- Nurse vitals
 -- -------------------------------------------------------------------
 insert into public.nurse_vital_signs (

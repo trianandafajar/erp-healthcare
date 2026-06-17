@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { usePharmacyPrescriptions } from '~/composables/usePharmacyPrescriptions'
-import type { PrescriptionItem } from '~/data/pharmacy'
+import type { PrescriptionItem } from '~/types/pharmacy'
 
 const feed = usePharmacyPrescriptions()
 const detailDialog = ref(false)

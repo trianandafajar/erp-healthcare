@@ -1,4 +1,4 @@
-import type { PrescriptionItem, PrescriptionStatus } from '~/data/pharmacy'
+import type { PrescriptionItem, PrescriptionStatus } from '~/types/pharmacy'
 
 type PharmacyPrescriptionFeedItem = PrescriptionItem & {
     medicalRecordId: string

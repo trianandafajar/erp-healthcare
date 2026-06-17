@@ -1,51 +1,4 @@
-export type PrescriptionStatus = 'Pending' | 'Verified' | 'Rejected' | 'Dispensed'
-export type StockMovementType = 'Incoming' | 'Outgoing'
-export type StockReason = 'Damaged' | 'Expired' | 'Manual Adjustment' | 'Transfer'
-
-export type PrescriptionItem = {
-    id: string
-    patientName: string
-    mrn: string
-    doctorName: string
-    medicines: string[]
-    dosage?: string | null
-    frequency?: string | null
-    duration?: string | null
-    instructions?: string | null
-    note: string
-    priority: 'Low' | 'Medium' | 'High'
-    status: PrescriptionStatus
-    requestedAt: string
-    verifiedAt?: string | null
-    dispensedAt?: string | null
-    pharmacistNote?: string | null
-    rejectionNote?: string | null
-}
-
-export type StockItem = {
-    id: string
-    medicineName: string
-    supplier: string
-    batchNumber: string
-    expiredDate: string
-    quantity: number
-    minimumStock: number
-    unit: string
-    updatedAt: string
-}
-
-export type StockMovementItem = {
-    id: string
-    type: StockMovementType
-    medicineName: string
-    quantity: number
-    reasonOrSupplier: string
-    reference: string
-    note: string
-    createdAt: string
-    batchNumber: string
-    expiredDate: string
-}
+import type { PrescriptionItem, StockItem, StockMovementItem } from '~/types/pharmacy'
 
 export const initialPrescriptions: PrescriptionItem[] = [
     {
@@ -104,7 +57,8 @@ export const initialPrescriptions: PrescriptionItem[] = [
 export const initialStocks: StockItem[] = [
     {
         id: 'stk-001',
-        medicineName: 'Amoxicillin 500 mg',
+        medicineName: 'Amoxicillin',
+        dosage: '500 mg',
         supplier: 'PT Medika Prima',
         batchNumber: 'B-AX-2606',
         expiredDate: '2027-06-30T00:00:00.000Z',
@@ -115,7 +69,8 @@ export const initialStocks: StockItem[] = [
     },
     {
         id: 'stk-002',
-        medicineName: 'Paracetamol 500 mg',
+        medicineName: 'Paracetamol',
+        dosage: '500 mg',
         supplier: 'PT Sehat Sentosa',
         batchNumber: 'B-PR-2606',
         expiredDate: '2027-02-28T00:00:00.000Z',
@@ -126,7 +81,8 @@ export const initialStocks: StockItem[] = [
     },
     {
         id: 'stk-003',
-        medicineName: 'Ondansetron 4 mg',
+        medicineName: 'Ondansetron',
+        dosage: '4 mg',
         supplier: 'PT Maju Farma',
         batchNumber: 'B-ON-2605',
         expiredDate: '2026-12-31T00:00:00.000Z',
@@ -137,7 +93,8 @@ export const initialStocks: StockItem[] = [
     },
     {
         id: 'stk-004',
-        medicineName: 'Ranitidine 150 mg',
+        medicineName: 'Ranitidine',
+        dosage: '150 mg',
         supplier: 'PT Karya Sehat',
         batchNumber: 'B-RN-2605',
         expiredDate: '2026-11-30T00:00:00.000Z',
@@ -152,7 +109,8 @@ export const initialMovements: StockMovementItem[] = [
     {
         id: 'mov-001',
         type: 'Incoming',
-        medicineName: 'Paracetamol 500 mg',
+        medicineName: 'Paracetamol',
+        dosage: '500 mg',
         quantity: 200,
         reasonOrSupplier: 'PT Medika Prima',
         reference: 'GRN-260616-01',
@@ -164,7 +122,8 @@ export const initialMovements: StockMovementItem[] = [
     {
         id: 'mov-002',
         type: 'Outgoing',
-        medicineName: 'Amoxicillin 500 mg',
+        medicineName: 'Amoxicillin',
+        dosage: '500 mg',
         quantity: 24,
         reasonOrSupplier: 'Dispensed to Ward A',
         reference: 'ISS-260616-02',
@@ -176,7 +135,8 @@ export const initialMovements: StockMovementItem[] = [
     {
         id: 'mov-003',
         type: 'Incoming',
-        medicineName: 'Ondansetron 4 mg',
+        medicineName: 'Ondansetron',
+        dosage: '4 mg',
         quantity: 50,
         reasonOrSupplier: 'PT Sehat Sentosa',
         reference: 'GRN-260615-03',
