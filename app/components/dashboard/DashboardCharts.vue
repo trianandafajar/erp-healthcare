@@ -8,16 +8,22 @@ const { data } = await useFetch<{
   roleCounts: Record<string, { label: string, count: number }>
 }>('/api/dashboard/stats')
 
+const { data: appointmentGrowth } =
+  await useFetch<{
+    months: string[]
+    series: number[]
+    total: number
+  }>('/api/dashboard/monthly-appointments')
+
+
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-const patientsGrowthDummy = [12, 19, 15, 25, 22, 30, 28, 35, 32, 40, 38, 45]
-
-const patientsGrowthSeries = [
+const appointmentSeries = computed(() => [
   {
-    name: 'New Patients',
-    data: patientsGrowthDummy
+    name: 'Appointments',
+    data: appointmentGrowth.value?.series ?? []
   }
-]
+])
 
 const patientsGrowthOptions = computed(() => ({
   chart: {
@@ -38,7 +44,7 @@ const patientsGrowthOptions = computed(() => ({
     }
   },
   xaxis: {
-    categories: months,
+    categories: appointmentGrowth.value?.months ?? [],
     axisBorder: { show: false },
   },
   yaxis: { show: true },
@@ -106,12 +112,17 @@ const totalRoleUsers = computed(() => usersByRoleSeries.value.reduce((a, b) => a
     <v-col cols="12" md="7">
       <v-card elevation="0" class="h-100">
         <v-card-item>
-          <v-card-title class="text-h5">Patients Growth</v-card-title>
-          <v-card-subtitle>Sample data — monthly new patients</v-card-subtitle>
+          <v-card-title class="text-h5">
+            Monthly Appointments
+          </v-card-title>
+
+          <v-card-subtitle>
+            Total {{ appointmentGrowth?.total ?? 0 }} appointments this year
+          </v-card-subtitle>
         </v-card-item>
         <v-card-text>
           <ClientOnly>
-            <apexchart type="area" height="300" :options="patientsGrowthOptions" :series="patientsGrowthSeries" />
+            <apexchart type="area" height="300" :options="patientsGrowthOptions" :series="appointmentSeries" />
           </ClientOnly>
         </v-card-text>
       </v-card>

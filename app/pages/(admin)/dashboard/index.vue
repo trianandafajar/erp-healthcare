@@ -20,9 +20,16 @@ useSeoMeta({
 </script>
 
 <template>
+    <v-card elevation="0">
+        <v-card-text>
+            <div class="text-h5 font-weight-bold">Admin Dashboard</div>
+            <div class="text-caption text-medium-emphasis">Overview daily web activity</div>
+        </v-card-text>
+    </v-card>
+
     <WidgetFive />
 
     <DashboardCharts />
 
-    <RecentActivity/>
+    <RecentActivity />
 </template>
