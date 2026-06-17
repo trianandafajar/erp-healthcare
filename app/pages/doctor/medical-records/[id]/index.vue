@@ -25,6 +25,34 @@ const { data, pending } = await useFetch<{
 
 const record = computed(() => data.value?.medical_record)
 
+const { data: attachmentData } = await useFetch<{
+    files: any[]
+}>(`/api/doctor/medical-record-files/${id}`)
+
+const attachments = computed(
+    () => attachmentData.value?.files ?? []
+)
+
+async function viewFile(fileId: string) {
+    const res = await $fetch<{ url: string }>(
+        `/api/doctor/medical-record-files/${fileId}/url`
+    )
+
+    window.open(res.url, '_blank')
+}
+
+function formatFileSize(bytes?: number) {
+    if (!bytes) return '-'
+
+    const kb = bytes / 1024
+
+    if (kb < 1024) {
+        return `${kb.toFixed(1)} KB`
+    }
+
+    return `${(kb / 1024).toFixed(1)} MB`
+}
+
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
     return new Date(dateStr).toLocaleDateString('id-ID', {
@@ -222,6 +250,104 @@ function formatTime(timeStr?: string) {
 
                     <td class="py-3">
                         {{ prescription.instructions }}
+                    </td>
+                </tr>
+            </tbody>
+        </v-table>
+    </UiTitleCard>
+
+    <UiTitleCard class-name="px-0 pb-0 rounded-md mt-4">
+        <v-card-item>
+            <div class="d-flex justify-space-between align-center">
+                <div>
+                    <v-card-title class="text-subtitle-1">
+                        Examination Attachments
+                    </v-card-title>
+
+                    <v-card-subtitle>
+                        Supporting documents uploaded during examination
+                    </v-card-subtitle>
+                </div>
+
+                <v-chip color="info" variant="tonal" prepend-icon="mdi-paperclip">
+                    {{ attachments.length }} File(s)
+                </v-chip>
+            </div>
+        </v-card-item>
+
+        <v-divider />
+
+        <v-table hover density="comfortable">
+            <thead class="bg-containerBg">
+                <tr>
+                    <th class="text-left">Document</th>
+                    <th class="text-left">Category</th>
+                    <th class="text-left">Type</th>
+                    <th class="text-left">Size</th>
+                    <th class="text-left">Uploaded</th>
+                    <th class="text-right">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr v-if="!attachments.length">
+                    <td colspan="6" class="text-center py-8">
+                        <v-icon icon="mdi-folder-open-outline" size="40" class="mb-2 d-block mx-auto" />
+
+                        <div class="text-medium-emphasis">
+                            No attachments found
+                        </div>
+                    </td>
+                </tr>
+
+                <tr v-for="file in attachments" :key="file.id">
+                    <td class="py-3">
+                        <div class="d-flex align-center ga-3">
+                            <v-avatar size="40" color="primary" variant="tonal">
+                                <v-icon :icon="file.file_type?.includes('pdf')
+                                    ? 'mdi-file-pdf-box'
+                                    : 'mdi-file-image'
+                                    " />
+                            </v-avatar>
+
+                            <div>
+                                <div class="font-weight-medium">
+                                    {{ file.title }}
+                                </div>
+
+                                <div class="text-caption text-medium-emphasis">
+                                    {{ file.file_name }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="py-3">
+                        <v-chip size="small" variant="tonal" color="secondary">
+                            {{ file.category }}
+                        </v-chip>
+                    </td>
+
+                    <td class="py-3">
+                        <span class="text-caption">
+                            {{ file.file_type }}
+                        </span>
+                    </td>
+                    <td class="py-3">
+                        <span class="text-caption">
+                            {{ formatFileSize(file.file_size) }}
+                        </span>
+                    </td>
+
+                    <td class="py-3">
+                        {{ formatDate(file.created_at) }}
+                    </td>
+
+                    <td class="text-right py-3">
+                        <v-btn color="primary" variant="tonal" prepend-icon="mdi-eye-outline" size="small"
+                            @click="viewFile(file.id)">
+                            View
+                        </v-btn>
                     </td>
                 </tr>
             </tbody>

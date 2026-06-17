@@ -6,6 +6,15 @@ definePageMeta({
     middleware: 'auth'
 })
 
+useSeoMeta({
+    title: 'Examination Input Page',
+    ogTitle: 'My Amazing Site',
+    description: 'This is my amazing site, let me tell you all about it.',
+    ogDescription: 'This is my amazing site, let me tell you all about it.',
+    ogImage: 'https://example.com/image.png',
+    twitterCard: 'summary_large_image',
+})
+
 interface Patient {
     id: string
     full_name: string
@@ -28,6 +37,12 @@ interface Prescription {
     instructions: string
 }
 
+interface ExaminationAttachment {
+    title: string
+    category: string
+    file: File | null
+}
+
 const route = useRoute()
 
 const { data, pending } = await useFetch<AppointmentResponse>(
@@ -36,8 +51,8 @@ const { data, pending } = await useFetch<AppointmentResponse>(
 
 const appointment = computed(() => data.value?.appointment)
 const patient = computed(() => appointment.value?.patients)
+const attachments = ref<ExaminationAttachment[]>([])
 
-// ── Reference data for referral modal ──────────────────────────────────────
 const { data: deptData } = await useFetch<{ departments: any[] }>('/api/departments')
 const { data: doctorsData } = await useFetch<{ doctors: any[] }>('/api/doctors')
 
@@ -89,6 +104,18 @@ function removeMedicine(index: number) {
     prescriptions.value.splice(index, 1)
 }
 
+function addAttachment() {
+    attachments.value.push({
+        title: '',
+        category: 'document',
+        file: null
+    })
+}
+
+function removeAttachment(index: number) {
+    attachments.value.splice(index, 1)
+}
+
 function getInitials(name?: string | null): string {
     if (!name) return '?'
     return name
@@ -99,7 +126,6 @@ function getInitials(name?: string | null): string {
         .toUpperCase()
 }
 
-// ── Validation: all SOAP fields are required ─────────────────────────────────
 const isFormValid = computed(() => {
     return (
         form.subjective.trim().length > 0 &&
@@ -167,7 +193,12 @@ async function saveExamination() {
     saving.value = true
     try {
         const medicalRecordId = await submitExamination()
+
         if (!medicalRecordId) return
+
+        await uploadAttachments(
+            medicalRecordId
+        )
 
         notify('Examination saved successfully')
 
@@ -232,6 +263,44 @@ async function handleReferralSubmit(payload: {
         )
     } finally {
         referring.value = false
+    }
+}
+
+async function uploadAttachments(
+    medicalRecordId: string
+) {
+    for (const attachment of attachments.value) {
+        if (!attachment.file) continue
+
+        const formData = new FormData()
+
+        formData.append(
+            'medical_record_id',
+            medicalRecordId
+        )
+
+        formData.append(
+            'title',
+            attachment.title
+        )
+
+        formData.append(
+            'category',
+            attachment.category
+        )
+
+        formData.append(
+            'file',
+            attachment.file
+        )
+
+        await $fetch(
+            '/api/doctor/medical-record-files',
+            {
+                method: 'POST',
+                body: formData
+            }
+        )
     }
 }
 </script>
@@ -403,8 +472,7 @@ async function handleReferralSubmit(payload: {
                 <v-card-item>
                     <div class="d-flex justify-space-between align-center">
                         <v-card-title>Prescriptions</v-card-title>
-                        <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-plus" density="comfortable"
-                            @click="addMedicine">
+                        <v-btn color="primary" prepend-icon="mdi-plus" @click="addMedicine">
                             Add Medicine
                         </v-btn>
                     </div>
@@ -460,6 +528,65 @@ async function handleReferralSubmit(payload: {
                             {{ prescriptions.length }} medicine(s) added
                         </span>
                     </div>
+                </v-card-text>
+            </v-card>
+        </v-col>
+
+
+        <v-col cols="12">
+            <v-card>
+                <v-card-item>
+                    <div class="d-flex justify-space-between align-center">
+                        <div>
+                            <v-card-title>
+                                Examination Attachments
+                            </v-card-title>
+
+                            <v-card-subtitle>
+                                Upload supporting documents such as laboratory results,
+                                radiology reports, images, or other clinical documents
+                            </v-card-subtitle>
+                        </div>
+
+                        <v-btn color="primary" prepend-icon="mdi-plus" @click="addAttachment">
+                            Add Attachment
+                        </v-btn>
+                    </div>
+                </v-card-item>
+
+                <v-divider />
+
+                <v-card-text>
+                    <v-alert v-if="attachments.length === 0" type="info" variant="tonal">
+                        No attachments added.
+                    </v-alert>
+
+                    <v-row v-for="(attachment, index) in attachments" :key="index" class="align-center mb-2">
+                        <v-col cols="12" md="4">
+                            <v-text-field v-model="attachment.title" label="Title"
+                                placeholder="e.g. Complete Blood Count" variant="outlined" hide-details />
+                        </v-col>
+
+                        <v-col cols="12" md="3">
+                            <v-select v-model="attachment.category" label="Category" variant="outlined" hide-details
+                                :items="[
+                                    { title: 'Laboratory', value: 'lab' },
+                                    { title: 'Radiology', value: 'radiology' },
+                                    { title: 'Image', value: 'image' },
+                                    { title: 'Document', value: 'document' }
+                                ]" />
+                        </v-col>
+
+                        <v-col cols="12" md="4">
+                            <v-file-input v-model="attachment.file" label="File" variant="outlined"
+                                prepend-icon="mdi-paperclip" hide-details accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                        </v-col>
+
+                        <v-col cols="12" md="1" class="d-flex align-center justify-center">
+                            <v-btn icon="mdi-delete-outline" color="error" variant="text" size="large"
+                                @click="removeAttachment(index)" />
+                        </v-col>
+                    </v-row>
                 </v-card-text>
             </v-card>
         </v-col>
