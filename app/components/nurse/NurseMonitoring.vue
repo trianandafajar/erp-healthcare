@@ -56,6 +56,7 @@ const priorityFilter = ref<'all' | 'High' | 'Medium' | 'Low'>('all')
 const detailDialog = ref(false)
 const selectedPatientId = ref<string | null>(null)
 const liveClock = ref(new Date())
+const realtimeStatus = ref<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting')
 
 const statusOptions = [
     { title: 'All status', value: 'all' },
@@ -148,6 +149,13 @@ const selectedPatient = computed(() =>
     patientCards.value.find((item) => item.id === selectedPatientId.value) ?? null,
 )
 
+const realtimeStatusLabel = computed(() => {
+    if (realtimeStatus.value === 'connected') return 'Connected'
+    if (realtimeStatus.value === 'disconnected') return 'Disconnected'
+    if (realtimeStatus.value === 'error') return 'Realtime error'
+    return 'Connecting'
+})
+
 const chartOptions = computed(() => ({
     chart: {
         type: 'line',
@@ -205,27 +213,108 @@ const chartSeries = computed(() => {
 
 const loading = computed(() => patientPending.value || vitalPending.value || notePending.value || procedurePending.value)
 
-let intervalId: ReturnType<typeof setInterval> | null = null
+let realtimeChannel: any = null
+let refreshTimer: ReturnType<typeof setTimeout> | null = null
+let clockTimer: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
-    intervalId = setInterval(() => {
-        refreshPatients()
-        refreshVitals()
-        refreshNotes()
-        refreshProcedures()
+    refreshAll()
+    subscribeToRealtime()
+    clockTimer = setInterval(() => {
         liveClock.value = new Date()
-    }, 15000)
+    }, 30000)
 })
 
 onBeforeUnmount(() => {
-    if (intervalId) {
-        clearInterval(intervalId)
+    if (refreshTimer) {
+        clearTimeout(refreshTimer)
+        refreshTimer = null
+    }
+
+    if (clockTimer) {
+        clearInterval(clockTimer)
+        clockTimer = null
+    }
+
+    const supabase = useSupabase()
+
+    if (supabase && realtimeChannel) {
+        supabase.removeChannel(realtimeChannel)
+        realtimeChannel = null
     }
 })
 
 function openDetail(patientId: string) {
     selectedPatientId.value = patientId
     detailDialog.value = true
+}
+
+function refreshAll() {
+    refreshPatients()
+    refreshVitals()
+    refreshNotes()
+    refreshProcedures()
+    liveClock.value = new Date()
+}
+
+function scheduleRefresh() {
+    if (refreshTimer) {
+        clearTimeout(refreshTimer)
+    }
+
+    refreshTimer = setTimeout(() => {
+        refreshAll()
+        refreshTimer = null
+    }, 200)
+}
+
+function subscribeToRealtime() {
+    const supabase = useSupabase()
+
+    if (!supabase) {
+        realtimeStatus.value = 'error'
+        return
+    }
+
+    if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel)
+    }
+
+    realtimeChannel = supabase.channel('nurse-monitoring-live')
+
+    ;['patients', 'nurse_vital_signs', 'nurse_care_notes', 'nurse_procedures'].forEach((table) => {
+        ;['INSERT', 'UPDATE', 'DELETE'].forEach((event) => {
+            realtimeChannel?.on(
+                'postgres_changes',
+                {
+                    event,
+                    schema: 'public',
+                    table,
+                },
+                scheduleRefresh,
+            )
+        })
+    })
+
+    realtimeChannel
+        ?.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                realtimeStatus.value = 'connected'
+                return
+            }
+
+            if (status === 'CHANNEL_ERROR') {
+                realtimeStatus.value = 'error'
+                return
+            }
+
+            if (status === 'TIMED_OUT') {
+                realtimeStatus.value = 'disconnected'
+                return
+            }
+
+            realtimeStatus.value = 'connecting'
+        })
 }
 
 function formatRelativeTime(dateInput: string) {
@@ -345,8 +434,12 @@ function statusBadge(status: 'Normal' | 'Need Observation' | 'Critical') {
                     Realtime patient surveillance from vital signs, care notes, and procedure updates.
                 </v-card-subtitle>
             </div>
-            <v-chip variant="tonal" color="primary" prepend-icon="mdi-clock-outline">
-                Live refresh every 15s
+            <v-chip
+                variant="tonal"
+                :color="realtimeStatus === 'connected' ? 'success' : realtimeStatus === 'error' ? 'error' : 'warning'"
+                prepend-icon="mdi-access-point"
+            >
+                Realtime {{ realtimeStatusLabel }}
             </v-chip>
         </div>
     </v-card-item>
