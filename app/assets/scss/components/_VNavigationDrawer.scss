@@ -1,3 +1,5 @@
+@use '../variables' as *;
+
 .v-navigation-drawer__scrim.fade-transition-leave-to {
   display: none;
 }

@@ -1,3 +1,5 @@
+@use '../variables' as *;
+
 .v-breadcrumbs-item--link {
   color: rgb(var(--v-theme-lightText));
 }

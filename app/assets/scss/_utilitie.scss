@@ -1,3 +1,5 @@
+@use './variables' as *;
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.25s ease;

@@ -1,3 +1,5 @@
+@use '../variables' as *;
+
 .v-list-item {
   &.v-list-item--border {
     border-color: rgb(var(--v-border-color));

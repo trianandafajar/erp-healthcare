@@ -1,3 +1,5 @@
+@use '../variables' as *;
+
 .v-input--density-default:not(.v-autocomplete--multiple),
 .v-field--variant-solo,
 .v-field--variant-filled {
