@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
 
 interface Doctor {
     id: string
@@ -34,6 +33,10 @@ const props = defineProps<{
     doctor?: Doctor | null
     availableUsers?: AvailableUser[]
     departments?: Department[]
+    onCreateUser: (payload: {
+        full_name: string
+        email: string
+    }) => Promise<{ id: string; full_name: string; email: string } | null>
 }>()
 
 const emit = defineEmits<{
@@ -54,6 +57,35 @@ const form = ref({
     consultation_fee: 0,
     is_available: true,
 })
+
+const createUserDialog = ref(false)
+const creatingUser = ref(false)
+
+const createUserForm = ref({
+    full_name: '',
+    email: '',
+})
+
+function openCreateUserDialog() {
+    createUserForm.value = { full_name: '', email: '' }
+    createUserDialog.value = true
+}
+
+async function submitCreateUser() {
+    creatingUser.value = true
+    try {
+        const newUser = await props.onCreateUser({ ...createUserForm.value })
+
+        if (newUser?.id) {
+            form.value.id = newUser.id
+            createUserDialog.value = false
+            createUserForm.value = { full_name: '', email: '' }
+        }
+        // if newUser is null (failed), keep dialog open so user can retry
+    } finally {
+        creatingUser.value = false
+    }
+}
 
 watch(
     () => props.doctor,
@@ -172,14 +204,27 @@ function onSubmit() {
                             User Account
                         </v-label>
 
-                        <v-select v-if="mode === 'add'" v-model="form.id" :items="availableUsers ?? []"
-                            item-title="full_name" item-value="id" placeholder="Select a user with doctor role"
-                            variant="outlined" density="compact" hide-details="auto"
-                            no-data-text="No available users with doctor role">
-                            <template #item="{ props: itemProps, item }">
-                                <v-list-item v-bind="itemProps" :subtitle="item.raw.email" />
-                            </template>
-                        </v-select>
+                        <template v-if="mode === 'add'">
+                            <div class="d-flex ga-2 align-start">
+                                <v-select v-model="form.id" :items="availableUsers ?? []" item-title="full_name"
+                                    item-value="id" placeholder="Select a doctor account" variant="outlined"
+                                    density="compact" hide-details="auto" no-data-text="No available doctor accounts"
+                                    class="flex-grow-1">
+                                    <template #item="{ props: itemProps, item }">
+                                        <v-list-item v-bind="itemProps" :subtitle="item.raw.email" />
+                                    </template>
+                                </v-select>
+
+                                <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus"
+                                    @click="openCreateUserDialog">
+                                    Create User
+                                </v-btn>
+                            </div>
+
+                            <div class="text-caption text-medium-emphasis mt-1">
+                                Create a new doctor account if it doesn't exist yet.
+                            </div>
+                        </template>
 
                         <v-text-field v-else :model-value="`${doctor?.full_name} (${doctor?.email})`" variant="outlined"
                             density="compact" hide-details disabled />
@@ -289,4 +334,30 @@ function onSubmit() {
             </v-btn>
         </v-card-actions>
     </v-card>
+
+    <v-dialog v-model="createUserDialog" max-width="500">
+        <v-card>
+            <v-card-title>
+                Create Doctor Account
+            </v-card-title>
+
+            <v-card-text>
+                <v-text-field v-model="createUserForm.full_name" label="Full Name" variant="outlined" />
+
+                <v-text-field v-model="createUserForm.email" label="Email" type="email" variant="outlined" />
+            </v-card-text>
+
+            <v-card-actions>
+                <v-spacer />
+
+                <v-btn variant="text" :disabled="creatingUser" @click="createUserDialog = false">
+                    Cancel
+                </v-btn>
+
+                <v-btn color="primary" :loading="creatingUser" @click="submitCreateUser">
+                    Create Account
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
