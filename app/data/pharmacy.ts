@@ -8,6 +8,10 @@ export type PrescriptionItem = {
     mrn: string
     doctorName: string
     medicines: string[]
+    dosage?: string | null
+    frequency?: string | null
+    duration?: string | null
+    instructions?: string | null
     note: string
     priority: 'Low' | 'Medium' | 'High'
     status: PrescriptionStatus

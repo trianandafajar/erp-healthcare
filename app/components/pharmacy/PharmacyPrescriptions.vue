@@ -1,79 +1,118 @@
 <script setup lang="ts">
-import usePharmacyWorkspace from '~/composables/usePharmacyWorkspace'
+import { computed, ref } from 'vue'
+import { usePharmacyPrescriptions } from '~/composables/usePharmacyPrescriptions'
+import type { PrescriptionItem } from '~/data/pharmacy'
 
-const workspace = usePharmacyWorkspace()
+const feed = usePharmacyPrescriptions()
+
 const search = ref('')
-const statusFilter = ref<'all' | 'Pending' | 'Verified' | 'Rejected' | 'Dispensed'>('all')
 const detailDialog = ref(false)
 const rejectDialog = ref(false)
-const selectedId = ref<string | null>(null)
+const selectedGroupId = ref<string | null>(null)
 const rejectNote = ref('')
+const snackbar = ref(false)
+const snackbarMsg = ref('')
+const snackbarColor = ref<'success' | 'error' | 'info'>('success')
 
-const statusOptions = [
-    { title: 'All statuses', value: 'all' },
-    { title: 'Pending', value: 'Pending' },
-    { title: 'Verified', value: 'Verified' },
-    { title: 'Rejected', value: 'Rejected' },
-    { title: 'Dispensed', value: 'Dispensed' },
-]
-
-const prescriptions = computed(() => workspace.prescriptions.value)
+const groupedPrescriptions = computed(() => feed.groupedPrescriptions.value.filter((group) => group.status === 'Pending'))
+const isLoading = computed(() => feed.pending.value && groupedPrescriptions.value.length === 0)
 
 const filteredPrescriptions = computed(() => {
     const keyword = search.value.trim().toLowerCase()
 
-    return prescriptions.value.filter((item) => {
-        const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-        const matchKeyword = !keyword ||
-            item.patientName.toLowerCase().includes(keyword) ||
-            item.mrn.toLowerCase().includes(keyword) ||
-            item.doctorName.toLowerCase().includes(keyword)
+    return groupedPrescriptions.value.filter((group) => {
+        if (!keyword) return true
 
-        return matchStatus && matchKeyword
+        return (
+            group.patientName.toLowerCase().includes(keyword) ||
+            group.mrn.toLowerCase().includes(keyword) ||
+            group.doctorName.toLowerCase().includes(keyword) ||
+            group.items.some((item) =>
+                item.medicines.join(', ').toLowerCase().includes(keyword) ||
+                (item.dosage ?? '').toLowerCase().includes(keyword) ||
+                (item.frequency ?? '').toLowerCase().includes(keyword) ||
+                (item.duration ?? '').toLowerCase().includes(keyword) ||
+                (item.instructions ?? '').toLowerCase().includes(keyword),
+            )
+        )
     })
 })
 
-const selectedPrescription = computed(() =>
-    prescriptions.value.find((item) => item.id === selectedId.value) ?? null,
+const selectedGroup = computed(() =>
+    groupedPrescriptions.value.find((group) => group.medicalRecordId === selectedGroupId.value) ?? null,
 )
 
-function openDetail(id: string) {
-    selectedId.value = id
-    detailDialog.value = true
-}
+function formatDateTime(value: string | null | undefined) {
+    if (!value) return '-'
 
-function openReject(id: string) {
-    selectedId.value = id
-    rejectNote.value = ''
-    rejectDialog.value = true
-}
-
-function verifyPrescription(id: string) {
-    workspace.updatePrescriptionStatus(id, 'Verified', 'Verified by pharmacist.')
-}
-
-function rejectPrescription() {
-    if (!selectedId.value) return
-    workspace.updatePrescriptionStatus(selectedId.value, 'Rejected', rejectNote.value.trim() || 'Returned to doctor.')
-    rejectDialog.value = false
-}
-
-function dispensePrescription(id: string) {
-    workspace.updatePrescriptionStatus(id, 'Dispensed', 'Dispensed from prescription list.')
-}
-
-function formatDateTime(value: string) {
     return new Date(value).toLocaleString('en-US', {
         dateStyle: 'medium',
         timeStyle: 'short',
     })
 }
 
-function medicineSummary(items: string[]) {
-    return items.join(', ')
+function notify(message: string, color: 'success' | 'error' | 'info' = 'success') {
+    snackbarMsg.value = message
+    snackbarColor.value = color
+    snackbar.value = true
 }
 
-function statusColor(status: string) {
+function openDetail(groupId: string) {
+    selectedGroupId.value = groupId
+    detailDialog.value = true
+}
+
+function openReject(groupId: string) {
+    selectedGroupId.value = groupId
+    rejectNote.value = ''
+    rejectDialog.value = true
+}
+
+async function updateGroupStatus(groupId: string, payload: { status: 'Verified' | 'Rejected'; pharmacistNote?: string | null; rejectionNote?: string | null }) {
+    const group = groupedPrescriptions.value.find((item) => item.medicalRecordId === groupId)
+    if (!group) return
+
+    await Promise.all(
+        group.items.map((item) =>
+            feed.setPrescriptionStatus(item.id, payload),
+        ),
+    )
+}
+
+async function verifyGroup(groupId: string) {
+    try {
+        await updateGroupStatus(groupId, {
+            status: 'Verified',
+            pharmacistNote: 'Verified by pharmacist.',
+        })
+        notify('Prescription group verified successfully', 'success')
+    } catch (error: any) {
+        notify(error?.data?.message ?? error?.message ?? 'Failed to verify prescription group', 'error')
+    }
+}
+
+async function rejectGroup() {
+    if (!selectedGroupId.value) return
+
+    try {
+        await updateGroupStatus(selectedGroupId.value, {
+            status: 'Rejected',
+            pharmacistNote: rejectNote.value.trim() || 'Returned to doctor.',
+            rejectionNote: rejectNote.value.trim() || 'Returned to doctor.',
+        })
+
+        rejectDialog.value = false
+        notify('Prescription group returned to doctor', 'info')
+    } catch (error: any) {
+        notify(error?.data?.message ?? error?.message ?? 'Failed to reject prescription group', 'error')
+    }
+}
+
+function medicineLabel(items: PrescriptionItem[]) {
+    return items.map((item) => item.medicines.join(', ')).join(' • ')
+}
+
+function statusColor(status: PrescriptionItem['status']) {
     if (status === 'Pending') return 'primary'
     if (status === 'Verified') return 'success'
     if (status === 'Dispensed') return 'info'
@@ -88,7 +127,7 @@ function statusColor(status: string) {
                 <div class="text-caption text-uppercase text-medium-emphasis">Pharmacy Operations</div>
                 <v-card-title class="text-h4">Incoming Prescriptions</v-card-title>
                 <v-card-subtitle class="mt-1">
-                    Review prescriptions that have arrived from doctors and triage them for verification.
+                    Track prescriptions by patient visit, not per medicine row.
                 </v-card-subtitle>
             </div>
         </div>
@@ -96,12 +135,16 @@ function statusColor(status: string) {
 
     <v-card elevation="0">
         <v-card-text class="d-flex flex-column ga-4">
+            <v-alert v-if="feed.error.value" type="error" variant="tonal" density="comfortable" class="mb-1">
+                {{ feed.error.value?.message || 'Unable to load prescriptions.' }}
+            </v-alert>
+
             <v-row dense>
                 <v-col cols="12" md="7">
                     <v-text-field
                         v-model="search"
-                        label="Search patient, MRN, or doctor"
-                        placeholder="Search patient, MRN, or doctor"
+                        label="Search patient, MRN, doctor, or medicine"
+                        placeholder="Search patient, MRN, doctor, or medicine"
                         prepend-inner-icon="mdi-magnify"
                         variant="outlined"
                         density="comfortable"
@@ -109,145 +152,193 @@ function statusColor(status: string) {
                         clearable
                     />
                 </v-col>
-                <v-col cols="12" md="5">
-                    <v-select
-                        v-model="statusFilter"
-                        :items="statusOptions"
-                        item-title="title"
-                        item-value="value"
-                        label="Filter by status"
-                        variant="outlined"
-                        density="comfortable"
-                        hide-details
-                    />
+                <v-col cols="12" md="5" />
+            </v-row>
+
+            <v-progress-linear v-if="feed.pending.value && groupedPrescriptions.length > 0" indeterminate color="primary" rounded />
+
+            <v-row v-if="isLoading" dense>
+                <v-col v-for="index in 4" :key="index" cols="12">
+                    <v-card elevation="0" class="pharmacy-skeleton-card">
+                        <v-card-text class="d-flex flex-column ga-4">
+                            <div class="d-flex align-start justify-space-between ga-4">
+                                <div class="flex-grow-1">
+                                    <v-skeleton-loader type="heading" width="40%" class="mb-2" />
+                                    <v-skeleton-loader type="text" width="22%" />
+                                </div>
+                                <v-skeleton-loader type="chip" width="88" />
+                            </div>
+
+                            <div>
+                                <v-skeleton-loader type="text" width="28%" class="mb-2" />
+                                <v-skeleton-loader type="text" width="78%" />
+                                <v-skeleton-loader type="text" width="46%" class="mt-2" />
+                            </div>
+
+                            <div class="d-flex flex-column ga-2">
+                                <v-skeleton-loader type="text" width="18%" />
+                                <v-skeleton-loader type="text" width="68%" />
+                                <v-skeleton-loader type="text" width="54%" />
+                            </div>
+
+                            <div class="d-flex flex-wrap justify-end ga-2">
+                                <v-skeleton-loader v-for="actionIndex in 3" :key="actionIndex" type="button" width="96" />
+                            </div>
+                        </v-card-text>
+                    </v-card>
                 </v-col>
             </v-row>
 
-            <v-table hover density="comfortable">
-                <thead class="bg-containerBg">
-                    <tr>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Doctor</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Medicines</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Requested</th>
-                        <th class="text-right text-caption font-weight-bold text-uppercase pharmacy-actions-head">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="filteredPrescriptions.length === 0">
-                        <td colspan="6" class="text-center py-8 text-medium-emphasis">
-                            No prescriptions found
-                        </td>
-                    </tr>
-                    <tr v-else v-for="item in filteredPrescriptions" :key="item.id">
-                        <td class="py-3">
-                            <div class="text-body-2 font-weight-medium">{{ item.patientName }}</div>
-                            <div class="text-caption text-medium-emphasis">{{ item.mrn }}</div>
-                        </td>
-                        <td class="py-3 text-body-2">{{ item.doctorName }}</td>
-                        <td class="py-3">
-                            <div class="text-body-2">{{ medicineSummary(item.medicines) }}</div>
-                            <div class="text-caption text-medium-emphasis">{{ item.note }}</div>
-                        </td>
-                        <td class="py-3">
-                            <v-chip size="small" variant="tonal" :color="statusColor(item.status)">
-                                {{ item.status }}
-                            </v-chip>
-                        </td>
-                        <td class="py-3 text-body-2 text-medium-emphasis">
-                            {{ formatDateTime(item.requestedAt) }}
-                        </td>
-                        <td class="py-3 text-right pharmacy-actions-cell">
-                            <div class="pharmacy-action-group">
-                                <v-btn size="small" variant="text" color="secondary" @click="openDetail(item.id)">
+            <v-row v-else dense>
+                <v-col v-for="group in filteredPrescriptions" :key="group.medicalRecordId" cols="12">
+                    <v-card elevation="0" class="pharmacy-group-card">
+                        <v-card-text class="d-flex flex-column ga-4">
+                            <div class="d-flex flex-wrap align-start justify-space-between ga-4">
+                                <div>
+                                    <div class="text-h6">{{ group.patientName }}</div>
+                                    <div class="text-body-2 text-medium-emphasis">{{ group.mrn }} • {{ group.doctorName }}</div>
+                                    <div class="text-caption text-medium-emphasis mt-1">
+                                        {{ group.items.length }} medicine(s) in this prescription
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap align-center justify-end ga-2">
+                                    <v-chip size="small" variant="tonal" :color="statusColor(group.status)">
+                                        {{ group.status }}
+                                    </v-chip>
+                                    <v-chip size="small" variant="tonal" color="secondary">
+                                        {{ group.priority }} priority
+                                    </v-chip>
+                                </div>
+                            </div>
+
+                            <div class="text-caption text-medium-emphasis">
+                                Requested {{ formatDateTime(group.requestedAt) }}
+                            </div>
+
+                            <v-table density="comfortable" class="pharmacy-group-table">
+                                <thead class="bg-containerBg">
+                                    <tr>
+                                        <th class="text-left text-caption font-weight-bold text-uppercase">Medication</th>
+                                        <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
+                                        <th class="text-left text-caption font-weight-bold text-uppercase">Frequency</th>
+                                        <th class="text-left text-caption font-weight-bold text-uppercase">Duration</th>
+                                        <th class="text-left text-caption font-weight-bold text-uppercase">Instructions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item in group.items" :key="item.id">
+                                        <td class="py-3">
+                                            <div class="text-body-2 font-weight-medium">{{ medicineLabel([item]) }}</div>
+                                        </td>
+                                        <td class="py-3 text-body-2">{{ item.dosage || '-' }}</td>
+                                        <td class="py-3 text-body-2">{{ item.frequency || '-' }}</td>
+                                        <td class="py-3 text-body-2">{{ item.duration || '-' }}</td>
+                                        <td class="py-3 text-body-2">{{ item.instructions || '-' }}</td>
+                                    </tr>
+                                </tbody>
+                            </v-table>
+
+                            <div class="d-flex flex-wrap justify-end ga-2">
+                                <v-btn size="small" variant="text" color="secondary" @click="openDetail(group.medicalRecordId)">
                                     View Detail
                                 </v-btn>
-                                <v-btn size="small" variant="text" color="success" @click="verifyPrescription(item.id)">
-                                    Verify
+                                <v-btn size="small" variant="text" color="success" @click="verifyGroup(group.medicalRecordId)">
+                                    Verify Group
                                 </v-btn>
-                                <v-btn size="small" variant="text" color="error" @click="openReject(item.id)">
-                                    Reject
-                                </v-btn>
-                                <v-btn
-                                    v-if="item.status === 'Verified'"
-                                    size="small"
-                                    variant="text"
-                                    color="primary"
-                                    @click="dispensePrescription(item.id)"
-                                >
-                                    Dispense
+                                <v-btn size="small" variant="text" color="error" @click="openReject(group.medicalRecordId)">
+                                    Reject Group
                                 </v-btn>
                             </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </v-table>
+                        </v-card-text>
+                    </v-card>
+                </v-col>
+            </v-row>
+
+            <v-card v-if="filteredPrescriptions.length === 0 && !isLoading" elevation="0">
+                <v-card-text class="py-10 text-center text-medium-emphasis">
+                    No prescriptions found
+                </v-card-text>
+            </v-card>
         </v-card-text>
     </v-card>
 
-    <v-dialog v-model="detailDialog" max-width="820">
-        <v-card v-if="selectedPrescription">
-            <v-card-title class="text-h6 d-flex align-center justify-space-between">
-                <span>Prescription Detail</span>
-                <v-chip size="small" variant="tonal" :color="statusColor(selectedPrescription.status)">
-                    {{ selectedPrescription.status }}
+    <v-dialog v-model="detailDialog" max-width="920">
+        <v-card v-if="selectedGroup" class="pharmacy-detail-shell">
+            <v-card-title class="text-h6 d-flex flex-wrap align-center justify-space-between ga-3">
+                <span>Prescription Group Detail</span>
+                <v-chip size="small" variant="tonal" :color="statusColor(selectedGroup.status)">
+                    {{ selectedGroup.status }}
                 </v-chip>
             </v-card-title>
+
             <v-card-text>
                 <v-row dense>
-                    <v-col cols="12" md="7">
-                        <div class="pharmacy-detail-box">
-                            <div class="pharmacy-detail-grid">
-                                <div>
-                                    <div class="text-caption text-medium-emphasis">Patient</div>
-                                    <div class="text-body-1 font-weight-medium">{{ selectedPrescription.patientName }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-caption text-medium-emphasis">MRN</div>
-                                    <div class="text-body-1 font-weight-medium">{{ selectedPrescription.mrn }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-caption text-medium-emphasis">Doctor</div>
-                                    <div class="text-body-1 font-weight-medium">{{ selectedPrescription.doctorName }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-caption text-medium-emphasis">Priority</div>
-                                    <div class="text-body-1 font-weight-medium">{{ selectedPrescription.priority }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-caption text-medium-emphasis">Requested At</div>
-                                    <div class="text-body-2">{{ formatDateTime(selectedPrescription.requestedAt) }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-caption text-medium-emphasis">Last Pharmacist Note</div>
-                                    <div class="text-body-2">{{ selectedPrescription.pharmacistNote || '-' }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </v-col>
                     <v-col cols="12" md="5">
                         <v-card variant="tonal" color="primary" class="h-100">
-                            <v-card-text>
-                                <div class="text-caption text-uppercase text-medium-emphasis">Medicines</div>
-                                <div class="d-flex flex-column ga-2 mt-2">
-                                    <v-chip v-for="medicine in selectedPrescription.medicines" :key="medicine" size="small" variant="flat" color="white" class="justify-start">
-                                        {{ medicine }}
-                                    </v-chip>
+                            <v-card-text class="d-flex flex-column ga-4">
+                                <div>
+                                    <div class="text-caption text-uppercase text-medium-emphasis">Patient</div>
+                                    <div class="text-h6">{{ selectedGroup.patientName }}</div>
+                                    <div class="text-body-2 text-medium-emphasis">{{ selectedGroup.mrn }}</div>
                                 </div>
-                                <div class="mt-4">
-                                    <div class="text-caption text-uppercase text-medium-emphasis">Doctor Note</div>
-                                    <div class="text-body-2 mt-1">{{ selectedPrescription.note }}</div>
+
+                                <div class="pharmacy-detail-grid">
+                                    <div>
+                                        <div class="text-caption text-medium-emphasis">Doctor</div>
+                                        <div class="text-body-2 font-weight-medium">{{ selectedGroup.doctorName }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-caption text-medium-emphasis">Priority</div>
+                                        <div class="text-body-2 font-weight-medium">{{ selectedGroup.priority }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-caption text-medium-emphasis">Requested</div>
+                                        <div class="text-body-2 font-weight-medium">{{ formatDateTime(selectedGroup.requestedAt) }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-caption text-medium-emphasis">Last Update</div>
+                                        <div class="text-body-2 font-weight-medium">{{ formatDateTime(selectedGroup.lastUpdatedAt) }}</div>
+                                    </div>
                                 </div>
-                                <div class="mt-4" v-if="selectedPrescription.rejectionNote">
-                                    <div class="text-caption text-uppercase text-medium-emphasis">Rejection Note</div>
-                                    <div class="text-body-2 mt-1">{{ selectedPrescription.rejectionNote }}</div>
+                            </v-card-text>
+                        </v-card>
+                    </v-col>
+
+                    <v-col cols="12" md="7">
+                        <v-card variant="outlined" class="h-100 pharmacy-detail-card">
+                            <v-card-text class="d-flex flex-column ga-4">
+                                <div>
+                                    <div class="text-caption text-uppercase text-medium-emphasis">Medicines</div>
+                                    <div class="text-h6">{{ selectedGroup.items.length }} item(s)</div>
                                 </div>
+
+                                <v-table density="comfortable">
+                                    <thead class="bg-containerBg">
+                                        <tr>
+                                            <th class="text-left text-caption font-weight-bold text-uppercase">Medication</th>
+                                            <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
+                                            <th class="text-left text-caption font-weight-bold text-uppercase">Frequency</th>
+                                            <th class="text-left text-caption font-weight-bold text-uppercase">Duration</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="item in selectedGroup.items" :key="item.id">
+                                            <td class="py-3">
+                                                <div class="text-body-2 font-weight-medium">{{ medicineLabel([item]) }}</div>
+                                                <div class="text-caption text-medium-emphasis">{{ item.instructions || '-' }}</div>
+                                            </td>
+                                            <td class="py-3 text-body-2">{{ item.dosage || '-' }}</td>
+                                            <td class="py-3 text-body-2">{{ item.frequency || '-' }}</td>
+                                            <td class="py-3 text-body-2">{{ item.duration || '-' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </v-table>
                             </v-card-text>
                         </v-card>
                     </v-col>
                 </v-row>
             </v-card-text>
+
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="detailDialog = false">Close</v-btn>
             </v-card-actions>
@@ -256,7 +347,7 @@ function statusColor(status: string) {
 
     <v-dialog v-model="rejectDialog" max-width="560">
         <v-card>
-            <v-card-title class="text-h6">Reject Prescription</v-card-title>
+            <v-card-title class="text-h6">Reject Prescription Group</v-card-title>
             <v-card-text>
                 <v-textarea
                     v-model="rejectNote"
@@ -269,35 +360,34 @@ function statusColor(status: string) {
             </v-card-text>
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="rejectDialog = false">Cancel</v-btn>
-                <v-btn color="error" variant="flat" @click="rejectPrescription">Reject</v-btn>
+                <v-btn color="error" variant="flat" @click="rejectGroup">Reject</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
+        {{ snackbarMsg }}
+        <template #actions>
+            <v-btn variant="text" icon="mdi-close" @click="snackbar = false" />
+        </template>
+    </v-snackbar>
 </template>
 
 <style scoped>
-.pharmacy-actions-head {
-    width: 340px;
-}
-
-.pharmacy-actions-cell {
-    min-width: 340px;
-}
-
-.pharmacy-action-group {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 4px;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-}
-
-.pharmacy-detail-box {
-    height: 100%;
+.pharmacy-group-card,
+.pharmacy-detail-card,
+.pharmacy-skeleton-card {
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 14px;
-    padding: 16px;
+    box-shadow: none;
+}
+
+.pharmacy-group-table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.pharmacy-detail-shell {
+    overflow: hidden;
 }
 
 .pharmacy-detail-grid {
@@ -307,16 +397,6 @@ function statusColor(status: string) {
 }
 
 @media (max-width: 960px) {
-    .pharmacy-actions-head,
-    .pharmacy-actions-cell {
-        width: auto;
-        min-width: 0;
-    }
-
-    .pharmacy-action-group {
-        flex-wrap: wrap;
-    }
-
     .pharmacy-detail-grid {
         grid-template-columns: 1fr;
     }
