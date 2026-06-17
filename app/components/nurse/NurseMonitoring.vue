@@ -149,13 +149,6 @@ const selectedPatient = computed(() =>
     patientCards.value.find((item) => item.id === selectedPatientId.value) ?? null,
 )
 
-const realtimeStatusLabel = computed(() => {
-    if (realtimeStatus.value === 'connected') return 'Connected'
-    if (realtimeStatus.value === 'disconnected') return 'Disconnected'
-    if (realtimeStatus.value === 'error') return 'Realtime error'
-    return 'Connecting'
-})
-
 const chartOptions = computed(() => ({
     chart: {
         type: 'line',
@@ -434,13 +427,6 @@ function statusBadge(status: 'Normal' | 'Need Observation' | 'Critical') {
                     Realtime patient surveillance from vital signs, care notes, and procedure updates.
                 </v-card-subtitle>
             </div>
-            <v-chip
-                variant="tonal"
-                :color="realtimeStatus === 'connected' ? 'success' : realtimeStatus === 'error' ? 'error' : 'warning'"
-                prepend-icon="mdi-access-point"
-            >
-                Realtime {{ realtimeStatusLabel }}
-            </v-chip>
         </div>
     </v-card-item>
 

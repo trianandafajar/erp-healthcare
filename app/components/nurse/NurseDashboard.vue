@@ -1,175 +1,372 @@
 <script setup lang="ts">
-import useNurseWorkspace from '~/composables/useNurseWorkspace'
+import NursePriorityPatients from './dashboard/NursePriorityPatients.vue'
+import NurseLatestUpdates from './dashboard/NurseLatestUpdates.vue'
 
-const workspace = useNurseWorkspace()
+type NursePatient = {
+    id: string
+    full_name: string
+    medical_record_number: string
+}
 
-const priorityPatients = computed(() => workspace.patients.value.filter(Boolean))
-const recentMonitoring = computed(() => workspace.monitoringItems.value.filter(Boolean))
+type NurseVitalRecord = {
+    id: string
+    patient_id: string
+    patient_name: string
+    medical_record_number: string
+    blood_pressure: string
+    temperature: string | number | null
+    pulse: string | number | null
+    notes: string | null
+    recorded_at: string
+}
 
-const featureCards = computed(() => [
+type NurseCareNote = {
+    id: string
+    patient_id: string
+    patient_name: string
+    medical_record_number: string
+    category: string
+    note: string
+    author_name: string
+    recorded_at: string
+}
+
+type NurseProcedure = {
+    id: string
+    patient_id: string
+    patient_name: string
+    medical_record_number: string
+    procedure_name: string
+    scheduled_at: string
+    ended_at: string | null
+    priority: 'Low' | 'Medium' | 'High'
+    status: 'Planned' | 'In Progress' | 'Completed'
+    notes: string
+    recorded_by_name: string | null
+}
+
+type DashboardSummaryCard = {
+    title: string
+    value: string
+    caption: string
+    to: string
+    color: string
+}
+
+type PatientOverviewItem = {
+    id: string
+    name: string
+    mrn: string
+    room: string
+    status: 'Stable' | 'Watch' | 'Critical'
+    lastUpdate: string
+}
+
+type UpdateItem = {
+    kind: 'Vital' | 'Note' | 'Procedure'
+    title: string
+    detail: string
+    time: string
+}
+
+const { data: patientData, pending: patientPending, refresh: refreshPatients } = useLazyFetch<{ patients: NursePatient[] }>('/api/nurse/patients')
+const { data: vitalData, pending: vitalPending, refresh: refreshVitals } = useLazyFetch<{ vitals: NurseVitalRecord[] }>('/api/nurse/vitals')
+const { data: noteData, pending: notePending, refresh: refreshNotes } = useLazyFetch<{ notes: NurseCareNote[] }>('/api/nurse/care-notes')
+const { data: procedureData, pending: procedurePending, refresh: refreshProcedures } = useLazyFetch<{ procedures: NurseProcedure[] }>('/api/nurse/procedures')
+
+const realtimeStatus = ref<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting')
+let refreshTimer: ReturnType<typeof setTimeout> | null = null
+let realtimeChannel: any = null
+
+const latestVitals = computed(() => vitalData.value?.vitals ?? [])
+const latestNotes = computed(() => noteData.value?.notes ?? [])
+const latestProcedures = computed(() => procedureData.value?.procedures ?? [])
+
+const patientCount = computed(() => patientData.value?.patients?.length ?? 0)
+const vitalCount = computed(() => latestVitals.value.length)
+const noteCount = computed(() => latestNotes.value.length)
+const procedureCount = computed(() => latestProcedures.value.length)
+
+const patientOverview = computed<PatientOverviewItem[]>(() => {
+    const groups = new Map<string, NurseVitalRecord[]>()
+
+    for (const vital of latestVitals.value) {
+        const list = groups.get(vital.patient_id) ?? []
+        list.push(vital)
+        groups.set(vital.patient_id, list)
+    }
+
+    return Array.from(groups.entries())
+        .map(([patientId, history]) => {
+            const latestVital = history[0]
+            const latestNote = latestNotes.value.find((item) => item.patient_id === patientId) ?? null
+            const latestProcedure = latestProcedures.value.find((item) => item.patient_id === patientId) ?? null
+
+            return {
+                id: patientId,
+                name: latestVital?.patient_name ?? '-',
+                mrn: latestVital?.medical_record_number ?? '-',
+                room: deriveRoom(latestVital),
+                status: deriveStatus(latestVital),
+                lastUpdate: latestTimestamp([latestVital?.recorded_at, latestNote?.recorded_at, latestProcedure?.scheduled_at]),
+            }
+        })
+        .sort((left, right) => new Date(right.lastUpdate).getTime() - new Date(left.lastUpdate).getTime())
+})
+
+const statusSummary = computed(() => {
+    return patientOverview.value.reduce(
+        (accumulator, patient) => {
+            accumulator[patient.status] += 1
+            return accumulator
+        },
+        {
+            Stable: 0,
+            Watch: 0,
+            Critical: 0,
+        },
+    )
+})
+
+const recentActivity = computed<UpdateItem[]>(() => {
+    const vitals = latestVitals.value.slice(0, 3).map((item) => ({
+        kind: 'Vital' as const,
+        title: item.patient_name,
+        detail: `${item.blood_pressure} • ${item.temperature ?? '-'} °C • HR ${item.pulse ?? '-'}`,
+        time: item.recorded_at,
+    }))
+
+    const notes = latestNotes.value.slice(0, 3).map((item) => ({
+        kind: 'Note' as const,
+        title: item.patient_name,
+        detail: item.note,
+        time: item.recorded_at,
+    }))
+
+    const procedures = latestProcedures.value.slice(0, 3).map((item) => ({
+        kind: 'Procedure' as const,
+        title: item.patient_name,
+        detail: `${item.procedure_name} • ${item.status}`,
+        time: item.scheduled_at,
+    }))
+
+    return [...vitals, ...notes, ...procedures]
+        .sort((left, right) => new Date(right.time).getTime() - new Date(left.time).getTime())
+        .slice(0, 6)
+})
+
+const isLoading = computed(() => patientPending.value || vitalPending.value || notePending.value || procedurePending.value)
+
+const summaryCards = computed<DashboardSummaryCard[]>(() => [
     {
         title: 'Patients',
-        value: workspace.summary.value.patientCount.toString(),
+        value: patientCount.value.toString(),
         caption: 'Active patients under care',
         to: '/nurse/patients',
         color: 'primary',
     },
     {
         title: 'Vital Signs',
-        value: workspace.summary.value.vitalCount.toString(),
-        caption: 'Blood pressure, temperature, weight, height, and pulse',
+        value: vitalCount.value.toString(),
+        caption: 'Live vital sign records',
         to: '/nurse/vitals',
         color: 'error',
     },
     {
         title: 'Care Notes',
-        value: workspace.summary.value.noteCount.toString(),
-        caption: 'Progress notes and shift observations',
+        value: noteCount.value.toString(),
+        caption: 'Progress notes and observations',
         to: '/nurse/care-notes',
         color: 'secondary',
     },
     {
         title: 'Procedure Schedule',
-        value: workspace.summary.value.procedureCount.toString(),
-        caption: 'Planned procedures and priorities',
+        value: procedureCount.value.toString(),
+        caption: 'Planned and ongoing procedures',
         to: '/nurse/procedures',
         color: 'info',
     },
     {
         title: 'Patient Monitoring',
-        value: workspace.summary.value.monitoringCount.toString(),
-        caption: `${workspace.summary.value.urgentCount} need immediate attention`,
+        value: statusSummary.value.Critical.toString(),
+        caption: `${statusSummary.value.Watch} need closer observation`,
         to: '/nurse/monitoring',
         color: 'warning',
     },
+    {
+        title: 'Stable Patients',
+        value: statusSummary.value.Stable.toString(),
+        caption: 'Patients currently stable',
+        to: '/nurse/monitoring',
+        color: 'success',
+    },
+    {
+        title: 'Observation',
+        value: statusSummary.value.Watch.toString(),
+        caption: 'Patients needing close observation',
+        to: '/nurse/monitoring',
+        color: 'warning',
+    },
+    {
+        title: 'Critical',
+        value: statusSummary.value.Critical.toString(),
+        caption: 'Patients needing immediate attention',
+        to: '/nurse/monitoring',
+        color: 'error',
+    },
 ])
 
-function formatRelativeTime(dateStr: string) {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / (1000 * 60))
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+const summaryPendingMap = computed<Record<string, boolean>>(() => ({
+    Patients: patientPending.value,
+    'Vital Signs': vitalPending.value,
+    'Care Notes': notePending.value,
+    'Procedure Schedule': procedurePending.value,
+    'Patient Monitoring': vitalPending.value || notePending.value || procedurePending.value,
+    'Stable Patients': vitalPending.value,
+    Observation: vitalPending.value,
+    Critical: vitalPending.value,
+}))
 
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins} minutes ago`
-    if (diffHours < 24) return `${diffHours} hours ago`
+onMounted(() => {
+    refreshAll()
+    subscribeRealtime()
+})
 
-    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+onBeforeUnmount(() => {
+    if (refreshTimer) {
+        clearTimeout(refreshTimer)
+        refreshTimer = null
+    }
+
+    const supabase = useSupabase()
+
+    if (supabase && realtimeChannel) {
+        supabase.removeChannel(realtimeChannel)
+        realtimeChannel = null
+    }
+})
+
+function refreshAll() {
+    refreshPatients()
+    refreshVitals()
+    refreshNotes()
+    refreshProcedures()
+}
+
+function scheduleRefresh() {
+    if (refreshTimer) {
+        clearTimeout(refreshTimer)
+    }
+
+    refreshTimer = setTimeout(() => {
+        refreshAll()
+        refreshTimer = null
+    }, 200)
+}
+
+function subscribeRealtime() {
+    const supabase = useSupabase()
+
+    if (!supabase) {
+        realtimeStatus.value = 'error'
+        return
+    }
+
+    if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel)
+    }
+
+    realtimeChannel = supabase.channel('nurse-dashboard-live')
+
+    ;['patients', 'nurse_vital_signs', 'nurse_care_notes', 'nurse_procedures'].forEach((table) => {
+        ;['INSERT', 'UPDATE', 'DELETE'].forEach((event) => {
+            realtimeChannel?.on(
+                'postgres_changes',
+                {
+                    event,
+                    schema: 'public',
+                    table,
+                },
+                scheduleRefresh,
+            )
+        })
+    })
+
+    realtimeChannel?.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+            realtimeStatus.value = 'connected'
+            return
+        }
+
+        if (status === 'CHANNEL_ERROR') {
+            realtimeStatus.value = 'error'
+            return
+        }
+
+        if (status === 'TIMED_OUT') {
+            realtimeStatus.value = 'disconnected'
+            return
+        }
+
+        realtimeStatus.value = 'connecting'
+    })
+}
+
+function latestTimestamp(values: Array<string | null | undefined>) {
+    return values
+        .filter(Boolean)
+        .sort((left, right) => new Date(right as string).getTime() - new Date(left as string).getTime())[0] as string
+}
+
+function parseBloodPressure(value: string) {
+    const [systolicRaw, diastolicRaw] = value.split('/').map((part) => Number(part))
+
+    if (!Number.isFinite(systolicRaw) || !Number.isFinite(diastolicRaw)) {
+        return null
+    }
+
+    return {
+        systolic: systolicRaw,
+        diastolic: diastolicRaw,
+    }
+}
+
+function deriveStatus(vital?: NurseVitalRecord) {
+    if (!vital) return 'Stable'
+
+    const pulse = Number(vital.pulse ?? 0)
+    const temperature = Number(vital.temperature ?? 0)
+    const pressure = parseBloodPressure(vital.blood_pressure)
+    const systolic = pressure?.systolic ?? 0
+
+    if (pulse > 120 || pulse < 50 || temperature >= 39 || systolic < 90) return 'Critical'
+    if (pulse >= 101 || temperature >= 37.5 || systolic < 110) return 'Watch'
+    return 'Stable'
+}
+
+function deriveRoom(vital?: NurseVitalRecord) {
+    const status = deriveStatus(vital)
+
+    if (status === 'Critical') return 'ICU'
+    if (status === 'Watch') return 'Observation'
+    return 'Ward'
 }
 </script>
 
 <template>
-    <v-row>
-        <v-col cols="12">
-            <v-card elevation="0" class="mb-6">
-                <v-card-text class="py-6">
-                    <div class="d-flex flex-wrap align-center justify-space-between ga-4">
-                        <div>
-                            <div class="text-caption text-medium-emphasis text-uppercase">Nurse Dashboard</div>
-                            <h3 class="text-h3 mb-2">Daily care workflow</h3>
-                            <p class="text-body-1 text-medium-emphasis mb-0">
-                                Focus on patients, vital signs, care notes, procedure schedules, and monitoring.
-                            </p>
-                        </div>
-                        <div class="d-flex ga-3 flex-wrap">
-                            <v-btn color="primary" variant="flat" to="/nurse/vitals">Add Vitals</v-btn>
-                            <v-btn color="secondary" variant="tonal" to="/nurse/care-notes">Add Note</v-btn>
-                        </div>
-                    </div>
-                </v-card-text>
-            </v-card>
-        </v-col>
-    </v-row>
+    <NurseDashboardHero />
+    <NurseDashboardSummaryCards :cards="summaryCards" :pending-map="summaryPendingMap" />
 
-    <v-row>
-        <v-col v-for="card in featureCards" :key="card.title" cols="12" sm="6" lg="4">
-            <v-card elevation="0" :to="card.to" class="h-100">
-                <v-card-text class="d-flex flex-column ga-2">
-                    <div class="text-caption text-medium-emphasis text-uppercase">{{ card.title }}</div>
-                    <div class="text-h3 font-weight-bold">{{ card.value }}</div>
-                    <div class="text-body-2 text-medium-emphasis">{{ card.caption }}</div>
-                </v-card-text>
-            </v-card>
-        </v-col>
-    </v-row>
+    <NurseDashboardChart :vitals="latestVitals" :loading="isLoading" />
 
     <v-row class="mt-4">
         <v-col cols="12" lg="7">
-            <v-card elevation="0">
-                <v-card-item class="pb-2">
-                    <v-card-title class="text-h5">Priority Patients</v-card-title>
-                    <v-card-subtitle>Patients currently under close observation</v-card-subtitle>
-                </v-card-item>
-
-                <v-divider />
-
-                <v-table hover density="comfortable">
-                    <thead class="bg-containerBg">
-                        <tr>
-                            <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                            <th class="text-left text-caption font-weight-bold text-uppercase">Room</th>
-                            <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                            <th class="text-right text-caption font-weight-bold text-uppercase">Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="patient in priorityPatients" :key="patient.id">
-                            <td class="py-3">
-                                <div class="text-body-2 font-weight-medium">{{ patient.name }}</div>
-                                <div class="text-caption text-medium-emphasis">{{ patient.mrn }}</div>
-                            </td>
-                            <td class="py-3">{{ patient.department }} - {{ patient.room }}</td>
-                            <td class="py-3">
-                                <v-chip size="small" variant="tonal" :color="patient.status === 'critical' ? 'error' : patient.status === 'watch' ? 'warning' : 'success'">
-                                    {{ patient.status }}
-                                </v-chip>
-                            </td>
-                            <td class="py-3 text-right text-caption text-medium-emphasis">
-                                {{ formatRelativeTime(patient.lastUpdated) }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </v-table>
-            </v-card>
+            <nurse-priority-patients :patients="patientOverview" :loading="isLoading" />
         </v-col>
 
         <v-col cols="12" lg="5">
-            <v-card elevation="0" class="mb-4">
-                <v-card-item class="pb-2">
-                    <v-card-title class="text-h5">Today's Tasks</v-card-title>
-                    <v-card-subtitle>Shift checklist</v-card-subtitle>
-                </v-card-item>
-
-                <v-divider />
-
-                <v-card-text class="d-flex flex-column ga-3">
-                    <v-chip v-for="task in ['Patient list', 'Vital sign entry', 'Care notes', 'Procedure schedule', 'Patient monitoring']" :key="task" variant="tonal" color="primary" label>
-                        {{ task }}
-                    </v-chip>
-                </v-card-text>
-            </v-card>
-
-            <v-card elevation="0">
-                <v-card-item class="pb-2">
-                    <v-card-title class="text-h5">Latest Updates</v-card-title>
-                    <v-card-subtitle>Recent activity in the care area</v-card-subtitle>
-                </v-card-item>
-
-                <v-divider />
-
-                <v-card-text class="d-flex flex-column ga-4">
-                    <div v-for="item in recentMonitoring" :key="item.id" class="d-flex align-center justify-space-between ga-3">
-                        <div>
-                            <div class="text-body-2 font-weight-medium">{{ item.patientName }}</div>
-                            <div class="text-caption text-medium-emphasis">{{ item.observation }}</div>
-                        </div>
-                        <v-chip size="small" variant="tonal" :color="item.status === 'Urgent' ? 'error' : item.status === 'Observe' ? 'warning' : 'success'">
-                            {{ item.status }}
-                        </v-chip>
-                    </div>
-                </v-card-text>
-            </v-card>
+            <NurseLatestUpdates :items="recentActivity" :loading="isLoading" />
         </v-col>
     </v-row>
+
 </template>
