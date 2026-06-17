@@ -8,8 +8,10 @@ const props = defineProps<{
 
 const workspace = usePharmacyWorkspace()
 const search = ref('')
+const currentPage = ref(1)
 const detailDialog = ref(false)
 const selectedId = ref<string | null>(null)
+const itemsPerPage = 8
 
 function medicineLabel(item: { medicineName: string; dosage?: string | null }) {
     return item.dosage?.trim() ? `${item.medicineName} ${item.dosage}` : item.medicineName
@@ -37,15 +39,24 @@ const filteredMovements = computed(() => {
     })
 })
 
-const selectedMovement = computed(() => filteredMovements.value.find((item) => item.id === selectedId.value) ?? movements.value.find((item) => item.id === selectedId.value) ?? null)
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredMovements.value.length / itemsPerPage)))
+const safeCurrentPage = computed(() => Math.min(currentPage.value, totalPages.value))
 
-const movementCount = computed(() => filteredMovements.value.length)
-const uniqueMedicineCount = computed(() => new Set(filteredMovements.value.map((item) => medicineLabel(item))).size)
+const paginatedMovements = computed(() => {
+    const start = (safeCurrentPage.value - 1) * itemsPerPage
+    return filteredMovements.value.slice(start, start + itemsPerPage)
+})
+
+const selectedMovement = computed(() => filteredMovements.value.find((item) => item.id === selectedId.value) ?? movements.value.find((item) => item.id === selectedId.value) ?? null)
 
 function openDetail(item: StockMovementItem) {
     selectedId.value = item.id
     detailDialog.value = true
 }
+
+watch(search, () => {
+    currentPage.value = 1
+})
 
 function formatDateTime(value: string) {
     return new Date(value).toLocaleString('en-US', {
@@ -96,15 +107,6 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                     hide-details
                     class="pharmacy-log-search"
                 />
-
-                <div class="d-flex flex-wrap ga-2">
-                    <v-chip color="primary" variant="tonal" size="small">
-                        {{ movementCount }} logs
-                    </v-chip>
-                    <v-chip color="secondary" variant="tonal" size="small">
-                        {{ uniqueMedicineCount }} medicines
-                    </v-chip>
-                </div>
             </div>
 
             <v-table hover density="comfortable" class="pharmacy-log-table">
@@ -127,7 +129,7 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                     </tr>
                     <tr
                         v-else
-                        v-for="movement in filteredMovements"
+                        v-for="movement in paginatedMovements"
                         :key="movement.id"
                         class="pharmacy-log-row"
                         @click="openDetail(movement)"
@@ -170,6 +172,20 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                     </tr>
                 </tbody>
             </v-table>
+
+            <div v-if="filteredMovements.length > itemsPerPage" class="d-flex flex-wrap align-center justify-space-between ga-3 pt-2">
+                <div class="text-body-2 text-medium-emphasis">
+                    Showing {{ Math.min((safeCurrentPage - 1) * itemsPerPage + 1, filteredMovements.length) }}-{{ Math.min(safeCurrentPage * itemsPerPage, filteredMovements.length) }} of {{ filteredMovements.length }} logs
+                </div>
+                <v-pagination
+                    v-model="currentPage"
+                    :length="totalPages"
+                    :total-visible="7"
+                    density="compact"
+                    rounded="circle"
+                    show-first-last-page
+                />
+            </div>
         </v-card-text>
     </v-card>
 
