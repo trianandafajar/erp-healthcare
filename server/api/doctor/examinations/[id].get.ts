@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
       status,
       chief_complaint,
       notes,
+      doctor_id,
 
       patients (
         id,

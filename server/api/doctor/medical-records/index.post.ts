@@ -6,14 +6,11 @@ export default defineEventHandler(async (event) => {
     blood_pressure,
     temperature,
     heart_rate,
-    respiratory_rate,
     weight,
     height,
-    oxygen_saturation,
 
     subjective,
     objective,
-    assessment,
     treatment_plan,
 
     diagnosis,
@@ -38,10 +35,7 @@ export default defineEventHandler(async (event) => {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    throw createError({
-      statusCode: 401,
-      message: 'Unauthorized'
-    })
+    throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 
   const { data: doctor, error: doctorError } = await admin
@@ -51,12 +45,8 @@ export default defineEventHandler(async (event) => {
     .single()
 
   if (doctorError || !doctor) {
-    throw createError({
-      statusCode: 404,
-      message: 'Doctor profile not found'
-    })
+    throw createError({ statusCode: 404, message: 'Doctor profile not found' })
   }
-
 
   const { data: medicalRecord, error: medicalRecordError } = await admin
     .from('medical_records')
@@ -68,14 +58,11 @@ export default defineEventHandler(async (event) => {
       blood_pressure,
       temperature,
       heart_rate,
-      respiratory_rate,
       weight,
       height,
-      oxygen_saturation,
 
       subjective,
       objective,
-      assessment,
       treatment_plan,
 
       diagnosis,
@@ -86,19 +73,14 @@ export default defineEventHandler(async (event) => {
     .single()
 
   if (medicalRecordError) {
-    throw createError({
-      statusCode: 400,
-      message: medicalRecordError.message
-    })
+    throw createError({ statusCode: 400, message: medicalRecordError.message })
   }
 
   if (Array.isArray(prescriptions) && prescriptions.length > 0) {
     const prescriptionRows = prescriptions.map((item: any) => ({
       medical_record_id: medicalRecord.id,
-
       patient_id,
       doctor_id: doctor.id,
-
       medication_name: item.medication_name,
       dosage: item.dosage,
       frequency: item.frequency,
@@ -111,18 +93,13 @@ export default defineEventHandler(async (event) => {
       .insert(prescriptionRows)
 
     if (prescriptionError) {
-      throw createError({
-        statusCode: 400,
-        message: prescriptionError.message
-      })
+      throw createError({ statusCode: 400, message: prescriptionError.message })
     }
   }
 
   await admin
     .from('appointments')
-    .update({
-      status: 'done'
-    })
+    .update({ status: 'done' })
     .eq('id', appointment_id)
 
   await admin.rpc('log_activity', {
@@ -131,10 +108,7 @@ export default defineEventHandler(async (event) => {
     p_module: 'medical_records',
     p_entity_id: medicalRecord.id,
     p_description: `Created medical record for patient ${patient_id}`,
-    p_metadata: {
-      medical_record_id: medicalRecord.id,
-      appointment_id
-    }
+    p_metadata: { medical_record_id: medicalRecord.id, appointment_id }
   })
 
   return {

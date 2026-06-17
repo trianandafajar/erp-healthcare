@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ReferralModal from '~/components/doctor/referal/ReferralModal.vue'
+
 definePageMeta({
     layout: 'doctor',
     middleware: 'auth'
@@ -13,6 +15,7 @@ interface Patient {
 
 interface AppointmentResponse {
     appointment: {
+        doctor_id: string
         patients: Patient | null
     } | null
 }
@@ -33,6 +36,19 @@ const { data, pending } = await useFetch<AppointmentResponse>(
 
 const appointment = computed(() => data.value?.appointment)
 const patient = computed(() => appointment.value?.patients)
+
+// ── Reference data for referral modal ──────────────────────────────────────
+const { data: deptData } = await useFetch<{ departments: any[] }>('/api/departments')
+const { data: doctorsData } = await useFetch<{ doctors: any[] }>('/api/doctors')
+
+const departments = computed(() => deptData.value?.departments ?? [])
+const doctors = computed(() =>
+    (doctorsData.value?.doctors ?? []).map((d: any) => ({
+        id: d.id,
+        full_name: d.full_name,
+        department_id: d.department?.id ?? null
+    }))
+)
 
 const form = reactive({
     blood_pressure: '' as string,
@@ -83,7 +99,19 @@ function getInitials(name?: string | null): string {
         .toUpperCase()
 }
 
+// ── Validation: all SOAP fields are required ─────────────────────────────────
+const isFormValid = computed(() => {
+    return (
+        form.subjective.trim().length > 0 &&
+        form.objective.trim().length > 0 &&
+        form.diagnosis.trim().length > 0 &&
+        form.treatment_plan.trim().length > 0
+    )
+})
+
 const saving = ref(false)
+const referring = ref(false)
+const referralDialog = ref(false)
 
 const snackbar = ref(false)
 const snackbarMsg = ref('')
@@ -95,11 +123,9 @@ function notify(msg: string, color = 'success') {
     snackbar.value = true
 }
 
-async function saveExamination() {
+async function submitExamination(): Promise<string | null> {
     try {
-        saving.value = true
-
-        await $fetch('/api/doctor/medical-records', {
+        const res: any = await $fetch('/api/doctor/medical-records', {
             method: 'POST',
             body: {
                 appointment_id: route.params.id,
@@ -122,24 +148,90 @@ async function saveExamination() {
             }
         })
 
+        return res?.medical_record?.id ?? null
+    } catch (error: any) {
+        notify(
+            error?.data?.message ?? error?.message ?? 'Failed to save examination',
+            'error'
+        )
+        return null
+    }
+}
+
+async function saveExamination() {
+    if (!isFormValid.value) {
+        notify('Please complete all SOAP fields before saving', 'error')
+        return
+    }
+
+    saving.value = true
+    try {
+        const medicalRecordId = await submitExamination()
+        if (!medicalRecordId) return
+
         notify('Examination saved successfully')
 
         setTimeout(() => {
             navigateTo('/doctor/medical-records')
         }, 1000)
+    } finally {
+        saving.value = false
     }
-    catch (error: any) {
-        console.error(error)
+}
 
+function openReferral() {
+    if (!isFormValid.value) {
+        notify('Please complete all SOAP fields before referring', 'error')
+        return
+    }
+    referralDialog.value = true
+}
+
+async function handleReferralSubmit(payload: {
+    to_department_id: string
+    to_doctor_id: string | null
+    reason: string
+    notes: string
+}) {
+    referring.value = true
+    try {
+        const medicalRecordId = await submitExamination()
+        if (!medicalRecordId) return
+
+        console.log('referral payload check:', {
+            medical_record_id: medicalRecordId,
+            patient_id: patient.value?.id,
+            from_doctor_id: appointment.value?.doctor_id,
+            to_department_id: payload.to_department_id,
+            reason: payload.reason,
+        })
+
+        await $fetch('/api/doctor/referrals', {
+            method: 'POST',
+            body: {
+                medical_record_id: medicalRecordId,
+                patient_id: patient.value?.id,
+                from_doctor_id: appointment.value?.doctor_id,
+                to_department_id: payload.to_department_id,
+                to_doctor_id: payload.to_doctor_id,
+                reason: payload.reason,
+                notes: payload.notes,
+            }
+        })
+
+        referralDialog.value = false
+        notify('Examination saved and patient referred successfully')
+
+        setTimeout(() => {
+            navigateTo('/doctor/medical-records')
+        }, 1000)
+    } catch (error: any) {
         notify(
-            error?.data?.message ??
-            error?.message ??
-            'Failed to save examination',
+            error?.data?.message ?? error?.message ?? 'Failed to refer patient',
             'error'
         )
-    }
-    finally {
-        saving.value = false
+    } finally {
+        referring.value = false
     }
 }
 </script>
@@ -259,7 +351,7 @@ async function saveExamination() {
                     <div class="d-flex justify-space-between align-center">
                         <v-card-title>Medical Assessment (SOAP)</v-card-title>
                         <v-chip size="small" variant="tonal" color="secondary">
-                            SOAP format
+                            All fields required
                         </v-chip>
                     </div>
                 </v-card-item>
@@ -269,19 +361,19 @@ async function saveExamination() {
                 <v-card-text>
                     <v-row>
                         <v-col cols="12">
-                            <v-textarea v-model="form.subjective" label="Subjective"
+                            <v-textarea v-model="form.subjective" label="Subjective *"
                                 placeholder="Patient's reported symptoms and complaints..." rows="3"
                                 density="comfortable" variant="outlined" />
                         </v-col>
 
                         <v-col cols="12">
-                            <v-textarea v-model="form.objective" label="Objective"
+                            <v-textarea v-model="form.objective" label="Objective *"
                                 placeholder="Observable, measurable findings..." rows="3" density="comfortable"
                                 variant="outlined" />
                         </v-col>
 
                         <v-col cols="12" md="9">
-                            <v-textarea v-model="form.diagnosis" label="Diagnosis" placeholder="Clinical diagnosis..."
+                            <v-textarea v-model="form.diagnosis" label="Diagnosis *" placeholder="Clinical diagnosis..."
                                 rows="3" density="comfortable" variant="outlined" />
                         </v-col>
 
@@ -291,7 +383,7 @@ async function saveExamination() {
                         </v-col>
 
                         <v-col cols="12">
-                            <v-textarea v-model="form.treatment_plan" label="Treatment Plan"
+                            <v-textarea v-model="form.treatment_plan" label="Treatment Plan *"
                                 placeholder="Planned treatment and interventions..." rows="3" density="comfortable"
                                 variant="outlined" />
                         </v-col>
@@ -371,18 +463,27 @@ async function saveExamination() {
                 </v-card-text>
             </v-card>
         </v-col>
+
         <v-col cols="12">
             <div class="d-flex justify-end ga-3">
                 <v-btn variant="outlined">
                     Cancel
                 </v-btn>
+                <v-btn color="secondary" variant="tonal" prepend-icon="mdi-share-variant-outline"
+                    :disabled="!isFormValid" @click="openReferral">
+                    Refer Patient
+                </v-btn>
                 <v-btn color="primary" variant="flat" prepend-icon="mdi-content-save" :loading="saving"
-                    @click="saveExamination">
+                    :disabled="!isFormValid" @click="saveExamination">
                     Save Examination
                 </v-btn>
             </div>
         </v-col>
     </v-row>
+
+    <ReferralModal v-model="referralDialog" :departments="departments" :doctors="doctors" :saving="referring"
+        @submit="handleReferralSubmit" />
+
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" :timeout="3000">
         {{ snackbarMsg }}
 
