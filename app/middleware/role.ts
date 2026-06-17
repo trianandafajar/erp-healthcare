@@ -29,6 +29,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         specialist: '/doctor/dashboard',
         pharmacy: '/pharmacy/dashboard',
         nurse: '/nurse/dashboard',
+        receptionist: '/receptionist/dashboard',
         patient: '/patient/dashboard',
     }
 

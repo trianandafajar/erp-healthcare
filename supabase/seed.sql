@@ -8,6 +8,7 @@ VALUES
   ('doctor', 'Doctor'),
   ('specialist', 'Specialist'),
   ('pharmacy', 'Pharmacist'),
+  ('receptionist', 'Receptionist'),
   ('staff', 'Staff'),
   ('patient', 'Patient')
 ON CONFLICT (name) DO NOTHING;
@@ -141,6 +142,28 @@ BEGIN
 
     perm_names := ARRAY[
         'patient.view'
+    ];
+
+    FOREACH perm_name IN ARRAY perm_names LOOP
+        SELECT id INTO v_perm_id
+        FROM public.permissions
+        WHERE name = perm_name;
+
+        INSERT INTO public.role_permissions(role_id, permission_id)
+        VALUES (v_role_id, v_perm_id)
+        ON CONFLICT DO NOTHING;
+    END LOOP;
+
+    SELECT id INTO v_role_id
+    FROM public.roles
+    WHERE name = 'receptionist';
+
+    perm_names := ARRAY[
+        'patient.view',
+        'patient.create',
+        'patient.edit',
+        'doctor.view',
+        'department.view'
     ];
 
     FOREACH perm_name IN ARRAY perm_names LOOP

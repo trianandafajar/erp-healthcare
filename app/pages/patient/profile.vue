@@ -10,7 +10,6 @@ useSeoMeta({
 })
 
 const { profile } = usePatientPortalMock()
-const search = ref('')
 
 const profileItems = [
     { label: 'Full Name', value: profile.fullName },
@@ -22,13 +21,6 @@ const profileItems = [
     { label: 'Blood Type', value: profile.bloodType },
     { label: 'Address', value: profile.address },
 ]
-
-const filteredProfileItems = computed(() =>
-    profileItems.filter((item) => {
-        const keyword = search.value.toLowerCase()
-        return item.label.toLowerCase().includes(keyword) || item.value.toLowerCase().includes(keyword)
-    })
-)
 </script>
 
 <template>
@@ -37,9 +29,6 @@ const filteredProfileItems = computed(() =>
             <h2 class="text-h3 mb-1">My Profile</h2>
             <p class="text-medium-emphasis mb-0">Review your account and patient information in one place.</p>
         </div>
-        <v-btn color="primary" prepend-icon="mdi-account-edit-outline">
-            Edit Profile
-        </v-btn>
     </div>
 
     <v-row>
@@ -58,20 +47,12 @@ const filteredProfileItems = computed(() =>
 
         <v-col cols="12" lg="8">
             <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Personal Information">
-                <div class="px-4 pt-3">
-                    <v-text-field v-model="search" placeholder="Search profile information"
-                        prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
-                        style="max-width: 340px" />
-                </div>
                 <v-row class="px-4 py-2">
-                    <v-col v-for="item in filteredProfileItems" :key="item.label" cols="12" sm="6">
+                    <v-col v-for="item in profileItems" :key="item.label" cols="12" sm="6">
                         <div class="py-3">
                             <div class="text-caption text-medium-emphasis">{{ item.label }}</div>
                             <div class="text-body-1 font-weight-medium mt-1">{{ item.value }}</div>
                         </div>
-                    </v-col>
-                    <v-col v-if="filteredProfileItems.length === 0" cols="12">
-                        <div class="py-8 text-center text-medium-emphasis">No profile information found.</div>
                     </v-col>
                 </v-row>
             </UiTitleCard>

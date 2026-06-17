@@ -56,6 +56,7 @@ async function validate() {
             specialist: '/doctor/dashboard',
             pharmacy: '/pharmacy/dashboard',
             nurse: '/nurse/dashboard',
+            receptionist: '/receptionist/dashboard',
             patient: '/patient/dashboard',
         }
 
