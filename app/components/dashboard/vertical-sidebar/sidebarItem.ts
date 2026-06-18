@@ -9,7 +9,9 @@ import {
   UsergroupAddOutlined,
   SolutionOutlined,
   HistoryOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons-vue';
+
 export interface menu {
   header?: string;
   title?: string;
@@ -78,6 +80,16 @@ const sidebarItem: menu[] = [
     icon: KeyOutlined,
     to: '/permissions'
   },
+
+  {
+    header: 'Reports'
+  },
+  {
+    title: 'Reports',
+    icon: BarChartOutlined,
+    to: '/reports'
+  },
+
   {
     header: 'Log'
   },
