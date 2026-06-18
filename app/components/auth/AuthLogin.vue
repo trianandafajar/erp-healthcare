@@ -42,13 +42,37 @@ async function validate() {
 
         const { data: { user } } = await supabase.auth.getUser()
 
-        const { data: roleData } = await supabase
+        const { data: roleData, error: roleError } = await supabase
             .from('user_roles')
-            .select('roles(name)')
+            .select(`
+                roles (
+                    name,
+                    label,
+                    role_permissions (
+                        permissions (
+                            name,
+                            module,
+                            category
+                        )
+                    )
+                )
+            `)
             .eq('user_id', user!.id)
-            .returns<any[]>()
+            .single()
 
-        const role = (roleData as any)?.[0]?.roles?.name
+        if (roleError) throw roleError
+
+        console.log(roleData)
+
+        const role = (roleData as any)?.roles?.name
+
+        const permissions: string[] = (roleData as any)?.roles?.role_permissions
+            ?.map((rp: any) => rp.permissions?.name)
+            .filter(Boolean) ?? []
+
+        // simpan ke Pinia store
+        const authStore = useAuthStore()
+        authStore.setUser({ user, role, permissions })
 
         const redirectMap: Record<string, string> = {
             admin: '/dashboard',

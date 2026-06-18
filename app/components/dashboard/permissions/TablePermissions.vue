@@ -8,6 +8,7 @@ interface Permission {
     name: string
     label: string
     module: string
+    category: string
     created_at?: string
 }
 
@@ -59,6 +60,7 @@ async function handleSubmit(payload: any) {
                 name: payload.name,
                 label: payload.label,
                 module: payload.module,
+                category: payload.category
             }
         })
     }
@@ -69,7 +71,8 @@ async function handleSubmit(payload: any) {
                 id: payload.id,
                 name: payload.name,
                 label: payload.label,
-                module: payload.module
+                module: payload.module,
+                category: payload.category
             }
         })
     }
@@ -93,10 +96,13 @@ async function handleSubmit(payload: any) {
                 <v-card-title class="text-h3">Permissions</v-card-title>
                 <v-card-subtitle class="mt-1">Manage available permissions grouped by module</v-card-subtitle>
             </div>
-            <v-btn color="primary" @click="openAdd" variant="flat" size="large" prepend-icon="mdi-plus"
-                density="comfortable">
-                Add Permission
-            </v-btn>
+
+            <!-- <PermissionGuard permission="view.dashboard"> -->
+                <v-btn color="primary" @click="openAdd" variant="flat" size="large" prepend-icon="mdi-plus"
+                    density="comfortable">
+                    Add Permission
+                </v-btn>
+            <!-- </PermissionGuard> -->
         </div>
     </v-card-item>
 
