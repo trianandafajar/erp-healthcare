@@ -19,6 +19,8 @@ interface Nurse {
     created?: string
 }
 
+const { can } = usePermission()
+
 const search = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10;
@@ -165,14 +167,8 @@ async function handleSubmit(payload: any) {
                 <v-card-title class="text-h4">Nurses Management</v-card-title>
                 <v-card-subtitle class="mt-1">Manage nurse profiles and departments.</v-card-subtitle>
             </div>
-            <v-btn
-                color="primary"
-                variant="flat"
-                size="large"
-                prepend-icon="mdi-plus"
-                density="comfortable"
-                @click="openAdd"
-            >
+            <v-btn v-if="can('nurse.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openAdd">
                 Create Nurse
             </v-btn>
         </div>
@@ -242,10 +238,10 @@ async function handleSubmit(payload: any) {
                         </v-chip>
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                            density="comfortable" @click="openEdit(nurse)" />
-                        <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
-                            @click="openDelete(nurse)" />
+                        <v-btn v-if="can('nurse.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(nurse)" />
+                        <v-btn v-if="can('nurse.delete')" icon="mdi-delete-outline" variant="text" size="small"
+                            color="error" density="comfortable" @click="openDelete(nurse)" />
                     </td>
                 </tr>
             </tbody>

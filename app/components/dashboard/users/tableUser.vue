@@ -3,6 +3,8 @@ import { ref, computed } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import UserModal from './UserModal.vue';
 
+const { can } = usePermission()
+
 const search = ref('');
 const selectedRole = ref('all');
 const currentPage = ref(1);
@@ -161,8 +163,8 @@ async function handleSubmit(payload: any) {
                 <v-card-title class="text-h3">User Management</v-card-title>
                 <v-card-subtitle class="mt-1">Manage and organize user accounts</v-card-subtitle>
             </div>
-            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable"
-                @click="openAdd">
+            <v-btn v-if="can('user.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openAdd">
                 Add User
             </v-btn>
         </div>
@@ -228,10 +230,10 @@ async function handleSubmit(payload: any) {
                         {{ formatDate(user.joined) }}
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                            density="comfortable" @click="openEdit(user)" />
-                        <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
-                            @click="openDelete(user)" />
+                        <v-btn v-if="can('user.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(user)" />
+                        <v-btn v-if="can('user.delete')" icon="mdi-delete-outline" variant="text" size="small"
+                            color="error" density="comfortable" @click="openDelete(user)" />
                     </td>
                 </tr>
             </tbody>

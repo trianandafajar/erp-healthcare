@@ -20,6 +20,8 @@ interface Role {
     user_count: number
 }
 
+const { can } = usePermission()
+
 // fetch data
 const { data, pending } = await useFetch<{ roles: Role[] }>('/api/roles')
 const { data: permData } = await useFetch<{ permissions: Permission[]; grouped: Record<string, Permission[]> }>('/api/permissions')
@@ -105,8 +107,8 @@ async function handleSubmit(payload: any) {
                 <v-card-title class="text-h3">Roles & Permissions</v-card-title>
                 <v-card-subtitle class="mt-1">Manage roles and assign permissions to each role</v-card-subtitle>
             </div>
-            <v-btn color="primary" @click="openAdd" variant="flat" size="large" prepend-icon="mdi-plus"
-                density="comfortable">
+            <v-btn v-if="can('role.create')" color="primary" @click="openAdd" variant="flat" size="large"
+                prepend-icon="mdi-plus" density="comfortable">
                 Add Role
             </v-btn>
         </div>
@@ -187,13 +189,13 @@ async function handleSubmit(payload: any) {
                         </div>
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn @click="openEdit(role)" icon="mdi-pencil-outline" variant="text" size="small"
-                            color="secondary" density="comfortable" />
+                        <v-btn v-if="can('role.edit')" @click="openEdit(role)" icon="mdi-pencil-outline" variant="text"
+                            size="small" color="secondary" density="comfortable" />
                         <v-tooltip :text="role.user_count > 0 ? 'Role still in use' : 'Delete role'" location="top">
                             <template #activator="{ props }">
                                 <span v-bind="props">
-                                    <v-btn @click="openDelete(role)" icon="mdi-delete-outline" variant="text"
-                                        size="small" color="error" density="comfortable"
+                                    <v-btn v-if="can('role.delete')" @click="openDelete(role)" icon="mdi-delete-outline"
+                                        variant="text" size="small" color="error" density="comfortable"
                                         :disabled="role.user_count > 0" />
                                 </span>
                             </template>

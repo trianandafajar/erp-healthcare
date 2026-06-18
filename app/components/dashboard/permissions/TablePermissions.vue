@@ -12,6 +12,8 @@ interface Permission {
     created_at?: string
 }
 
+const { can } = usePermission()
+
 // fetch data
 const { data, pending } = await useFetch<{ permissions: Permission[]; grouped: Record<string, Permission[]> }>('/api/permissions')
 
@@ -98,10 +100,10 @@ async function handleSubmit(payload: any) {
             </div>
 
             <!-- <PermissionGuard permission="view.dashboard"> -->
-                <v-btn color="primary" @click="openAdd" variant="flat" size="large" prepend-icon="mdi-plus"
-                    density="comfortable">
-                    Add Permission
-                </v-btn>
+            <v-btn v-if="can('permission.create')" color="primary" @click="openAdd" variant="flat" size="large"
+                prepend-icon="mdi-plus" density="comfortable">
+                Add Permission
+            </v-btn>
             <!-- </PermissionGuard> -->
         </div>
     </v-card-item>
@@ -157,10 +159,10 @@ async function handleSubmit(payload: any) {
                         </v-chip>
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn @click="openEdit(permission)" icon="mdi-pencil-outline" variant="text" size="small"
-                            color="secondary" density="comfortable" />
-                        <v-btn @click="openDelete(permission)" icon="mdi-delete-outline" variant="text" size="small"
-                            color="error" density="comfortable" />
+                        <v-btn v-if="can('permission.edit')" @click="openEdit(permission)" icon="mdi-pencil-outline"
+                            variant="text" size="small" color="secondary" density="comfortable" />
+                        <v-btn v-if="can('permission.delete')" @click="openDelete(permission)" icon="mdi-delete-outline"
+                            variant="text" size="small" color="error" density="comfortable" />
                     </td>
                 </tr>
             </tbody>

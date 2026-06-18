@@ -27,6 +27,8 @@ const search = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
+const { can } = usePermission()
+
 const { data, pending, refresh } = await useFetch<{ doctors: any[] }>('/api/doctors')
 const { data: deptData } = await useFetch<{ departments: any[] }>('/api/departments')
 const { data: availableData, refresh: refreshAvailable } = await useFetch<{ users: any[] }>('/api/doctors/available')
@@ -246,8 +248,8 @@ async function handleSubmit(payload: any) {
                 <v-card-title class="text-h3">Doctors Management</v-card-title>
                 <v-card-subtitle class="mt-1">Manage doctor profiles, specializations, and departments</v-card-subtitle>
             </div>
-            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable"
-                @click="openAdd">
+            <v-btn v-if="can('doctor.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openAdd">
                 Add Doctor
             </v-btn>
         </div>
@@ -321,10 +323,10 @@ async function handleSubmit(payload: any) {
                         </v-chip>
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                            density="comfortable" @click="openEdit(doctor)" />
-                        <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
-                            @click="openDelete(doctor)" />
+                        <v-btn v-if="can('doctor.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(doctor)" />
+                        <v-btn v-if="can('doctor.delete')" icon="mdi-delete-outline" variant="text" size="small"
+                            color="error" density="comfortable" @click="openDelete(doctor)" />
                     </td>
                 </tr>
             </tbody>
