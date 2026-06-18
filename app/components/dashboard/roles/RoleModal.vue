@@ -6,6 +6,7 @@ interface Permission {
     name: string
     label: string
     module: string
+    category?: string | null
 }
 
 interface Role {
@@ -71,20 +72,52 @@ const config = computed(() => ({
     },
 }[props.mode]))
 
+const categoryFilter = ref<string | null>(null)
+const filterMenu = ref(false)
+
+const categoryOptions = [
+    { title: 'All Categories', value: null },
+    { title: 'Admin', value: 'admin' },
+    { title: 'Doctor', value: 'doctor' },
+    { title: 'Nurse', value: 'nurse' },
+    { title: 'Patient', value: 'patient' },
+    { title: 'Pharmacy', value: 'pharmacy' },
+    { title: 'Receptionist', value: 'receptionist' },
+]
+
+const allPermissionsFlat = computed(() =>
+    Object.values(props.groupedPermissions ?? {}).flat()
+)
+
+// Permissions filtered by the selected category
+const filteredPermissions = computed(() => {
+    if (!categoryFilter.value) return allPermissionsFlat.value
+    return allPermissionsFlat.value.filter(p => p.category === categoryFilter.value)
+})
+
+const filteredGroupedPermissions = computed(() => {
+    return filteredPermissions.value.reduce((acc: Record<string, Permission[]>, p) => {
+        const moduleKey = p.module
+        if (!acc[moduleKey]) acc[moduleKey] = []
+        acc[moduleKey].push(p)
+        return acc
+    }, {} as Record<string, Permission[]>)
+})
+
 const moduleKeys = computed(() =>
-    Object.keys(props.groupedPermissions || {}).sort()
+    Object.keys(filteredGroupedPermissions.value).sort()
 )
 
 function moduleCheckedCount(mod: string) {
     return (
-        props.groupedPermissions?.[mod] ?? []
+        filteredGroupedPermissions.value[mod] ?? []
     ).filter((p) =>
         form.value.permissions.includes(p.id)
     ).length
 }
 
 function isModuleChecked(mod: string) {
-    const perms = props.groupedPermissions?.[mod] ?? []
+    const perms = filteredGroupedPermissions.value[mod] ?? []
 
     return (
         perms.length > 0 &&
@@ -95,7 +128,7 @@ function isModuleChecked(mod: string) {
 }
 
 function isModuleIndeterminate(mod: string) {
-    const perms = props.groupedPermissions?.[mod] ?? []
+    const perms = filteredGroupedPermissions.value[mod] ?? []
 
     const checked = perms.filter((p) =>
         form.value.permissions.includes(p.id)
@@ -105,12 +138,8 @@ function isModuleIndeterminate(mod: string) {
         checked.length < perms.length
 }
 
-const groupedPermissions = computed(
-    () => props.groupedPermissions ?? {}
-)
-
 function toggleModule(mod: string, checked: boolean) {
-    const perms = props.groupedPermissions?.[mod] ?? []
+    const perms = filteredGroupedPermissions.value[mod] ?? []
 
     if (checked) {
         const ids = perms.map((p) => p.id)
@@ -216,21 +245,45 @@ function onSubmit() {
 
                     <v-col cols="12" class="mt-3">
                         <!-- Permissions -->
-                        <div class="mb-2 d-flex align-center justify-space-between">
+                        <div class="mb-2 d-flex align-center justify-space-between flex-wrap ga-2">
                             <div class="text-subtitle-2 font-weight-semibold">
                                 <v-icon icon="mdi-key-outline" size="16" class="mr-1" />
                                 Permissions
                             </div>
 
-                            <v-chip size="small" color="primary" variant="tonal">
-                                {{ form.permissions.length }} selected
-                            </v-chip>
+                            <div class="d-flex align-center ga-2">
+                                <v-chip size="small" color="primary" variant="tonal">
+                                    {{ form.permissions.length }} selected
+                                </v-chip>
+
+                                <v-menu v-model="filterMenu" :close-on-content-click="false" location="bottom end">
+                                    <template #activator="{ props: menuProps }">
+                                        <v-btn v-bind="menuProps" icon variant="tonal"
+                                            :color="categoryFilter ? 'primary' : 'secondary'" size="small">
+                                            <v-icon icon="mdi-filter-variant" size="18" />
+                                        </v-btn>
+                                    </template>
+
+                                    <v-card min-width="220" rounded="lg">
+                                        <v-card-text class="pa-3">
+                                            <div class="text-caption font-weight-medium mb-2">
+                                                Filter by category
+                                            </div>
+                                            <v-select v-model="categoryFilter" :items="categoryOptions"
+                                                item-title="title" item-value="value" placeholder="All Categories"
+                                                variant="outlined" density="compact" hide-details
+                                                @update:model-value="filterMenu = false" />
+                                        </v-card-text>
+                                    </v-card>
+                                </v-menu>
+                            </div>
                         </div>
 
                         <v-card variant="outlined" rounded="lg" class="pa-0 overflow-hidden">
                             <div v-if="moduleKeys.length === 0"
                                 class="text-center pa-6 text-medium-emphasis text-caption">
                                 No permissions available
+                                <template v-if="categoryFilter"> for this category</template>
                             </div>
 
                             <div v-for="(mod, index) in moduleKeys" :key="mod">
@@ -251,15 +304,16 @@ function onSubmit() {
 
                                         <span class="text-caption text-medium-emphasis">
                                             {{ moduleCheckedCount(mod) }}/{{
-                                                groupedPermissions[mod]?.length ?? 0
+                                                filteredGroupedPermissions[mod]?.length ?? 0
                                             }}
                                         </span>
                                     </div>
 
                                     <!-- Permission Items -->
                                     <div class="d-flex flex-wrap gap-x-4 gap-y-0 pl-8">
-                                        <v-checkbox v-for="perm in groupedPermissions[mod]" :key="perm.id" :model-value="form.permissions.includes(perm.id)
-                                            " density="compact" hide-details class="perm-checkbox" @update:model-value="
+                                        <v-checkbox v-for="perm in filteredGroupedPermissions[mod]" :key="perm.id"
+                                            :model-value="form.permissions.includes(perm.id)" density="compact"
+                                            hide-details class="perm-checkbox" @update:model-value="
                                                 (v) => {
                                                     if (v)
                                                         form.permissions.push(

@@ -6,6 +6,7 @@ interface Permission {
     name: string
     label: string
     module: string
+    category?: string | null
 }
 
 const props = defineProps<{
@@ -19,25 +20,58 @@ const emit = defineEmits<{
     (e: 'cancel'): void
 }>()
 
+const categoryOptions = [
+    { title: 'Admin', value: 'admin' },
+    { title: 'Doctor', value: 'doctor' },
+    { title: 'Nurse', value: 'nurse' },
+    { title: 'Patient', value: 'patient' },
+    { title: 'Pharmacy', value: 'pharmacy' },
+    { title: 'Receptionist', value: 'receptionist' },
+]
+
+const defaultModules = ['general', 'user', 'role', 'doctor', 'nurse', 'patient', 'department', 'report']
+
+const moduleOptions = computed(() => {
+    const merged = new Set([...defaultModules, ...(props.moduleKeys ?? [])])
+    return [...merged]
+})
+
 const form = ref({
-    name: '',
+    category: null as string | null,
+    module: '' as string,
+    action: '' as string, // the part after "module."
     label: '',
-    module: '',
+})
+
+// Derived final permission name, e.g. module="doctor", action="view" -> "doctor.view"
+const fullName = computed(() => {
+    if (!form.value.module || !form.value.action) return ''
+    return `${form.value.module}.${form.value.action}`.toLowerCase()
 })
 
 watch(
     () => props.permission,
     (permission) => {
         if (permission && props.mode === 'edit') {
+            const [mod, ...rest] = permission.name.split('.')
             form.value = {
-                name: permission.name,
+                category: permission.category ?? null,
+                module: permission.module ?? mod ?? '',
+                action: rest.join('.') ?? '',
                 label: permission.label,
-                module: permission.module,
             }
+        } else if (props.mode === 'add') {
+            form.value = { category: null, module: '', action: '', label: '' }
         }
     },
     { immediate: true }
 )
+
+// Keep the action input clean: lowercase, no spaces, letters/underscore only
+watch(() => form.value.action, (val) => {
+    const cleaned = val.toLowerCase().replace(/[^a-z_]/g, '')
+    if (cleaned !== val) form.value.action = cleaned
+})
 
 const config = computed(() => ({
     add: {
@@ -60,20 +94,26 @@ const config = computed(() => ({
     },
 }[props.mode]))
 
+const isValid = computed(() => {
+    return !!form.value.module && !!form.value.action.trim() && !!form.value.label.trim()
+})
+
 function onSubmit() {
     if (props.mode === 'delete') {
         emit('submit', {
             id: props.permission?.id,
         })
-
         return
     }
 
+    if (!isValid.value) return
+
     emit('submit', {
         id: props.permission?.id,
-        name: form.value.name,
+        name: fullName.value,
         label: form.value.label,
         module: form.value.module,
+        category: form.value.category,
     })
 }
 </script>
@@ -120,21 +160,12 @@ function onSubmit() {
                 <v-row dense>
                     <v-col cols="12">
                         <v-label class="text-caption font-weight-medium mb-1">
-                            Permission Name
+                            Category (Dashboard)
                         </v-label>
 
-                        <v-text-field v-model="form.name" placeholder="e.g. users.create" variant="outlined"
-                            density="compact" hide-details="auto" :disabled="mode === 'edit'"
-                            :rules="[(v) => /^[a-z]+\.[a-z]+$/.test(v) || 'Format: module.action (lowercase, e.g. users.create)']" />
-                    </v-col>
-
-                    <v-col cols="12" class="mt-3">
-                        <v-label class="text-caption font-weight-medium mb-1">
-                            Display Label
-                        </v-label>
-
-                        <v-text-field v-model="form.label" placeholder="e.g. Create Users" variant="outlined"
-                            density="compact" hide-details />
+                        <v-select v-model="form.category" :items="categoryOptions" item-title="title" item-value="value"
+                            placeholder="Which dashboard is this for?" variant="outlined" density="compact" hide-details
+                            clearable />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">
@@ -142,8 +173,36 @@ function onSubmit() {
                             Module
                         </v-label>
 
-                        <v-combobox v-model="form.module" :items="moduleKeys ?? []" placeholder="e.g. users"
-                            variant="outlined" density="compact" hide-details />
+                        <v-combobox v-model="form.module" :items="moduleOptions" placeholder="e.g. patient"
+                            variant="outlined" density="compact" hide-details="auto" :disabled="mode === 'edit'" />
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">
+                            Permission Name
+                        </v-label>
+
+                        <div class="d-flex align-center ga-2">
+                            <v-chip v-if="form.module" variant="tonal" color="primary" label class="font-mono">
+                                {{ form.module }}.
+                            </v-chip>
+                            <v-text-field v-model="form.action"
+                                :placeholder="form.module ? 'e.g. view' : 'Select a module first'" variant="outlined"
+                                density="compact" hide-details="auto" :disabled="!form.module || mode === 'edit'" />
+                        </div>
+
+                        <div v-if="fullName" class="text-caption text-medium-emphasis mt-1">
+                            Full identifier: <span class="font-mono">{{ fullName }}</span>
+                        </div>
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">
+                            Display Label
+                        </v-label>
+
+                        <v-text-field v-model="form.label" placeholder="e.g. View Patients" variant="outlined"
+                            density="compact" hide-details />
                     </v-col>
                 </v-row>
             </v-card-text>
@@ -158,9 +217,17 @@ function onSubmit() {
                 Cancel
             </v-btn>
 
-            <v-btn variant="flat" :color="config.confirmColor" @click="onSubmit">
+            <v-btn variant="flat" :color="config.confirmColor" :disabled="mode !== 'delete' && !isValid"
+                @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>
     </v-card>
 </template>
+
+<style scoped>
+.font-mono {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+</style>

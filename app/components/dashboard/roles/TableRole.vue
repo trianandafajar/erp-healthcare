@@ -8,6 +8,7 @@ interface Permission {
     name: string
     label: string
     module: string
+    category?: string | null
 }
 
 interface Role {

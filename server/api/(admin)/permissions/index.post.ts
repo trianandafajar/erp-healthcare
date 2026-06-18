@@ -1,11 +1,16 @@
 export default defineEventHandler(async (event) => {
-    const { name, label, module } = await readBody(event)
+    const { name, label, module, category } = await readBody(event)
 
     if (!name || !label || !module) {
         throw createError({ statusCode: 400, message: 'Name, label, and module are required' })
     }
 
-    const nameRegex = /^[a-z]+\.[a-z]+$/
+    const validCategories = ['admin', 'doctor', 'nurse', 'patient', 'pharmacy', 'receptionist']
+    if (category && !validCategories.includes(category)) {
+        throw createError({ statusCode: 400, message: `Category must be one of: ${validCategories.join(', ')}` })
+    }
+
+    const nameRegex = /^[a-z_]+\.[a-z_]+$/
     if (!nameRegex.test(name)) {
         throw createError({
             statusCode: 400,
@@ -19,7 +24,7 @@ export default defineEventHandler(async (event) => {
 
     const { data, error } = await admin
         .from('permissions')
-        .insert({ name, label, module })
+        .insert({ name, label, module, category: category ?? null })
         .select()
         .single()
 
