@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['report.view'],
 })
 
 // ── Dummy data — replace with real API calls once report sources are defined ─

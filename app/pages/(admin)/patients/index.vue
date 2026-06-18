@@ -3,7 +3,8 @@ import TablePatient from '~/components/dashboard/patient/TablePatient.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['patient.view'],
 })
 
 useSeoMeta({

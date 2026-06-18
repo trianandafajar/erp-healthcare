@@ -3,7 +3,8 @@ import TableNurse from '~/components/dashboard/nurses/TableNurse.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['nurse.view'],
 })
 
 useSeoMeta({

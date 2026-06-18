@@ -3,7 +3,8 @@ import TablePermissions from '~/components/dashboard/permissions/TablePermission
 
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['permission.view'],
 })
 
 useSeoMeta({

@@ -5,7 +5,8 @@ import WidgetFive from '~/components/dashboard/WidgetFive.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['dashboard.view'], 
 })
 
 useSeoMeta({

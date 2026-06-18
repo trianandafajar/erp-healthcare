@@ -3,7 +3,8 @@ import TableUser from '~/components/dashboard/users/TableUser.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['user.view']
 })
 
 useSeoMeta({

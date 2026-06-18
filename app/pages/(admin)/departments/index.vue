@@ -3,7 +3,8 @@ import TableDepartments from '~/components/dashboard/departments/TableDepartment
 
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['department.view'],
 })
 
 useSeoMeta({

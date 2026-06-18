@@ -3,7 +3,8 @@ import TableDoctors from '~/components/dashboard/doctors/TableDoctors.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['doctor.view'],
 })
 
 useSeoMeta({

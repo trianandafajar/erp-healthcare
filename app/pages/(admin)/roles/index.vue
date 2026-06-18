@@ -4,7 +4,8 @@ import TableRole from '~/components/dashboard/roles/TableRole.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['role.view'],
 })
 
 useSeoMeta({
