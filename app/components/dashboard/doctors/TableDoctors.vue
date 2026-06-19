@@ -291,8 +291,9 @@ async function handleSubmit(payload: any) {
                 <tr v-else v-for="doctor in paginatedDoctors" :key="doctor.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
-                            <v-avatar size="34" color="primary" variant="tonal" :image="doctor.photo_url || undefined">
-                                <span v-if="!doctor.photo_url" class="text-caption font-weight-bold">
+                            <v-avatar size="34" color="primary" variant="tonal">
+                                <v-img v-if="doctor.photo_url" :src="doctor.photo_url" cover />
+                                <span v-else class="text-caption font-weight-bold">
                                     {{ getInitials(doctor.full_name) }}
                                 </span>
                             </v-avatar>
