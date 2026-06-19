@@ -12,11 +12,23 @@ export default defineEventHandler(async (event) => {
     const supabase = serverSupabase(event)
     const { data: { user } } = await supabase.auth.getUser()
 
+    if (role) {
+        const { data: foundRole, error: roleError } = await admin
+            .from('roles')
+            .select('id')
+            .eq('name', role)
+            .single()
+
+        if (roleError || !foundRole) {
+            throw createError({ statusCode: 400, message: `Role '${role}' not found` })
+        }
+    }
+
     const { data, error } = await admin.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
-        user_metadata: { full_name },
+        user_metadata: { full_name, role },
     })
 
     if (error) throw createError({ statusCode: 400, message: error.message })
@@ -25,26 +37,6 @@ export default defineEventHandler(async (event) => {
 
     if (status) {
         await admin.from('profiles').update({ status }).eq('id', userId)
-    }
-
-    if (role) {
-        const { data: roleData, error: roleError } = await admin
-            .from('roles')
-            .select('id')
-            .eq('name', role)
-            .single()
-
-        if (roleError || !roleData) {
-            throw createError({ statusCode: 400, message: `Role '${role}' not found` })
-        }
-
-        const { error: userRoleError } = await admin
-            .from('user_roles')
-            .insert({ user_id: userId, role_id: roleData.id })
-
-        if (userRoleError) {
-            throw createError({ statusCode: 400, message: userRoleError.message })
-        }
     }
 
     await admin.rpc('log_activity', {

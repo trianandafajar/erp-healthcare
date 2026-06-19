@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
         .single()
 
     const { error: authError } = await admin.auth.admin.updateUserById(id, {
-        user_metadata: { full_name },
+        user_metadata: { full_name, role },
     })
     if (authError) throw createError({ statusCode: 400, message: authError.message })
 

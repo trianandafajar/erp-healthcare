@@ -27,7 +27,7 @@ const roles = computed(() =>
 const form = ref({
     full_name: '',
     email: '',
-    role: 'staff',
+    role: 'patient',
     status: 'active'
 })
 
@@ -40,7 +40,7 @@ watch(() => props.user, (u) => {
             status: u.status
         }
     } else {
-        form.value = { full_name: '', email: '', role: 'staff', status: 'active' }
+        form.value = { full_name: '', email: '', role: 'patient', status: 'active' }
     }
 }, { immediate: true })
 
