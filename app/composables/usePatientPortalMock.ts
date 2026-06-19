@@ -337,7 +337,7 @@ export const usePatientPortalMock = () => {
             invoiceNumber: 'INV-2026-00021',
             serviceDate: '2026-06-12',
             serviceName: 'General Consultation',
-            amount: 250000,
+            amount: 250,
             status: 'Pending'
         },
         {
@@ -345,7 +345,7 @@ export const usePatientPortalMock = () => {
             invoiceNumber: 'INV-2026-00016',
             serviceDate: '2026-05-18',
             serviceName: 'Medication and Consultation',
-            amount: 375000,
+            amount: 375,
             status: 'Paid'
         },
         {
@@ -353,7 +353,7 @@ export const usePatientPortalMock = () => {
             invoiceNumber: 'INV-2026-00009',
             serviceDate: '2026-04-02',
             serviceName: 'Laboratory Test',
-            amount: 420000,
+            amount: 420,
             status: 'Overdue'
         }
     ]

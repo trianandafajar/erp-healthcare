@@ -299,7 +299,7 @@ function onSubmit() {
                             Consultation Fee
                         </v-label>
 
-                        <v-text-field v-model.number="form.consultation_fee" type="number" min="0" prefix="Rp"
+                        <v-text-field v-model.number="form.consultation_fee" type="number" min="0" prefix="$"
                             variant="outlined" density="compact" hide-details />
                     </v-col>
 

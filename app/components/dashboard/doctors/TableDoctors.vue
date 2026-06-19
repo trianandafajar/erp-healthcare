@@ -89,10 +89,10 @@ function formatDate(dateStr?: string) {
 
 function formatCurrency(value: number) {
     if (!value) return '-'
-    return new Intl.NumberFormat('id-ID', {
+    return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
+        currency: 'USD',
+        minimumFractionDigits: 2,
     }).format(value)
 }
 

@@ -33,10 +33,10 @@ function statusColor(status: string) {
 }
 
 function formatCurrency(amount: number) {
-    return new Intl.NumberFormat('id-ID', {
+    return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
+        currency: 'USD',
+        maximumFractionDigits: 2,
     }).format(amount)
 }
 

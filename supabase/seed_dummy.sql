@@ -159,7 +159,7 @@ values
         '+62-811-0000-001',
         'Internal medicine specialist focused on outpatient and inpatient care.',
         8,
-        250000,
+        25,
         true
     ),
     (
@@ -171,7 +171,7 @@ values
         '+62-811-0000-002',
         'Cardiology doctor handling cardiac follow-up and medication review.',
         12,
-        350000,
+        35,
         true
     )
 on conflict (id) do update
