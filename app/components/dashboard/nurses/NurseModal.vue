@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-
 interface Nurse {
     id: string
-    full_name: string
-    email: string
-    phone: string
-    photo_url: string
-    experience_years: number
-    is_available: boolean
-    department: { id: string; name: string; code?: string } | null
-    created?: string
+    full_name?: string
+    email?: string
+    phone?: string
+    photo_url?: string
+    experience_years?: number
+    is_available?: boolean
+    department?: { id: string; name: string; code?: string } | null
 }
 
 interface AvailableUser {
@@ -46,6 +43,85 @@ const form = ref({
     is_available: true,
 })
 
+const photoFile = ref<File | null>(null)
+const photoPreview = ref<string>('')
+const uploadingPhoto = ref(false)
+const photoError = ref<string>('')
+const photoInputRef = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
+
+function triggerFileInput() {
+    photoInputRef.value?.click()
+}
+
+function validateFile(file: File): string | null {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowed.includes(file.type)) return 'Only JPG, PNG, or WebP images are allowed.'
+    if (file.size > 2 * 1024 * 1024) return 'Image must be smaller than 2 MB.'
+    return null
+}
+
+function applyFile(file: File) {
+    const err = validateFile(file)
+    if (err) {
+        photoError.value = err
+        return
+    }
+    photoError.value = ''
+    photoFile.value = file
+    if (photoPreview.value.startsWith('blob:')) URL.revokeObjectURL(photoPreview.value)
+    photoPreview.value = URL.createObjectURL(file)
+}
+
+function onFileInputChange(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (file) applyFile(file)
+}
+
+function onDragOver(event: DragEvent) {
+    event.preventDefault()
+    isDragging.value = true
+}
+
+function onDragLeave() {
+    isDragging.value = false
+}
+
+function onDrop(event: DragEvent) {
+    event.preventDefault()
+    isDragging.value = false
+    const file = event.dataTransfer?.files?.[0]
+    if (file) applyFile(file)
+}
+
+function removePhoto() {
+    if (photoPreview.value.startsWith('blob:')) URL.revokeObjectURL(photoPreview.value)
+    photoFile.value = null
+    photoPreview.value = ''
+    photoError.value = ''
+    form.value.photo_url = ''
+    if (photoInputRef.value) photoInputRef.value.value = ''
+}
+
+async function uploadPhoto(): Promise<string> {
+    if (!photoFile.value) return form.value.photo_url
+
+    uploadingPhoto.value = true
+    try {
+        const body = new FormData()
+        body.append('file', photoFile.value)
+
+        const result = await $fetch<{ url: string }>('/api/upload/nurse-photo', {
+            method: 'POST',
+            body,
+        })
+
+        return result.url
+    } finally {
+        uploadingPhoto.value = false
+    }
+}
+
 watch(
     () => props.nurse,
     (nurse) => {
@@ -58,6 +134,8 @@ watch(
                 experience_years: nurse.experience_years ?? 0,
                 is_available: nurse.is_available ?? true,
             }
+            photoPreview.value = nurse.photo_url ?? ''
+            photoFile.value = null
         } else if (props.mode === 'add') {
             form.value = {
                 id: '',
@@ -67,6 +145,9 @@ watch(
                 experience_years: 0,
                 is_available: true,
             }
+            photoPreview.value = ''
+            photoFile.value = null
+            photoError.value = ''
         }
     },
     { immediate: true }
@@ -75,7 +156,7 @@ watch(
 const config = computed(() => ({
     add: {
         title: 'Add New Nurse',
-        icon: 'mdi-doctor',
+        icon: 'mdi-account-heart-outline',
         confirmColor: 'primary',
         confirmLabel: 'Create Nurse',
     },
@@ -93,19 +174,33 @@ const config = computed(() => ({
     },
 }[props.mode]))
 
-function onSubmit() {
+const submitting = ref(false)
+
+async function onSubmit() {
     if (props.mode === 'delete') {
-        emit('submit', {
-            id: props.nurse?.id,
-        })
+        emit('submit', { id: props.nurse?.id })
         return
     }
 
-    emit('submit', {
-        ...form.value,
-        id: props.mode === 'add' ? form.value.id : props.nurse?.id,
-    })
+    submitting.value = true
+    try {
+        const photoUrl = await uploadPhoto()
+
+        emit('submit', {
+            ...form.value,
+            photo_url: photoUrl,
+            id: props.mode === 'add' ? form.value.id : props.nurse?.id,
+        })
+    } catch (err: any) {
+        photoError.value = err?.message ?? 'Failed to upload photo. Please try again.'
+    } finally {
+        submitting.value = false
+    }
 }
+
+const isSubmitDisabled = computed(() =>
+    (props.mode === 'add' && !form.value.id) || submitting.value
+)
 </script>
 
 <template>
@@ -113,11 +208,8 @@ function onSubmit() {
         <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
             <div class="d-flex align-center ga-2">
                 <v-icon :icon="config.icon" size="20" />
-                <span class="text-h6 font-weight-bold">
-                    {{ config.title }}
-                </span>
+                <span class="text-h6 font-weight-bold">{{ config.title }}</span>
             </div>
-
             <v-btn icon="mdi-close" variant="text" density="compact" @click="emit('cancel')" />
         </v-card-title>
 
@@ -129,16 +221,13 @@ function onSubmit() {
                     <v-avatar color="error" variant="tonal" size="56">
                         <v-icon icon="mdi-delete-outline" size="28" />
                     </v-avatar>
-
                     <div>
                         <p class="text-body-1 font-weight-medium">
                             Are you sure you want to remove this nurse's profile?
                         </p>
-
                         <p class="text-body-2 text-medium-emphasis mt-1">
-                            <strong>{{ nurse?.full_name }}</strong>
-                            ({{ nurse?.email }})
-                            will be removed from the nurses list. The user account itself will not be deleted.
+                            <strong>{{ nurse?.full_name }}</strong> ({{ nurse?.email }}) will be removed from the
+                            nurses list. The user account itself will not be deleted.
                         </p>
                     </div>
                 </div>
@@ -149,9 +238,7 @@ function onSubmit() {
             <v-card-text class="pa-4" style="max-height: 520px; overflow-y: auto;">
                 <v-row dense>
                     <v-col cols="12">
-                        <v-label class="text-caption font-weight-medium mb-1">
-                            User Account
-                        </v-label>
+                        <v-label class="text-caption font-weight-medium mb-1">User Account</v-label>
 
                         <v-select v-if="mode === 'add'" v-model="form.id" :items="availableUsers ?? []"
                             item-title="full_name" item-value="id" placeholder="Select a user with nurse role"
@@ -166,47 +253,70 @@ function onSubmit() {
                             density="compact" hide-details disabled />
                     </v-col>
 
-                    <v-col cols="12" sm="6" class="mt-3">
-                        <v-label class="text-caption font-weight-medium mb-1">
-                            Department / Poli
-                        </v-label>
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Profile Photo</v-label>
 
+                        <div class="d-flex ga-3 align-stretch">
+                            <v-avatar size="80" rounded="lg" color="grey-lighten-3" class="flex-shrink-0">
+                                <v-img v-if="photoPreview" :src="photoPreview" cover />
+                                <v-icon v-else icon="mdi-account-heart-outline" size="40" color="grey-lighten-1" />
+                            </v-avatar>
+
+                            <div class="photo-dropzone flex-grow-1 d-flex flex-column align-center justify-center ga-1 rounded-lg"
+                                :class="{ 'photo-dropzone--dragging': isDragging, 'photo-dropzone--error': !!photoError }"
+                                @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop"
+                                @click="triggerFileInput">
+                                <v-icon :icon="isDragging ? 'mdi-cloud-download-outline' : 'mdi-image-plus-outline'"
+                                    size="24" :color="isDragging ? 'primary' : 'grey'" />
+                                <span class="text-caption font-weight-medium">
+                                    {{ isDragging ? 'Drop to upload' : 'Click or drag & drop' }}
+                                </span>
+                                <span class="text-caption text-medium-emphasis">
+                                    JPG, PNG, WebP · Max 2 MB
+                                </span>
+                            </div>
+
+                            <input ref="photoInputRef" type="file" accept="image/jpeg,image/png,image/webp"
+                                style="display: none" @change="onFileInputChange" />
+                        </div>
+
+                        <div v-if="photoError" class="text-caption text-error mt-1 d-flex align-center ga-1">
+                            <v-icon icon="mdi-alert-circle-outline" size="14" />
+                            {{ photoError }}
+                        </div>
+
+                        <div v-if="photoPreview" class="mt-2">
+                            <v-btn variant="text" color="error" size="small" prepend-icon="mdi-delete-outline"
+                                @click="removePhoto">
+                                Remove photo
+                            </v-btn>
+                        </div>
+                    </v-col>
+
+                    <v-col cols="12" sm="6" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Department / Poli</v-label>
                         <v-select v-model="form.department_id" :items="departments ?? []" item-title="name"
                             item-value="id" placeholder="Select department" variant="outlined" density="compact"
                             hide-details clearable />
                     </v-col>
 
                     <v-col cols="12" sm="6" class="mt-3">
-                        <v-label class="text-caption font-weight-medium mb-1">
-                            Phone
-                        </v-label>
-
+                        <v-label class="text-caption font-weight-medium mb-1">Phone</v-label>
                         <v-text-field v-model="form.phone" placeholder="e.g. 081234567890" variant="outlined"
                             density="compact" hide-details />
                     </v-col>
 
-                    <v-col cols="12" sm="6" class="mt-3">
-                        <v-label class="text-caption font-weight-medium mb-1">
-                            Photo URL
-                        </v-label>
-
-                        <v-text-field v-model="form.photo_url" placeholder="https://..." variant="outlined"
-                            density="compact" hide-details />
-                    </v-col>
-
-                    <v-col cols="6" sm="6" class="mt-3">
-                        <v-label class="text-caption font-weight-medium mb-1">
-                            Experience (years)
-                        </v-label>
-
+                    <v-col cols="12" sm="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Experience (years)</v-label>
                         <v-text-field v-model.number="form.experience_years" type="number" min="0" variant="outlined"
                             density="compact" hide-details />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">
-                        <v-switch v-model="form.is_available" color="success" label="Available for consultation"
-                            hide-details density="compact" />
+                        <v-switch v-model="form.is_available" color="success" label="Available for duty" hide-details
+                            density="compact" />
                     </v-col>
+
                 </v-row>
             </v-card-text>
         </template>
@@ -215,14 +325,39 @@ function onSubmit() {
 
         <v-card-actions class="pa-4 pt-3">
             <v-spacer />
-
-            <v-btn variant="tonal" color="secondary" @click="emit('cancel')">
+            <v-btn variant="tonal" color="secondary" :disabled="submitting" @click="emit('cancel')">
                 Cancel
             </v-btn>
-
-            <v-btn variant="flat" :color="config.confirmColor" :disabled="mode === 'add' && !form.id" @click="onSubmit">
+            <v-btn variant="flat" :color="config.confirmColor" :disabled="isSubmitDisabled" :loading="submitting"
+                @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>
     </v-card>
 </template>
+
+<style scoped>
+.photo-dropzone {
+    height: 80px;
+    min-height: 80px;
+    border: 2px dashed rgba(var(--v-border-color), 0.4);
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    text-align: center;
+    overflow: hidden;
+}
+
+.photo-dropzone:hover {
+    border-color: rgb(var(--v-theme-primary));
+    background-color: rgba(var(--v-theme-primary), 0.04);
+}
+
+.photo-dropzone--dragging {
+    border-color: rgb(var(--v-theme-primary));
+    background-color: rgba(var(--v-theme-primary), 0.08);
+}
+
+.photo-dropzone--error {
+    border-color: rgb(var(--v-theme-error));
+}
+</style>
