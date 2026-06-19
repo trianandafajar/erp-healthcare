@@ -25,7 +25,18 @@ export default defineEventHandler(async (event) => {
 
   const { data: userRoles } = await supabase
     .from('user_roles')
-    .select('roles(id, label)')
+    .select(`
+      roles(
+        id,
+        name,
+        label,
+        role_permissions(
+          permissions(
+            name
+          )
+        )
+      )
+    `)
     .eq('user_id', user.id)
 
   const roles = userRoles?.map((r: any) => r.roles).filter(Boolean) ?? []

@@ -28,6 +28,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'open-profile': [mode: 'view' | 'edit']
 }>()
+const authStore = useAuthStore()
+const profileStore = useProfileStore()
 
 function getInitials(name: string) {
   return name
@@ -42,6 +44,8 @@ async function confirmLogout() {
   isLoggingOut.value = true
   try {
     await $fetch('/api/auth/logout', { method: 'POST' })
+    authStore.clearUser()
+    profileStore.clearProfile()
     await navigateTo('/login')
   } finally {
     isLoggingOut.value = false

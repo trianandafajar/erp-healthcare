@@ -5,7 +5,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     function setUser(payload: {
         user: any
-        role: string
+        role: string | null
         permissions: string[]
     }) {
         user.value = payload.user
