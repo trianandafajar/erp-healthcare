@@ -39,3 +39,11 @@ export const supabaseAdmin = () => {
         process.env.SUPABASE_SERVICE_KEY!,
     )
 }
+
+export const supabaseEphemeral = () => {
+    return createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false } }
+    )
+}

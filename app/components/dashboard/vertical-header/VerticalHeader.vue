@@ -10,14 +10,18 @@ import ProfileDD from './ProfileDD.vue';
 import ProfileSidebar from './ProfileSidebar.vue';
 
 const customizer = useCustomizerStore();
+const profileStore = useProfileStore()
 
-const { data, pending, refresh } = useLazyFetch<{
-  user: { id: string; email: string }
-  profile: any
-  roles: { id: string; label: string }[]
-}>('/api/profile')
-const profile = computed(() => data.value?.profile)
-const roles = computed(() => data.value?.roles ?? [])
+onMounted(() => {
+  profileStore.fetchProfile().catch(() => {})
+})
+
+const profile = computed(() => profileStore.profile)
+const roles = computed(() => profileStore.roles)
+
+function refresh() {
+  return profileStore.refreshProfile().catch(() => null)
+}
 
 const profileSidebarOpen = ref(false)
 const profileSidebarMode = ref<'view' | 'edit'>('view')
@@ -38,9 +42,41 @@ function getInitials(name: string) {
     .join('')
     .toUpperCase()
 }
+
+const { isImpersonating, impersonatedName, impersonatedRole, exitImpersonation } = useImpersonation()
+const isExiting = ref(false)
+
+async function handleExit() {
+  isExiting.value = true
+  try {
+    await exitImpersonation()
+  } catch {
+    isExiting.value = false
+  }
+}
 </script>
 
 <template>
+  <v-app-bar v-if="isImpersonating" flat height="44" :order="-1" color="orange-darken-2" style="z-index: 1005;">
+    <v-icon icon="mdi-shield-account" size="18" class="ml-4 mr-2" />
+
+    <span class="text-body-2">
+      You are currently logged in as
+      <strong>{{ impersonatedName }}</strong>
+    </span>
+
+    <v-chip size="x-small" variant="tonal" color="white" label class="ml-2 text-capitalize">
+      {{ impersonatedRole }}
+    </v-chip>
+
+    <v-spacer />
+
+    <v-btn size="small" variant="outlined" color="white" :loading="isExiting" prepend-icon="mdi-logout-variant"
+      class="mr-4" style="border-color: rgba(255,255,255,0.6);" @click="handleExit">
+      Return to Admin Account
+    </v-btn>
+  </v-app-bar>
+
   <v-app-bar elevation="0" height="60">
     <v-btn class="hidden-md-and-down text-secondary mr-3" color="darkText" icon rounded="sm" variant="text"
       @click.stop="customizer.SET_MINI_SIDEBAR(!customizer.mini_sidebar)" size="small">
@@ -51,62 +87,25 @@ function getInitials(name: string) {
       <MenuFoldOutlined :style="{ fontSize: '16px' }" />
     </v-btn>
 
-    <!-- search mobile -->
-    <v-menu :close-on-content-click="false" class="hidden-lg-and-up" offset="10, 0">
-      <template v-slot:activator="{ props }">
-        <v-btn class="hidden-lg-and-up text-secondary ml-1" color="lightsecondary" icon rounded="sm" variant="flat"
-          size="small" v-bind="props">
-          <SearchOutlined :style="{ fontSize: '17px' }" />
-        </v-btn>
-      </template>
-      <v-sheet class="search-sheet v-col-12 pa-0" width="320">
-        <v-text-field persistent-placeholder placeholder="Search here.." color="primary" variant="solo" hide-details>
-          <template v-slot:prepend-inner>
-            <SearchOutlined :style="{ fontSize: '17px' }" />
-          </template>
-        </v-text-field>
-      </v-sheet>
-    </v-menu>
-
-    <!-- ---------------------------------------------- -->
-    <!-- Search part -->
-    <!-- ---------------------------------------------- -->
-    <v-sheet class="d-none d-lg-block" width="250">
-      <Searchbar />
-    </v-sheet>
-
-    <!---/Search part -->
-
     <v-spacer />
-    <!-- ---------------------------------------------- -->
-    <!---right part -->
-    <!-- ---------------------------------------------- -->
 
-    <!-- ---------------------------------------------- -->
     <!-- Github -->
-    <!-- ---------------------------------------------- -->
     <v-btn icon class="text-secondary hidden-sm-and-down d-flex" color="darkText" rounded="sm" variant="text"
       href="https://github.com/codedthemes/mantis-free-vuetify-vuejs-admin-template" target="_blank">
       <GithubOutlined :style="{ fontSize: '16px' }" />
     </v-btn>
 
-    <!-- ---------------------------------------------- -->
     <!-- Notification -->
-    <!-- ---------------------------------------------- -->
     <NotificationDD />
 
-    <!-- ---------------------------------------------- -->
     <!-- User Profile -->
-    <!-- ---------------------------------------------- -->
     <v-menu v-model="profileMenuOpen" :close-on-content-click="false" offset="8, 0">
       <template v-slot:activator="{ props }">
         <v-btn class="profileBtn" variant="text" rounded="sm" v-bind="props">
           <div class="d-flex align-center">
             <v-avatar class="mr-sm-2 mr-0 py-2" size="34" color="primary" variant="tonal">
               <span class="text-caption font-weight-bold">
-                {{
-                  getInitials(profile?.full_name ?? '-')
-                }}
+                {{ getInitials(profile?.full_name ?? '-') }}
               </span>
             </v-avatar>
             <h6 class="text-subtitle-1 mb-0 d-sm-block d-none">{{ profile?.full_name ?? '-' }}</h6>

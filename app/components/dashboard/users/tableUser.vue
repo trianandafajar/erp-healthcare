@@ -36,6 +36,30 @@ const roleColors = computed<Record<string, string>>(() => {
     return map
 })
 
+const { loginAs } = useImpersonation()
+
+const isLoggingInAs = ref<string | null>(null)
+
+const snackbar = ref(false)
+const snackbarMsg = ref('')
+const snackbarColor = ref('success')
+
+function showSnackbar(msg: string, color = 'success') {
+    snackbarMsg.value = msg
+    snackbarColor.value = color
+    snackbar.value = true
+}
+
+async function openLoginAs(user: any) {
+    isLoggingInAs.value = user.id
+    try {
+        await loginAs({ id: user.id, name: user.name, role: user.role })
+    } catch (err: any) {
+        showSnackbar(err?.data?.message || err?.message || 'Gagal masuk sebagai user ini.', 'error')
+        isLoggingInAs.value = null
+    }
+}
+
 const { data, pending } = await useFetch<{ profiles: any[] }>('/api/users')
 
 const users = computed(() =>
@@ -120,39 +144,46 @@ function closeModal() {
 }
 
 async function handleSubmit(payload: any) {
-    if (modalMode.value === 'add') {
-        await $fetch('/api/users', {
-            method: 'POST',
-            body: {
-                email: payload.email,
-                password: 'Password123',
-                full_name: payload.full_name,
-                role: payload.role,
-                status: payload.status
-            }
-        })
+    try {
+        if (modalMode.value === 'add') {
+            await $fetch('/api/users', {
+                method: 'POST',
+                body: {
+                    email: payload.email,
+                    password: 'Password123',
+                    full_name: payload.full_name,
+                    role: payload.role,
+                    status: payload.status
+                }
+            })
+            showSnackbar('User has been created.')
+        }
+        else if (modalMode.value === 'edit') {
+            await $fetch('/api/users', {
+                method: 'PUT',
+                body: {
+                    id: payload.id,
+                    full_name: payload.full_name,
+                    role: payload.role,
+                    status: payload.status
+                }
+            })
+            showSnackbar('User has been updated.')
+        }
+        else if (modalMode.value === 'delete') {
+            await $fetch('/api/users', {
+                method: 'DELETE',
+                body: {
+                    id: payload.id
+                }
+            })
+            showSnackbar('User has been deleted.')
+        }
+        await refreshNuxtData()
+        closeModal()
+    } catch (err: any) {
+        showSnackbar(err?.data?.message || err?.message || 'Failed to save user.', 'error')
     }
-    else if (modalMode.value === 'edit') {
-        await $fetch('/api/users', {
-            method: 'PUT',
-            body: {
-                id: payload.id,
-                full_name: payload.full_name,
-                role: payload.role,
-                status: payload.status
-            }
-        })
-    }
-    else if (modalMode.value === 'delete') {
-        await $fetch('/api/users', {
-            method: 'DELETE',
-            body: {
-                id: payload.id
-            }
-        })
-    }
-    await refreshNuxtData()
-    closeModal()
 }
 </script>
 
@@ -234,6 +265,12 @@ async function handleSubmit(payload: any) {
                             color="secondary" density="comfortable" @click="openEdit(user)" />
                         <v-btn v-if="can('user.delete')" icon="mdi-delete-outline" variant="text" size="small"
                             color="error" density="comfortable" @click="openDelete(user)" />
+                        <v-btn icon variant="text" size="small" color="warning" density="comfortable"
+                            title="Login as this user" :loading="isLoggingInAs === user.id"
+                            :disabled="isLoggingInAs !== null"
+                            @click="openLoginAs(user)">
+                            <v-icon icon="mdi-account-arrow-right-outline" />
+                        </v-btn>
                     </td>
                 </tr>
             </tbody>
@@ -252,4 +289,11 @@ async function handleSubmit(payload: any) {
             <UserModal :mode="modalMode" :user="selectedUser" @submit="handleSubmit" @cancel="closeModal" />
         </v-dialog>
     </div>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
+        {{ snackbarMsg }}
+        <template #actions>
+            <v-btn variant="text" icon="mdi-close" @click="snackbar = false" />
+        </template>
+    </v-snackbar>
 </template>

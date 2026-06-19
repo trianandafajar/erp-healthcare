@@ -1,9 +1,9 @@
 <script setup lang="ts">
 definePageMeta({
-    layout: 'default',
+    layout: 'blank',
     middleware: 'auth'
 })
 </script>
 <template>
-    Hello world
+    Calon Landing Page
 </template>
