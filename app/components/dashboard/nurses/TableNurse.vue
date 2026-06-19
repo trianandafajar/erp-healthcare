@@ -204,17 +204,6 @@ async function handleSubmit(payload: any) {
                 </tr>
                 <tr v-else v-for="nurse in paginatedNurses" :key="nurse.id">
                     <td class="py-3">
-                        <!-- <div class="d-flex align-center ga-3">
-                            <v-avatar size="34" color="primary" variant="tonal" :image="nurse.photo_url || undefined">
-                                <span v-if="!nurse.photo_url" class="text-caption font-weight-bold">
-                                    {{ getInitials(nurse.full_name) }}
-                                </span>
-                            </v-avatar>
-                            <div>
-                                <div class="text-body-2 font-weight-medium">{{ nurse.full_name }}</div>
-                                <div class="text-caption text-medium-emphasis">{{ nurse.email }}</div>
-                            </div>
-                        </div> -->
                          <div class="d-flex align-center ga-3">
                             <v-avatar size="34" color="primary" variant="tonal">
                                 <v-img v-if="nurse.photo_url" :src="nurse.photo_url" cover />
