@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import NurseModal from './NurseModal.vue';
 
@@ -40,7 +40,51 @@ const nurses = computed<Nurse[]>(() =>
 )
 
 const departments = computed(() => deptData.value?.departments ?? [])
-const availableUsers = computed(() => availableData.value?.users ?? [])
+
+const availableUsers = ref<any[]>([])
+watch(
+    availableData,
+    (val) => {
+        availableUsers.value = val?.users ?? []
+    },
+    { immediate: true }
+)
+
+async function handleCreateUser(payload: {
+    full_name: string
+    email: string
+}) {
+    try {
+        const res: any = await $fetch('/api/users', {
+            method: 'POST',
+            body: {
+                full_name: payload.full_name,
+                email: payload.email,
+                password: 'Password123',
+                role: 'nurse'
+            }
+        })
+
+        const newUser = {
+            id: res.user.id,
+            full_name: payload.full_name,
+            email: payload.email
+        }
+
+        availableUsers.value.unshift(newUser)
+
+        notify('Nurse account created successfully')
+
+        return newUser
+    } catch (error: any) {
+        notify(
+            error?.data?.message ??
+            'Failed to create nurse account',
+            'error'
+        )
+        return null
+    }
+}
 
 const filteredNurses = computed(() => {
     return nurses.value.filter((n) =>
@@ -255,7 +299,7 @@ async function handleSubmit(payload: any) {
 
     <v-dialog v-model="dialog" max-width="600" persistent>
         <NurseModal :mode="modalMode" :nurse="selectedNurse" :available-users="availableUsers"
-            :departments="departments" @submit="handleSubmit" @cancel="closeModal" />
+            :departments="departments" :on-create-user="handleCreateUser" @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">

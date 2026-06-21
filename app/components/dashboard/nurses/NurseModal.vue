@@ -27,6 +27,10 @@ const props = defineProps<{
     nurse?: Nurse | null
     availableUsers?: AvailableUser[]
     departments?: Department[]
+    onCreateUser: (payload: {
+        full_name: string
+        email: string
+    }) => Promise<{ id: string; full_name: string; email: string } | null>
 }>()
 
 const emit = defineEmits<{
@@ -153,6 +157,33 @@ watch(
     { immediate: true }
 )
 
+const createUserDialog = ref(false)
+const creatingUser = ref(false)
+
+const createUserForm = ref({
+    full_name: '',
+    email: '',
+})
+
+function openCreateUserDialog() {
+    createUserForm.value = { full_name: '', email: '' }
+    createUserDialog.value = true
+}
+
+async function submitCreateUser() {
+    creatingUser.value = true
+    try {
+        const newUser = await props.onCreateUser({ ...createUserForm.value })
+        if (newUser?.id) {
+            form.value.id = newUser.id
+            createUserDialog.value = false
+            createUserForm.value = { full_name: '', email: '' }
+        }
+    } finally {
+        creatingUser.value = false
+    }
+}
+
 const config = computed(() => ({
     add: {
         title: 'Add New Nurse',
@@ -240,14 +271,21 @@ const isSubmitDisabled = computed(() =>
                     <v-col cols="12">
                         <v-label class="text-caption font-weight-medium mb-1">User Account</v-label>
 
-                        <v-select v-if="mode === 'add'" v-model="form.id" :items="availableUsers ?? []"
-                            item-title="full_name" item-value="id" placeholder="Select a user with nurse role"
-                            variant="outlined" density="compact" hide-details="auto"
-                            no-data-text="No available users with nurse role">
-                            <template #item="{ props: itemProps, item }">
-                                <v-list-item v-bind="itemProps" :subtitle="item.raw.email" />
-                            </template>
-                        </v-select>
+                        <div v-if="mode === 'add'" class="d-flex ga-2 align-center">
+                            <v-select v-model="form.id" :items="availableUsers ?? []" item-title="full_name"
+                                item-value="id" placeholder="Select a user with nurse role" variant="outlined"
+                                density="compact" hide-details="auto" no-data-text="No available users with nurse role"
+                                class="flex-grow-1">
+                                <template #item="{ props: itemProps, item }">
+                                    <v-list-item v-bind="itemProps" :subtitle="item.raw.email" />
+                                </template>
+                            </v-select>
+
+                            <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus" height="40"
+                                @click="openCreateUserDialog">
+                                Create User
+                            </v-btn>
+                        </div>
 
                         <v-text-field v-else :model-value="`${nurse?.full_name} (${nurse?.email})`" variant="outlined"
                             density="compact" hide-details disabled />
@@ -334,6 +372,49 @@ const isSubmitDisabled = computed(() =>
             </v-btn>
         </v-card-actions>
     </v-card>
+
+    <v-dialog v-model="createUserDialog" max-width="500">
+        <v-card rounded="lg">
+            <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
+                <div class="d-flex align-center ga-2">
+                    <v-icon icon="mdi-account-plus-outline" size="20" />
+                    <span class="text-h6 font-weight-bold">Create Nurse Account</span>
+                </div>
+                <v-btn icon="mdi-close" variant="text" density="compact" :disabled="creatingUser"
+                    @click="createUserDialog = false" />
+            </v-card-title>
+
+            <v-divider />
+
+            <v-card-text class="pa-4">
+                <v-row dense>
+                    <v-col cols="12">
+                        <v-label class="text-caption font-weight-medium mb-1">Full Name</v-label>
+                        <v-text-field v-model="createUserForm.full_name" placeholder="Nurse John Doe" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Email Address</v-label>
+                        <v-text-field v-model="createUserForm.email" placeholder="nurse@hospital.com" type="email"
+                            variant="outlined" density="compact" hide-details />
+                    </v-col>
+                </v-row>
+            </v-card-text>
+
+            <v-divider />
+
+            <v-card-actions class="pa-4 pt-3">
+                <v-spacer />
+                <v-btn variant="tonal" color="secondary" :disabled="creatingUser" @click="createUserDialog = false">
+                    Cancel
+                </v-btn>
+                <v-btn color="primary" variant="flat" :loading="creatingUser"
+                    :disabled="!createUserForm.full_name || !createUserForm.email" @click="submitCreateUser">
+                    Create Account
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <style scoped>
