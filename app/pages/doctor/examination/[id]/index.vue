@@ -53,6 +53,21 @@ const appointment = computed(() => data.value?.appointment)
 const patient = computed(() => appointment.value?.patients)
 const attachments = ref<ExaminationAttachment[]>([])
 
+const { data: latestDoctorVitals } = await useLazyFetch<{
+    vital: {
+        blood_pressure: string
+        temperature: number | null
+        weight: number | null
+        height: number | null
+        heart_rate: number | null
+    } | null
+}>(() => {
+    const patientId = patient.value?.id
+    return patientId
+        ? `/api/doctor/vitals/latest/${patientId}`
+        : ''
+})
+
 const { data: deptData } = await useFetch<{ departments: any[] }>('/api/departments')
 const { data: doctorsData } = await useFetch<{ doctors: any[] }>('/api/doctors')
 
@@ -79,6 +94,22 @@ const form = reactive({
     treatment_plan: '' as string,
     notes: '' as string,
 })
+
+watch(
+    () => patient.value?.id,
+    () => {
+        const vital = latestDoctorVitals.value?.vital ?? null
+        if (!vital) return
+
+        form.blood_pressure = vital.blood_pressure ?? ''
+
+        form.temperature = vital.temperature ?? null
+        form.weight = vital.weight ?? null
+        form.height = vital.height ?? null
+        form.heart_rate = vital.heart_rate ?? null
+    },
+    { immediate: true },
+)
 
 const prescriptions = ref<Prescription[]>([
     {
