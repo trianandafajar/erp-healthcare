@@ -37,7 +37,7 @@ useSeoMeta({
         </div>
 
         <v-col cols="12">
-            <div class="pt-6 pl-6">
+            <div class="pt-6 pl-6"> 
                 <AppLogo />
             </div>
         </v-col>
