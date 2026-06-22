@@ -9,16 +9,31 @@ useSeoMeta({
     description: 'Patient examination results page',
 })
 
-const { examinationResults } = usePatientPortalMock()
+type ExaminationResult = {
+    id: string
+    date: string
+    type: string
+    doctor: string
+    status: 'Ready' | 'Pending' | string
+    fileName: string
+    department: string
+    summary: string
+    requestedBy: string
+    notes: string
+}
+
+const { data, pending, refresh } = await useFetch<{ examinationResults: ExaminationResult[] }>('/api/patient/examination-results')
+
+const examinationResults = computed<ExaminationResult[]>(() => data.value?.examinationResults ?? [])
 const snackbar = ref(false)
 const snackbarMessage = ref('')
 const search = ref('')
 const statusFilter = ref('all')
 const detailDialog = ref(false)
-const selectedResult = ref<(typeof examinationResults)[number] | null>(null)
+const selectedResult = ref<ExaminationResult | null>(null)
 
 const filteredResults = computed(() =>
-    examinationResults.filter((item) => {
+    examinationResults.value.filter((item) => {
         const keyword = search.value.toLowerCase()
         const matchSearch =
             item.type.toLowerCase().includes(keyword) ||
@@ -33,14 +48,25 @@ function statusColor(status: string) {
     return status === 'Ready' ? 'success' : 'warning'
 }
 
-function openDetail(item: (typeof examinationResults)[number]) {
+function openDetail(item: ExaminationResult) {
     selectedResult.value = item
     detailDialog.value = true
 }
 
-function handleDownload(fileName: string) {
-    snackbarMessage.value = `Download queued for ${fileName}`
+async function handleDownload(fileId: string, fileName: string) {
+    snackbarMessage.value = `Preparing download for ${fileName}`
     snackbar.value = true
+
+    const { data, error } = await useFetch<{ url: string }>(`/api/patient/examination-results/${fileId}/url`)
+
+    if (error.value) {
+        snackbarMessage.value = `Failed to prepare download: ${error.value.message}`
+        snackbar.value = true
+        return
+    }
+
+    const url = data.value?.url
+    if (url) window.open(url, '_blank')
 }
 
 function formatDate(dateStr: string) {
@@ -85,18 +111,18 @@ function formatDate(dateStr: string) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in filteredResults" :key="item.id" class="cursor-pointer"
-                    @click="openDetail(item)">
+                <tr v-for="item in filteredResults" :key="item.id" class="cursor-pointer" @click="openDetail(item)">
                     <td>{{ formatDate(item.date) }}</td>
                     <td>{{ item.type }}</td>
                     <td>{{ item.department }}</td>
                     <td>{{ item.doctor }}</td>
                     <td>
-                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status }}</v-chip>
+                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
+                            }}</v-chip>
                     </td>
                     <td class="text-right">
                         <v-btn size="small" variant="text" color="primary" :disabled="item.status !== 'Ready'"
-                            prepend-icon="mdi-download" @click.stop="handleDownload(item.fileName)">
+                            @click.stop="handleDownload(item.id, item.fileName)">
                             Download
                         </v-btn>
                     </td>
@@ -120,7 +146,8 @@ function formatDate(dateStr: string) {
                     </div>
                     <div class="d-flex flex-wrap ga-2">
                         <v-chip color="primary" variant="tonal">{{ formatDate(selectedResult.date) }}</v-chip>
-                        <v-chip :color="statusColor(selectedResult.status)" variant="tonal">{{ selectedResult.status }}</v-chip>
+                        <v-chip :color="statusColor(selectedResult.status)" variant="tonal">{{ selectedResult.status
+                            }}</v-chip>
                     </div>
                 </div>
             </v-card-item>
