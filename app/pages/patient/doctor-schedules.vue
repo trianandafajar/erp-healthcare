@@ -9,20 +9,53 @@ useSeoMeta({
     description: 'Patient doctor schedules page',
 })
 
-const { doctorSchedules } = usePatientPortalMock()
 const search = ref('')
 
-const filteredSchedules = computed(() =>
-    doctorSchedules.filter((item) => {
-        const keyword = search.value.toLowerCase()
-        return (
-            item.doctor.toLowerCase().includes(keyword) ||
-            item.specialty.toLowerCase().includes(keyword) ||
-            item.department.toLowerCase().includes(keyword) ||
-            item.day.toLowerCase().includes(keyword)
-        )
-    })
+type ScheduleRow = {
+    id: string
+    doctor: string
+    specialty: string
+    department: string
+    day: string
+    time: string
+    slots: number | null
+}
+
+const {
+    data: schedulesResponse,
+    pending,
+    error,
+} = await useFetch<{ schedules: Omit<ScheduleRow, 'doctor' | 'department' | 'slots'> & { doctorName: string; departmentName: string; maxPatients?: number }[] }>(
+    '/api/patient/schedules',
+    {
+        transform: (res) => res,
+    }
 )
+
+const schedules = computed<ScheduleRow[]>(() => {
+    const raw = schedulesResponse.value?.schedules ?? []
+    return raw.map((s: any) => ({
+        id: String(s.id),
+        day: String(s.day ?? ''),
+        time: String(s.time ?? ''),
+        doctor: String(s.doctorName ?? ''),
+        specialty: String(s.specialty ?? ''),
+        department: String(s.departmentName ?? ''),
+        slots: typeof s.maxPatients === 'number' ? s.maxPatients : null,
+    }))
+})
+
+const filteredSchedules = computed(() => {
+    const keyword = search.value.toLowerCase().trim()
+    if (!keyword) return schedules.value
+
+    return schedules.value.filter((item) =>
+        item.doctor.toLowerCase().includes(keyword) ||
+        item.specialty.toLowerCase().includes(keyword) ||
+        item.department.toLowerCase().includes(keyword) ||
+        item.day.toLowerCase().includes(keyword)
+    )
+})
 </script>
 
 <template>
@@ -52,17 +85,26 @@ const filteredSchedules = computed(() =>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in filteredSchedules" :key="item.id">
+                <tr v-if="pending">
+                    <td colspan="6" class="text-center py-6 text-medium-emphasis">Loading schedules...</td>
+                </tr>
+
+                <tr v-else-if="error">
+                    <td colspan="6" class="text-center py-6 text-medium-emphasis">Failed to load schedules.</td>
+                </tr>
+
+                <tr v-else v-for="item in filteredSchedules" :key="item.id">
                     <td>{{ item.doctor }}</td>
                     <td>{{ item.specialty }}</td>
                     <td>{{ item.department }}</td>
                     <td>{{ item.day }}</td>
                     <td>{{ item.time }}</td>
                     <td>
-                        <v-chip size="small" color="primary" variant="tonal">{{ item.slots }} slots</v-chip>
+                        <v-chip size="small" color="primary" variant="tonal">{{ item.slots ?? 0 }} slots</v-chip>
                     </td>
                 </tr>
-                <tr v-if="filteredSchedules.length === 0">
+
+                <tr v-if="!pending && !error && filteredSchedules.length === 0">
                     <td colspan="6" class="text-center py-6 text-medium-emphasis">No doctor schedule found.</td>
                 </tr>
             </tbody>

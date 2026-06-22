@@ -47,6 +47,7 @@ export default defineEventHandler(async (event) => {
             day: dayMap[s.day_of_week] ?? String(s.day_of_week),
             time: `${s.start_time} - ${s.end_time}`,
             doctorId: s.doctor_id,
+            maxPatients: s.max_patients,
             doctorName: s.doctors?.profiles?.full_name ?? '',
             specialty: s.doctors?.specialization ?? '',
             departmentId: s.doctors?.department_id ?? null,
