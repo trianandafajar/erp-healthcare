@@ -9,14 +9,34 @@ useSeoMeta({
     description: 'Patient visit history page',
 })
 
-const { visits } = usePatientPortalMock()
+type Visit = {
+    id: string
+    date: string
+    doctor: string
+    department: string
+    visitType: string
+    complaint: string
+    queueNumber: string | number
+    status: string
+    notes: string
+    followUp: string
+    vitalSigns: {
+        bloodPressure: string
+        heartRate: string
+        temperature: string
+    }
+}
+
+const { data } = await useFetch('/api/patient/visits')
+const visits = computed(() => data.value?.visits ?? [])
+
 const search = ref('')
 const statusFilter = ref('all')
 const detailDialog = ref(false)
-const selectedVisit = ref<(typeof visits)[number] | null>(null)
+const selectedVisit = ref<Visit | null>(null)
 
 const filteredVisits = computed(() =>
-    visits.filter((item) => {
+    (visits.value as Visit[]).filter((item) => {
         const keyword = search.value.toLowerCase()
         const matchSearch =
             item.doctor.toLowerCase().includes(keyword) ||
@@ -28,7 +48,7 @@ const filteredVisits = computed(() =>
     })
 )
 
-function openDetail(item: (typeof visits)[number]) {
+function openDetail(item: Visit) {
     selectedVisit.value = item
     detailDialog.value = true
 }
@@ -92,7 +112,8 @@ function statusColor(status: string) {
                     <td>{{ item.visitType }}</td>
                     <td class="text-wrap">{{ item.complaint }}</td>
                     <td>
-                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status }}</v-chip>
+                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
+                            }}</v-chip>
                     </td>
                     <td class="text-right">
                         <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-eye-outline"
@@ -120,7 +141,8 @@ function statusColor(status: string) {
                     </div>
                     <div class="d-flex flex-wrap ga-2">
                         <v-chip color="primary" variant="tonal">{{ formatDate(selectedVisit.date) }}</v-chip>
-                        <v-chip :color="statusColor(selectedVisit.status)" variant="tonal">{{ selectedVisit.status }}</v-chip>
+                        <v-chip :color="statusColor(selectedVisit.status)" variant="tonal">{{ selectedVisit.status
+                            }}</v-chip>
                     </div>
                 </div>
             </v-card-item>
@@ -146,7 +168,8 @@ function statusColor(status: string) {
                                 <v-card elevation="0" border rounded="lg">
                                     <v-card-text>
                                         <div class="text-caption text-medium-emphasis">Blood Pressure</div>
-                                        <div class="text-body-1 font-weight-medium">{{ selectedVisit.vitalSigns.bloodPressure }}</div>
+                                        <div class="text-body-1 font-weight-medium">{{
+                                            selectedVisit.vitalSigns.bloodPressure }}</div>
                                     </v-card-text>
                                 </v-card>
                             </v-col>
@@ -154,7 +177,8 @@ function statusColor(status: string) {
                                 <v-card elevation="0" border rounded="lg">
                                     <v-card-text>
                                         <div class="text-caption text-medium-emphasis">Heart Rate</div>
-                                        <div class="text-body-1 font-weight-medium">{{ selectedVisit.vitalSigns.heartRate }}</div>
+                                        <div class="text-body-1 font-weight-medium">{{
+                                            selectedVisit.vitalSigns.heartRate }}</div>
                                     </v-card-text>
                                 </v-card>
                             </v-col>
@@ -162,7 +186,8 @@ function statusColor(status: string) {
                                 <v-card elevation="0" border rounded="lg">
                                     <v-card-text>
                                         <div class="text-caption text-medium-emphasis">Temperature</div>
-                                        <div class="text-body-1 font-weight-medium">{{ selectedVisit.vitalSigns.temperature }}</div>
+                                        <div class="text-body-1 font-weight-medium">{{
+                                            selectedVisit.vitalSigns.temperature }}</div>
                                     </v-card-text>
                                 </v-card>
                             </v-col>

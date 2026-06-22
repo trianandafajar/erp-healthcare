@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
             status,
             type,
             chief_complaint,
-
+ queue_number,
             patients (
                 id,
                 full_name,

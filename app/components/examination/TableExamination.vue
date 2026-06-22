@@ -8,6 +8,7 @@ interface Examination {
     id: string
     appointment_date: string | null
     appointment_time: string | null
+    queue_number: string | null
     status: string | null
     type: string | null
     chief_complaint: string | null
@@ -134,7 +135,7 @@ function openExamination(record: Examination) {
 
                 <tr v-else v-for="(exam, index) in paginatedExaminations" :key="exam.id">
                     <td class="py-3">
-                        {{ getQueueNumber(index) }}
+                        {{ exam.queue_number ?? '-' }}
                     </td>
 
                     <td class="py-3">
