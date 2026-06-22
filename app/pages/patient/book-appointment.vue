@@ -22,22 +22,23 @@ interface PatientAppointment {
     status: AppointmentStatus
 }
 
-const { doctorSchedules, visits } = usePatientPortalMock()
+type DbSchedule = {
+    id: string
+    day: string
+    time: string
+    doctorId: string
+    doctorName: string
+    specialty: string
+    departmentId: string | null
+    departmentName: string
+}
 
-const initialAppointments = visits
-    .filter((item) => item.status === 'Scheduled')
-    .map((item) => ({
-        id: item.id,
-        department: item.department,
-        doctor: item.doctor,
-        specialty: doctorSchedules.find((schedule) => schedule.doctor === item.doctor)?.specialty ?? item.department,
-        date: item.date,
-        time: doctorSchedules.find((schedule) => schedule.doctor === item.doctor)?.time ?? '-',
-        complaint: item.complaint,
-        status: item.status as AppointmentStatus
-    }))
+// state
+const { visits } = usePatientPortalMock()
 
-const appointments = useState<PatientAppointment[]>('patient-book-appointments', () => initialAppointments)
+const appointments = useState<PatientAppointment[]>('patient-book-appointments', () => [])
+const schedules = ref<DbSchedule[]>([])
+
 const search = ref('')
 const statusFilter = ref<'All' | AppointmentStatus>('All')
 const dialog = ref(false)
@@ -48,8 +49,8 @@ const snackbar = ref(false)
 const snackbarMessage = ref('')
 
 const emptyForm = () => ({
-    department: '',
-    doctor: '',
+    departmentId: '' as string,
+    doctorId: '' as string,
     date: '',
     time: '',
     complaint: '',
@@ -58,10 +59,20 @@ const emptyForm = () => ({
 
 const form = ref(emptyForm())
 
-const departmentOptions = computed(() => [...new Set(doctorSchedules.map((item) => item.department))])
-const doctorOptions = computed(() =>
-    doctorSchedules.filter((item) => !form.value.department || item.department === form.value.department)
+// computed
+const departmentOptions = computed(() =>
+    [...new Map(schedules.value.map((s) => [s.departmentId ?? '', s.departmentName])).entries()]
+        .filter(([id]) => id)
+        .map(([id, name]) => ({ id, name }))
 )
+
+const doctorOptions = computed(() => {
+    if (!form.value.departmentId) return []
+    return schedules.value
+        .filter((s) => s.departmentId === form.value.departmentId)
+        .map((s) => ({ doctorId: s.doctorId, doctorName: s.doctorName, specialty: s.specialty }))
+        .filter((v, i, arr) => arr.findIndex((x) => x.doctorId === v.doctorId) === i)
+})
 
 const filteredAppointments = computed(() =>
     appointments.value.filter((item) => {
@@ -73,26 +84,25 @@ const filteredAppointments = computed(() =>
             item.complaint.toLowerCase().includes(keyword) ||
             item.id.toLowerCase().includes(keyword)
         const matchesStatus = statusFilter.value === 'All' || item.status === statusFilter.value
-
         return matchesSearch && matchesStatus
     })
 )
 
 const selectedSchedule = computed(() =>
-    doctorSchedules.find((item) => item.doctor === form.value.doctor)
+    schedules.value.find((s) => s.doctorId === form.value.doctorId) ?? null
 )
 
-watch(() => form.value.department, () => {
-    if (!doctorOptions.value.some((item) => item.doctor === form.value.doctor)) {
-        form.value.doctor = ''
-        form.value.time = ''
-    }
+// watchers
+watch(() => form.value.departmentId, () => {
+    form.value.doctorId = ''
+    form.value.time = ''
 })
 
-watch(() => form.value.doctor, () => {
+watch(() => form.value.doctorId, () => {
     form.value.time = selectedSchedule.value?.time ?? ''
 })
 
+// functions
 function openCreate() {
     editingId.value = null
     form.value = emptyForm()
@@ -101,40 +111,73 @@ function openCreate() {
 
 function openEdit(item: PatientAppointment) {
     editingId.value = item.id
-    form.value = {
-        department: item.department,
-        doctor: item.doctor,
-        date: item.date,
-        time: item.time,
-        complaint: item.complaint,
-        status: item.status
-    }
     dialog.value = true
 }
 
-function saveAppointment() {
-    const schedule = selectedSchedule.value
-    const payload: PatientAppointment = {
-        id: editingId.value ?? `APP-${Date.now().toString().slice(-6)}`,
-        department: form.value.department,
-        doctor: form.value.doctor,
-        specialty: schedule?.specialty ?? form.value.department,
-        date: form.value.date,
-        time: form.value.time,
-        complaint: form.value.complaint,
-        status: form.value.status
-    }
+async function loadAppointments() {
+    const { data, error } = await useFetch('/api/patient/appointments/today', {
+        method: 'GET',
+    })
+    if (error.value) return
 
+    const apiAppointments = data.value?.appointments ?? []
+    appointments.value = apiAppointments.map((item: any) => ({
+        id: item.id ?? '',
+        department: item.department ?? item.department_id ?? '',
+        doctor: item.doctors?.profiles?.full_name ?? '',
+        specialty: item.doctors?.specialization ?? '',
+        date: item.appointment_date ?? '',
+        time: item.appointment_time ?? '',
+        complaint: item.chief_complaint ?? item.notes ?? '',
+        status: item.status === 'Cancelled' ? 'Cancelled' : 'Scheduled',
+    }))
+}
+
+async function loadSchedules() {
+    const { data, error } = await useFetch('/api/patient/schedules', { method: 'GET' })
+    if (error.value) return
+    schedules.value = (data.value?.schedules ?? []) as DbSchedule[]
+}
+
+async function saveAppointment() {
     if (editingId.value) {
-        appointments.value = appointments.value.map((item) => (item.id === editingId.value ? payload : item))
-        snackbarMessage.value = 'Appointment has been updated.'
-    } else {
-        appointments.value = [payload, ...appointments.value]
-        snackbarMessage.value = 'Appointment has been booked.'
+        snackbarMessage.value = 'Editing existing appointments is not implemented in this page.'
+        snackbar.value = true
+        return
     }
 
+    if (!form.value.doctorId || !form.value.departmentId || !form.value.date || !form.value.complaint) return
+
+    const schedule = selectedSchedule.value
+    if (!schedule) return
+
+    const payload = {
+        doctor_id: form.value.doctorId,
+        department_id: form.value.departmentId,
+        appointment_date: form.value.date,
+        appointment_time: schedule.time.split(' - ')[0] ?? schedule.time,
+        type: 'appointment',
+        status: 'waiting',
+        chief_complaint: form.value.complaint,
+        notes: form.value.complaint,
+    }
+
+    const { error } = await useFetch('/api/patient/appointments/today', {
+        method: 'POST',
+        body: payload,
+    })
+
+    if ((error.value as any)?.message) {
+        snackbarMessage.value = (error.value as any).message
+        snackbar.value = true
+        return
+    }
+
+    snackbarMessage.value = 'Appointment has been booked.'
     snackbar.value = true
     dialog.value = false
+    form.value = emptyForm()
+    await loadAppointments()
 }
 
 function openDelete(item: PatientAppointment) {
@@ -144,7 +187,6 @@ function openDelete(item: PatientAppointment) {
 
 function deleteAppointment() {
     if (!deletingAppointment.value) return
-
     appointments.value = appointments.value.filter((item) => item.id !== deletingAppointment.value?.id)
     snackbarMessage.value = 'Appointment has been deleted.'
     snackbar.value = true
@@ -154,7 +196,6 @@ function deleteAppointment() {
 
 function formatDate(dateStr: string) {
     if (!dateStr) return '-'
-
     return new Date(dateStr).toLocaleDateString('en-US', {
         day: 'numeric',
         month: 'short',
@@ -165,6 +206,9 @@ function formatDate(dateStr: string) {
 function statusColor(status: AppointmentStatus) {
     return status === 'Scheduled' ? 'primary' : 'error'
 }
+
+// init
+await Promise.all([loadAppointments(), loadSchedules()])
 </script>
 
 <template>
@@ -216,7 +260,8 @@ function statusColor(status: AppointmentStatus) {
                     <td>{{ item.time }}</td>
                     <td class="text-wrap">{{ item.complaint }}</td>
                     <td>
-                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status }}</v-chip>
+                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
+                        }}</v-chip>
                     </td>
                     <td class="text-right">
                         <div class="d-flex justify-end ga-2">
@@ -256,23 +301,27 @@ function statusColor(status: AppointmentStatus) {
             <v-card-text>
                 <v-row>
                     <v-col cols="12" md="6">
-                        <v-select v-model="form.department" :items="departmentOptions" label="Department"
-                            variant="outlined" hide-details />
+                        <v-select v-model="form.departmentId" :items="departmentOptions" label="Department"
+                            item-title="name" item-value="id" variant="outlined" hide-details />
                     </v-col>
+
                     <v-col cols="12" md="6">
-                        <v-select v-model="form.doctor" :items="doctorOptions.map((item) => item.doctor)" label="Doctor"
-                            variant="outlined" hide-details />
+                        <v-select v-model="form.doctorId" :items="doctorOptions" label="Doctor" item-title="doctorName"
+                            item-value="doctorId" variant="outlined" hide-details />
                     </v-col>
+
                     <v-col cols="12" md="6">
                         <v-text-field v-model="form.date" label="Preferred Date" type="date" variant="outlined"
                             hide-details />
                     </v-col>
                     <v-col cols="12" md="6">
-                        <v-text-field v-model="form.time" label="Practice Time" variant="outlined" readonly hide-details />
+                        <v-text-field v-model="form.time" label="Practice Time" variant="outlined" readonly
+                            hide-details />
                         <div v-if="selectedSchedule" class="text-caption text-medium-emphasis mt-2">
                             Available every {{ selectedSchedule.day }}, {{ selectedSchedule.time }}.
                         </div>
                     </v-col>
+
                     <v-col v-if="editingId" cols="12" md="6">
                         <v-select v-model="form.status" :items="['Scheduled', 'Cancelled']" label="Status"
                             variant="outlined" hide-details />
@@ -288,7 +337,7 @@ function statusColor(status: AppointmentStatus) {
                 <v-spacer />
                 <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
                 <v-btn color="primary" variant="flat" prepend-icon="mdi-content-save-outline"
-                    :disabled="!form.department || !form.doctor || !form.date || !form.complaint"
+                    :disabled="!form.doctorId || !form.departmentId || !form.date || !form.complaint"
                     @click="saveAppointment">
                     {{ editingId ? 'Save Changes' : 'Save Appointment' }}
                 </v-btn>
