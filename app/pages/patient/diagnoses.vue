@@ -9,14 +9,32 @@ useSeoMeta({
     description: 'Patient diagnosis history page',
 })
 
-const { diagnoses } = usePatientPortalMock()
+type DiagnosisItem = {
+    id: string
+    date: string
+    doctor: string
+    diagnosis: string
+    code: string
+    notes: string
+    department: string
+    severity: string
+    symptoms: string[]
+    findings: string[]
+    carePlan: string[]
+    followUp: string
+}
+
+const { data, pending, error } = await useFetch<{ diagnoses: DiagnosisItem[] }>('/api/patient/diagnoses')
+
+const diagnoses = computed(() => data.value?.diagnoses ?? [])
 const search = ref('')
 const detailDialog = ref(false)
-const selectedDiagnosis = ref<(typeof diagnoses)[number] | null>(null)
+const selectedDiagnosis = ref<DiagnosisItem | null>(null)
 
-const filteredDiagnoses = computed(() =>
-    diagnoses.filter((item) => {
-        const keyword = search.value.toLowerCase()
+const filteredDiagnoses = computed(() => {
+    const keyword = search.value.toLowerCase()
+
+    return diagnoses.value.filter((item) => {
         return (
             item.diagnosis.toLowerCase().includes(keyword) ||
             item.doctor.toLowerCase().includes(keyword) ||
@@ -24,9 +42,9 @@ const filteredDiagnoses = computed(() =>
             item.department.toLowerCase().includes(keyword)
         )
     })
-)
+})
 
-function openDetail(item: (typeof diagnoses)[number]) {
+function openDetail(item: DiagnosisItem) {
     selectedDiagnosis.value = item
     detailDialog.value = true
 }
@@ -52,7 +70,8 @@ function formatDate(dateStr: string) {
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
         <div>
             <h2 class="text-h3 mb-1">Diagnosis History</h2>
-            <p class="text-medium-emphasis mb-0">Review diagnosis records and open the full clinical details when needed.</p>
+            <p class="text-medium-emphasis mb-0">Review diagnosis records and open the full clinical details when
+                needed.</p>
         </div>
     </div>
 
@@ -71,7 +90,7 @@ function formatDate(dateStr: string) {
                     <th>Code</th>
                     <th>Department</th>
                     <th>Doctor</th>
-                    <th>Severity</th>
+                    <!-- <th>Severity</th> -->
                     <th class="text-right">Action</th>
                 </tr>
             </thead>
@@ -82,11 +101,11 @@ function formatDate(dateStr: string) {
                     <td>{{ item.code }}</td>
                     <td>{{ item.department }}</td>
                     <td>{{ item.doctor }}</td>
-                    <td>
+                    <!-- <td>
                         <v-chip size="small" :color="severityColor(item.severity)" variant="tonal">
                             {{ item.severity }}
                         </v-chip>
-                    </td>
+                    </td> -->
                     <td class="text-right">
                         <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-eye-outline"
                             @click="openDetail(item)">
@@ -108,14 +127,15 @@ function formatDate(dateStr: string) {
                     <div>
                         <v-card-title class="px-0">{{ selectedDiagnosis.diagnosis }}</v-card-title>
                         <v-card-subtitle class="px-0 mt-1">
-                            {{ selectedDiagnosis.code }} | {{ selectedDiagnosis.department }} | {{ selectedDiagnosis.doctor }}
+                            {{ selectedDiagnosis.code }} | {{ selectedDiagnosis.department }} | {{
+                                selectedDiagnosis.doctor }}
                         </v-card-subtitle>
                     </div>
                     <div class="d-flex flex-wrap ga-2">
                         <v-chip color="primary" variant="tonal">{{ formatDate(selectedDiagnosis.date) }}</v-chip>
-                        <v-chip :color="severityColor(selectedDiagnosis.severity)" variant="tonal">
+                        <!-- <v-chip :color="severityColor(selectedDiagnosis.severity)" variant="tonal">
                             {{ selectedDiagnosis.severity }} severity
-                        </v-chip>
+                        </v-chip> -->
                     </div>
                 </div>
             </v-card-item>
