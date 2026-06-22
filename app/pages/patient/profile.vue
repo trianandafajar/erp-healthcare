@@ -9,18 +9,47 @@ useSeoMeta({
     description: 'Patient profile page',
 })
 
-const { profile } = usePatientPortalMock()
+type PatientProfile = {
+    fullName: string
+    medicalRecordNumber: string
+    email: string
+    phone: string
+    gender: string
+    dateOfBirth: string
+    bloodType: string
+    address: string
+    status: 'Active' | 'Inactive'
+}
 
-const profileItems = [
-    { label: 'Full Name', value: profile.fullName },
-    { label: 'Medical Record Number', value: profile.medicalRecordNumber },
-    { label: 'Email', value: profile.email },
-    { label: 'Phone Number', value: profile.phone },
-    { label: 'Gender', value: profile.gender },
-    { label: 'Date of Birth', value: new Date(profile.dateOfBirth).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) },
-    { label: 'Blood Type', value: profile.bloodType },
-    { label: 'Address', value: profile.address },
-]
+const { data, pending } = await useFetch<{ profile: PatientProfile }>('/api/patient/profile')
+
+const profile = computed<PatientProfile>(() => data.value?.profile ?? {
+    fullName: '-',
+    medicalRecordNumber: '-',
+    email: '-',
+    phone: '-',
+    gender: '-',
+    dateOfBirth: '',
+    bloodType: '-',
+    address: '-',
+    status: 'Inactive'
+})
+
+const profileItems = computed(() => [
+    { label: 'Full Name', value: profile.value.fullName },
+    { label: 'Medical Record Number', value: profile.value.medicalRecordNumber },
+    { label: 'Email', value: profile.value.email },
+    { label: 'Phone Number', value: profile.value.phone },
+    { label: 'Gender', value: profile.value.gender },
+    {
+        label: 'Date of Birth',
+        value: profile.value.dateOfBirth
+            ? new Date(profile.value.dateOfBirth).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+            : '-'
+    },
+    { label: 'Blood Type', value: profile.value.bloodType },
+    { label: 'Address', value: profile.value.address },
+])
 </script>
 
 <template>
@@ -36,11 +65,17 @@ const profileItems = [
             <v-card elevation="0" rounded="lg">
                 <v-card-text class="text-center py-8">
                     <v-avatar size="88" color="primary" variant="tonal" class="mb-4">
-                        <span class="text-h4 font-weight-bold">{{ profile.fullName.split(' ').map((name) => name[0]).slice(0, 2).join('') }}</span>
+                        <span class="text-h4 font-weight-bold">
+                            {{profile.fullName.split(' ').map((name) => name[0]).slice(0, 2).join('')}}
+                        </span>
                     </v-avatar>
                     <div class="text-h5">{{ profile.fullName }}</div>
                     <div class="text-body-2 text-medium-emphasis mt-1">{{ profile.email }}</div>
-                    <v-chip class="mt-4" color="success" variant="tonal">{{ profile.status }}</v-chip>
+                    <v-chip class="mt-4" :color="profile.status === 'Active' ? 'success' : 'warning'" variant="tonal">
+                        {{ profile.status }}
+                    </v-chip>
+
+                    <div v-if="pending" class="text-caption text-medium-emphasis mt-4">Loading...</div>
                 </v-card-text>
             </v-card>
         </v-col>
