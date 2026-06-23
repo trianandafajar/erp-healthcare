@@ -3,7 +3,7 @@ import PharmacyDashboard from '~/components/pharmacy/PharmacyDashboard.vue'
 
 definePageMeta({
     layout: 'pharmacy',
-    middleware: ['auth', 'role'],
+    middleware: ['auth', 'role', 'permission'],
     role: 'pharmacy',
     permissions: ['dashboard.view'],
 })

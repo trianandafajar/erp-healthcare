@@ -3,7 +3,7 @@ import NurseCareNotes from '~/components/nurse/NurseCareNotes.vue'
 
 definePageMeta({
     layout: 'nurse',
-    middleware: ['auth', 'role'],
+    middleware: ['auth', 'role', 'permission'],
     role: 'nurse',
     permissions: ['care-notes.view'],
 })

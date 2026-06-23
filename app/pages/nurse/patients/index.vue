@@ -3,7 +3,7 @@ import NursePatientList from '~/components/nurse/NursePatientList.vue'
 
 definePageMeta({
     layout: 'nurse',
-    middleware: ['auth', 'role'],
+    middleware: ['auth', 'role', 'permission'],
     role: 'nurse',
     permissions: ['patient.view'],
 })

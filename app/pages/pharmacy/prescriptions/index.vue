@@ -3,7 +3,7 @@ import PharmacyPrescriptions from '~/components/pharmacy/PharmacyPrescriptions.v
 
 definePageMeta({
     layout: 'pharmacy',
-    middleware: ['auth', 'role'],
+    middleware: ['auth', 'role', 'permission'],
     role: 'pharmacy',
     permissions: ['prescriptions.view'],
 })
