@@ -4,7 +4,8 @@ import TableAppoint from '~/components/doctor/appointment/TableAppoint.vue';
 
 definePageMeta({
     layout: 'doctor',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['appointment.view'],
 })
 
 useSeoMeta({

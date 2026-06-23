@@ -5,6 +5,8 @@ import ScheduleModal from './ScheduleModal.vue'
 
 definePageMeta({ middleware: ['auth'] })
 
+const { can } = usePermission()
+
 interface DoctorSchedule {
     id: string
     day_of_week: number
@@ -147,8 +149,8 @@ async function handleSubmit(payload: any) {
                 <v-card-title class="text-h3">My Schedule</v-card-title>
                 <v-card-subtitle class="mt-1">Manage your weekly availability</v-card-subtitle>
             </div>
-            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable"
-                @click="openAdd">
+            <v-btn v-if="can('schedule.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openAdd">
                 Add Schedule
             </v-btn>
         </div>
@@ -191,10 +193,10 @@ async function handleSubmit(payload: any) {
                         </v-chip>
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                            density="comfortable" @click="openEdit(schedule)" />
-                        <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
-                            @click="openDelete(schedule)" />
+                        <v-btn v-if="can('schedule.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(schedule)" />
+                        <v-btn v-if="can('schedule.delete')" icon="mdi-delete-outline" variant="text" size="small"
+                            color="error" density="comfortable" @click="openDelete(schedule)" />
                     </td>
                 </tr>
             </tbody>

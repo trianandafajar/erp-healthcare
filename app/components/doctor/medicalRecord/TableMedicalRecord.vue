@@ -4,6 +4,8 @@ import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 
 definePageMeta({ middleware: ['auth'] })
 
+const { can } = usePermission()
+
 interface MedicalRecord {
     id: string
     diagnosis: string | null

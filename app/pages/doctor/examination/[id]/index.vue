@@ -3,8 +3,11 @@ import ReferralModal from '~/components/doctor/referal/ReferralModal.vue'
 
 definePageMeta({
     layout: 'doctor',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['examination.view'],
 })
+
+const { can } = usePermission()
 
 useSeoMeta({
     title: 'Examination Input Page',
@@ -639,8 +642,8 @@ async function uploadAttachments(
         </v-col>
     </v-row>
 
-    <ReferralModal v-model="referralDialog" :departments="departments" :doctors="doctors" :saving="referring"
-        @submit="handleReferralSubmit" />
+    <ReferralModal v-if="can('referrals.create')" v-model="referralDialog" :departments="departments" :doctors="doctors"
+        :saving="referring" @submit="handleReferralSubmit" />
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" :timeout="3000">
         {{ snackbarMsg }}

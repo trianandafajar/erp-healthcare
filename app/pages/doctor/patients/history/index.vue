@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'doctor',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['patient-history.view'],
 })
 
 interface Patient {
@@ -99,7 +100,7 @@ function openHistory(patientId: string) {
                                 <div class="d-flex align-center ga-3">
                                     <v-avatar size="34" color="secondary" variant="tonal">
                                         <span class="text-caption font-weight-bold">{{ getInitials(patient.full_name)
-                                        }}</span>
+                                            }}</span>
                                     </v-avatar>
                                     <span class="text-body-2 font-weight-medium">{{ patient.full_name }}</span>
                                 </div>

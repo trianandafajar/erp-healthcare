@@ -3,7 +3,11 @@ import { ref, computed } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import ApptModal from './ApptModal.vue'
 
-definePageMeta({ middleware: ['auth'] })
+definePageMeta({
+    middleware: ['auth'],
+})
+
+const { can } = usePermission()
 
 interface Appointment {
     id: string
@@ -189,8 +193,8 @@ async function handleSubmit(payload: any) {
                     List of patients scheduled today
                 </v-card-subtitle>
             </div>
-            <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" density="comfortable"
-                @click="openAdd">
+            <v-btn v-if="can('appointment.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openAdd">
                 Add Appointment
             </v-btn>
         </div>
@@ -261,10 +265,10 @@ async function handleSubmit(payload: any) {
                         {{ appt.chief_complaint ?? '-' }}
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                            density="comfortable" @click="openEdit(appt)" />
-                        <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
-                            @click="openDelete(appt)" />
+                        <v-btn v-if="can('appointment.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(appt)" />
+                        <v-btn v-if="can('appointment.delete')" icon="mdi-delete-outline" variant="text" size="small"
+                            color="error" density="comfortable" @click="openDelete(appt)" />
                     </td>
                 </tr>
             </tbody>

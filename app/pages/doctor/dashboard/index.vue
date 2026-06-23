@@ -8,7 +8,8 @@ import {
 
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth']
+    middleware: ['auth', 'permission'],
+    permissions: ['dashboard.view'],
 })
 
 useSeoMeta({

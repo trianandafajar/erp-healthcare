@@ -4,7 +4,8 @@ import TableMedicalRecord from '~/components/doctor/medicalRecord/TableMedicalRe
 
 definePageMeta({
     layout: 'doctor',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['medical.view'], 
 })
 
 useSeoMeta({

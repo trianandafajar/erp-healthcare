@@ -4,6 +4,8 @@ import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 
 definePageMeta({ middleware: ['auth'] })
 
+const { can } = usePermission()
+
 interface Examination {
     id: string
     appointment_date: string | null
@@ -158,8 +160,8 @@ function openExamination(record: Examination) {
                     </td>
 
                     <td class="py-3 text-right">
-                        <v-btn icon="mdi-stethoscope" variant="text" size="small" color="primary" density="comfortable"
-                            @click="openExamination(exam)" />
+                        <v-btn v-if="can('examination.create')" icon="mdi-stethoscope" variant="text" size="small"
+                            color="primary" density="comfortable" @click="openExamination(exam)" />
                     </td>
                 </tr>
             </tbody>

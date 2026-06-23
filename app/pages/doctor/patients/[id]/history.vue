@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'doctor',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['patient-history.view'], 
 })
 
 interface TimelineItem {

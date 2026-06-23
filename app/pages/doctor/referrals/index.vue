@@ -5,7 +5,8 @@ import TableReferral from '~/components/doctor/referal/TableReferral.vue';
 
 definePageMeta({
     layout: 'doctor',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['referrals.view'],
 })
 
 useSeoMeta({

@@ -4,7 +4,8 @@ import TableSchedule from '~/components/doctor/schedule/TableSchedule.vue';
 
 definePageMeta({
     layout: 'doctor',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['schedule.view'],
 })
 
 useSeoMeta({

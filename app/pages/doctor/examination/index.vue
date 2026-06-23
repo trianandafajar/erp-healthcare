@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import TableExamination from '~/components/examination/TableExamination.vue';
+import TableExamination from '~/components/doctor/examination/TableExamination.vue';
 
 
 definePageMeta({
     layout: 'doctor',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['examination.view'],
 })
-
 useSeoMeta({
     title: 'Examination Page',
     ogTitle: 'My Amazing Site',
