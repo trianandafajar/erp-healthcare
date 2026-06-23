@@ -12,7 +12,12 @@ interface AppointmentRow {
     queue_number: string | null
     chief_complaint: string | null
     patient: { id: string; full_name: string; medical_record_number: string } | null
-    doctor: { id: string; full_name: string; department: { id: string; name: string } | null } | null
+    doctor: {
+        id: string
+        specialization: string | null
+        profile: { id: string; full_name: string } | null
+        department: { id: string; name: string } | null
+    } | null
     department: { id: string; name: string } | null
 }
 
@@ -52,7 +57,7 @@ const statusOptions = [
 
 const doctorOptions = computed(() => {
     const names = appointments.value
-        .map((a) => a.doctor?.full_name)
+        .map((a) => a.doctor?.profile?.full_name)
         .filter(Boolean) as string[]
     return ['all', ...new Set(names)]
 })
@@ -76,12 +81,12 @@ const filteredAppointments = computed(() => {
     const keyword = search.value.toLowerCase()
     return appointments.value.filter((item) => {
         const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-        const matchDoctor = doctorFilter.value === 'all' || item.doctor?.full_name === doctorFilter.value
+        const matchDoctor = doctorFilter.value === 'all' || item.doctor?.profile?.full_name === doctorFilter.value
         const matchDate = !dateFilter.value || item.appointment_date === dateFilter.value
         const matchSearch =
             (item.patient?.full_name ?? '').toLowerCase().includes(keyword) ||
             (item.patient?.medical_record_number ?? '').toLowerCase().includes(keyword) ||
-            (item.doctor?.full_name ?? '').toLowerCase().includes(keyword) ||
+            (item.doctor?.profile?.full_name ?? '').toLowerCase().includes(keyword) ||
             (item.department?.name ?? item.doctor?.department?.name ?? '').toLowerCase().includes(keyword) ||
             item.type.toLowerCase().includes(keyword)
         return matchStatus && matchDoctor && matchDate && matchSearch
@@ -112,7 +117,7 @@ async function confirmCheckIn() {
         checkInResult.value = {
             queue_number: res.appointment.queue_number,
             patient_name: selectedAppointment.value.patient?.full_name ?? '-',
-            doctor_name: selectedAppointment.value.doctor?.full_name ?? '-',
+            doctor_name: selectedAppointment.value.doctor?.profile?.full_name ?? '-',
             department_name: selectedAppointment.value.department?.name ?? selectedAppointment.value.doctor?.department?.name ?? '-',
         }
 
@@ -204,7 +209,7 @@ async function confirmCheckIn() {
                         </div>
                     </td>
                     <td class="py-3 text-body-2">
-                        <div>{{ item.doctor?.full_name ?? '-' }}</div>
+                        <div>{{ item.doctor?.profile?.full_name ?? '-' }}</div>
                         <div class="text-caption text-medium-emphasis">
                             {{ item.department?.name ?? item.doctor?.department?.name ?? '-' }}
                         </div>
@@ -250,7 +255,7 @@ async function confirmCheckIn() {
                     </v-col>
                     <v-col cols="12" sm="6">
                         <div class="text-caption text-medium-emphasis">Doctor</div>
-                        <div class="text-body-1 font-weight-medium">{{ selectedAppointment.doctor?.full_name ?? '-' }}
+                        <div class="text-body-1 font-weight-medium">{{ selectedAppointment.doctor?.profile?.full_name ?? '-' }}
                         </div>
                     </v-col>
                     <v-col cols="12" sm="6">

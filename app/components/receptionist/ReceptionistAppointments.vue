@@ -13,7 +13,12 @@ interface AppointmentRow {
     notes: string | null
     queue_number: string | null
     patient: { id: string; full_name: string; medical_record_number: string } | null
-    doctor: { id: string; full_name: string; department: { id: string; name: string } | null } | null
+    doctor: {
+        id: string
+        specialization: string | null
+        profile: { id: string; full_name: string } | null
+        department: { id: string; name: string } | null
+    } | null
     department: { id: string; name: string } | null
 }
 
@@ -134,7 +139,7 @@ const filteredAppointments = computed(() => {
         const matchSearch =
             (item.patient?.full_name ?? '').toLowerCase().includes(keyword) ||
             (item.patient?.medical_record_number ?? '').toLowerCase().includes(keyword) ||
-            (item.doctor?.full_name ?? '').toLowerCase().includes(keyword) ||
+            (item.doctor?.profile?.full_name ?? '').toLowerCase().includes(keyword) ||
             (item.department?.name ?? item.doctor?.department?.name ?? '').toLowerCase().includes(keyword)
         return matchStatus && matchSearch
     })
@@ -275,7 +280,7 @@ async function updateStatus(id: string, status: string) {
                         </div>
                     </td>
                     <td class="py-3 text-body-2">
-                        <div>{{ item.doctor?.full_name ?? '-' }}</div>
+                        <div>{{ item.doctor?.profile?.full_name ?? '-' }}</div>
                         <div class="text-caption text-medium-emphasis">
                             {{ item.department?.name ?? item.doctor?.department?.name ?? '-' }}
                         </div>
