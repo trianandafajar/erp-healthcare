@@ -97,16 +97,9 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
     <v-card elevation="0">
         <v-card-text class="d-flex flex-column ga-4 px-0">
             <div class="d-flex flex-wrap align-center ga-3">
-                <v-text-field
-                    v-model="search"
-                    prepend-inner-icon="mdi-magnify"
-                    label="Search logs"
-                    placeholder="Search medicine, reference, supplier, reason, or note"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    class="pharmacy-log-search"
-                />
+                <v-text-field v-model="search" prepend-inner-icon="mdi-magnify" label="Search logs"
+                    placeholder="Search medicine, reference, supplier, reason, or note" variant="outlined"
+                    density="comfortable" hide-details class="pharmacy-log-search" />
             </div>
 
             <v-table hover density="comfortable" class="pharmacy-log-table">
@@ -127,13 +120,8 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                             No logs found
                         </td>
                     </tr>
-                    <tr
-                        v-else
-                        v-for="movement in paginatedMovements"
-                        :key="movement.id"
-                        class="pharmacy-log-row"
-                        @click="openDetail(movement)"
-                    >
+                    <tr v-else v-for="movement in paginatedMovements" :key="movement.id" class="pharmacy-log-row"
+                        @click="openDetail(movement)">
                         <td class="py-3">
                             <div class="text-body-2 font-weight-medium">{{ medicineLabel(movement) }}</div>
                         </td>
@@ -173,18 +161,15 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                 </tbody>
             </v-table>
 
-            <div v-if="filteredMovements.length > itemsPerPage" class="d-flex flex-wrap align-center justify-space-between ga-3 pt-2">
+            <div v-if="filteredMovements.length > itemsPerPage"
+                class="d-flex flex-wrap align-center justify-space-between ga-3 pt-2">
                 <div class="text-body-2 text-medium-emphasis">
-                    Showing {{ Math.min((safeCurrentPage - 1) * itemsPerPage + 1, filteredMovements.length) }}-{{ Math.min(safeCurrentPage * itemsPerPage, filteredMovements.length) }} of {{ filteredMovements.length }} logs
+                    Showing {{ Math.min((safeCurrentPage - 1) * itemsPerPage + 1, filteredMovements.length) }}-{{
+                        Math.min(safeCurrentPage * itemsPerPage, filteredMovements.length) }} of {{ filteredMovements.length
+                    }} logs
                 </div>
-                <v-pagination
-                    v-model="currentPage"
-                    :length="totalPages"
-                    :total-visible="7"
-                    density="compact"
-                    rounded="circle"
-                    show-first-last-page
-                />
+                <v-pagination v-model="currentPage" :length="totalPages" :total-visible="7" density="compact"
+                    rounded="circle" show-first-last-page />
             </div>
         </v-card-text>
     </v-card>

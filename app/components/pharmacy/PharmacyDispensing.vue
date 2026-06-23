@@ -209,8 +209,7 @@ function statusColor(status: PrescriptionItem['status']) {
                 <div><strong>Doctor:</strong> {{ selectedGroup.doctorName }}</div>
                 <div><strong>Status:</strong> {{ selectedGroup.status }}</div>
                 <div><strong>Verified Time:</strong> {{ formatDateTime(selectedGroup.verifiedAt) }}</div>
-                <div><strong>Medicines:</strong> {{selectedGroup.items.map((item) => item.medicines.join(', ')).join('
-                    • ') }}</div>
+                <div><strong>Medicines:</strong> {{selectedGroup.items.map((item) => item.medicines.join(', ')).join('• ') }}</div>
             </v-card-text>
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="detailDialog = false">Close</v-btn>
