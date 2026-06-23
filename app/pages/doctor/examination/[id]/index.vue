@@ -33,7 +33,8 @@ interface AppointmentResponse {
 }
 
 interface Prescription {
-    medication_name: string
+    medicine_id: string
+    medicine_name: string
     dosage: string
     frequency: string
     duration: string
@@ -116,7 +117,8 @@ watch(
 
 const prescriptions = ref<Prescription[]>([
     {
-        medication_name: '',
+        medicine_id: '',
+        medicine_name: '',
         dosage: '',
         frequency: '',
         duration: '',
@@ -126,7 +128,8 @@ const prescriptions = ref<Prescription[]>([
 
 function addMedicine() {
     prescriptions.value.push({
-        medication_name: '',
+        medicine_id: '',
+        medicine_name: '',
         dosage: '',
         frequency: '',
         duration: '',
@@ -181,6 +184,20 @@ function notify(msg: string, color = 'success') {
     snackbarMsg.value = msg
     snackbarColor.value = color
     snackbar.value = true
+}
+
+const { data: medicineData } = await useFetch<{ medicine_stocks: any[] }>('/api/pharmacy/stocks')
+const medicines = computed(() => medicineData.value?.medicine_stocks ?? [])
+
+function onMedicineSelect(medicineId: string, index: number) {
+  const selected = medicines.value.find(m => m.id === medicineId)
+  if (!selected) return
+
+  const prescription = prescriptions.value[index]
+  if (!prescription) return
+
+  prescription.medicine_name = selected.medicine_name
+  prescription.dosage = selected.dosage
 }
 
 async function submitExamination(): Promise<string | null> {
@@ -529,8 +546,10 @@ async function uploadAttachments(
                         <tbody>
                             <tr v-for="(medicine, index) in prescriptions" :key="index">
                                 <td class="py-2" style="min-width: 160px;">
-                                    <v-text-field v-model="medicine.medication_name" placeholder="Medication name"
-                                        density="compact" variant="outlined" hide-details />
+                                    <v-select v-model="medicine.medicine_id" :items="medicines"
+                                        item-title="medicine_name" item-value="id" label="Medicine" density="compact"
+                                        variant="outlined" hide-details
+                                        @update:model-value="(val) => onMedicineSelect(val, index)" />
                                 </td>
                                 <td class="py-2" style="min-width: 110px;">
                                     <v-text-field v-model="medicine.dosage" placeholder="e.g. 500mg" density="compact"
