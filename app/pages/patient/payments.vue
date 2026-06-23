@@ -4,20 +4,33 @@ definePageMeta({
     middleware: ['auth', 'permission'],
     permissions: ['payments.view'],
 })
-const {can} = usePermission()
+const { can } = usePermission()
 useSeoMeta({
     title: 'Payments',
     description: 'Patient payments page',
 })
 
-const { payments } = usePatientPortalMock()
+type PaymentItem = {
+    id: string
+    invoiceNumber: string
+    serviceName: string
+    department: string
+    amount: number
+    status: string
+    paymentMethod: string
+    serviceDate: string
+    paidAt: string | null
+}
+
+const { data } = await useFetch<{ payments: PaymentItem[] }>('/api/patient/billing')
+const payments = computed(() => data.value?.payments ?? [])
 const snackbar = ref(false)
 const snackbarMessage = ref('')
 const search = ref('')
 const statusFilter = ref('all')
 
 const filteredPayments = computed(() =>
-    payments.filter((item) => {
+    payments.value.filter((item) => {
         const keyword = search.value.toLowerCase()
         const matchSearch =
             item.invoiceNumber.toLowerCase().includes(keyword) ||

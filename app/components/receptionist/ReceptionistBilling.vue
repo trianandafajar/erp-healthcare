@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const workspace = useReceptionistWorkspace()
+const { billing, updateBillingStatus } = useBilling()
 const search = ref('')
 const statusFilter = ref('All')
 const snackbar = ref(false)
@@ -8,7 +8,7 @@ const { can } = usePermission()
 
 const filteredBilling = computed(() => {
     const keyword = search.value.toLowerCase()
-    return workspace.billing.value.filter((item) => {
+    return billing.value.filter((item) => {
         const matchesStatus = statusFilter.value === 'All' || item.status === statusFilter.value
         const matchesKeyword =
             item.invoiceNumber.toLowerCase().includes(keyword) ||
@@ -22,7 +22,7 @@ const filteredBilling = computed(() => {
 })
 
 const totalPending = computed(() =>
-    workspace.billing.value
+    billing.value
         .filter((item) => item.status === 'Pending' || item.status === 'Overdue')
         .reduce((total, item) => total + item.amount, 0)
 )
@@ -42,7 +42,7 @@ function formatCurrency(amount: number) {
 }
 
 function markPaid(id: string, invoiceNumber: string) {
-    workspace.updateBillingStatus(id, 'Paid')
+    updateBillingStatus(id, 'Paid')
     snackbarMessage.value = `${invoiceNumber} marked as paid.`
     snackbar.value = true
 }
