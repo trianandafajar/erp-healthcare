@@ -12,7 +12,11 @@ export default defineEventHandler(async (event) => {
             end_time,
             max_patients,
             is_active,
-            doctor:doctors(id, full_name, department:departments(id, name))
+            doctor:doctors(
+                id,
+                department:departments(id, name),
+                profile:profiles(id, full_name)
+            )
         `)
         .eq('is_active', true)
         .order('day_of_week')
@@ -29,7 +33,7 @@ export default defineEventHandler(async (event) => {
         max_patients: s.max_patients,
         is_active: s.is_active,
         doctor_id: s.doctor?.id ?? null,
-        doctor_name: s.doctor?.full_name ?? '-',
+        doctor_name: s.doctor?.profile?.full_name ?? '-',
         department_id: s.doctor?.department?.id ?? null,
         department_name: s.doctor?.department?.name ?? '-',
     }))
