@@ -5,6 +5,7 @@ definePageMeta({
     layout: 'receptionist',
     middleware: ['auth', 'role'],
     role: 'receptionist',
+    permissions: ['appointment.view'],
 })
 
 useSeoMeta({

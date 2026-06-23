@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ReceptionistDoctorSchedule, ScheduleStatus } from '~/data/receptionist'
 
+const { can } = usePermission()
 const workspace = useReceptionistWorkspace()
 const search = ref('')
 const statusFilter = ref('All')
@@ -208,9 +209,11 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
         <div>
             <h2 class="text-h3 mb-1">Doctor Schedules</h2>
-            <p class="text-medium-emphasis mb-0">Manage doctor availability, quota, practice rooms, and schedule status.</p>
+            <p class="text-medium-emphasis mb-0">Manage doctor availability, quota, practice rooms, and schedule status.
+            </p>
         </div>
-        <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="openCreate">Add Schedule</v-btn>
+        <v-btn v-if="can('schedule.create')" color="primary" variant="flat" prepend-icon="mdi-plus"
+            @click="openCreate">Add Schedule</v-btn>
     </div>
 
     <v-row class="mb-4">
@@ -252,15 +255,9 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
         <div class="px-4 py-3">
             <v-row dense>
                 <v-col cols="12" md="6">
-                    <v-text-field
-                        v-model="search"
+                    <v-text-field v-model="search"
                         placeholder="Search doctor, specialty, department, day, room, or status"
-                        prepend-inner-icon="mdi-magnify"
-                        variant="outlined"
-                        density="compact"
-                        hide-details
-                        clearable
-                    />
+                        prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable />
                 </v-col>
                 <v-col cols="12" sm="6" md="3">
                     <v-select v-model="statusFilter" :items="statusOptions" label="Status" variant="outlined"
@@ -271,12 +268,12 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
                         variant="outlined" density="compact" hide-details />
                 </v-col>
                 <v-col cols="12" sm="6" md="3">
-                    <v-select v-model="specialtyFilter" :items="specialtyOptions" label="Specialty"
-                        variant="outlined" density="compact" hide-details />
+                    <v-select v-model="specialtyFilter" :items="specialtyOptions" label="Specialty" variant="outlined"
+                        density="compact" hide-details />
                 </v-col>
                 <v-col cols="12" sm="6" md="3">
-                    <v-select v-model="dayFilter" :items="dayOptions" label="Day" variant="outlined"
-                        density="compact" hide-details />
+                    <v-select v-model="dayFilter" :items="dayOptions" label="Day" variant="outlined" density="compact"
+                        hide-details />
                 </v-col>
                 <v-col cols="12" sm="6" md="3">
                     <v-select v-model="roomFilter" :items="roomOptions" label="Room" variant="outlined"
@@ -310,26 +307,23 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
                 <tr v-for="item in filteredSchedules" :key="item.id">
                     <td>
                         <div class="font-weight-medium">{{ item.doctorName }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.specialty }} - {{ item.department }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ item.specialty }} - {{ item.department }}
+                        </div>
                     </td>
                     <td>{{ item.day }}</td>
                     <td>{{ item.startTime }} - {{ item.endTime }}</td>
                     <td>{{ item.room }}</td>
                     <td>
                         <div class="d-flex align-center ga-2">
-                            <v-progress-linear
-                                :model-value="quotaPercent(item)"
-                                height="8"
-                                rounded
-                                :color="statusColor(item.status)"
-                                style="width: 90px"
-                            />
+                            <v-progress-linear :model-value="quotaPercent(item)" height="8" rounded
+                                :color="statusColor(item.status)" style="width: 90px" />
                             <span class="text-body-2">{{ item.booked }}/{{ item.quota }}</span>
                         </div>
                         <div class="text-caption text-medium-emphasis">{{ remainingSlots(item) }} slots left</div>
                     </td>
                     <td>
-                        <v-chip size="small" variant="tonal" :color="statusColor(item.status)">{{ item.status }}</v-chip>
+                        <v-chip size="small" variant="tonal" :color="statusColor(item.status)">{{ item.status
+                        }}</v-chip>
                     </td>
                     <td class="text-right">
                         <div class="d-flex justify-end ga-2">
@@ -341,8 +335,9 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
                             </v-tooltip>
                             <v-tooltip text="Edit schedule">
                                 <template #activator="{ props }">
-                                    <v-btn v-bind="props" icon="mdi-pencil-outline" size="small" color="primary"
-                                        variant="tonal" aria-label="Edit schedule" @click="openEdit(item)" />
+                                    <v-btn v-if="can('schedule.edit')" v-bind="props" icon="mdi-pencil-outline"
+                                        size="small" color="primary" variant="tonal" aria-label="Edit schedule"
+                                        @click="openEdit(item)" />
                                 </template>
                             </v-tooltip>
                             <v-menu location="bottom end">
@@ -351,12 +346,13 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
                                         aria-label="More schedule actions" />
                                 </template>
                                 <v-list density="compact">
-                                    <v-list-item v-for="status in editableStatusOptions" :key="status"
-                                        @click="setQuickStatus(item, status)">
+                                    <v-list-item v-if="can('schedule.status')" v-for="status in editableStatusOptions"
+                                        :key="status" @click="setQuickStatus(item, status)">
                                         <v-list-item-title>{{ status }}</v-list-item-title>
                                     </v-list-item>
                                     <v-divider />
-                                    <v-list-item class="text-error" @click="openDelete(item)">
+                                    <v-list-item v-if="can('schedule.delete')" class="text-error"
+                                        @click="openDelete(item)">
                                         <v-list-item-title>Delete</v-list-item-title>
                                     </v-list-item>
                                 </v-list>
@@ -391,22 +387,28 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
                         <v-text-field v-model="form.room" label="Room" variant="outlined" hide-details />
                     </v-col>
                     <v-col cols="12" md="4">
-                        <v-select v-model="form.day" :items="formDayOptions" label="Day" variant="outlined" hide-details />
+                        <v-select v-model="form.day" :items="formDayOptions" label="Day" variant="outlined"
+                            hide-details />
                     </v-col>
                     <v-col cols="12" md="4">
-                        <v-text-field v-model="form.startTime" label="Start Time" type="time" variant="outlined" hide-details />
+                        <v-text-field v-model="form.startTime" label="Start Time" type="time" variant="outlined"
+                            hide-details />
                     </v-col>
                     <v-col cols="12" md="4">
-                        <v-text-field v-model="form.endTime" label="End Time" type="time" variant="outlined" hide-details />
+                        <v-text-field v-model="form.endTime" label="End Time" type="time" variant="outlined"
+                            hide-details />
                     </v-col>
                     <v-col cols="12" md="4">
-                        <v-text-field v-model.number="form.quota" label="Quota" type="number" min="1" variant="outlined" hide-details />
+                        <v-text-field v-model.number="form.quota" label="Quota" type="number" min="1" variant="outlined"
+                            hide-details />
                     </v-col>
                     <v-col cols="12" md="4">
-                        <v-text-field v-model.number="form.booked" label="Booked" type="number" min="0" variant="outlined" hide-details />
+                        <v-text-field v-model.number="form.booked" label="Booked" type="number" min="0"
+                            variant="outlined" hide-details />
                     </v-col>
                     <v-col cols="12" md="4">
-                        <v-select v-model="form.status" :items="editableStatusOptions" label="Status" variant="outlined" hide-details />
+                        <v-select v-model="form.status" :items="editableStatusOptions" label="Status" variant="outlined"
+                            hide-details />
                     </v-col>
                 </v-row>
             </v-card-text>
@@ -439,7 +441,8 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
                 </div>
                 <div class="d-flex justify-space-between ga-4">
                     <span class="text-medium-emphasis">Practice</span>
-                    <span>{{ selectedSchedule.day }}, {{ selectedSchedule.startTime }} - {{ selectedSchedule.endTime }}</span>
+                    <span>{{ selectedSchedule.day }}, {{ selectedSchedule.startTime }} - {{ selectedSchedule.endTime
+                    }}</span>
                 </div>
                 <div class="d-flex justify-space-between ga-4">
                     <span class="text-medium-emphasis">Room</span>
@@ -447,7 +450,8 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
                 </div>
                 <div class="d-flex justify-space-between ga-4">
                     <span class="text-medium-emphasis">Quota</span>
-                    <span>{{ selectedSchedule.booked }} booked from {{ selectedSchedule.quota }} | {{ remainingSlots(selectedSchedule) }} left</span>
+                    <span>{{ selectedSchedule.booked }} booked from {{ selectedSchedule.quota }} | {{
+                        remainingSlots(selectedSchedule) }} left</span>
                 </div>
                 <div class="d-flex justify-space-between ga-4">
                     <span class="text-medium-emphasis">Status</span>
@@ -458,7 +462,8 @@ function setQuickStatus(item: ReceptionistDoctorSchedule, status: ScheduleStatus
             </v-card-text>
             <v-card-actions class="justify-end px-6 pb-4">
                 <v-btn variant="text" @click="detailDialog = false">Close</v-btn>
-                <v-btn color="primary" variant="flat" @click="openEdit(selectedSchedule); detailDialog = false">Edit</v-btn>
+                <v-btn color="primary" variant="flat"
+                    @click="openEdit(selectedSchedule); detailDialog = false">Edit</v-btn>
                 <v-btn color="secondary" variant="tonal" to="/receptionist/appointments">Create Appointment</v-btn>
             </v-card-actions>
         </v-card>

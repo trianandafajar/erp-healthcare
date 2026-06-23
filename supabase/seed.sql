@@ -129,6 +129,20 @@
     ('stock.edit', 'Edit Stock Item', 'stock', 'pharmacy'),
     ('stock.adjust', 'Adjust Stock', 'stock', 'pharmacy'),
 
+    -- Receptionist area pages
+    ('billing.view', 'View Billing', 'billing', 'receptionist'),
+    ('check-in.view', 'View Check-in', 'check-in', 'receptionist'),
+    ('queue.view', 'View Queue', 'queue', 'receptionist'),
+    ('queue.print', 'Print Queue', 'queue', 'receptionist'),
+    ('patient-regist.view', 'View Patient Registration', 'patient-regist', 'receptionist'),
+
+    -- Receptionist actions
+    ('billing.pay', 'Mark Billing as Paid', 'billing', 'receptionist'),
+    ('schedule.status', 'Update Schedule Status', 'schedule', 'receptionist'),
+    ('patient-regist.create', 'Register Patient', 'patient-regist', 'receptionist'),
+    ('queue.update', 'Update Queue Status', 'queue', 'receptionist'),
+    ('check-in.create', 'Confirm Check-in', 'check-in', 'receptionist'),
+
     -- Admin-only extra permission (from migration)
     ('user.impersonate', 'Login as User', 'user', 'admin')
 
@@ -248,16 +262,41 @@
             ON CONFLICT DO NOTHING;
         END LOOP;
 
+       -- =====================
+        -- RECEPTIONIST
+        -- =====================
+
         SELECT id INTO v_role_id
         FROM public.roles
         WHERE name = 'receptionist';
 
         perm_names := ARRAY[
+            -- Pages
+            'dashboard.view',
             'patient.view',
             'patient.create',
             'patient.edit',
             'doctor.view',
-            'department.view'
+            'department.view',
+            'appointment.view',
+            'schedule.view',
+            'billing.view',
+            'check-in.view',
+            'queue.view',
+            'queue.print',
+            'patient-regist.view',
+
+            -- Actions
+            'appointment.create',
+            'appointment.edit',
+            'billing.pay',
+            'schedule.create',
+            'schedule.edit',
+            'schedule.delete',
+            'schedule.status',
+            'patient-regist.create',
+            'queue.update',
+            'check-in.create'
         ];
 
         FOREACH perm_name IN ARRAY perm_names LOOP

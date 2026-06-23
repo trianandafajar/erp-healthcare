@@ -3,6 +3,7 @@ const workspace = useReceptionistWorkspace()
 const search = ref('')
 const snackbar = ref(false)
 const dialog = ref(false)
+const { can } = usePermission()
 
 const form = reactive({
     fullName: '',
@@ -54,23 +55,17 @@ function submitRegistration() {
             <h2 class="text-h3 mb-1">Patient Registration</h2>
             <p class="text-medium-emphasis mb-0">Register new patients and check existing patient records.</p>
         </div>
-        <v-btn color="primary" variant="flat" prepend-icon="mdi-account-plus-outline" @click="dialog = true">
+        <v-btn v-if="can('patient-regist.create')" color="primary" variant="flat"
+            prepend-icon="mdi-account-plus-outline" @click="dialog = true">
             Patient Registration
         </v-btn>
     </div>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Patient Data">
         <div class="px-4 py-3 d-flex align-center justify-space-between flex-wrap ga-3">
-            <v-text-field
-                v-model="search"
-                placeholder="Search patient, MRN, or phone number"
-                prepend-inner-icon="mdi-magnify"
-                variant="outlined"
-                density="compact"
-                hide-details
-                clearable
-                style="max-width: 420px"
-            />
+            <v-text-field v-model="search" placeholder="Search patient, MRN, or phone number"
+                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
+                style="max-width: 420px" />
             <div class="text-caption text-medium-emphasis">
                 Showing {{ filteredPatients.length }} of {{ workspace.patients.value.length }} patients
             </div>
@@ -89,9 +84,12 @@ function submitRegistration() {
                 <tr v-for="item in filteredPatients" :key="item.id">
                     <td>
                         <div class="font-weight-medium">{{ item.fullName }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.medicalRecordNumber }} - {{ item.gender }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ item.medicalRecordNumber }} - {{ item.gender
+                            }}</div>
                     </td>
-                    <td>{{ new Date(item.dateOfBirth).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) }}</td>
+                    <td>{{ new Date(item.dateOfBirth).toLocaleDateString('en-US', {
+                        day: 'numeric', month: 'short',
+                        year: 'numeric' }) }}</td>
                     <td>
                         <div>{{ item.phone }}</div>
                         <div class="text-caption text-medium-emphasis">{{ item.address }}</div>
@@ -114,25 +112,32 @@ function submitRegistration() {
                 <v-card-text>
                     <v-row>
                         <v-col cols="12">
-                            <v-text-field v-model="form.fullName" label="Full Name" variant="outlined" density="compact" hide-details />
+                            <v-text-field v-model="form.fullName" label="Full Name" variant="outlined" density="compact"
+                                hide-details />
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-select v-model="form.gender" :items="['Male', 'Female']" label="Gender" variant="outlined" density="compact" hide-details />
+                            <v-select v-model="form.gender" :items="['Male', 'Female']" label="Gender"
+                                variant="outlined" density="compact" hide-details />
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="form.dateOfBirth" label="Date of Birth" type="date" variant="outlined" density="compact" hide-details />
+                            <v-text-field v-model="form.dateOfBirth" label="Date of Birth" type="date"
+                                variant="outlined" density="compact" hide-details />
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="form.phone" label="Phone Number" variant="outlined" density="compact" hide-details />
+                            <v-text-field v-model="form.phone" label="Phone Number" variant="outlined" density="compact"
+                                hide-details />
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="form.insuranceProvider" label="Insurance" variant="outlined" density="compact" hide-details />
+                            <v-text-field v-model="form.insuranceProvider" label="Insurance" variant="outlined"
+                                density="compact" hide-details />
                         </v-col>
                         <v-col cols="12">
-                            <v-textarea v-model="form.address" label="Address" variant="outlined" density="compact" rows="3" hide-details />
+                            <v-textarea v-model="form.address" label="Address" variant="outlined" density="compact"
+                                rows="3" hide-details />
                         </v-col>
                         <v-col cols="12">
-                            <v-text-field v-model="form.emergencyContact" label="Emergency Contact" variant="outlined" density="compact" hide-details />
+                            <v-text-field v-model="form.emergencyContact" label="Emergency Contact" variant="outlined"
+                                density="compact" hide-details />
                         </v-col>
                     </v-row>
                 </v-card-text>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { can } = usePermission()
 const workspace = useReceptionistWorkspace()
 const search = ref('')
 const statusFilter = ref('All')
@@ -121,29 +122,18 @@ function createAppointment() {
             <h2 class="text-h3 mb-1">Appointment</h2>
             <p class="text-medium-emphasis mb-0">Manage patient visit schedules and appointment status.</p>
         </div>
-        <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="dialog = true">Create Appointment</v-btn>
+        <v-btn v-if="can('appointment.create')" color="primary" variant="flat" prepend-icon="mdi-plus"
+            @click="dialog = true">Create Appointment</v-btn>
     </div>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Appointment List">
         <div class="px-4 py-3 d-flex flex-wrap ga-3">
-            <v-text-field
-                v-model="search"
-                placeholder="Search patient, doctor, MRN, or department"
-                prepend-inner-icon="mdi-magnify"
-                variant="outlined"
-                density="compact"
-                hide-details
-                clearable
-                style="max-width: 420px"
-            />
-            <v-select
-                v-model="statusFilter"
-                :items="['All', 'Scheduled', 'Checked In', 'Waiting', 'Completed', 'Cancelled']"
-                variant="outlined"
-                density="compact"
-                hide-details
-                style="max-width: 220px"
-            />
+            <v-text-field v-model="search" placeholder="Search patient, doctor, MRN, or department"
+                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
+                style="max-width: 420px" />
+            <v-select v-model="statusFilter"
+                :items="['All', 'Scheduled', 'Checked In', 'Waiting', 'Completed', 'Cancelled']" variant="outlined"
+                density="compact" hide-details style="max-width: 220px" />
         </div>
 
         <v-table class="text-no-wrap">
@@ -173,25 +163,17 @@ function createAppointment() {
                     </td>
                     <td>{{ item.type }}</td>
                     <td>
-                        <v-chip size="small" variant="tonal" :color="statusColor(item.status)">{{ item.status }}</v-chip>
+                        <v-chip size="small" variant="tonal" :color="statusColor(item.status)">{{ item.status
+                            }}</v-chip>
                     </td>
                     <td class="text-right">
-                        <v-btn
-                            v-if="item.status === 'Scheduled'"
-                            size="small"
-                            color="primary"
-                            variant="tonal"
-                            @click="workspace.checkInAppointment(item.id)"
-                        >
+                        <v-btn v-if="item.status === 'Scheduled'" size="small" color="primary" variant="tonal"
+                            @click="workspace.checkInAppointment(item.id)">
                             Check-in
                         </v-btn>
-                        <v-btn
-                            v-else-if="item.status !== 'Completed'"
-                            size="small"
-                            color="success"
-                            variant="tonal"
-                            @click="workspace.updateAppointmentStatus(item.id, 'Completed')"
-                        >
+                        <v-btn v-if="can('appointment.edit') && item.status !== 'Completed'" size="small"
+                            color="success" variant="tonal"
+                            @click="workspace.updateAppointmentStatus(item.id, 'Completed')">
                             Complete
                         </v-btn>
                     </td>
@@ -210,50 +192,33 @@ function createAppointment() {
             <v-card-text>
                 <v-row>
                     <v-col cols="12">
-                        <v-select v-model="form.patientId" :items="patientOptions" label="Patient" variant="outlined" density="compact" hide-details />
+                        <v-select v-model="form.patientId" :items="patientOptions" label="Patient" variant="outlined"
+                            density="compact" hide-details />
                     </v-col>
                     <v-col cols="12">
-                        <v-select
-                            v-model="form.doctorScheduleId"
-                            :items="doctorScheduleOptions"
-                            label="Doctor Schedule"
-                            variant="outlined"
-                            density="compact"
-                            hide-details
-                        />
+                        <v-select v-model="form.doctorScheduleId" :items="doctorScheduleOptions" label="Doctor Schedule"
+                            variant="outlined" density="compact" hide-details />
                     </v-col>
                     <v-col cols="12" sm="6">
-                        <v-text-field
-                            :model-value="selectedSchedule?.department ?? ''"
-                            label="Department"
-                            variant="outlined"
-                            density="compact"
-                            hide-details
-                            readonly
-                        />
+                        <v-text-field :model-value="selectedSchedule?.department ?? ''" label="Department"
+                            variant="outlined" density="compact" hide-details readonly />
                     </v-col>
                     <v-col cols="12" sm="6">
-                        <v-text-field v-model="form.appointmentDate" type="date" label="Date" variant="outlined" density="compact" hide-details />
+                        <v-text-field v-model="form.appointmentDate" type="date" label="Date" variant="outlined"
+                            density="compact" hide-details />
                     </v-col>
                     <v-col cols="12" sm="6">
-                        <v-text-field
-                            v-model="form.appointmentTime"
-                            type="time"
-                            label="Time"
-                            variant="outlined"
-                            density="compact"
-                            :min="selectedSchedule?.startTime"
-                            :max="selectedSchedule?.endTime"
-                            :hint="scheduleTimeHint"
-                            persistent-hint
-                            :disabled="!selectedSchedule"
-                        />
+                        <v-text-field v-model="form.appointmentTime" type="time" label="Time" variant="outlined"
+                            density="compact" :min="selectedSchedule?.startTime" :max="selectedSchedule?.endTime"
+                            :hint="scheduleTimeHint" persistent-hint :disabled="!selectedSchedule" />
                     </v-col>
                     <v-col cols="12" sm="6">
-                        <v-select v-model="form.type" :items="['Consultation', 'New Visit', 'Control', 'Procedure']" label="Type" variant="outlined" density="compact" hide-details />
+                        <v-select v-model="form.type" :items="['Consultation', 'New Visit', 'Control', 'Procedure']"
+                            label="Type" variant="outlined" density="compact" hide-details />
                     </v-col>
                     <v-col cols="12">
-                        <v-textarea v-model="form.note" label="Note" variant="outlined" density="compact" rows="3" hide-details />
+                        <v-textarea v-model="form.note" label="Note" variant="outlined" density="compact" rows="3"
+                            hide-details />
                     </v-col>
                     <v-col v-if="formError" cols="12">
                         <v-alert color="error" variant="tonal">{{ formError }}</v-alert>

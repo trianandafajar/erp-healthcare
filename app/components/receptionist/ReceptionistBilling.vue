@@ -4,6 +4,7 @@ const search = ref('')
 const statusFilter = ref('All')
 const snackbar = ref(false)
 const snackbarMessage = ref('')
+const { can } = usePermission()
 
 const filteredBilling = computed(() => {
     const keyword = search.value.toLowerCase()
@@ -56,7 +57,8 @@ function openReceipt(invoiceNumber: string) {
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
         <div>
             <h2 class="text-h3 mb-1">Billing</h2>
-            <p class="text-medium-emphasis mb-0">Manage patient invoices, payment status, and receipts from the reception desk.</p>
+            <p class="text-medium-emphasis mb-0">Manage patient invoices, payment status, and receipts from the
+                reception desk.</p>
         </div>
         <v-card elevation="0" class="px-4 py-3">
             <div class="text-caption text-medium-emphasis">Outstanding Billing</div>
@@ -66,17 +68,11 @@ function openReceipt(invoiceNumber: string) {
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Billing List">
         <div class="px-4 py-3 d-flex align-center justify-space-between flex-wrap ga-3">
-            <v-text-field
-                v-model="search"
-                placeholder="Search invoice, patient, MRN, service, or department"
-                prepend-inner-icon="mdi-magnify"
-                variant="outlined"
-                density="compact"
-                hide-details
-                clearable
-                style="max-width: 430px"
-            />
-            <v-btn-toggle v-model="statusFilter" mandatory density="compact" variant="tonal" color="primary" class="flex-wrap">
+            <v-text-field v-model="search" placeholder="Search invoice, patient, MRN, service, or department"
+                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
+                style="max-width: 430px" />
+            <v-btn-toggle v-model="statusFilter" mandatory density="compact" variant="tonal" color="primary"
+                class="flex-wrap">
                 <v-btn value="All">All</v-btn>
                 <v-btn value="Paid">Paid</v-btn>
                 <v-btn value="Pending">Pending</v-btn>
@@ -100,7 +96,10 @@ function openReceipt(invoiceNumber: string) {
                     <td>
                         <div class="font-weight-medium">{{ item.invoiceNumber }}</div>
                         <div class="text-caption text-medium-emphasis">
-                            {{ new Date(item.serviceDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+                            {{ new Date(item.serviceDate).toLocaleDateString('en-US', {
+                                day: 'numeric', month: 'short',
+                                year: 'numeric'
+                            }) }}
                         </div>
                     </td>
                     <td>
@@ -109,7 +108,8 @@ function openReceipt(invoiceNumber: string) {
                     </td>
                     <td>
                         <div>{{ item.serviceName }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.department }} - {{ item.paymentMethod }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ item.department }} - {{ item.paymentMethod }}
+                        </div>
                     </td>
                     <td>{{ formatCurrency(item.amount) }}</td>
                     <td>
@@ -118,24 +118,13 @@ function openReceipt(invoiceNumber: string) {
                         </v-chip>
                     </td>
                     <td class="text-right">
-                        <v-btn
-                            v-if="item.status !== 'Paid'"
-                            size="small"
-                            color="primary"
-                            variant="tonal"
-                            prepend-icon="mdi-cash-check"
-                            @click="markPaid(item.id, item.invoiceNumber)"
-                        >
+                        <v-btn v-if="can('billing.pay') && item.status !== 'Paid'" size="small" color="primary"
+                            variant="tonal" prepend-icon="mdi-cash-check"
+                            @click="markPaid(item.id, item.invoiceNumber)">
                             Mark Paid
                         </v-btn>
-                        <v-btn
-                            v-else
-                            size="small"
-                            color="success"
-                            variant="text"
-                            prepend-icon="mdi-receipt-text-outline"
-                            @click="openReceipt(item.invoiceNumber)"
-                        >
+                        <v-btn v-else size="small" color="success" variant="text"
+                            prepend-icon="mdi-receipt-text-outline" @click="openReceipt(item.invoiceNumber)">
                             Receipt
                         </v-btn>
                     </td>

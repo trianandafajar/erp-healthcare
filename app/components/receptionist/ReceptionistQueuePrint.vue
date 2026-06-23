@@ -1,4 +1,6 @@
 <script setup lang="ts">
+
+const { can } = usePermission()
 const workspace = useReceptionistWorkspace()
 const selectedQueueId = ref(workspace.queue.value[0]?.id ?? '')
 const search = ref('')
@@ -51,24 +53,19 @@ function printQueue() {
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3 no-print">
         <div>
             <h2 class="text-h3 mb-1">Print Queue Number</h2>
-            <p class="text-medium-emphasis mb-0">Select a queue from the table, review the detail, and print the queue ticket.</p>
+            <p class="text-medium-emphasis mb-0">Select a queue from the table, review the detail, and print the queue
+                ticket.</p>
         </div>
     </div>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md no-print" title="Queue Print List">
         <div class="px-4 py-3 d-flex align-center justify-space-between flex-wrap ga-3">
-            <v-text-field
-                v-model="search"
-                placeholder="Search queue number, patient, MRN, doctor, or department"
-                prepend-inner-icon="mdi-magnify"
-                variant="outlined"
-                density="compact"
-                hide-details
-                clearable
-                style="max-width: 430px"
-            />
+            <v-text-field v-model="search" placeholder="Search queue number, patient, MRN, doctor, or department"
+                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
+                style="max-width: 430px" />
             <div v-if="selectedQueue" class="text-body-2 text-medium-emphasis">
-                Selected: <span class="font-weight-medium text-high-emphasis">{{ selectedQueue.queueNumber }} - {{ selectedQueue.patientName }}</span>
+                Selected: <span class="font-weight-medium text-high-emphasis">{{ selectedQueue.queueNumber }} - {{
+                    selectedQueue.patientName }}</span>
             </div>
         </div>
 
@@ -84,7 +81,8 @@ function printQueue() {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in filteredQueue" :key="item.id" :class="{ 'selected-row': item.id === selectedQueue?.id }">
+                <tr v-for="item in filteredQueue" :key="item.id"
+                    :class="{ 'selected-row': item.id === selectedQueue?.id }">
                     <td>
                         <span class="queue-number-pill">{{ item.queueNumber }}</span>
                     </td>
@@ -94,7 +92,8 @@ function printQueue() {
                     </td>
                     <td>
                         <div>{{ item.doctorName }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.department }} - {{ item.appointmentTime }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ item.department }} - {{ item.appointmentTime
+                        }}</div>
                     </td>
                     <td>{{ formatTime(item.checkedInAt) }}</td>
                     <td>
@@ -107,7 +106,8 @@ function printQueue() {
                             <v-btn size="small" color="secondary" variant="tonal" @click="openDetail(item.id)">
                                 Detail
                             </v-btn>
-                            <v-btn size="small" color="primary" variant="flat" prepend-icon="mdi-printer-outline" @click="selectForPrint(item.id)">
+                            <v-btn size="small" color="primary" variant="flat" prepend-icon="mdi-printer-outline"
+                                @click="selectForPrint(item.id)">
                                 Print
                             </v-btn>
                         </div>
@@ -163,7 +163,8 @@ function printQueue() {
             </v-card-text>
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="detailDialog = false">Close</v-btn>
-                <v-btn color="primary" variant="flat" prepend-icon="mdi-printer-outline" @click="printQueue">Print</v-btn>
+                <v-btn v-if="can('queue.print')" color="primary" variant="flat" prepend-icon="mdi-printer-outline"
+                    @click="printQueue">Print</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

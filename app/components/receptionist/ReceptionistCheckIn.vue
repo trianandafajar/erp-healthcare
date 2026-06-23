@@ -8,6 +8,7 @@ const appointmentDateFilter = ref('')
 const confirmDialog = ref(false)
 const queueDialog = ref(false)
 const selectedAppointment = ref<(typeof workspace.appointments.value)[number] | null>(null)
+const { can } = usePermission()
 
 const scheduledAppointments = computed(() => {
     const keyword = search.value.toLowerCase()
@@ -68,7 +69,8 @@ function statusColor(status: string) {
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
         <div>
             <h2 class="text-h3 mb-1">Patient Check-in</h2>
-            <p class="text-medium-emphasis mb-0">Search scheduled appointments, check patients in, and create queue numbers.</p>
+            <p class="text-medium-emphasis mb-0">Search scheduled appointments, check patients in, and create queue
+                numbers.</p>
         </div>
     </div>
 
@@ -76,15 +78,8 @@ function statusColor(status: string) {
         <div class="px-4 py-3">
             <v-row dense align="center">
                 <v-col cols="12" md="4">
-                    <v-text-field
-                        v-model="search"
-                        placeholder="Search patient, MRN, doctor, or department"
-                        prepend-inner-icon="mdi-magnify"
-                        variant="outlined"
-                        density="compact"
-                        hide-details
-                        clearable
-                    />
+                    <v-text-field v-model="search" placeholder="Search patient, MRN, doctor, or department"
+                        prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable />
                 </v-col>
                 <v-col cols="12" sm="6" md="2">
                     <v-select v-model="statusFilter" :items="statusOptions" label="Status" variant="outlined"
@@ -95,8 +90,8 @@ function statusColor(status: string) {
                         density="compact" hide-details />
                 </v-col>
                 <v-col cols="12" sm="6" md="2">
-                    <v-text-field v-model="appointmentDateFilter" label="Appointment Date" type="date" variant="outlined"
-                        density="compact" hide-details />
+                    <v-text-field v-model="appointmentDateFilter" label="Appointment Date" type="date"
+                        variant="outlined" density="compact" hide-details />
                 </v-col>
                 <v-col cols="12" sm="6" md="1" class="d-flex justify-end">
                     <v-btn color="secondary" variant="tonal" size="small" icon="mdi-filter-remove-outline"
@@ -136,11 +131,12 @@ function statusColor(status: string) {
                         <div class="text-caption text-medium-emphasis">{{ item.department }}</div>
                     </td>
                     <td>
-                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status }}</v-chip>
+                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
+                            }}</v-chip>
                     </td>
                     <td class="text-right">
-                        <v-btn color="primary" variant="tonal" size="small"
-                            :disabled="item.status !== 'Scheduled'" @click="requestCheckIn(item)">
+                        <v-btn color="primary" variant="tonal" size="small" :disabled="item.status !== 'Scheduled'"
+                            @click="requestCheckIn(item)">
                             Check-in
                         </v-btn>
                     </td>
@@ -183,7 +179,8 @@ function statusColor(status: string) {
             <v-card-actions class="px-6 pb-4">
                 <v-spacer />
                 <v-btn variant="text" @click="confirmDialog = false">Cancel</v-btn>
-                <v-btn color="primary" variant="flat" prepend-icon="mdi-check-circle-outline" @click="confirmCheckIn">
+                <v-btn v-if="can('check-in.create')" color="primary" variant="flat"
+                    prepend-icon="mdi-check-circle-outline" @click="confirmCheckIn">
                     Confirm Check-in
                 </v-btn>
             </v-card-actions>
@@ -197,12 +194,14 @@ function statusColor(status: string) {
                 <div class="text-caption text-medium-emphasis text-uppercase mb-2">Queue Number</div>
                 <div class="text-h1 font-weight-bold mb-3">{{ generatedQueue.queueNumber }}</div>
                 <div class="text-h5 mb-1">{{ generatedQueue.patientName }}</div>
-                <div class="text-body-2 text-medium-emphasis">{{ generatedQueue.department }} - {{ generatedQueue.doctorName }}</div>
+                <div class="text-body-2 text-medium-emphasis">{{ generatedQueue.department }} - {{
+                    generatedQueue.doctorName }}</div>
             </v-card-text>
             <v-card-actions class="px-6 pb-4">
                 <v-spacer />
                 <v-btn variant="text" @click="queueDialog = false">Close</v-btn>
-                <v-btn color="secondary" variant="tonal" prepend-icon="mdi-printer-outline" to="/receptionist/queue/print">
+                <v-btn color="secondary" variant="tonal" prepend-icon="mdi-printer-outline"
+                    to="/receptionist/queue/print">
                     Print
                 </v-btn>
             </v-card-actions>
