@@ -21,6 +21,8 @@ type ViewTab = 'card' | 'list'
 const route = useRoute()
 const router = useRouter()
 
+const { can } = usePermission()
+
 const { data: patientData, pending: patientPending } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
 const { data: noteData, pending, refresh } = useLazyFetch<{ notes: NurseCareNote[] }>('/api/nurse/care-notes')
 
@@ -169,18 +171,18 @@ async function submitNote() {
             method: editingNoteId.value ? 'PUT' : 'POST',
             body: editingNoteId.value
                 ? {
-                      id: editingNoteId.value,
-                      patient_id: form.patientId,
-                      category: form.category,
-                      note: form.note,
-                      author_name: form.authorName,
-                  }
+                    id: editingNoteId.value,
+                    patient_id: form.patientId,
+                    category: form.category,
+                    note: form.note,
+                    author_name: form.authorName,
+                }
                 : {
-                      patient_id: form.patientId,
-                      category: form.category,
-                      note: form.note,
-                      author_name: form.authorName,
-                  },
+                    patient_id: form.patientId,
+                    category: form.category,
+                    note: form.note,
+                    author_name: form.authorName,
+                },
         })
 
         dialog.value = false
@@ -233,14 +235,8 @@ function closeDialog() {
                 <v-card-title class="text-h4">Care Note History</v-card-title>
                 <v-card-subtitle class="mt-1">Latest patient care notes from the database.</v-card-subtitle>
             </div>
-            <v-btn
-                color="primary"
-                variant="flat"
-                size="large"
-                prepend-icon="mdi-plus"
-                density="comfortable"
-                @click="openAddDialog"
-            >
+            <v-btn v-if="can('care-notes.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openAddDialog">
                 Create Care Note
             </v-btn>
         </div>
@@ -248,41 +244,15 @@ function closeDialog() {
     <v-card elevation="0">
         <v-card-text class="d-flex flex-column ga-4">
             <div class="d-flex flex-wrap align-center gap-3">
-                <v-text-field
-                    v-model="historySearch"
-                    density="comfortable"
-                    hide-details
-                    clearable
-                    label="Search history"
-                    placeholder="Search patient, category, author, or note..."
-                    prepend-inner-icon="mdi-magnify"
-                    variant="outlined"
-                    class="care-filter-field"
-                />
-                <v-autocomplete
-                    v-model="historyPatientFilter"
-                    :items="historyPatientOptions"
-                    density="comfortable"
-                    hide-details
-                    item-title="title"
-                    item-value="value"
-                    label="Filter by patient"
-                    placeholder="Search patient..."
-                    variant="outlined"
-                    clearable
-                    class="care-filter-field"
-                />
-                <v-select
-                    v-model="historyCategoryFilter"
-                    :items="categoryOptions"
-                    density="comfortable"
-                    hide-details
-                    item-title="title"
-                    item-value="value"
-                    label="Filter by category"
-                    variant="outlined"
-                    class="care-filter-field care-filter-category"
-                />
+                <v-text-field v-model="historySearch" density="comfortable" hide-details clearable
+                    label="Search history" placeholder="Search patient, category, author, or note..."
+                    prepend-inner-icon="mdi-magnify" variant="outlined" class="care-filter-field" />
+                <v-autocomplete v-model="historyPatientFilter" :items="historyPatientOptions" density="comfortable"
+                    hide-details item-title="title" item-value="value" label="Filter by patient"
+                    placeholder="Search patient..." variant="outlined" clearable class="care-filter-field" />
+                <v-select v-model="historyCategoryFilter" :items="categoryOptions" density="comfortable" hide-details
+                    item-title="title" item-value="value" label="Filter by category" variant="outlined"
+                    class="care-filter-field care-filter-category" />
             </div>
             <v-tabs v-model="viewTab" color="primary" density="comfortable" class="care-tabs-header" grow>
                 <v-tab value="card">Card</v-tab>
@@ -295,7 +265,8 @@ function closeDialog() {
                         <v-col v-if="pending" cols="12" class="text-center py-8">
                             <v-progress-circular indeterminate color="primary" />
                         </v-col>
-                        <v-col v-else-if="filteredCareNotes.length === 0" cols="12" class="text-center py-8 text-medium-emphasis">
+                        <v-col v-else-if="filteredCareNotes.length === 0" cols="12"
+                            class="text-center py-8 text-medium-emphasis">
                             No care notes yet
                         </v-col>
                         <v-col v-for="note in filteredCareNotes" :key="note.id" cols="12" md="6">
@@ -325,10 +296,12 @@ function closeDialog() {
                                     </div>
 
                                     <div class="d-flex justify-end ga-2 mt-3">
-                                        <v-btn size="small" variant="text" color="secondary" prepend-icon="mdi-pencil-outline" @click="startEdit(note)">
+                                        <v-btn size="small" variant="text" color="secondary"
+                                            prepend-icon="mdi-pencil-outline" @click="startEdit(note)">
                                             Edit
                                         </v-btn>
-                                        <v-btn size="small" variant="text" color="error" prepend-icon="mdi-delete-outline" @click="askDelete(note)">
+                                        <v-btn size="small" variant="text" color="error"
+                                            prepend-icon="mdi-delete-outline" @click="askDelete(note)">
                                             Delete
                                         </v-btn>
                                     </div>
@@ -363,7 +336,8 @@ function closeDialog() {
                             <tr v-else v-for="note in filteredCareNotes" :key="note.id">
                                 <td class="py-3">
                                     <div class="text-body-2 font-weight-medium">{{ note.patient_name }}</div>
-                                    <div class="text-caption text-medium-emphasis">{{ note.medical_record_number }}</div>
+                                    <div class="text-caption text-medium-emphasis">{{ note.medical_record_number }}
+                                    </div>
                                 </td>
                                 <td class="py-3">
                                     <v-chip size="small" variant="tonal" color="primary" label>
@@ -377,20 +351,10 @@ function closeDialog() {
                                     {{ formatDate(note.recorded_at) }}
                                 </td>
                                 <td class="py-3 text-right">
-                                    <v-btn
-                                        icon="mdi-pencil-outline"
-                                        variant="text"
-                                        size="small"
-                                        color="secondary"
-                                        @click="startEdit(note)"
-                                    />
-                                    <v-btn
-                                        icon="mdi-delete-outline"
-                                        variant="text"
-                                        size="small"
-                                        color="error"
-                                        @click="askDelete(note)"
-                                    />
+                                    <v-btn v-if="can('care-notes.edit')" icon="mdi-pencil-outline" variant="text"
+                                        size="small" color="secondary" @click="startEdit(note)" />
+                                    <v-btn v-if="can('care-notes.delete')" icon="mdi-delete-outline" variant="text"
+                                        size="small" color="error" @click="askDelete(note)" />
                                 </td>
                             </tr>
                         </tbody>
@@ -407,40 +371,15 @@ function closeDialog() {
             </v-card-title>
             <v-card-text>
                 <v-form class="d-flex flex-column ga-4" @submit.prevent="submitNote">
-                    <v-autocomplete
-                        v-model="form.patientId"
-                        :items="patientOptions"
-                        :loading="patientPending"
-                        item-title="title"
-                        item-value="value"
-                        label="Patient"
-                        placeholder="Search patient..."
-                        variant="outlined"
-                        density="comfortable"
-                        clearable
-                    />
-                    <v-select
-                        v-model="form.category"
-                        :items="categoryOptions"
-                        item-title="title"
-                        item-value="value"
-                        label="Category"
-                        variant="outlined"
-                        density="comfortable"
-                    />
-                    <v-text-field
-                        v-model="form.authorName"
-                        label="Note author"
-                        variant="outlined"
-                        density="comfortable"
-                    />
-                    <v-textarea
-                        v-model="form.note"
-                        label="Note content"
-                        rows="4"
-                        variant="outlined"
-                        density="comfortable"
-                    />
+                    <v-autocomplete v-model="form.patientId" :items="patientOptions" :loading="patientPending"
+                        item-title="title" item-value="value" label="Patient" placeholder="Search patient..."
+                        variant="outlined" density="comfortable" clearable />
+                    <v-select v-model="form.category" :items="categoryOptions" item-title="title" item-value="value"
+                        label="Category" variant="outlined" density="comfortable" />
+                    <v-text-field v-model="form.authorName" label="Note author" variant="outlined"
+                        density="comfortable" />
+                    <v-textarea v-model="form.note" label="Note content" rows="4" variant="outlined"
+                        density="comfortable" />
                     <div class="d-flex ga-2 justify-end">
                         <v-btn variant="text" @click="closeDialog">Cancel</v-btn>
                         <v-btn type="submit" color="primary" variant="flat" :loading="submitting">

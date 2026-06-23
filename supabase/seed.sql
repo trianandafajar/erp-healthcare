@@ -6,10 +6,9 @@
     VALUES
     ('admin', 'Administrator'),
     ('doctor', 'Doctor'),
-    ('specialist', 'Specialist'),
     ('pharmacy', 'Pharmacist'),
     ('receptionist', 'Receptionist'),
-    ('staff', 'Staff'),
+    ('nurse', 'Nurse'),
     ('patient', 'Patient')
     ON CONFLICT (name) DO NOTHING;
 
@@ -98,6 +97,23 @@
     ('nurse.edit', 'Edit Nurse', 'nurse', 'nurse'),
     ('nurse.delete', 'Delete Nurse', 'nurse', 'nurse'),
 
+    -- Nurse area pages
+    ('dashboard.view', 'View Dashboard', 'dashboard', 'nurse'),
+    ('care-notes.view', 'View Care Notes', 'care-notes', 'nurse'),
+    ('care-notes.create', 'Create Care Notes', 'care-notes', 'nurse'),
+    ('care-notes.edit', 'Edit Care Notes', 'care-notes', 'nurse'),
+    ('care-notes.delete', 'Delete Care Notes', 'care-notes', 'nurse'),
+    ('monitoring.view', 'View Patient Monitoring', 'monitoring', 'nurse'),
+    ('procedures.view', 'View Procedures', 'procedures', 'nurse'),
+    ('procedures.create', 'Create Procedures', 'procedures', 'nurse'),
+    ('procedures.edit', 'Edit Procedures', 'procedures', 'nurse'),
+    ('procedures.delete', 'Delete Procedures', 'procedures', 'nurse'),
+    ('vitals.view', 'View Vital Signs', 'vitals', 'nurse'),
+    ('vitals.create', 'Create Vital Signs', 'vitals', 'nurse'),
+    ('vitals.edit', 'Edit Vital Signs', 'vitals', 'nurse'),
+    ('vitals.delete', 'Delete Vital Signs', 'vitals', 'nurse'),
+
+
     -- Admin-only extra permission (from migration)
     ('user.impersonate', 'Login as User', 'user', 'admin')
 
@@ -178,30 +194,6 @@
         END LOOP;
 
         -- =====================
-        -- SPECIALIST
-        -- =====================
-
-        SELECT id INTO v_role_id
-        FROM public.roles
-        WHERE name = 'specialist';
-
-        perm_names := ARRAY[
-            'patient.view',
-            'patient.edit',
-            'report.view'
-        ];
-
-        FOREACH perm_name IN ARRAY perm_names LOOP
-            SELECT id INTO v_perm_id
-            FROM public.permissions
-            WHERE name = perm_name;
-
-            INSERT INTO public.role_permissions(role_id, permission_id)
-            VALUES (v_role_id, v_perm_id)
-            ON CONFLICT DO NOTHING;
-        END LOOP;
-
-        -- =====================
         -- PHARMACY
         -- =====================
 
@@ -246,19 +238,38 @@
         END LOOP;
 
         -- =====================
-        -- STAFF
+        -- NURSE
         -- =====================
 
         SELECT id INTO v_role_id
         FROM public.roles
-        WHERE name = 'staff';
+        WHERE name = 'nurse';
 
         perm_names := ARRAY[
-            'user.view',
-            'doctor.view',
+            -- Pages
+            'dashboard.view',
             'patient.view',
-            'department.view',
-            'report.view'
+
+            -- Care Notes
+            'care-notes.view',
+            'care-notes.create',
+            'care-notes.edit',
+            'care-notes.delete',
+
+            -- Monitoring
+            'monitoring.view',
+
+            -- Procedures
+            'procedures.view',
+            'procedures.create',
+            'procedures.edit',
+            'procedures.delete',
+
+            -- Vitals
+            'vitals.view',
+            'vitals.create',
+            'vitals.edit',
+            'vitals.delete'
         ];
 
         FOREACH perm_name IN ARRAY perm_names LOOP

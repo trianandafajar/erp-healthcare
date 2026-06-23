@@ -26,6 +26,8 @@ type NurseProcedure = {
 
 type CalendarView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'
 
+const { can } = usePermission()
+
 const { data: patientData, pending: patientPending } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
 const { data: procedureData, pending, refresh } = useLazyFetch<{ procedures: NurseProcedure[] }>('/api/nurse/procedures')
 
@@ -256,14 +258,14 @@ async function submitProcedure() {
                     notes: form.notes,
                 }
                 : {
-                      patient_id: form.patientId,
-                      procedure_name: form.procedureName,
-                      scheduled_at: new Date(form.startAt).toISOString(),
-                      ended_at: form.endAt ? new Date(form.endAt).toISOString() : null,
-                      priority: form.priority,
-                      status: form.status,
-                      notes: form.notes,
-                  },
+                    patient_id: form.patientId,
+                    procedure_name: form.procedureName,
+                    scheduled_at: new Date(form.startAt).toISOString(),
+                    ended_at: form.endAt ? new Date(form.endAt).toISOString() : null,
+                    priority: form.priority,
+                    status: form.status,
+                    notes: form.notes,
+                },
         })
 
         dialog.value = false
@@ -372,14 +374,8 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                 <v-card-title class="text-h4">Procedure Schedule</v-card-title>
                 <v-card-subtitle class="mt-1">Manage scheduled procedures by calendar or table.</v-card-subtitle>
             </div>
-            <v-btn
-                color="primary"
-                variant="flat"
-                size="large"
-                prepend-icon="mdi-plus"
-                density="comfortable"
-                @click="openCreateDialog()"
-            >
+            <v-btn v-if="can('procedures.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openCreateDialog()">
                 Create Procedure
             </v-btn>
         </div>
@@ -391,50 +387,27 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                 <v-tab value="list">List</v-tab>
             </v-tabs>
             <div class="d-flex flex-wrap align-center ga-3">
-                <v-text-field
-                    v-model="search"
-                    density="comfortable"
-                    hide-details
-                    clearable
-                    label="Search history"
-                    placeholder="Patient, procedure, note..."
-                    prepend-inner-icon="mdi-magnify"
-                    variant="outlined"
-                    class="procedure-filter-field"
-                />
-                <v-autocomplete
-                    v-model="categoryFilter"
-                    :items="categoryOptions"
-                    item-title="title"
-                    item-value="value"
-                    label="Filter by status"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    clearable
-                    class="procedure-filter-field"
-                />
-                <v-select
-                    v-model="statusFilter"
-                    :items="priorityOptions"
-                    item-title="title"
-                    item-value="value"
-                    label="Filter by priority"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    clearable
-                    class="procedure-filter-field procedure-filter-priority"
-                />
+                <v-text-field v-model="search" density="comfortable" hide-details clearable label="Search history"
+                    placeholder="Patient, procedure, note..." prepend-inner-icon="mdi-magnify" variant="outlined"
+                    class="procedure-filter-field" />
+                <v-autocomplete v-model="categoryFilter" :items="categoryOptions" item-title="title" item-value="value"
+                    label="Filter by status" variant="outlined" density="comfortable" hide-details clearable
+                    class="procedure-filter-field" />
+                <v-select v-model="statusFilter" :items="priorityOptions" item-title="title" item-value="value"
+                    label="Filter by priority" variant="outlined" density="comfortable" hide-details clearable
+                    class="procedure-filter-field procedure-filter-priority" />
             </div>
             <v-window v-model="viewTab">
                 <v-window-item value="calendar">
                     <div class="calendar-shell">
                         <div class="calendar-toolbar">
                             <div class="calendar-nav-group">
-                                <v-btn icon="mdi-chevron-left" variant="flat" color="primary" class="calendar-nav-btn" @click="calendarRef?.getApi?.().prev()" />
-                                <v-btn icon="mdi-chevron-right" variant="flat" color="primary" class="calendar-nav-btn" @click="calendarRef?.getApi?.().next()" />
-                                <v-btn variant="tonal" color="secondary" class="calendar-today-btn" @click="calendarRef?.getApi?.().today()">
+                                <v-btn icon="mdi-chevron-left" variant="flat" color="primary" class="calendar-nav-btn"
+                                    @click="calendarRef?.getApi?.().prev()" />
+                                <v-btn icon="mdi-chevron-right" variant="flat" color="primary" class="calendar-nav-btn"
+                                    @click="calendarRef?.getApi?.().next()" />
+                                <v-btn variant="tonal" color="secondary" class="calendar-today-btn"
+                                    @click="calendarRef?.getApi?.().today()">
                                     Today
                                 </v-btn>
                             </div>
@@ -444,7 +417,8 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                             </div>
 
                             <div class="calendar-toolbar-end">
-                                <v-btn-toggle v-model="calendarView" color="primary" variant="outlined" divided density="comfortable">
+                                <v-btn-toggle v-model="calendarView" color="primary" variant="outlined" divided
+                                    density="comfortable">
                                     <v-btn value="dayGridMonth">Month</v-btn>
                                     <v-btn value="timeGridWeek">Week</v-btn>
                                     <v-btn value="timeGridDay">Day</v-btn>
@@ -495,15 +469,18 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                             <tr v-else v-for="procedure in paginatedProcedures" :key="procedure.id">
                                 <td class="py-3">
                                     <div class="text-body-2 font-weight-medium">{{ procedure.patient_name }}</div>
-                                    <div class="text-caption text-medium-emphasis">{{ procedure.medical_record_number }}</div>
+                                    <div class="text-caption text-medium-emphasis">{{ procedure.medical_record_number }}
+                                    </div>
                                 </td>
                                 <td class="py-3">
                                     <div class="text-body-2">{{ procedure.procedure_name }}</div>
                                     <div class="text-caption text-medium-emphasis">{{ procedure.notes || '-' }}</div>
                                 </td>
-                                <td class="py-3 text-body-2 text-medium-emphasis">{{ formatRange(procedure.scheduled_at, procedure.ended_at) }}</td>
+                                <td class="py-3 text-body-2 text-medium-emphasis">{{ formatRange(procedure.scheduled_at,
+                                    procedure.ended_at) }}</td>
                                 <td class="py-3">
-                                    <v-chip size="small" variant="tonal" :color="procedure.priority === 'High' ? 'error' : procedure.priority === 'Medium' ? 'warning' : 'success'">
+                                    <v-chip size="small" variant="tonal"
+                                        :color="procedure.priority === 'High' ? 'error' : procedure.priority === 'Medium' ? 'warning' : 'success'">
                                         {{ procedure.priority }}
                                     </v-chip>
                                 </td>
@@ -513,8 +490,10 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                                     </v-chip>
                                 </td>
                                 <td class="py-3 text-right">
-                                    <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary" @click="openEditDialog(procedure)" />
-                                    <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" @click="askDelete(procedure)" />
+                                    <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
+                                        @click="openEditDialog(procedure)" />
+                                    <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error"
+                                        @click="askDelete(procedure)" />
                                 </td>
                             </tr>
                         </tbody>
@@ -537,13 +516,8 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                 </v-btn>
             </v-card-title>
             <v-card-text class="d-flex flex-column ga-3">
-                <v-card
-                    v-for="procedure in selectedProcedures"
-                    :key="procedure.id"
-                    variant="flat"
-                    rounded="lg"
-                    class="procedure-day-card"
-                >
+                <v-card v-for="procedure in selectedProcedures" :key="procedure.id" variant="flat" rounded="lg"
+                    class="procedure-day-card">
                     <v-card-text class="pa-4">
                         <div class="d-flex align-start justify-space-between ga-4">
                             <div>
@@ -556,7 +530,8 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                         </div>
 
                         <div class="d-flex flex-wrap ga-2 mt-3">
-                            <v-chip size="x-small" variant="tonal" :color="procedure.priority === 'High' ? 'error' : procedure.priority === 'Medium' ? 'warning' : 'success'">
+                            <v-chip size="x-small" variant="tonal"
+                                :color="procedure.priority === 'High' ? 'error' : procedure.priority === 'Medium' ? 'warning' : 'success'">
                                 {{ procedure.priority }}
                             </v-chip>
                             <div class="text-caption text-medium-emphasis">
@@ -571,7 +546,8 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                             </div>
                             <div>
                                 <div class="procedure-detail-label">Time</div>
-                                <div class="procedure-detail-value">{{ formatRange(procedure.scheduled_at, procedure.ended_at) }}</div>
+                                <div class="procedure-detail-value">{{ formatRange(procedure.scheduled_at,
+                                    procedure.ended_at) }}</div>
                             </div>
                             <div>
                                 <div class="procedure-detail-label">Recorder</div>
@@ -584,10 +560,12 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                         </div>
 
                         <div class="d-flex justify-end ga-2 mt-3">
-                            <v-btn size="small" variant="text" color="secondary" prepend-icon="mdi-pencil-outline" @click="openEditDialog(procedure)">
+                            <v-btn v-if="can('procedures.edit')" size="small" variant="text" color="secondary"
+                                prepend-icon="mdi-pencil-outline" @click="openEditDialog(procedure)">
                                 Edit
                             </v-btn>
-                            <v-btn size="small" variant="text" color="error" prepend-icon="mdi-delete-outline" @click="askDelete(procedure)">
+                            <v-btn v-if="can('procedures.delete')" size="small" variant="text" color="error"
+                                prepend-icon="mdi-delete-outline" @click="askDelete(procedure)">
                                 Delete
                             </v-btn>
                         </div>
@@ -611,72 +589,32 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
             </v-card-title>
             <v-card-text>
                 <v-form class="d-flex flex-column ga-4" @submit.prevent="submitProcedure">
-                    <v-autocomplete
-                        v-model="form.patientId"
-                        :items="patientOptions"
-                        :loading="patientPending"
-                        item-title="title"
-                        item-value="value"
-                        label="Patient"
-                        placeholder="Search patient..."
-                        variant="outlined"
-                        density="comfortable"
-                        clearable
-                    />
-                    <v-text-field
-                        v-model="form.procedureName"
-                        label="Procedure"
-                        placeholder="Wound dressing change"
-                        variant="outlined"
-                        density="comfortable"
-                    />
+                    <v-autocomplete v-model="form.patientId" :items="patientOptions" :loading="patientPending"
+                        item-title="title" item-value="value" label="Patient" placeholder="Search patient..."
+                        variant="outlined" density="comfortable" clearable />
+                    <v-text-field v-model="form.procedureName" label="Procedure" placeholder="Wound dressing change"
+                        variant="outlined" density="comfortable" />
                     <v-row dense>
                         <v-col cols="12" md="6">
-                            <v-text-field
-                                v-model="form.startAt"
-                                label="Start time"
-                                type="datetime-local"
-                                variant="outlined"
-                                density="comfortable"
-                            />
+                            <v-text-field v-model="form.startAt" label="Start time" type="datetime-local"
+                                variant="outlined" density="comfortable" />
                         </v-col>
                         <v-col cols="12" md="6">
-                            <v-text-field
-                                v-model="form.endAt"
-                                label="End time"
-                                type="datetime-local"
-                                variant="outlined"
-                                density="comfortable"
-                            />
+                            <v-text-field v-model="form.endAt" label="End time" type="datetime-local" variant="outlined"
+                                density="comfortable" />
                         </v-col>
                     </v-row>
                     <v-row dense>
                         <v-col cols="12" md="6">
-                            <v-select
-                                v-model="form.priority"
-                                :items="['Low', 'Medium', 'High']"
-                                label="Priority"
-                                variant="outlined"
-                                density="comfortable"
-                            />
+                            <v-select v-model="form.priority" :items="['Low', 'Medium', 'High']" label="Priority"
+                                variant="outlined" density="comfortable" />
                         </v-col>
                         <v-col cols="12" md="6">
-                            <v-select
-                                v-model="form.status"
-                                :items="['Planned', 'In Progress', 'Completed']"
-                                label="Status"
-                                variant="outlined"
-                                density="comfortable"
-                            />
+                            <v-select v-model="form.status" :items="['Planned', 'In Progress', 'Completed']"
+                                label="Status" variant="outlined" density="comfortable" />
                         </v-col>
                     </v-row>
-                    <v-textarea
-                        v-model="form.notes"
-                        label="Notes"
-                        rows="4"
-                        variant="outlined"
-                        density="comfortable"
-                    />
+                    <v-textarea v-model="form.notes" label="Notes" rows="4" variant="outlined" density="comfortable" />
                     <div class="d-flex ga-2 justify-end">
                         <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
                         <v-btn type="submit" color="primary" variant="flat" :loading="submitting">
@@ -694,7 +632,8 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
             <v-card-text>This record will be removed permanently.</v-card-text>
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
-                <v-btn color="error" variant="flat" :loading="submitting" @click="deleteSelectedProcedure">Delete</v-btn>
+                <v-btn color="error" variant="flat" :loading="submitting"
+                    @click="deleteSelectedProcedure">Delete</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

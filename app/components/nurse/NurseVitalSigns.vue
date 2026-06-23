@@ -19,6 +19,8 @@ type NurseVitalRecord = {
     recorded_at: string
 }
 
+const { can } = usePermission()
+
 const { data: patientData, pending: patientPending } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
 const { data: vitalData, pending, refresh } = useLazyFetch<{ vitals: NurseVitalRecord[] }>('/api/nurse/vitals')
 
@@ -153,24 +155,24 @@ async function submitVital() {
             method: editingVitalId.value ? 'PUT' : 'POST',
             body: editingVitalId.value
                 ? {
-                      id: editingVitalId.value,
-                      patient_id: form.patientId,
-                      blood_pressure: form.bloodPressure,
-                      temperature: form.temperature,
-                      weight: form.weight,
-                      height: form.height,
-                      pulse: form.pulse,
-                      notes: form.notes,
-                  }
+                    id: editingVitalId.value,
+                    patient_id: form.patientId,
+                    blood_pressure: form.bloodPressure,
+                    temperature: form.temperature,
+                    weight: form.weight,
+                    height: form.height,
+                    pulse: form.pulse,
+                    notes: form.notes,
+                }
                 : {
-                      patient_id: form.patientId,
-                      blood_pressure: form.bloodPressure,
-                      temperature: form.temperature,
-                      weight: form.weight,
-                      height: form.height,
-                      pulse: form.pulse,
-                      notes: form.notes,
-                  },
+                    patient_id: form.patientId,
+                    blood_pressure: form.bloodPressure,
+                    temperature: form.temperature,
+                    weight: form.weight,
+                    height: form.height,
+                    pulse: form.pulse,
+                    notes: form.notes,
+                },
         })
 
         dialog.value = false
@@ -243,14 +245,8 @@ function formatDate(dateStr: string) {
                 <v-card-title class="text-h4">Vital Sign History</v-card-title>
                 <v-card-subtitle class="mt-1">Latest recorded entries from the database.</v-card-subtitle>
             </div>
-            <v-btn
-                color="primary"
-                variant="flat"
-                size="large"
-                prepend-icon="mdi-plus"
-                density="comfortable"
-                @click="openAddDialog"
-            >
+            <v-btn v-if="can('vitals.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openAddDialog">
                 Create Vital Sign
             </v-btn>
         </div>
@@ -258,50 +254,25 @@ function formatDate(dateStr: string) {
 
     <v-card elevation="0">
         <div class="d-flex align-center p-4 ga-3 flex-wrap justify-space-between">
-            <v-text-field
-                v-model="historySearch"
-                density="comfortable"
-                hide-details
-                clearable
-                label="Search history"
-                placeholder="Search name, MRN, or vital values..."
-                prepend-inner-icon="mdi-magnify"
-                variant="outlined"
-                style="min-width: 340px; max-width: 420px; flex: 1 1 360px"
-            />
+            <v-text-field v-model="historySearch" density="comfortable" hide-details clearable label="Search history"
+                placeholder="Search name, MRN, or vital values..." prepend-inner-icon="mdi-magnify" variant="outlined"
+                style="min-width: 340px; max-width: 420px; flex: 1 1 360px" />
             <div class="d-flex align-center ga-2 flex-wrap">
-                <v-autocomplete
-                    v-model="historyPatientFilter"
-                    :items="historyPatientOptions"
-                    density="comfortable"
-                    hide-details
-                    item-title="title"
-                    item-value="value"
-                    label="Filter by patient"
-                    placeholder="Search patient..."
-                    variant="outlined"
-                    clearable
-                    style="min-width: 280px; max-width: 360px"
-                />
+                <v-autocomplete v-model="historyPatientFilter" :items="historyPatientOptions" density="comfortable"
+                    hide-details item-title="title" item-value="value" label="Filter by patient"
+                    placeholder="Search patient..." variant="outlined" clearable
+                    style="min-width: 280px; max-width: 360px" />
                 <v-menu v-model="historyDateMenu" :close-on-content-click="false" location="bottom start">
                     <template #activator="{ props }">
-                        <v-text-field
-                            v-bind="props"
-                            :model-value="historyDateLabel"
-                            density="comfortable"
-                            hide-details
-                            label="Filter by date"
-                            readonly
-                            clearable
-                            variant="outlined"
-                            style="min-width: 220px; max-width: 260px"
-                            @click:clear="clearHistoryDateFilter"
-                        />
+                        <v-text-field v-bind="props" :model-value="historyDateLabel" density="comfortable" hide-details
+                            label="Filter by date" readonly clearable variant="outlined"
+                            style="min-width: 220px; max-width: 260px" @click:clear="clearHistoryDateFilter" />
                     </template>
 
                     <v-card width="360" elevation="8">
                         <v-card-text>
-                            <v-date-picker v-model="historyDateSelection" multiple="range" color="primary" hide-header />
+                            <v-date-picker v-model="historyDateSelection" multiple="range" color="primary"
+                                hide-header />
                             <div class="d-flex justify-end mt-2">
                                 <v-btn variant="text" color="primary" @click="clearHistoryDateFilter">
                                     Clear
@@ -314,49 +285,51 @@ function formatDate(dateStr: string) {
         </div>
 
         <v-table hover density="comfortable">
-                <thead class="bg-containerBg">
-                    <tr>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Vitals</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Note</th>
-                        <th class="text-right text-caption font-weight-bold text-uppercase">Time</th>
-                        <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="pending">
-                        <td colspan="5" class="text-center py-8">
-                            <v-progress-circular indeterminate color="primary" />
-                        </td>
-                    </tr>
-                    <tr v-else-if="filteredVitals.length === 0">
-                        <td colspan="5" class="text-center py-8 text-medium-emphasis">
-                            No vital signs recorded yet
-                        </td>
-                    </tr>
-                    <tr v-else v-for="vital in filteredVitals" :key="vital.id">
-                        <td class="py-3">
-                            <div class="text-body-2 font-weight-medium">{{ vital.patient_name }}</div>
-                            <div class="text-caption text-medium-emphasis">{{ vital.medical_record_number }}</div>
-                        </td>
-                        <td class="py-3 text-body-2">
-                            <div>BP: {{ vital.blood_pressure }}</div>
-                            <div>Temp: {{ vital.temperature ?? '-' }} °C | Pulse: {{ vital.pulse ?? '-' }}</div>
-                            <div>Wt/Ht: {{ vital.weight ?? '-' }} kg / {{ vital.height ?? '-' }} cm</div>
-                        </td>
-                        <td class="py-3 text-body-2 text-medium-emphasis">
-                            {{ vital.notes ?? '-' }}
-                        </td>
-                        <td class="py-3 text-right text-caption text-medium-emphasis">
-                            {{ formatDate(vital.recorded_at) }}
-                        </td>
-                        <td class="py-3 text-right">
-                            <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary" @click="startEdit(vital)" />
-                            <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" @click="askDelete(vital)" />
-                        </td>
-                    </tr>
-                </tbody>
-            </v-table>
+            <thead class="bg-containerBg">
+                <tr>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Vitals</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Note</th>
+                    <th class="text-right text-caption font-weight-bold text-uppercase">Time</th>
+                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-if="pending">
+                    <td colspan="5" class="text-center py-8">
+                        <v-progress-circular indeterminate color="primary" />
+                    </td>
+                </tr>
+                <tr v-else-if="filteredVitals.length === 0">
+                    <td colspan="5" class="text-center py-8 text-medium-emphasis">
+                        No vital signs recorded yet
+                    </td>
+                </tr>
+                <tr v-else v-for="vital in filteredVitals" :key="vital.id">
+                    <td class="py-3">
+                        <div class="text-body-2 font-weight-medium">{{ vital.patient_name }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ vital.medical_record_number }}</div>
+                    </td>
+                    <td class="py-3 text-body-2">
+                        <div>BP: {{ vital.blood_pressure }}</div>
+                        <div>Temp: {{ vital.temperature ?? '-' }} °C | Pulse: {{ vital.pulse ?? '-' }}</div>
+                        <div>Wt/Ht: {{ vital.weight ?? '-' }} kg / {{ vital.height ?? '-' }} cm</div>
+                    </td>
+                    <td class="py-3 text-body-2 text-medium-emphasis">
+                        {{ vital.notes ?? '-' }}
+                    </td>
+                    <td class="py-3 text-right text-caption text-medium-emphasis">
+                        {{ formatDate(vital.recorded_at) }}
+                    </td>
+                    <td class="py-3 text-right">
+                        <v-btn v-if="can('vitals.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" @click="startEdit(vital)" />
+                        <v-btn v-if="can('vitals.delete')" icon="mdi-delete-outline" variant="text" size="small"
+                            color="error" @click="askDelete(vital)" />
+                    </td>
+                </tr>
+            </tbody>
+        </v-table>
     </v-card>
 
     <v-dialog v-model="dialog" max-width="640">
@@ -366,36 +339,33 @@ function formatDate(dateStr: string) {
             </v-card-title>
             <v-card-text>
                 <v-form class="d-flex flex-column ga-4" @submit.prevent="submitVital">
-                    <v-autocomplete
-                        v-model="form.patientId"
-                        :items="patientOptions"
-                        :loading="patientPending"
-                        item-title="title"
-                        item-value="value"
-                        label="Patient"
-                        placeholder="Search patient..."
-                        variant="outlined"
-                        density="comfortable"
-                        clearable
-                    />
-                    <v-text-field v-model="form.bloodPressure" label="Blood pressure" placeholder="120/80" variant="outlined" density="comfortable" />
+                    <v-autocomplete v-model="form.patientId" :items="patientOptions" :loading="patientPending"
+                        item-title="title" item-value="value" label="Patient" placeholder="Search patient..."
+                        variant="outlined" density="comfortable" clearable />
+                    <v-text-field v-model="form.bloodPressure" label="Blood pressure" placeholder="120/80"
+                        variant="outlined" density="comfortable" />
                     <v-row dense>
                         <v-col cols="12" md="6">
-                            <v-text-field v-model="form.temperature" label="Temperature" placeholder="36.8" suffix="°C" variant="outlined" density="comfortable" />
+                            <v-text-field v-model="form.temperature" label="Temperature" placeholder="36.8" suffix="°C"
+                                variant="outlined" density="comfortable" />
                         </v-col>
                         <v-col cols="12" md="6">
-                            <v-text-field v-model="form.pulse" label="Pulse" placeholder="78" suffix="bpm" variant="outlined" density="comfortable" />
+                            <v-text-field v-model="form.pulse" label="Pulse" placeholder="78" suffix="bpm"
+                                variant="outlined" density="comfortable" />
                         </v-col>
                     </v-row>
                     <v-row dense>
                         <v-col cols="12" md="6">
-                            <v-text-field v-model="form.weight" label="Weight" placeholder="60" suffix="kg" variant="outlined" density="comfortable" />
+                            <v-text-field v-model="form.weight" label="Weight" placeholder="60" suffix="kg"
+                                variant="outlined" density="comfortable" />
                         </v-col>
                         <v-col cols="12" md="6">
-                            <v-text-field v-model="form.height" label="Height" placeholder="165" suffix="cm" variant="outlined" density="comfortable" />
+                            <v-text-field v-model="form.height" label="Height" placeholder="165" suffix="cm"
+                                variant="outlined" density="comfortable" />
                         </v-col>
                     </v-row>
-                    <v-textarea v-model="form.notes" label="Short note" rows="3" variant="outlined" density="comfortable" />
+                    <v-textarea v-model="form.notes" label="Short note" rows="3" variant="outlined"
+                        density="comfortable" />
                     <div class="d-flex ga-2 justify-end">
                         <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
                         <v-btn type="submit" color="primary" variant="flat" :loading="submitting">

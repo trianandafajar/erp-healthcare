@@ -5,6 +5,7 @@ definePageMeta({
     layout: 'nurse',
     middleware: ['auth', 'role'],
     role: 'nurse',
+    permissions: ['care-notes.view'],
 })
 
 useSeoMeta({
