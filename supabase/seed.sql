@@ -17,42 +17,63 @@ ON CONFLICT (name) DO NOTHING;
 -- Seed Permissions
 -- =========================
 
-INSERT INTO public.permissions (name, label, module)
+-- ensure category exists (migrations might have run already)
+ALTER TABLE public.permissions
+  ADD COLUMN IF NOT EXISTS category text;
+
+-- seed permissions with category
+INSERT INTO public.permissions (name, label, module, category)
 VALUES
+  -- General
+  ('general.access', 'General Access', 'general', 'admin'),
+
   -- User
-  ('user.view', 'View Users', 'user'),
-  ('user.create', 'Create User', 'user'),
-  ('user.edit', 'Edit User', 'user'),
-  ('user.delete', 'Delete User', 'user'),
+  ('user.view', 'View Users', 'user', 'admin'),
+  ('user.create', 'Create User', 'user', 'admin'),
+  ('user.edit', 'Edit User', 'user', 'admin'),
+  ('user.delete', 'Delete User', 'user', 'admin'),
 
   -- Role
-  ('role.view', 'View Roles', 'role'),
-  ('role.create', 'Create Role', 'role'),
-  ('role.edit', 'Edit Role', 'role'),
-  ('role.delete', 'Delete Role', 'role'),
-  ('permission.assign', 'Assign Permission', 'role'),
+  ('role.view', 'View Roles', 'role', 'admin'),
+  ('role.create', 'Create Role', 'role', 'admin'),
+  ('role.edit', 'Edit Role', 'role', 'admin'),
+  ('role.delete', 'Delete Role', 'role', 'admin'),
+  ('permission.view', 'View Permissions', 'permission', 'admin'),
+  ('permission.create', 'Create Permission', 'permission', 'admin'),
+  ('permission.edit', 'Edit Permission', 'permission', 'admin'),
+  ('permission.delete', 'Delete Permission', 'permission', 'admin'),
+  ('permission.assign', 'Assign Permission', 'role', 'admin'),
 
   -- Doctor
-  ('doctor.view', 'View Doctor', 'doctor'),
-  ('doctor.create', 'Create Doctor', 'doctor'),
-  ('doctor.edit', 'Edit Doctor', 'doctor'),
-  ('doctor.delete', 'Delete Doctor', 'doctor'),
+  ('doctor.view', 'View Doctor', 'doctor', 'doctor'),
+  ('doctor.create', 'Create Doctor', 'doctor', 'doctor'),
+  ('doctor.edit', 'Edit Doctor', 'doctor', 'doctor'),
+  ('doctor.delete', 'Delete Doctor', 'doctor', 'doctor'),
 
   -- Patient
-  ('patient.view', 'View Patient', 'patient'),
-  ('patient.create', 'Create Patient', 'patient'),
-  ('patient.edit', 'Edit Patient', 'patient'),
-  ('patient.delete', 'Delete Patient', 'patient'),
+  ('patient.view', 'View Patient', 'patient', 'patient'),
+  ('patient.create', 'Create Patient', 'patient', 'patient'),
+  ('patient.edit', 'Edit Patient', 'patient', 'patient'),
+  ('patient.delete', 'Delete Patient', 'patient', 'patient'),
 
   -- Department
-  ('department.view', 'View Department', 'department'),
-  ('department.create', 'Create Department', 'department'),
-  ('department.edit', 'Edit Department', 'department'),
-  ('department.delete', 'Delete Department', 'department'),
+  ('department.view', 'View Department', 'department', 'doctor'),
+  ('department.create', 'Create Department', 'department', 'doctor'),
+  ('department.edit', 'Edit Department', 'department', 'doctor'),
+  ('department.delete', 'Delete Department', 'department', 'doctor'),
 
   -- Report
-  ('report.view', 'View Report', 'report'),
-  ('report.export', 'Export Report', 'report')
+  ('report.view', 'View Report', 'report', 'admin'),
+  ('report.export', 'Export Report', 'report', 'admin'),
+
+  -- Nurse (admin pages use nurse.view)
+  ('nurse.view', 'View Nurse', 'nurse', 'nurse'),
+  ('nurse.create', 'Create Nurse', 'nurse', 'nurse'),
+  ('nurse.edit', 'Edit Nurse', 'nurse', 'nurse'),
+  ('nurse.delete', 'Delete Nurse', 'nurse', 'nurse'),
+
+  -- Admin-only extra permission (from migration)
+  ('user.impersonate', 'Login as User', 'user', 'admin')
 
 ON CONFLICT (name) DO NOTHING;
 

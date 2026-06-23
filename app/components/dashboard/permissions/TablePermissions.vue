@@ -98,26 +98,13 @@ async function handleSubmit(payload: any) {
                 <v-card-title class="text-h3">Permissions</v-card-title>
                 <v-card-subtitle class="mt-1">Manage available permissions grouped by module</v-card-subtitle>
             </div>
-
-            <!-- <PermissionGuard permission="view.dashboard"> -->
             <v-btn v-if="can('permission.create')" color="primary" @click="openAdd" variant="flat" size="large"
                 prepend-icon="mdi-plus" density="comfortable">
                 Add Permission
             </v-btn>
-            <!-- </PermissionGuard> -->
+
         </div>
     </v-card-item>
-
-    <div class="d-flex gap-3 mb-4">
-        <v-card variant="tonal" color="primary" rounded="lg" class="pa-4 flex-1">
-            <div class="text-h4 font-weight-bold">{{ permissions.length }}</div>
-            <div class="text-caption text-medium-emphasis">Total Permissions</div>
-        </v-card>
-        <v-card variant="tonal" color="info" rounded="lg" class="pa-4 flex-1">
-            <div class="text-h4 font-weight-bold">{{ moduleKeys.length }}</div>
-            <div class="text-caption text-medium-emphasis">Modules</div>
-        </v-card>
-    </div>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
         <v-divider />

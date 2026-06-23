@@ -114,21 +114,6 @@ async function handleSubmit(payload: any) {
         </div>
     </v-card-item>
 
-    <div class="d-flex gap-3 mb-4">
-        <v-card variant="tonal" color="primary" rounded="lg" class="pa-4 flex-1">
-            <div class="text-h4 font-weight-bold">{{ roles.length }}</div>
-            <div class="text-caption text-medium-emphasis">Total Roles</div>
-        </v-card>
-        <v-card variant="tonal" color="success" rounded="lg" class="pa-4 flex-1">
-            <div class="text-h4 font-weight-bold">{{ permData?.permissions?.length ?? 0 }}</div>
-            <div class="text-caption text-medium-emphasis">Total Permissions</div>
-        </v-card>
-        <v-card variant="tonal" color="info" rounded="lg" class="pa-4 flex-1">
-            <div class="text-h4 font-weight-bold">{{ moduleKeys.length }}</div>
-            <div class="text-caption text-medium-emphasis">Modules</div>
-        </v-card>
-    </div>
-
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
         <v-divider />
 
