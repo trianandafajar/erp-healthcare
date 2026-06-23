@@ -4,7 +4,7 @@ import { usePharmacyPrescriptions } from '~/composables/usePharmacyPrescriptions
 import type { PrescriptionItem } from '~/types/pharmacy'
 
 const feed = usePharmacyPrescriptions()
-
+const { can } = usePermission()
 const search = ref('')
 const detailDialog = ref(false)
 const rejectDialog = ref(false)
@@ -141,21 +141,15 @@ function statusColor(status: PrescriptionItem['status']) {
 
             <v-row dense>
                 <v-col cols="12" md="7">
-                    <v-text-field
-                        v-model="search"
-                        label="Search patient, MRN, doctor, or medicine"
-                        placeholder="Search patient, MRN, doctor, or medicine"
-                        prepend-inner-icon="mdi-magnify"
-                        variant="outlined"
-                        density="comfortable"
-                        hide-details
-                        clearable
-                    />
+                    <v-text-field v-model="search" label="Search patient, MRN, doctor, or medicine"
+                        placeholder="Search patient, MRN, doctor, or medicine" prepend-inner-icon="mdi-magnify"
+                        variant="outlined" density="comfortable" hide-details clearable />
                 </v-col>
                 <v-col cols="12" md="5" />
             </v-row>
 
-            <v-progress-linear v-if="feed.pending.value && groupedPrescriptions.length > 0" indeterminate color="primary" rounded />
+            <v-progress-linear v-if="feed.pending.value && groupedPrescriptions.length > 0" indeterminate
+                color="primary" rounded />
 
             <v-row v-if="isLoading" dense>
                 <v-col v-for="index in 4" :key="index" cols="12">
@@ -182,7 +176,8 @@ function statusColor(status: PrescriptionItem['status']) {
                             </div>
 
                             <div class="d-flex flex-wrap justify-end ga-2">
-                                <v-skeleton-loader v-for="actionIndex in 3" :key="actionIndex" type="button" width="96" />
+                                <v-skeleton-loader v-for="actionIndex in 3" :key="actionIndex" type="button"
+                                    width="96" />
                             </div>
                         </v-card-text>
                     </v-card>
@@ -196,7 +191,8 @@ function statusColor(status: PrescriptionItem['status']) {
                             <div class="d-flex flex-wrap align-start justify-space-between ga-4">
                                 <div>
                                     <div class="text-h6">{{ group.patientName }}</div>
-                                    <div class="text-body-2 text-medium-emphasis">{{ group.mrn }} • {{ group.doctorName }}</div>
+                                    <div class="text-body-2 text-medium-emphasis">{{ group.mrn }} • {{ group.doctorName
+                                    }}</div>
                                     <div class="text-caption text-medium-emphasis mt-1">
                                         {{ group.items.length }} medicine(s) in this prescription
                                     </div>
@@ -218,17 +214,21 @@ function statusColor(status: PrescriptionItem['status']) {
                             <v-table density="comfortable" class="pharmacy-group-table">
                                 <thead class="bg-containerBg">
                                     <tr>
-                                        <th class="text-left text-caption font-weight-bold text-uppercase">Medication</th>
+                                        <th class="text-left text-caption font-weight-bold text-uppercase">Medication
+                                        </th>
                                         <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
-                                        <th class="text-left text-caption font-weight-bold text-uppercase">Frequency</th>
+                                        <th class="text-left text-caption font-weight-bold text-uppercase">Frequency
+                                        </th>
                                         <th class="text-left text-caption font-weight-bold text-uppercase">Duration</th>
-                                        <th class="text-left text-caption font-weight-bold text-uppercase">Instructions</th>
+                                        <th class="text-left text-caption font-weight-bold text-uppercase">Instructions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="item in group.items" :key="item.id">
                                         <td class="py-3">
-                                            <div class="text-body-2 font-weight-medium">{{ medicineLabel([item]) }}</div>
+                                            <div class="text-body-2 font-weight-medium">{{ medicineLabel([item]) }}
+                                            </div>
                                         </td>
                                         <td class="py-3 text-body-2">{{ item.dosage || '-' }}</td>
                                         <td class="py-3 text-body-2">{{ item.frequency || '-' }}</td>
@@ -239,13 +239,16 @@ function statusColor(status: PrescriptionItem['status']) {
                             </v-table>
 
                             <div class="d-flex flex-wrap justify-end ga-2">
-                                <v-btn size="small" variant="text" color="secondary" @click="openDetail(group.medicalRecordId)">
+                                <v-btn size="small" variant="text" color="secondary"
+                                    @click="openDetail(group.medicalRecordId)">
                                     View Detail
                                 </v-btn>
-                                <v-btn size="small" variant="text" color="success" @click="verifyGroup(group.medicalRecordId)">
+                                <v-btn v-if="can('prescriptions.verify')" size="small" variant="text" color="success"
+                                    @click="verifyGroup(group.medicalRecordId)">
                                     Verify Group
                                 </v-btn>
-                                <v-btn size="small" variant="text" color="error" @click="openReject(group.medicalRecordId)">
+                                <v-btn v-if="can('prescriptions.reject')" size="small" variant="text" color="error"
+                                    @click="openReject(group.medicalRecordId)">
                                     Reject Group
                                 </v-btn>
                             </div>
@@ -293,11 +296,13 @@ function statusColor(status: PrescriptionItem['status']) {
                                     </div>
                                     <div>
                                         <div class="text-caption text-medium-emphasis">Requested</div>
-                                        <div class="text-body-2 font-weight-medium">{{ formatDateTime(selectedGroup.requestedAt) }}</div>
+                                        <div class="text-body-2 font-weight-medium">{{
+                                            formatDateTime(selectedGroup.requestedAt) }}</div>
                                     </div>
                                     <div>
                                         <div class="text-caption text-medium-emphasis">Last Update</div>
-                                        <div class="text-body-2 font-weight-medium">{{ formatDateTime(selectedGroup.lastUpdatedAt) }}</div>
+                                        <div class="text-body-2 font-weight-medium">{{
+                                            formatDateTime(selectedGroup.lastUpdatedAt) }}</div>
                                     </div>
                                 </div>
                             </v-card-text>
@@ -315,17 +320,23 @@ function statusColor(status: PrescriptionItem['status']) {
                                 <v-table density="comfortable">
                                     <thead class="bg-containerBg">
                                         <tr>
-                                            <th class="text-left text-caption font-weight-bold text-uppercase">Medication</th>
-                                            <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
-                                            <th class="text-left text-caption font-weight-bold text-uppercase">Frequency</th>
-                                            <th class="text-left text-caption font-weight-bold text-uppercase">Duration</th>
+                                            <th class="text-left text-caption font-weight-bold text-uppercase">
+                                                Medication</th>
+                                            <th class="text-left text-caption font-weight-bold text-uppercase">Dosage
+                                            </th>
+                                            <th class="text-left text-caption font-weight-bold text-uppercase">Frequency
+                                            </th>
+                                            <th class="text-left text-caption font-weight-bold text-uppercase">Duration
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr v-for="item in selectedGroup.items" :key="item.id">
                                             <td class="py-3">
-                                                <div class="text-body-2 font-weight-medium">{{ medicineLabel([item]) }}</div>
-                                                <div class="text-caption text-medium-emphasis">{{ item.instructions || '-' }}</div>
+                                                <div class="text-body-2 font-weight-medium">{{ medicineLabel([item]) }}
+                                                </div>
+                                                <div class="text-caption text-medium-emphasis">{{ item.instructions ||
+                                                    '-' }}</div>
                                             </td>
                                             <td class="py-3 text-body-2">{{ item.dosage || '-' }}</td>
                                             <td class="py-3 text-body-2">{{ item.frequency || '-' }}</td>
@@ -349,14 +360,8 @@ function statusColor(status: PrescriptionItem['status']) {
         <v-card>
             <v-card-title class="text-h6">Reject Prescription Group</v-card-title>
             <v-card-text>
-                <v-textarea
-                    v-model="rejectNote"
-                    label="Reason"
-                    rows="4"
-                    variant="outlined"
-                    density="comfortable"
-                    placeholder="Write the rejection reason for the doctor"
-                />
+                <v-textarea v-model="rejectNote" label="Reason" rows="4" variant="outlined" density="comfortable"
+                    placeholder="Write the rejection reason for the doctor" />
             </v-card-text>
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="rejectDialog = false">Cancel</v-btn>

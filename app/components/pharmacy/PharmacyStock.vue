@@ -2,6 +2,7 @@
 import usePharmacyWorkspace from '~/composables/usePharmacyWorkspace'
 import type { StockItem } from '~/types/pharmacy'
 
+const { can } = usePermission()
 const workspace = usePharmacyWorkspace()
 const search = ref('')
 const stockFilter = ref<'all' | 'low'>('all')
@@ -152,7 +153,8 @@ function formatDate(value: string) {
                     Search medicines, watch low stock items, and manage inventory adjustments.
                 </v-card-subtitle>
             </div>
-            <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="openCreate">
+            <v-btn v-if="can('stock.create')" color="primary" variant="flat" prepend-icon="mdi-plus"
+                @click="openCreate">
                 Add Medicine
             </v-btn>
         </div>
@@ -213,10 +215,12 @@ function formatDate(value: string) {
                                 {{ item.quantity <= item.minimumStock ? 'Low Stock' : 'Healthy' }} </v-chip>
                         </td>
                         <td class="py-3 text-right">
-                            <v-btn size="small" variant="text" color="secondary" @click="openEdit(item)">
+                            <v-btn v-if="can('stock.edit')" size="small" variant="text" color="secondary"
+                                @click="openEdit(item)">
                                 Edit
                             </v-btn>
-                            <v-btn size="small" variant="text" color="warning" @click="openAdjust(item)">
+                            <v-btn v-if="can('stock.adjust')" size="small" variant="text" color="warning"
+                                @click="openAdjust(item)">
                                 Adjust Stock
                             </v-btn>
                         </td>

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { usePharmacyPrescriptions } from '~/composables/usePharmacyPrescriptions'
 import type { PrescriptionItem } from '~/types/pharmacy'
 
+const { can } = usePermission()
 const feed = usePharmacyPrescriptions()
 const detailDialog = ref(false)
 const labelDialog = ref(false)
@@ -176,10 +177,12 @@ function statusColor(status: PrescriptionItem['status']) {
                     </div>
 
                     <div class="d-flex flex-wrap justify-end ga-2">
-                        <v-btn size="small" color="primary" variant="flat" @click="markAsDispensed(group.medicalRecordId)">
+                        <v-btn v-if="can('prescriptions.dispense')" size="small" color="primary" variant="flat"
+                            @click="markAsDispensed(group.medicalRecordId)">
                             Mark as Dispensed
                         </v-btn>
-                        <v-btn size="small" color="secondary" variant="tonal" @click="printLabel(group.medicalRecordId)">
+                        <v-btn size="small" color="secondary" variant="tonal"
+                            @click="printLabel(group.medicalRecordId)">
                             Print Label
                         </v-btn>
                         <v-btn size="small" color="info" variant="text" @click="openDetail(group.medicalRecordId)">
@@ -206,7 +209,8 @@ function statusColor(status: PrescriptionItem['status']) {
                 <div><strong>Doctor:</strong> {{ selectedGroup.doctorName }}</div>
                 <div><strong>Status:</strong> {{ selectedGroup.status }}</div>
                 <div><strong>Verified Time:</strong> {{ formatDateTime(selectedGroup.verifiedAt) }}</div>
-                <div><strong>Medicines:</strong> {{ selectedGroup.items.map((item) => item.medicines.join(', ')).join(' • ') }}</div>
+                <div><strong>Medicines:</strong> {{selectedGroup.items.map((item) => item.medicines.join(', ')).join('
+                    • ') }}</div>
             </v-card-text>
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="detailDialog = false">Close</v-btn>

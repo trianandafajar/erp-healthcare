@@ -113,6 +113,21 @@
     ('vitals.edit', 'Edit Vital Signs', 'vitals', 'nurse'),
     ('vitals.delete', 'Delete Vital Signs', 'vitals', 'nurse'),
 
+    -- Pharmacy area pages
+    ('dispensing.view', 'View Dispensing', 'dispensing', 'pharmacy'),
+    ('prescriptions.view', 'View Prescriptions', 'prescriptions', 'pharmacy'),
+    ('verification.view', 'View Verification', 'verification', 'pharmacy'),
+    ('stock.view', 'View Stock', 'stock', 'pharmacy'),
+    ('stock-in.view', 'View Incoming Stock', 'stock-in', 'pharmacy'),
+    ('stock-out.view', 'View Outgoing Stock', 'stock-out', 'pharmacy'),
+
+    -- Pharmacy actions
+    ('prescriptions.verify', 'Verify Prescription', 'prescriptions', 'pharmacy'),
+    ('prescriptions.reject', 'Reject Prescription', 'prescriptions', 'pharmacy'),
+    ('prescriptions.dispense', 'Dispense Prescription', 'prescriptions', 'pharmacy'),
+    ('stock.create', 'Create Stock Item', 'stock', 'pharmacy'),
+    ('stock.edit', 'Edit Stock Item', 'stock', 'pharmacy'),
+    ('stock.adjust', 'Adjust Stock', 'stock', 'pharmacy'),
 
     -- Admin-only extra permission (from migration)
     ('user.impersonate', 'Login as User', 'user', 'admin')
@@ -202,7 +217,25 @@
         WHERE name = 'pharmacy';
 
         perm_names := ARRAY[
-            'patient.view'
+            -- Pages
+            'dashboard.view',
+            'patient.view',
+            'prescriptions.view',
+            'dispensing.view',
+            'verification.view',
+            'stock.view',
+            'stock-in.view',
+            'stock-out.view',
+
+            -- Prescription actions
+            'prescriptions.verify',
+            'prescriptions.reject',
+            'prescriptions.dispense',
+
+            -- Stock actions
+            'stock.create',
+            'stock.edit',
+            'stock.adjust'
         ];
 
         FOREACH perm_name IN ARRAY perm_names LOOP

@@ -5,6 +5,7 @@ definePageMeta({
     layout: 'pharmacy',
     middleware: ['auth', 'role'],
     role: 'pharmacy',
+    permissions: ['prescriptions.view'],
 })
 </script>
 
