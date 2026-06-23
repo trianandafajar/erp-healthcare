@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'patient',
-    middleware: 'auth'
+    middleware: 'auth',
+    permissions: ['dashboard.view'],
 })
 
 useSeoMeta({
@@ -138,7 +139,7 @@ async function goTo(path: string) {
                         <v-col cols="12" sm="6">
                             <div class="text-caption text-medium-emphasis">Visit Date</div>
                             <div class="text-body-1 font-weight-medium">{{ formatDate(upcomingAppointment.date)
-                                }}</div>
+                            }}</div>
                         </v-col>
                         <v-col cols="12" sm="6">
                             <div class="text-caption text-medium-emphasis">Complaint</div>

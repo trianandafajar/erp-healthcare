@@ -3,7 +3,7 @@ import ReceptionistCheckIn from '~/components/receptionist/ReceptionistCheckIn.v
 
 definePageMeta({
     layout: 'receptionist',
-    middleware: ['auth', 'role'],
+    middleware: ['auth', 'permission'],
     role: 'receptionist',
     permissions: ['check-in.view'],
 })
