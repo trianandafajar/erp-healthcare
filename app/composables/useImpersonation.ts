@@ -86,7 +86,7 @@ export const useImpersonation = () => {
         localStorage.removeItem('impersonated_role')
 
         await syncCurrentSessionProfile()
-        await navigateTo('/dashboard')
+        await navigateTo('/users-management')
     }
 
     return {
