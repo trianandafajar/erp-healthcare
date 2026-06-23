@@ -24,7 +24,7 @@ type PrescriptionItem = {
     doctor: string
     department: string
     visitReference: string
-    // status: 'Active' | 'Completed' | 'Expired' | string
+    status: 'Active' | 'Completed' | 'Expired' | string
     medications: MedicationItem[]
 }
 
@@ -93,13 +93,13 @@ function shortId(id?: string | null) {
             <v-text-field v-model="search" placeholder="Search prescription, doctor, medication, or department"
                 prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
                 style="max-width: 420px" />
-            <!-- <v-btn-toggle v-model="statusFilter" mandatory density="compact" variant="tonal" color="primary"
+            <v-btn-toggle v-model="statusFilter" mandatory density="compact" variant="tonal" color="primary"
                 class="flex-wrap">
                 <v-btn value="all">All</v-btn>
                 <v-btn value="Active">Active</v-btn>
                 <v-btn value="Completed">Completed</v-btn>
                 <v-btn value="Expired">Expired</v-btn>
-            </v-btn-toggle> -->
+            </v-btn-toggle>
         </div>
 
         <v-table class="text-no-wrap">
@@ -111,7 +111,7 @@ function shortId(id?: string | null) {
                     <th>Department</th>
                     <th>Visit Ref</th>
                     <th>Items</th>
-                    <!-- <th>Status</th> -->
+                    <th>Status</th>
                     <th class="text-right">Action</th>
                 </tr>
             </thead>
@@ -131,11 +131,11 @@ function shortId(id?: string | null) {
                             {{ item.medications.length }} medication{{ item.medications.length > 1 ? 's' : '' }}
                         </v-chip>
                     </td>
-                    <!-- <td>
+                    <td>
                         <v-chip size="small" :color="statusColor(item.status)" variant="tonal">
                             {{ item.status }}
                         </v-chip>
-                    </td> -->
+                    </td>
                     <td class="text-right">
                         <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-eye-outline"
                             @click="openDetail(item)">
@@ -163,6 +163,9 @@ function shortId(id?: string | null) {
                     <div class="d-flex flex-wrap ga-2">
                         <v-chip color="primary" variant="tonal">{{ formatDate(selectedPrescription.prescribedAt)
                             }}</v-chip>
+                        <v-chip :color="statusColor(selectedPrescription.status)" variant="tonal">
+                            {{ selectedPrescription.status }}
+                        </v-chip>
                     </div>
                 </div>
             </v-card-item>
@@ -176,7 +179,7 @@ function shortId(id?: string | null) {
                     <v-col cols="12" md="6">
                         <div class="text-caption text-medium-emphasis">Prescription Date</div>
                         <div class="text-body-1 font-weight-medium">{{ formatDate(selectedPrescription.prescribedAt)
-                            }}</div>
+                        }}</div>
                     </v-col>
                 </v-row>
 
@@ -215,7 +218,7 @@ function shortId(id?: string | null) {
                                                 <v-icon icon="mdi-pill" size="18" color="primary" class="mr-2" />
                                             </template>
                                             <v-list-item-title class="text-body-2 text-wrap">{{ instruction
-                                                }}</v-list-item-title>
+                                            }}</v-list-item-title>
                                         </v-list-item>
                                     </v-list>
                                 </template>

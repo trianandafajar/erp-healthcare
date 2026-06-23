@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
             frequency,
             duration,
             instructions,
+            status,
             doctors (
                 profiles (
                 full_name
@@ -71,9 +72,14 @@ export default defineEventHandler(async (event) => {
                 doctor: r.doctors?.profiles?.full_name ?? '-',
                 department: r.medical_records?.appointments?.departments?.name ?? '-',
                 visitReference: r.medical_records?.appointment_id ?? '-',
+                status: r.status ?? 'Pending',
+                pharmacistNote: r.pharmacist_note ?? null,
+                rejectionNote: r.rejection_note ?? null,
+                verifiedAt: r.verified_at ?? null,
+                dispensedAt: r.dispensed_at ?? null,
                 medications: [med],
             })
-        }
+        } 
     }
 
     return { prescriptions: Array.from(grouped.values()) }
