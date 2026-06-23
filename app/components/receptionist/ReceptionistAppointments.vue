@@ -1,223 +1,368 @@
 <script setup lang="ts">
-const { can } = usePermission()
-const workspace = useReceptionistWorkspace()
-const search = ref('')
-const statusFilter = ref('All')
-const dialog = ref(false)
-const snackbar = ref(false)
-const snackbarMessage = ref('')
-const formError = ref('')
-
-const form = reactive({
-    patientId: '',
-    doctorScheduleId: '',
-    appointmentDate: '2026-06-17',
-    appointmentTime: '',
-    type: 'Consultation',
-    note: '',
+definePageMeta({
+    middleware: ['auth'],
 })
 
-const patientOptions = computed(() => workspace.patients.value.map((item) => ({
-    title: `${item.fullName} (${item.medicalRecordNumber})`,
-    value: item.id,
+interface AppointmentRow {
+    id: string
+    appointment_date: string
+    appointment_time: string | null
+    type: string
+    status: string
+    chief_complaint: string | null
+    notes: string | null
+    queue_number: string | null
+    patient: { id: string; full_name: string; medical_record_number: string } | null
+    doctor: { id: string; full_name: string; department: { id: string; name: string } | null } | null
+    department: { id: string; name: string } | null
+}
+
+interface Schedule {
+    id: string
+    day_of_week: number
+    day_name: string
+    start_time: string
+    end_time: string
+    doctor_id: string | null
+    doctor_name: string
+    department_id: string | null
+    department_name: string
+}
+
+const { can } = usePermission()
+
+const search = ref('')
+const statusFilter = ref('all')
+const dialog = ref(false)
+const loading = ref(false)
+const formError = ref('')
+
+const snackbar = ref(false)
+const snackbarMsg = ref('')
+const snackbarColor = ref('success')
+
+function notify(msg: string, color = 'success') {
+    snackbarMsg.value = msg
+    snackbarColor.value = color
+    snackbar.value = true
+}
+
+const form = reactive({
+    patient_id: '',
+    doctor_schedule_id: '',
+    appointment_date: new Date().toISOString().slice(0, 10),
+    appointment_time: '',
+    type: 'appointment',
+    chief_complaint: '',
+    notes: '',
+})
+
+const { data: appointmentsData, pending, refresh } = await useFetch<{ appointments: AppointmentRow[] }>('/api/appointments')
+const { data: schedulesData } = await useFetch<{ schedules: Schedule[] }>('/api/doctor-schedules')
+const { data: patientsData } = await useFetch<{ patients: any[] }>('/api/patients')
+
+const appointments = computed(() => appointmentsData.value?.appointments ?? [])
+const schedules = computed(() => schedulesData.value?.schedules ?? [])
+const patients = computed(() => patientsData.value?.patients ?? [])
+
+const patientOptions = computed(() => patients.value.map((p) => ({
+    title: `${p.full_name} (${p.medical_record_number ?? '-'})`,
+    value: p.id,
 })))
 
-const doctorScheduleOptions = computed(() => workspace.doctorSchedules.value.map((item) => ({
-    title: `${item.doctorName} - ${item.department}`,
-    value: item.id,
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+const scheduleOptions = computed(() => schedules.value.map((s) => ({
+    title: `${s.doctor_name} - ${s.department_name}`,
+    value: s.id,
     props: {
-        subtitle: `${item.day}, ${item.startTime} - ${item.endTime} | ${item.room} | ${item.status}`,
-        disabled: item.status === 'Off Duty' || item.status === 'Full',
+        subtitle: `${s.day_name}, ${s.start_time.slice(0, 5)} - ${s.end_time.slice(0, 5)}`,
     },
 })))
 
-const selectedSchedule = computed(() => workspace.doctorSchedules.value.find((item) => item.id === form.doctorScheduleId) ?? null)
+const selectedSchedule = computed(() =>
+    schedules.value.find((s) => s.id === form.doctor_schedule_id) ?? null
+)
 
 const scheduleTimeHint = computed(() => {
-    if (!selectedSchedule.value) return 'Select a doctor schedule to see available appointment time.'
-    return `Available time: ${selectedSchedule.value.startTime} - ${selectedSchedule.value.endTime} (${selectedSchedule.value.day}, ${selectedSchedule.value.room}).`
+    if (!selectedSchedule.value) return 'Select a doctor schedule to see available time.'
+    const s = selectedSchedule.value
+    return `Available: ${s.start_time.slice(0, 5)} - ${s.end_time.slice(0, 5)} (${s.day_name})`
 })
+
+watch(() => form.doctor_schedule_id, () => {
+    formError.value = ''
+    if (!selectedSchedule.value) {
+        form.appointment_time = ''
+        return
+    }
+    if (!form.appointment_time ||
+        form.appointment_time < selectedSchedule.value.start_time ||
+        form.appointment_time > selectedSchedule.value.end_time
+    ) {
+        form.appointment_time = selectedSchedule.value.start_time.slice(0, 5)
+    }
+})
+
+const statusOptions = [
+    { label: 'All', value: 'all' },
+    { label: 'Waiting', value: 'waiting' },
+    { label: 'In Progress', value: 'in_progress' },
+    { label: 'Done', value: 'done' },
+    { label: 'Cancelled', value: 'cancelled' },
+]
+
+const typeLabels: Record<string, string> = {
+    appointment: 'Appointment',
+    walkin: 'Walk-in',
+    referral: 'Referral',
+    consultation: 'Consultation',
+    follow_up: 'Follow-up',
+}
+
+const statusColors: Record<string, string> = {
+    waiting: 'warning',
+    in_progress: 'primary',
+    done: 'success',
+    cancelled: 'error',
+}
 
 const filteredAppointments = computed(() => {
     const keyword = search.value.toLowerCase()
-    return workspace.appointments.value.filter((item) => {
-        const matchesStatus = statusFilter.value === 'All' || item.status === statusFilter.value
-        const matchesKeyword =
-            item.patientName.toLowerCase().includes(keyword) ||
-            item.medicalRecordNumber.toLowerCase().includes(keyword) ||
-            item.doctorName.toLowerCase().includes(keyword) ||
-            item.department.toLowerCase().includes(keyword)
-
-        return matchesStatus && matchesKeyword
+    return appointments.value.filter((item) => {
+        const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
+        const matchSearch =
+            (item.patient?.full_name ?? '').toLowerCase().includes(keyword) ||
+            (item.patient?.medical_record_number ?? '').toLowerCase().includes(keyword) ||
+            (item.doctor?.full_name ?? '').toLowerCase().includes(keyword) ||
+            (item.department?.name ?? item.doctor?.department?.name ?? '').toLowerCase().includes(keyword)
+        return matchStatus && matchSearch
     })
 })
 
-function statusColor(status: string) {
-    if (status === 'Completed') return 'success'
-    if (status === 'Cancelled') return 'error'
-    if (status === 'Checked In' || status === 'Waiting') return 'primary'
-    return 'secondary'
+function openCreate() {
+    formError.value = ''
+    form.patient_id = ''
+    form.doctor_schedule_id = ''
+    form.appointment_date = new Date().toISOString().slice(0, 10)
+    form.appointment_time = ''
+    form.type = 'appointment'
+    form.chief_complaint = ''
+    form.notes = ''
+    dialog.value = true
 }
 
-watch(
-    () => form.doctorScheduleId,
-    () => {
-        formError.value = ''
-        if (!selectedSchedule.value) {
-            form.appointmentTime = ''
+async function createAppointment() {
+    formError.value = ''
+    if (!form.patient_id || !form.appointment_date) {
+        formError.value = 'Patient and date are required.'
+        return
+    }
+    if (selectedSchedule.value) {
+        if (!form.appointment_time) {
+            formError.value = 'Appointment time is required.'
             return
         }
-
-        if (
-            !form.appointmentTime ||
-            form.appointmentTime < selectedSchedule.value.startTime ||
-            form.appointmentTime > selectedSchedule.value.endTime
-        ) {
-            form.appointmentTime = selectedSchedule.value.startTime
+        if (form.appointment_time < selectedSchedule.value.start_time.slice(0, 5) ||
+            form.appointment_time > selectedSchedule.value.end_time.slice(0, 5)) {
+            formError.value = `Time must be between ${selectedSchedule.value.start_time.slice(0, 5)} and ${selectedSchedule.value.end_time.slice(0, 5)}.`
+            return
         }
     }
-)
 
-function createAppointment() {
-    const patient = workspace.patients.value.find((item) => item.id === form.patientId)
-    const schedule = selectedSchedule.value
-    formError.value = ''
-
-    if (!patient || !schedule || !form.appointmentTime) {
-        formError.value = 'Patient, doctor schedule, and time are required.'
-        return
+    loading.value = true
+    try {
+        await $fetch('/api/appointments', {
+            method: 'POST',
+            body: {
+                patient_id: form.patient_id,
+                doctor_id: selectedSchedule.value?.doctor_id ?? null,
+                department_id: selectedSchedule.value?.department_id ?? null,
+                appointment_date: form.appointment_date,
+                appointment_time: form.appointment_time || null,
+                type: form.type,
+                chief_complaint: form.chief_complaint || null,
+                notes: form.notes || null,
+            }
+        })
+        notify('Appointment created successfully')
+        await refresh()
+        dialog.value = false
+    } catch (e: any) {
+        formError.value = e?.data?.message ?? 'Something went wrong'
+    } finally {
+        loading.value = false
     }
+}
 
-    if (form.appointmentTime < schedule.startTime || form.appointmentTime > schedule.endTime) {
-        formError.value = `Time must be between ${schedule.startTime} and ${schedule.endTime}.`
-        return
+async function updateStatus(id: string, status: string) {
+    try {
+        await $fetch(`/api/appointments/${id}`, {
+            method: 'PATCH',
+            body: { status }
+        })
+        notify(status === 'in_progress' ? 'Patient checked in' : 'Status updated')
+        await refresh()
+    } catch (e: any) {
+        notify(e?.data?.message ?? 'Failed to update status', 'error')
     }
-
-    workspace.createAppointment({
-        patientId: patient.id,
-        patientName: patient.fullName,
-        medicalRecordNumber: patient.medicalRecordNumber,
-        doctorName: schedule.doctorName,
-        department: schedule.department,
-        appointmentDate: form.appointmentDate,
-        appointmentTime: form.appointmentTime,
-        type: form.type,
-        note: form.note,
-    })
-
-    form.patientId = ''
-    form.doctorScheduleId = ''
-    form.appointmentTime = ''
-    form.type = 'Consultation'
-    form.note = ''
-    dialog.value = false
-    snackbarMessage.value = 'Appointment created successfully.'
-    snackbar.value = true
 }
 </script>
 
 <template>
-    <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
-        <div>
-            <h2 class="text-h3 mb-1">Appointment</h2>
-            <p class="text-medium-emphasis mb-0">Manage patient visit schedules and appointment status.</p>
+    <v-card-item class="pb-2 px-0 pt-0">
+        <div class="d-flex justify-space-between align-center">
+            <div>
+                <v-card-title class="text-h3">Appointments</v-card-title>
+                <v-card-subtitle class="mt-1">Manage patient visit schedules and appointment status</v-card-subtitle>
+            </div>
+            <v-btn v-if="can('appointment.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openCreate">
+                Create Appointment
+            </v-btn>
         </div>
-        <v-btn v-if="can('appointment.create')" color="primary" variant="flat" prepend-icon="mdi-plus"
-            @click="dialog = true">Create Appointment</v-btn>
-    </div>
+    </v-card-item>
 
-    <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Appointment List">
-        <div class="px-4 py-3 d-flex flex-wrap ga-3">
+    <UiTitleCard class-name="px-0 pb-0 rounded-md">
+        <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
             <v-text-field v-model="search" placeholder="Search patient, doctor, MRN, or department"
                 prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
-                style="max-width: 420px" />
-            <v-select v-model="statusFilter"
-                :items="['All', 'Scheduled', 'Checked In', 'Waiting', 'Completed', 'Cancelled']" variant="outlined"
-                density="compact" hide-details style="max-width: 220px" />
+                style="max-width: 320px" />
+
+            <v-btn-toggle v-model="statusFilter" density="compact" variant="tonal" divided mandatory color="primary"
+                class="flex-wrap">
+                <v-btn v-for="s in statusOptions" :key="s.value" :value="s.value" size="small">
+                    {{ s.label }}
+                </v-btn>
+            </v-btn-toggle>
         </div>
 
-        <v-table class="text-no-wrap">
-            <thead>
+        <v-divider />
+
+        <v-table class="bordered-table" hover density="comfortable">
+            <thead class="bg-containerBg">
                 <tr>
-                    <th>Patient</th>
-                    <th>Schedule</th>
-                    <th>Doctor</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th class="text-right">Action</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Schedule</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Doctor</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Type</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Queue</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
+                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in filteredAppointments" :key="item.id">
-                    <td>
-                        <div class="font-weight-medium">{{ item.patientName }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.medicalRecordNumber }}</div>
-                    </td>
-                    <td>
-                        <div>{{ item.appointmentDate }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.appointmentTime }}</div>
-                    </td>
-                    <td>
-                        <div>{{ item.doctorName }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.department }}</div>
-                    </td>
-                    <td>{{ item.type }}</td>
-                    <td>
-                        <v-chip size="small" variant="tonal" :color="statusColor(item.status)">{{ item.status
-                            }}</v-chip>
-                    </td>
-                    <td class="text-right">
-                        <v-btn v-if="item.status === 'Scheduled'" size="small" color="primary" variant="tonal"
-                            @click="workspace.checkInAppointment(item.id)">
-                            Check-in
-                        </v-btn>
-                        <v-btn v-if="can('appointment.edit') && item.status !== 'Completed'" size="small"
-                            color="success" variant="tonal"
-                            @click="workspace.updateAppointmentStatus(item.id, 'Completed')">
-                            Complete
-                        </v-btn>
+                <tr v-if="pending">
+                    <td colspan="7" class="text-center py-8">
+                        <v-progress-circular indeterminate color="primary" />
                     </td>
                 </tr>
-                <tr v-if="filteredAppointments.length === 0">
-                    <td colspan="6" class="text-center py-6 text-medium-emphasis">No appointment found.</td>
+                <tr v-else-if="filteredAppointments.length === 0">
+                    <td colspan="7" class="text-center py-8 text-medium-emphasis">
+                        <v-icon icon="mdi-calendar-remove-outline" size="32" class="mb-2 d-block mx-auto" />
+                        No appointments found
+                    </td>
+                </tr>
+                <tr v-else v-for="item in filteredAppointments" :key="item.id">
+                    <td class="py-3">
+                        <div class="text-body-2 font-weight-medium">{{ item.patient?.full_name ?? '-' }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ item.patient?.medical_record_number ?? '-' }}
+                        </div>
+                    </td>
+                    <td class="py-3 text-body-2">
+                        <div>{{ item.appointment_date }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ item.appointment_time?.slice(0, 5) ?? '-' }}
+                        </div>
+                    </td>
+                    <td class="py-3 text-body-2">
+                        <div>{{ item.doctor?.full_name ?? '-' }}</div>
+                        <div class="text-caption text-medium-emphasis">
+                            {{ item.department?.name ?? item.doctor?.department?.name ?? '-' }}
+                        </div>
+                    </td>
+                    <td class="py-3">
+                        <v-chip size="small" variant="tonal" color="secondary">
+                            {{ typeLabels[item.type] ?? item.type }}
+                        </v-chip>
+                    </td>
+                    <td class="py-3 text-body-2">
+                        {{ item.queue_number ?? '-' }}
+                    </td>
+                    <td class="py-3">
+                        <v-chip size="small" variant="tonal" :color="statusColors[item.status] ?? 'default'">
+                            {{ item.status.replace('_', ' ') }}
+                        </v-chip>
+                    </td>
+                    <td class="py-3 text-right">
+                        <v-btn v-if="can('appointment.edit') && item.status === 'waiting'" size="small" color="primary"
+                            variant="tonal" class="mr-1" @click="updateStatus(item.id, 'in_progress')">
+                            Check-in
+                        </v-btn>
+                        <v-btn v-if="can('appointment.edit') && item.status === 'in_progress'" size="small"
+                            color="success" variant="tonal" @click="updateStatus(item.id, 'done')">
+                            Done
+                        </v-btn>
+                        <v-btn
+                            v-if="can('appointment.edit') && (item.status === 'waiting' || item.status === 'in_progress')"
+                            size="small" color="error" variant="text" @click="updateStatus(item.id, 'cancelled')">
+                            Cancel
+                        </v-btn>
+                    </td>
                 </tr>
             </tbody>
         </v-table>
+
+        <div class="px-4 py-2">
+            <span class="text-caption text-medium-emphasis">
+                Showing {{ filteredAppointments.length }} of {{ appointments.length }} appointments
+            </span>
+        </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="720">
+    <v-dialog v-model="dialog" max-width="720" persistent>
         <v-card>
             <v-card-title class="text-h5">Create Appointment</v-card-title>
             <v-divider />
             <v-card-text>
                 <v-row>
                     <v-col cols="12">
-                        <v-select v-model="form.patientId" :items="patientOptions" label="Patient" variant="outlined"
-                            density="compact" hide-details />
-                    </v-col>
-                    <v-col cols="12">
-                        <v-select v-model="form.doctorScheduleId" :items="doctorScheduleOptions" label="Doctor Schedule"
+                        <v-autocomplete v-model="form.patient_id" :items="patientOptions" label="Patient"
                             variant="outlined" density="compact" hide-details />
                     </v-col>
+                    <v-col cols="12">
+                        <v-autocomplete v-model="form.doctor_schedule_id" :items="scheduleOptions"
+                            label="Doctor Schedule (optional)" variant="outlined" density="compact" hide-details
+                            clearable />
+                    </v-col>
                     <v-col cols="12" sm="6">
-                        <v-text-field :model-value="selectedSchedule?.department ?? ''" label="Department"
+                        <v-text-field :model-value="selectedSchedule?.department_name ?? ''" label="Department"
                             variant="outlined" density="compact" hide-details readonly />
                     </v-col>
                     <v-col cols="12" sm="6">
-                        <v-text-field v-model="form.appointmentDate" type="date" label="Date" variant="outlined"
+                        <v-select v-model="form.type" :items="[
+                            { title: 'Appointment', value: 'appointment' },
+                            { title: 'Walk-in', value: 'walkin' },
+                            { title: 'Referral', value: 'referral' },
+                            { title: 'Consultation', value: 'consultation' },
+                            { title: 'Follow-up', value: 'follow_up' },
+                        ]" label="Type" variant="outlined" density="compact" hide-details />
+                    </v-col>
+                    <v-col cols="12" sm="6">
+                        <v-text-field v-model="form.appointment_date" type="date" label="Date" variant="outlined"
                             density="compact" hide-details />
                     </v-col>
                     <v-col cols="12" sm="6">
-                        <v-text-field v-model="form.appointmentTime" type="time" label="Time" variant="outlined"
-                            density="compact" :min="selectedSchedule?.startTime" :max="selectedSchedule?.endTime"
-                            :hint="scheduleTimeHint" persistent-hint :disabled="!selectedSchedule" />
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                        <v-select v-model="form.type" :items="['Consultation', 'New Visit', 'Control', 'Procedure']"
-                            label="Type" variant="outlined" density="compact" hide-details />
+                        <v-text-field v-model="form.appointment_time" type="time" label="Time" variant="outlined"
+                            density="compact" :min="selectedSchedule?.start_time.slice(0, 5)"
+                            :max="selectedSchedule?.end_time.slice(0, 5)" :hint="scheduleTimeHint" persistent-hint
+                            :disabled="!selectedSchedule" />
                     </v-col>
                     <v-col cols="12">
-                        <v-textarea v-model="form.note" label="Note" variant="outlined" density="compact" rows="3"
+                        <v-textarea v-model="form.chief_complaint" label="Chief Complaint" variant="outlined"
+                            density="compact" rows="2" hide-details />
+                    </v-col>
+                    <v-col cols="12">
+                        <v-textarea v-model="form.notes" label="Notes" variant="outlined" density="compact" rows="2"
                             hide-details />
                     </v-col>
                     <v-col v-if="formError" cols="12">
@@ -227,10 +372,17 @@ function createAppointment() {
             </v-card-text>
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                <v-btn color="primary" variant="flat" @click="createAppointment">Save</v-btn>
+                <v-btn color="primary" variant="flat" :loading="loading" @click="createAppointment">
+                    Save
+                </v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 
-    <v-snackbar v-model="snackbar" color="success" timeout="2500">{{ snackbarMessage }}</v-snackbar>
+    <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
+        {{ snackbarMsg }}
+        <template #actions>
+            <v-btn variant="text" icon="mdi-close" @click="snackbar = false" />
+        </template>
+    </v-snackbar>
 </template>
