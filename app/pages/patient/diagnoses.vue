@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'patient',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['diagnoses.view'],
 })
 
 useSeoMeta({

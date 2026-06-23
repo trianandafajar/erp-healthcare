@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'patient',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['prescriptions.view'],
 })
 
 useSeoMeta({
@@ -161,7 +162,7 @@ function shortId(id?: string | null) {
                     </div>
                     <div class="d-flex flex-wrap ga-2">
                         <v-chip color="primary" variant="tonal">{{ formatDate(selectedPrescription.prescribedAt)
-                        }}</v-chip>
+                            }}</v-chip>
                     </div>
                 </div>
             </v-card-item>
@@ -175,7 +176,7 @@ function shortId(id?: string | null) {
                     <v-col cols="12" md="6">
                         <div class="text-caption text-medium-emphasis">Prescription Date</div>
                         <div class="text-body-1 font-weight-medium">{{ formatDate(selectedPrescription.prescribedAt)
-                        }}</div>
+                            }}</div>
                     </v-col>
                 </v-row>
 
@@ -214,7 +215,7 @@ function shortId(id?: string | null) {
                                                 <v-icon icon="mdi-pill" size="18" color="primary" class="mr-2" />
                                             </template>
                                             <v-list-item-title class="text-body-2 text-wrap">{{ instruction
-                                            }}</v-list-item-title>
+                                                }}</v-list-item-title>
                                         </v-list-item>
                                     </v-list>
                                 </template>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'patient',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['payments.view'],
 })
-
+const {can} = usePermission()
 useSeoMeta({
     title: 'Payments',
     description: 'Patient payments page',
@@ -60,9 +61,8 @@ function handleAction(item: { invoiceNumber: string; status: string }) {
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Billing Overview">
         <div class="d-flex align-center justify-space-between flex-wrap ga-3 px-4 py-3">
-            <v-text-field v-model="search" placeholder="Search invoice or service name"
-                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
-                style="max-width: 340px" />
+            <v-text-field v-model="search" placeholder="Search invoice or service name" prepend-inner-icon="mdi-magnify"
+                variant="outlined" density="compact" hide-details clearable style="max-width: 340px" />
             <v-btn-toggle v-model="statusFilter" mandatory density="compact" variant="tonal" color="primary"
                 class="flex-wrap">
                 <v-btn value="all">All</v-btn>
@@ -85,14 +85,18 @@ function handleAction(item: { invoiceNumber: string; status: string }) {
             <tbody>
                 <tr v-for="item in filteredPayments" :key="item.id">
                     <td>{{ item.invoiceNumber }}</td>
-                    <td>{{ new Date(item.serviceDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) }}</td>
+                    <td>{{ new Date(item.serviceDate).toLocaleDateString('en-US', {
+                        day: 'numeric', month: 'short',
+                        year: 'numeric'
+                    }) }}</td>
                     <td>{{ item.serviceName }}</td>
                     <td>{{ formatCurrency(item.amount) }}</td>
                     <td>
-                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status }}</v-chip>
+                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
+                            }}</v-chip>
                     </td>
                     <td class="text-right">
-                        <v-btn size="small" variant="text" color="primary"
+                        <v-btn v-if="can('payments.pay')" size="small" variant="text" color="primary"
                             :prepend-icon="item.status === 'Paid' ? 'mdi-receipt-text-outline' : 'mdi-credit-card-outline'"
                             @click="handleAction(item)">
                             {{ item.status === 'Paid' ? 'View Receipt' : 'Pay Now' }}

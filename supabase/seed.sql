@@ -143,6 +143,19 @@
     ('queue.update', 'Update Queue Status', 'queue', 'receptionist'),
     ('check-in.create', 'Confirm Check-in', 'check-in', 'receptionist'),
 
+    -- Patient portal pages
+    ('book-appt.view', 'View Book Appointment', 'book-appt', 'patient'),
+    ('book-appt.create', 'Create Appointment', 'book-appt', 'patient'),
+    ('book-appt.edit', 'Edit Appointment', 'book-appt', 'patient'),
+    ('book-appt.delete', 'Delete Appointment', 'book-appt', 'patient'),
+    ('diagnoses.view', 'View Diagnoses', 'diagnoses', 'patient'),
+    ('payments.view', 'View Payments', 'payments', 'patient'),
+    ('payments.pay', 'Make Payment', 'payments', 'patient'),
+    ('visits.view', 'View Visits', 'visits', 'patient'),
+    ('doctor-schedule.view', 'View Doctor Schedules', 'doctor-schedule', 'patient'),
+    ('profile.view', 'View Profile', 'profile', 'patient'),
+    ('examination.download', 'Download Examination Result', 'examination', 'patient'),
+
     -- Admin-only extra permission (from migration)
     ('user.impersonate', 'Login as User', 'user', 'admin')
 
@@ -342,6 +355,44 @@
             'vitals.create',
             'vitals.edit',
             'vitals.delete'
+        ];
+
+        FOREACH perm_name IN ARRAY perm_names LOOP
+            SELECT id INTO v_perm_id
+            FROM public.permissions
+            WHERE name = perm_name;
+
+            INSERT INTO public.role_permissions(role_id, permission_id)
+            VALUES (v_role_id, v_perm_id)
+            ON CONFLICT DO NOTHING;
+        END LOOP;
+
+        -- =====================
+        -- PATIENT
+        -- =====================
+
+        SELECT id INTO v_role_id
+        FROM public.roles
+        WHERE name = 'patient';
+
+        perm_names := ARRAY[
+            -- Pages
+            'dashboard.view',
+            'book-appt.view',
+            'diagnoses.view',
+            'examination.view',
+            'payments.view',
+            'prescriptions.view',
+            'visits.view',
+            'doctor-schedule.view',
+            'profile.view',
+
+            -- Actions
+            'book-appt.create',
+            'book-appt.edit',
+            'book-appt.delete',
+            'examination.download',
+            'payments.pay'
         ];
 
         FOREACH perm_name IN ARRAY perm_names LOOP

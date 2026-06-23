@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'patient',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['visits.view'],
 })
 
 useSeoMeta({
@@ -113,7 +114,7 @@ function statusColor(status: string) {
                     <td class="text-wrap">{{ item.complaint }}</td>
                     <td>
                         <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
-                            }}</v-chip>
+                        }}</v-chip>
                     </td>
                     <td class="text-right">
                         <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-eye-outline"
@@ -142,7 +143,7 @@ function statusColor(status: string) {
                     <div class="d-flex flex-wrap ga-2">
                         <v-chip color="primary" variant="tonal">{{ formatDate(selectedVisit.date) }}</v-chip>
                         <v-chip :color="statusColor(selectedVisit.status)" variant="tonal">{{ selectedVisit.status
-                            }}</v-chip>
+                        }}</v-chip>
                     </div>
                 </div>
             </v-card-item>

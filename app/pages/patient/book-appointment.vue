@@ -1,8 +1,11 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'patient',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['book-appt.view'],
 })
+
+const { can } = usePermission()
 
 useSeoMeta({
     title: 'Book Appointment',
@@ -217,7 +220,7 @@ await Promise.all([loadAppointments(), loadSchedules()])
             <h2 class="text-h3 mb-1">Book Appointment</h2>
             <p class="text-medium-emphasis mb-0">Manage your appointment requests and preferred doctor schedules.</p>
         </div>
-        <v-btn color="primary" prepend-icon="mdi-calendar-plus" @click="openCreate">
+        <v-btn v-if="can('book-appt.create')" color="primary" prepend-icon="mdi-calendar-plus" @click="openCreate">
             Book Appointment
         </v-btn>
     </div>
@@ -261,20 +264,22 @@ await Promise.all([loadAppointments(), loadSchedules()])
                     <td class="text-wrap">{{ item.complaint }}</td>
                     <td>
                         <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
-                        }}</v-chip>
+                            }}</v-chip>
                     </td>
                     <td class="text-right">
                         <div class="d-flex justify-end ga-2">
                             <v-tooltip text="Edit appointment">
                                 <template #activator="{ props }">
-                                    <v-btn v-bind="props" icon="mdi-pencil-outline" size="small" color="primary"
-                                        variant="tonal" aria-label="Edit appointment" @click="openEdit(item)" />
+                                    <v-btn v-if="can('book-appt.edit')" v-bind="props" icon="mdi-pencil-outline"
+                                        size="small" color="primary" variant="tonal" aria-label="Edit appointment"
+                                        @click="openEdit(item)" />
                                 </template>
                             </v-tooltip>
                             <v-tooltip text="Delete appointment">
                                 <template #activator="{ props }">
-                                    <v-btn v-bind="props" icon="mdi-delete-outline" size="small" color="error"
-                                        variant="tonal" aria-label="Delete appointment" @click="openDelete(item)" />
+                                    <v-btn v-if="can('book-appt.delete')" v-bind="props" icon="mdi-delete-outline"
+                                        size="small" color="error" variant="tonal" aria-label="Delete appointment"
+                                        @click="openDelete(item)" />
                                 </template>
                             </v-tooltip>
                         </div>

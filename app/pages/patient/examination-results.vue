@@ -1,9 +1,10 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'patient',
-    middleware: 'auth'
+    middleware: ['auth', 'permission'],
+    permissions: ['examination.view'],
 })
-
+const { can } = usePermission()
 useSeoMeta({
     title: 'Examination Results',
     description: 'Patient examination results page',
@@ -118,11 +119,11 @@ function formatDate(dateStr: string) {
                     <td>{{ item.doctor }}</td>
                     <td>
                         <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
-                            }}</v-chip>
+                        }}</v-chip>
                     </td>
                     <td class="text-right">
-                        <v-btn size="small" variant="text" color="primary" :disabled="item.status !== 'Ready'"
-                            @click.stop="handleDownload(item.id, item.fileName)">
+                        <v-btn v-if="can('examination.download')" size="small" variant="text" color="primary"
+                            :disabled="item.status !== 'Ready'" @click.stop="handleDownload(item.id, item.fileName)">
                             Download
                         </v-btn>
                     </td>
@@ -147,7 +148,7 @@ function formatDate(dateStr: string) {
                     <div class="d-flex flex-wrap ga-2">
                         <v-chip color="primary" variant="tonal">{{ formatDate(selectedResult.date) }}</v-chip>
                         <v-chip :color="statusColor(selectedResult.status)" variant="tonal">{{ selectedResult.status
-                            }}</v-chip>
+                        }}</v-chip>
                     </div>
                 </div>
             </v-card-item>
