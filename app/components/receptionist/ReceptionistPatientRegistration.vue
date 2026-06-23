@@ -1,153 +1,287 @@
 <script setup lang="ts">
-const workspace = useReceptionistWorkspace()
-const search = ref('')
-const snackbar = ref(false)
-const dialog = ref(false)
+import PatientModal from '../dashboard/patient/PatientModal.vue';
+
+definePageMeta({
+    middleware: ['auth'],
+})
+
+interface Patient {
+    id: string
+    medical_record_number: string
+    profile_id: string | null
+    full_name: string
+    date_of_birth: string
+    gender: string | null
+    phone: string
+    address: string
+    blood_type: string | null
+    has_account: boolean
+}
+
 const { can } = usePermission()
 
-const form = reactive({
-    fullName: '',
-    gender: 'Male' as 'Male' | 'Female',
-    dateOfBirth: '',
-    phone: '',
-    address: '',
-    insuranceProvider: 'Self Pay',
-    emergencyContact: '',
-})
+const search = ref('')
+const genderFilter = ref('all')
+const currentPage = ref(1)
+const itemsPerPage = 10
 
-const filteredPatients = computed(() => {
-    const keyword = search.value.toLowerCase()
-    return workspace.patients.value.filter((item) =>
-        item.fullName.toLowerCase().includes(keyword) ||
-        item.medicalRecordNumber.toLowerCase().includes(keyword) ||
-        item.phone.toLowerCase().includes(keyword)
-    )
-})
+const { data, pending, refresh } = await useFetch<{ patients: any[] }>('/api/patients')
 
-function submitRegistration() {
-    if (!form.fullName || !form.phone || !form.dateOfBirth) return
+const patients = computed<Patient[]>(() =>
+    (data.value?.patients ?? []).map((p) => ({
+        id: p.id,
+        medical_record_number: p.medical_record_number ?? '-',
+        profile_id: p.profile_id ?? null,
+        full_name: p.full_name ?? '-',
+        date_of_birth: p.date_of_birth ?? '',
+        gender: p.gender ?? null,
+        phone: p.phone ?? '-',
+        address: p.address ?? '-',
+        blood_type: p.blood_type ?? null,
+        has_account: !!p.profile_id,
+    }))
+)
 
-    workspace.registerPatient({
-        fullName: form.fullName,
-        gender: form.gender,
-        dateOfBirth: form.dateOfBirth,
-        phone: form.phone,
-        address: form.address,
-        insuranceProvider: form.insuranceProvider,
-        emergencyContact: form.emergencyContact,
+const genderOptions = [
+    { label: 'All', value: 'all' },
+    { label: 'Male', value: 'male' },
+    { label: 'Female', value: 'female' },
+]
+
+const filteredPatients = computed(() =>
+    patients.value.filter((p) => {
+        const matchGender = genderFilter.value === 'all' || p.gender === genderFilter.value
+        const matchSearch =
+            p.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
+            p.medical_record_number.toLowerCase().includes(search.value.toLowerCase()) ||
+            p.phone.toLowerCase().includes(search.value.toLowerCase())
+        return matchGender && matchSearch
     })
+)
 
-    form.fullName = ''
-    form.gender = 'Male'
-    form.dateOfBirth = ''
-    form.phone = ''
-    form.address = ''
-    form.insuranceProvider = 'Self Pay'
-    form.emergencyContact = ''
-    dialog.value = false
+const paginatedPatients = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage
+    return filteredPatients.value.slice(start, start + itemsPerPage)
+})
+
+const totalPages = computed(() => Math.ceil(filteredPatients.value.length / itemsPerPage))
+
+function getInitials(name: string) {
+    return name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
+}
+
+function calculateAge(dateStr?: string) {
+    if (!dateStr) return null
+    return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
+}
+
+const bloodTypeColors: Record<string, string> = {
+    A: 'error', B: 'primary', AB: 'purple', O: 'success',
+}
+
+const dialog = ref(false)
+const modalMode = ref<'add' | 'edit' | 'delete'>('add')
+const selectedPatient = ref<Patient | null>(null)
+const loading = ref(false)
+
+const snackbar = ref(false)
+const snackbarMsg = ref('')
+const snackbarColor = ref('success')
+
+function notify(msg: string, color = 'success') {
+    snackbarMsg.value = msg
+    snackbarColor.value = color
     snackbar.value = true
+}
+
+function openAdd() {
+    modalMode.value = 'add'
+    selectedPatient.value = null
+    dialog.value = true
+}
+
+function openEdit(patient: Patient) {
+    modalMode.value = 'edit'
+    selectedPatient.value = patient
+    dialog.value = true
+}
+
+function openDelete(patient: Patient) {
+    modalMode.value = 'delete'
+    selectedPatient.value = patient
+    dialog.value = true
+}
+
+function closeModal() {
+    dialog.value = false
+    selectedPatient.value = null
+}
+
+async function handleSubmit(payload: any) {
+    loading.value = true
+    try {
+        if (modalMode.value === 'add') {
+            await $fetch('/api/patients', {
+                method: 'POST',
+                body: {
+                    full_name: payload.full_name,
+                    date_of_birth: payload.date_of_birth,
+                    gender: payload.gender,
+                    phone: payload.phone,
+                    address: payload.address,
+                    blood_type: payload.blood_type,
+                }
+            })
+            notify('Patient registered successfully')
+        } else if (modalMode.value === 'edit') {
+            await $fetch('/api/patients', {
+                method: 'PUT',
+                body: {
+                    id: payload.id,
+                    full_name: payload.full_name,
+                    date_of_birth: payload.date_of_birth,
+                    gender: payload.gender,
+                    phone: payload.phone,
+                    address: payload.address,
+                    blood_type: payload.blood_type,
+                }
+            })
+            notify('Patient updated successfully')
+        } else if (modalMode.value === 'delete') {
+            await $fetch('/api/patients', {
+                method: 'DELETE',
+                body: { id: payload.id }
+            })
+            notify('Patient deleted successfully')
+        }
+
+        await refresh()
+        closeModal()
+    } catch (e: any) {
+        notify(e?.data?.message ?? 'Something went wrong', 'error')
+    } finally {
+        loading.value = false
+    }
 }
 </script>
 
 <template>
-    <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
-        <div>
-            <h2 class="text-h3 mb-1">Patient Registration</h2>
-            <p class="text-medium-emphasis mb-0">Register new patients and check existing patient records.</p>
-        </div>
-        <v-btn v-if="can('patient-regist.create')" color="primary" variant="flat"
-            prepend-icon="mdi-account-plus-outline" @click="dialog = true">
-            Patient Registration
-        </v-btn>
-    </div>
-
-    <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Patient Data">
-        <div class="px-4 py-3 d-flex align-center justify-space-between flex-wrap ga-3">
-            <v-text-field v-model="search" placeholder="Search patient, MRN, or phone number"
-                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
-                style="max-width: 420px" />
-            <div class="text-caption text-medium-emphasis">
-                Showing {{ filteredPatients.length }} of {{ workspace.patients.value.length }} patients
+    <v-card-item class="pb-2 px-0 pt-0">
+        <div class="d-flex justify-space-between align-center">
+            <div>
+                <v-card-title class="text-h3">Patient Registration</v-card-title>
+                <v-card-subtitle class="mt-1">Register new patients and manage existing records</v-card-subtitle>
             </div>
+            <v-btn v-if="can('patient.create')" color="primary" variant="flat" size="large"
+                prepend-icon="mdi-account-plus-outline" density="comfortable" @click="openAdd">
+                Register Patient
+            </v-btn>
         </div>
-        <v-table class="text-no-wrap">
-            <thead>
+    </v-card-item>
+
+    <UiTitleCard class-name="px-0 pb-0 rounded-md">
+        <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+            <v-text-field v-model="search" placeholder="Search by name, MRN, or phone..."
+                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
+                style="max-width: 320px" @update:model-value="currentPage = 1" />
+
+            <v-btn-toggle v-model="genderFilter" density="compact" variant="tonal" divided mandatory color="primary"
+                class="flex-wrap" @update:model-value="currentPage = 1">
+                <v-btn v-for="g in genderOptions" :key="g.value" :value="g.value" size="small">
+                    {{ g.label }}
+                </v-btn>
+            </v-btn-toggle>
+        </div>
+
+        <v-divider />
+
+        <v-table class="bordered-table" hover density="comfortable">
+            <thead class="bg-containerBg">
                 <tr>
-                    <th>Patient</th>
-                    <th>Date of Birth</th>
-                    <th>Contact</th>
-                    <th>Insurance</th>
-                    <th>Emergency</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">No. RM</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Gender / Age</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Phone</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Blood Type</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Account</th>
+                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in filteredPatients" :key="item.id">
-                    <td>
-                        <div class="font-weight-medium">{{ item.fullName }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.medicalRecordNumber }} - {{ item.gender
-                            }}</div>
+                <tr v-if="pending">
+                    <td colspan="7" class="text-center py-8">
+                        <v-progress-circular indeterminate color="primary" />
                     </td>
-                    <td>{{ new Date(item.dateOfBirth).toLocaleDateString('en-US', {
-                        day: 'numeric', month: 'short',
-                        year: 'numeric' }) }}</td>
-                    <td>
-                        <div>{{ item.phone }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.address }}</div>
-                    </td>
-                    <td>{{ item.insuranceProvider }}</td>
-                    <td>{{ item.emergencyContact }}</td>
                 </tr>
-                <tr v-if="filteredPatients.length === 0">
-                    <td colspan="5" class="text-center py-6 text-medium-emphasis">No patient found.</td>
+                <tr v-else-if="paginatedPatients.length === 0">
+                    <td colspan="7" class="text-center py-8 text-medium-emphasis">
+                        <v-icon icon="mdi-account-injury-outline" size="32" class="mb-2 d-block mx-auto" />
+                        No patients found
+                    </td>
+                </tr>
+                <tr v-else v-for="patient in paginatedPatients" :key="patient.id">
+                    <td class="py-3">
+                        <div class="d-flex align-center ga-3">
+                            <v-avatar size="34" color="secondary" variant="tonal">
+                                <span class="text-caption font-weight-bold">{{ getInitials(patient.full_name) }}</span>
+                            </v-avatar>
+                            <div>
+                                <div class="text-body-2 font-weight-medium">{{ patient.full_name }}</div>
+                                <div class="text-caption text-medium-emphasis">{{ patient.address }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3">
+                        <v-chip size="small" variant="tonal" color="primary" label>
+                            {{ patient.medical_record_number }}
+                        </v-chip>
+                    </td>
+                    <td class="py-3 text-body-2 text-medium-emphasis">
+                        <span class="text-capitalize">{{ patient.gender ?? '-' }}</span>
+                        <template v-if="calculateAge(patient.date_of_birth) !== null">
+                            · {{ calculateAge(patient.date_of_birth) }} yo
+                        </template>
+                    </td>
+                    <td class="py-3 text-body-2 text-medium-emphasis">{{ patient.phone }}</td>
+                    <td class="py-3">
+                        <v-chip v-if="patient.blood_type" size="small" variant="tonal"
+                            :color="bloodTypeColors[patient.blood_type] ?? 'secondary'">
+                            {{ patient.blood_type }}
+                        </v-chip>
+                        <span v-else class="text-medium-emphasis">-</span>
+                    </td>
+                    <td class="py-3">
+                        <v-chip :color="patient.has_account ? 'success' : 'default'" variant="tonal" size="small">
+                            {{ patient.has_account ? 'Registered' : 'Walk-in' }}
+                        </v-chip>
+                    </td>
+                    <td class="py-3 text-right">
+                        <v-btn v-if="can('patient.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(patient)" />
+                        <v-btn v-if="can('patient.delete')" icon="mdi-delete-outline" variant="text" size="small"
+                            color="error" density="comfortable" @click="openDelete(patient)" />
+                    </td>
                 </tr>
             </tbody>
         </v-table>
+
+        <div class="d-flex align-center justify-space-between px-4 py-2">
+            <span class="text-caption text-medium-emphasis">
+                Showing {{ paginatedPatients.length }} of {{ filteredPatients.length }} patients
+            </span>
+            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
+                size="small" />
+        </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="760">
-        <v-card>
-            <v-card-title class="text-h5">Patient Registration</v-card-title>
-            <v-divider />
-            <v-form @submit.prevent="submitRegistration">
-                <v-card-text>
-                    <v-row>
-                        <v-col cols="12">
-                            <v-text-field v-model="form.fullName" label="Full Name" variant="outlined" density="compact"
-                                hide-details />
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <v-select v-model="form.gender" :items="['Male', 'Female']" label="Gender"
-                                variant="outlined" density="compact" hide-details />
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <v-text-field v-model="form.dateOfBirth" label="Date of Birth" type="date"
-                                variant="outlined" density="compact" hide-details />
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <v-text-field v-model="form.phone" label="Phone Number" variant="outlined" density="compact"
-                                hide-details />
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <v-text-field v-model="form.insuranceProvider" label="Insurance" variant="outlined"
-                                density="compact" hide-details />
-                        </v-col>
-                        <v-col cols="12">
-                            <v-textarea v-model="form.address" label="Address" variant="outlined" density="compact"
-                                rows="3" hide-details />
-                        </v-col>
-                        <v-col cols="12">
-                            <v-text-field v-model="form.emergencyContact" label="Emergency Contact" variant="outlined"
-                                density="compact" hide-details />
-                        </v-col>
-                    </v-row>
-                </v-card-text>
-                <v-card-actions class="justify-end">
-                    <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                    <v-btn color="primary" variant="flat" type="submit">Save Patient</v-btn>
-                </v-card-actions>
-            </v-form>
-        </v-card>
+    <v-dialog v-model="dialog" max-width="600" persistent>
+        <PatientModal :mode="modalMode" :patient="selectedPatient" @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
 
-    <v-snackbar v-model="snackbar" color="success" timeout="2500">Patient added successfully.</v-snackbar>
+    <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
+        {{ snackbarMsg }}
+        <template #actions>
+            <v-btn variant="text" icon="mdi-close" @click="snackbar = false" />
+        </template>
+    </v-snackbar>
 </template>
