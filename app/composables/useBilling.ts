@@ -13,5 +13,21 @@ export const useBilling = () => {
         await refresh()
     }
 
-    return { billing, updateBillingStatus }
+    async function createBilling(payload: {
+        patientId: string
+        medicalRecordId: string
+        serviceName: string
+        department: string
+        amount: number
+        paymentMethod: string
+        serviceDate?: string
+    }) {
+        await $fetch('/api/billing', {
+            method: 'POST',
+            body: payload,
+        })
+        await refresh()
+    }
+
+    return { billing, updateBillingStatus, createBilling }
 }

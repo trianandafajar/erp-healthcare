@@ -14,7 +14,7 @@ export default defineEventHandler(async () => {
             service_date,
             paid_at,
             created_at,
-            patients (
+            patients (  
                 full_name,
                 medical_record_number
             )

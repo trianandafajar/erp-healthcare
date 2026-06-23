@@ -17,3 +17,12 @@ CREATE TABLE public.billing (
     CONSTRAINT billing_medical_record_id_fkey FOREIGN KEY (medical_record_id) REFERENCES medical_records(id) ON DELETE CASCADE,
     CONSTRAINT billing_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES patients(id)
 );
+
+ALTER TABLE public.billing ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "service_role_full_access" ON public.billing
+TO service_role
+USING (true)
+WITH CHECK (true);
+
+GRANT ALL ON public.billing TO postgres, authenticated, service_role, anon;

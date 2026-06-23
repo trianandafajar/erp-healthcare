@@ -142,6 +142,7 @@
     ('patient-regist.create', 'Register Patient', 'patient-regist', 'receptionist'),
     ('queue.update', 'Update Queue Status', 'queue', 'receptionist'),
     ('check-in.create', 'Confirm Check-in', 'check-in', 'receptionist'),
+    ('billing.create', 'Create Billing', 'billing', 'receptionist'),
 
     -- Patient portal pages
     ('book-appt.view', 'View Book Appointment', 'book-appt', 'patient'),
@@ -309,7 +310,8 @@
             'schedule.status',
             'patient-regist.create',
             'queue.update',
-            'check-in.create'
+            'check-in.create',
+            'billing.create'
         ];
 
         FOREACH perm_name IN ARRAY perm_names LOOP
