@@ -33,6 +33,10 @@ async function confirmLogout() {
     authStore.clearUser()
     profileStore.clearProfile()
     await navigateTo('/login')
+
+    localStorage.removeItem('admin_session')
+    localStorage.removeItem('impersonated_name')
+    localStorage.removeItem('impersonated_role')
   } finally {
     isLoggingOut.value = false
     dialog.value = false
