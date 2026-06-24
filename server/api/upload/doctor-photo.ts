@@ -49,18 +49,6 @@ export default defineEventHandler(async (event) => {
 
     const admin = supabaseAdmin()
 
-    // const { data: doctor } = await admin
-    //     .from('doctors')
-    //     .select('id')
-    //     .eq('id', doctorId)
-    //     .single()
-
-    // if (!doctor)
-    //     throw createError({
-    //         statusCode: 404,
-    //         message: 'Doctor not found.'
-    //     })
-
     const ext = file.name.split('.').pop() ?? 'jpg'
 
     const fileName = `${crypto.randomUUID()}.${ext}`

@@ -114,16 +114,21 @@ async function uploadPhoto(): Promise<string> {
     try {
         const body = new FormData()
         body.append('file', photoFile.value)
+        body.append('profile_id', form.value.id)
 
-        const result = await $fetch<{ url: string }>('/api/upload/nurse-photo', {
-            method: 'POST',
-            body,
-        })
+        const result = await $fetch<{ url: string }>(
+            '/api/upload/nurse-photo',
+            {
+                method: 'POST',
+                body,
+            }
+        )
 
-        return result.url
+        form.value.photo_url = result.url
     } finally {
         uploadingPhoto.value = false
     }
+    return form.value.photo_url
 }
 
 watch(
@@ -214,16 +219,22 @@ async function onSubmit() {
     }
 
     submitting.value = true
+
     try {
-        const photoUrl = await uploadPhoto()
+        if (photoFile.value) {
+            await uploadPhoto()
+        }
 
         emit('submit', {
             ...form.value,
-            photo_url: photoUrl,
-            id: props.mode === 'add' ? form.value.id : props.nurse?.id,
+            id: props.mode === 'add'
+                ? form.value.id
+                : props.nurse?.id,
         })
     } catch (err: any) {
-        photoError.value = err?.message ?? 'Failed to upload photo. Please try again.'
+        photoError.value =
+            err?.message ??
+            'Failed to upload photo.'
     } finally {
         submitting.value = false
     }

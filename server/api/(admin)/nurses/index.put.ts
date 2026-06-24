@@ -3,7 +3,7 @@ export default defineEventHandler(async (event) => {
     id,
     department_id,
     phone,
-    photo_url,
+
     experience_years,
     is_available
   } = await readBody(event)
@@ -25,7 +25,6 @@ export default defineEventHandler(async (event) => {
     .update({
       department_id,
       phone,
-      photo_url,
       experience_years,
       is_available
     })
@@ -41,7 +40,7 @@ export default defineEventHandler(async (event) => {
     p_description: `Updated nurse profile for ${(before as any)?.profiles?.full_name ?? 'a nurse'}`,
     p_metadata: {
       before: before ?? null,
-      after: { department_id, phone, photo_url, experience_years, is_available }
+      after: { department_id, phone, experience_years, is_available }
     }
   })
 

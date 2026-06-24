@@ -2,8 +2,7 @@ export default defineEventHandler(async (event) => {
     const {
         id,
         department_id,
-        phone,
-        photo_url,
+        phone,  
         experience_years,
         is_available
     } = await readBody(event)
@@ -31,7 +30,6 @@ export default defineEventHandler(async (event) => {
             id,
             department_id,
             phone,
-            photo_url,
             experience_years,
             is_available: is_available ?? true
         })
