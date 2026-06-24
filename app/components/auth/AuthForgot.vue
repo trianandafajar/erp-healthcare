@@ -44,7 +44,7 @@ async function validate() {
 
 <template>
     <div class="d-flex justify-space-between align-center">
-        <h3 class="text-h3 text-center mb-0">Forgot Password</h3>
+        <h3 class="text-h5 mb-0">Forgot Password</h3>
         <NuxtLink to="/login" class="text-primary text-decoration-none">Back to Login?</NuxtLink>
     </div>
 
