@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
 
     const { error: emailError } = await resend.emails.send({
         from: 'onboarding@resend.dev',
-        to: 'hi.faridudin@gmail.com',
+        to: email,
         subject: 'Reset Your HealthData Password',
         html: `
         <!DOCTYPE html>
