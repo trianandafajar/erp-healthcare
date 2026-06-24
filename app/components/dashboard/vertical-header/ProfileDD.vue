@@ -1,57 +1,57 @@
-<script setup lang="ts">
-import { ref } from 'vue';
-import {
-  LogoutOutlined,
-  UserOutlined,
-  SettingOutlined,
-  QuestionCircleOutlined,
-  LockOutlined,
-  CommentOutlined,
-  UnorderedListOutlined,
-  EditOutlined,
-  ProfileOutlined,
-  WalletOutlined
-} from '@ant-design/icons-vue';
+  <script setup lang="ts">
+  import { ref } from 'vue';
+  import {
+    LogoutOutlined,
+    UserOutlined,
+    SettingOutlined,
+    QuestionCircleOutlined,
+    LockOutlined,
+    CommentOutlined,
+    UnorderedListOutlined,
+    EditOutlined,
+    ProfileOutlined,
+    WalletOutlined
+  } from '@ant-design/icons-vue';
 
-const tab = ref(null);
-const dialog = ref(false)
-const isLoggingOut = ref(false)
+  const tab = ref(null);
+  const dialog = ref(false)
+  const isLoggingOut = ref(false)
 
-const props = defineProps<{
-  profile?: {
-    full_name?: string
-    avatar_url?: string
-  } | null
-  roles?: { id: string; label: string }[]
-}>()
+  const props = defineProps<{
+    profile?: {
+      full_name?: string
+      avatar_url?: string
+    } | null
+    roles?: { id: string; label: string }[]
+  }>()
 
-const emit = defineEmits<{
-  'open-profile': [mode: 'view' | 'edit']
-}>()
-const authStore = useAuthStore()
-const profileStore = useProfileStore()
+  const emit = defineEmits<{
+    'open-profile': [mode: 'view' | 'edit']
+  }>()
+  const authStore = useAuthStore()
+  const profileStore = useProfileStore()
 
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-}
-
-async function confirmLogout() {
-  isLoggingOut.value = true
-  try {
-    await $fetch('/api/auth/logout', { method: 'POST' })
-    authStore.clearUser()
-    profileStore.clearProfile()
-    await navigateTo('/login')
-  } finally {
-    isLoggingOut.value = false
-    dialog.value = false
+  function getInitials(name: string) {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase()
   }
-}
+
+  async function confirmLogout() {
+    isLoggingOut.value = true
+    try {
+      await $fetch('/api/auth/logout', { method: 'POST' })
+      authStore.clearUser()
+      profileStore.clearProfile()
+      await navigateTo('/login')
+    } finally {
+      isLoggingOut.value = false
+      dialog.value = false
+    }
+  }
 </script>
 
 <template>
@@ -93,20 +93,6 @@ async function confirmLogout() {
               <v-list-item-title class="text-h6">Edit Profile</v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="emit('open-profile', 'view')" color="primary" rounded="0" value="View Profile">
-              <template v-slot:prepend>
-                <UserOutlined :style="{ fontSize: '14px' }" class="mr-4" />
-              </template>
-              <v-list-item-title class="text-h6">View Profile</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item color="primary" rounded="0" value="Social Profile">
-              <template v-slot:prepend>
-                <ProfileOutlined :style="{ fontSize: '14px' }" class="mr-4" />
-              </template>
-              <v-list-item-title class="text-h6">Social Profile</v-list-item-title>
-            </v-list-item>
-
             <v-list-item color="primary" rounded="0" value="Billing">
               <template v-slot:prepend>
                 <WalletOutlined :style="{ fontSize: '14px' }" class="mr-4" />
@@ -114,11 +100,11 @@ async function confirmLogout() {
               <v-list-item-title class="text-h6">Billing</v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="dialog = true" color="secondary" rounded="0">
+            <v-list-item @click="dialog = true" color="primary" rounded="0" value="Logout">
               <template v-slot:prepend>
                 <LogoutOutlined :style="{ fontSize: '14px' }" class="mr-4" />
               </template>
-              <v-list-item-title class="text-subtitle-2">Logout</v-list-item-title>
+              <v-list-item-title class="text-h6">Logout</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-window-item>
