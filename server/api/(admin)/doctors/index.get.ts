@@ -9,7 +9,6 @@ export default defineEventHandler(async () => {
             str_number,
             sip_number,
             phone,
-            photo_url,
             biography,
             experience_years,
             consultation_fee,
@@ -19,7 +18,8 @@ export default defineEventHandler(async () => {
             profiles (
                 full_name,
                 email,
-                status
+                status,
+                avatar_url
             ),
             departments (
                 id,
@@ -37,6 +37,7 @@ export default defineEventHandler(async () => {
         full_name: d.profiles?.full_name ?? null,
         email: d.profiles?.email ?? null,
         status: d.profiles?.status ?? null,
+        photo_url: d.profiles?.avatar_url ?? null,
         department: d.departments,
         profiles: undefined,
         departments: undefined

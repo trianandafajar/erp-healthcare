@@ -1,43 +1,106 @@
 export default defineEventHandler(async (event) => {
     const formData = await readFormData(event)
+
     const file = formData.get('file') as File | null
+    const profileId = formData.get('profile_id') as string | null
 
-    if (!file) {
-        throw createError({ statusCode: 400, message: 'No file provided.' })
-    }
+    if (!profileId)
+        throw createError({
+            statusCode: 400,
+            message: 'Profile ID is required.'
+        })
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
-        throw createError({ statusCode: 400, message: 'Invalid file type. Only JPG, PNG, or WebP are allowed.' })
-    }
+    if (!file)
+        throw createError({
+            statusCode: 400,
+            message: 'No file provided.'
+        })
 
-    if (file.size > 2 * 1024 * 1024) {
-        throw createError({ statusCode: 400, message: 'File too large. Maximum size is 2 MB.' })
-    }
+    const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/webp'
+    ]
+
+    if (!allowedTypes.includes(file.type))
+        throw createError({
+            statusCode: 400,
+            message: 'Invalid file type.'
+        })
+
+    if (file.size > 2 * 1024 * 1024)
+        throw createError({
+            statusCode: 400,
+            message: 'File too large.'
+        })
+
+    const supabase = serverSupabase(event)
+
+    const {
+        data: { user },
+        error: authError
+    } = await supabase.auth.getUser()
+
+    if (authError || !user)
+        throw createError({
+            statusCode: 401,
+            message: 'Unauthorized.'
+        })
+
+    const admin = supabaseAdmin()
+
+    // const { data: doctor } = await admin
+    //     .from('doctors')
+    //     .select('id')
+    //     .eq('id', doctorId)
+    //     .single()
+
+    // if (!doctor)
+    //     throw createError({
+    //         statusCode: 404,
+    //         message: 'Doctor not found.'
+    //     })
 
     const ext = file.name.split('.').pop() ?? 'jpg'
+
     const fileName = `${crypto.randomUUID()}.${ext}`
-    const filePath = `photos/${fileName}`
+
+    const filePath = `avatars/${fileName}`
 
     const arrayBuffer = await file.arrayBuffer()
     const buffer = new Uint8Array(arrayBuffer)
 
-    const supabase = supabaseAdmin()
-
-    const { error: uploadError } = await supabase.storage
-        .from('doctor-photos')
+    const { error: uploadError } = await admin.storage
+        .from('profile-avatars')
         .upload(filePath, buffer, {
             contentType: file.type,
-            upsert: false,
+            upsert: true
         })
 
-    if (uploadError) {
-        throw createError({ statusCode: 500, message: uploadError.message })
-    }
+    if (uploadError)
+        throw createError({
+            statusCode: 500,
+            message: uploadError.message
+        })
 
-    const { data: urlData } = supabase.storage
-        .from('doctor-photos')
+    const { data: urlData } = admin.storage
+        .from('profile-avatars')
         .getPublicUrl(filePath)
 
-    return { url: urlData.publicUrl }
+    const { error: updateError } = await admin
+        .from('profiles')
+        .update({
+            avatar_url: urlData.publicUrl
+        })
+        .eq('id', profileId)
+
+    if (updateError)
+        throw createError({
+            statusCode: 500,
+            message: updateError.message
+        })
+
+    return {
+        url: urlData.publicUrl
+    }
 })

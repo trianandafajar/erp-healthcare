@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
     const ext = file.name.split('.').pop() ?? 'jpg'
     const fileName = `${crypto.randomUUID()}.${ext}`
-    const filePath = `avatars/${fileName}.${ext}`
+    const filePath = `avatars/${fileName}`
 
     const arrayBuffer = await file.arrayBuffer()
     const buffer = new Uint8Array(arrayBuffer)

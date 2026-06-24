@@ -125,12 +125,17 @@ async function uploadPhoto(): Promise<string> {
     try {
         const body = new FormData()
         body.append('file', photoFile.value)
+        body.append('profile_id', form.value.id)
 
-        const result = await $fetch<{ url: string }>('/api/upload/doctor-photo', {
-            method: 'POST',
-            body,
-        })
+        const result = await $fetch<{ url: string }>(
+            '/api/upload/doctor-photo',
+            {
+                method: 'POST',
+                body,
+            }
+        )
 
+        form.value.photo_url = result.url
         return result.url
     } finally {
         uploadingPhoto.value = false
@@ -235,16 +240,22 @@ async function onSubmit() {
     }
 
     submitting.value = true
+
     try {
-        const photoUrl = await uploadPhoto()
+        if (photoFile.value) {
+            await uploadPhoto()
+        }
 
         emit('submit', {
             ...form.value,
-            photo_url: photoUrl,
-            id: props.mode === 'add' ? form.value.id : props.doctor?.id,
+            id: props.mode === 'add'
+                ? form.value.id
+                : props.doctor?.id,
         })
     } catch (err: any) {
-        photoError.value = err?.message ?? 'Failed to upload photo. Please try again.'
+        photoError.value =
+            err?.message ??
+            'Failed to upload photo.'
     } finally {
         submitting.value = false
     }
@@ -330,7 +341,8 @@ const isSubmitDisabled = computed(() =>
                                 :class="{
                                     'photo-dropzone--dragging': isDragging,
                                     'photo-dropzone--error': !!photoError
-                                }" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop" @click="triggerFileInput">
+                                }" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop"
+                                @click="triggerFileInput">
                                 <v-icon :icon="isDragging ? 'mdi-cloud-download-outline' : 'mdi-image-plus-outline'"
                                     size="24" :color="isDragging ? 'primary' : 'grey'" />
 
