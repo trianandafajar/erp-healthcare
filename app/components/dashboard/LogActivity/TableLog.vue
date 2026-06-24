@@ -141,7 +141,7 @@ function onFilterChange() {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Actor</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">User</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Action</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Module</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Description</th>
