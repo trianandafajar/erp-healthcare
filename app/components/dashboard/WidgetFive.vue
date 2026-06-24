@@ -45,7 +45,8 @@ const fivecards = computed(() => [
         percent: growthPercent.value,
         color: isGrowth.value ? 'primary' : 'error',
         icon: isGrowth.value ? RiseOutlined : FallOutlined,
-        text: thisMonthUsers.value.toLocaleString() + ' new users this month'
+        text: thisMonthUsers.value.toLocaleString() + ' new users this month',
+        to: '/users-management'
     },
     {
         name: 'Total Patients',
@@ -53,7 +54,8 @@ const fivecards = computed(() => [
         percent: null,
         color: 'success',
         icon: null,
-        text: 'Registered & walk-in'
+        text: 'Registered & walk-in',
+        to: '/patients'
     },
     {
         name: 'Total Doctors',
@@ -61,7 +63,8 @@ const fivecards = computed(() => [
         percent: null,
         color: 'warning',
         icon: null,
-        text: 'Active doctor profiles'
+        text: 'Active doctor profiles',
+        to: '/doctors'
     },
     {
         name: 'Total Nurses',
@@ -69,7 +72,8 @@ const fivecards = computed(() => [
         percent: null,
         color: 'secondary',
         icon: null,
-        text: 'Active nurse profiles'
+        text: 'Active nurse profiles',
+        to: '/nurses'
     },
     {
         name: 'Total Departments',
@@ -77,7 +81,8 @@ const fivecards = computed(() => [
         percent: null,
         color: 'info',
         icon: null,
-        text: 'Poli / departments'
+        text: 'Poli / departments',
+        to: '/departments'
     }
 ]);
 </script>
@@ -86,7 +91,7 @@ const fivecards = computed(() => [
     <v-row class="my-0">
         <v-col cols="6" sm="4" md="" v-for="(card5, i) in fivecards" :key="i" :style="{ flex: '1 1 0' }"
             class="flex-grow-1">
-            <v-card elevation="0">
+            <v-card :to="card5.to" elevation="0">
                 <v-card-text>
                     <div class="d-flex align-items-center justify-space-between">
                         <div>
