@@ -5,9 +5,7 @@ import { MenuFoldOutlined, SearchOutlined, GithubOutlined } from '@ant-design/ic
 
 // dropdown imports
 import NotificationDD from './NotificationDD.vue';
-import Searchbar from './SearchBarPanel.vue';
 import ProfileDD from './ProfileDD.vue';
-import ProfileSidebar from './ProfileSidebar.vue';
 
 const customizer = useCustomizerStore();
 const profileStore = useProfileStore()
@@ -35,6 +33,7 @@ function openProfileSidebar(mode: 'view' | 'edit') {
 }
 
 function getInitials(name: string) {
+  if (!name) return '?'
   return name
     .split(' ')
     .map(n => n[0])
@@ -97,9 +96,10 @@ async function handleExit() {
       <template v-slot:activator="{ props }">
         <v-btn class="profileBtn" variant="text" rounded="sm" v-bind="props">
           <div class="d-flex align-center">
-            <v-avatar class="mr-sm-2 mr-0 py-2" size="34" color="primary" variant="tonal">
-              <span class="text-caption font-weight-bold">
-                {{ getInitials(profile?.full_name ?? '-') }}
+            <v-avatar class="mr-sm-2 mr-0" size="34" color="primary" variant="tonal">
+              <v-img v-if="profile?.avatar_url" :src="profile?.avatar_url" cover />
+              <span v-else class="text-caption font-weight-bold">
+                {{ getInitials(profile?.full_name) }}
               </span>
             </v-avatar>
             <h6 class="text-subtitle-1 mb-0 d-sm-block d-none">{{ profile?.full_name ?? '-' }}</h6>
@@ -111,7 +111,4 @@ async function handleExit() {
       </v-sheet>
     </v-menu>
   </v-app-bar>
-
-  <ProfileSidebar v-model="profileSidebarOpen" :mode="profileSidebarMode" :profile="profile" :roles="roles"
-    @refresh="refresh" />
 </template>

@@ -47,8 +47,9 @@ async function confirmLogout() {
 <template>
   <div>
     <div class="d-flex align-center pa-5">
-      <v-avatar size="32" class="mr-2" color="primary" variant="tonal">
-        <span class="text-caption font-weight-bold">
+      <v-avatar class="mr-2" size="32" color="primary" variant="tonal">
+        <v-img v-if="profile?.avatar_url" :src="profile?.avatar_url" cover />
+        <span v-else class="text-caption font-weight-bold">
           {{ getInitials(profile?.full_name ?? '-') }}
         </span>
       </v-avatar>
@@ -66,7 +67,7 @@ async function confirmLogout() {
     <v-divider />
 
     <v-list class="py-0" aria-label="profile list">
-      <v-list-item @click="emit('open-profile', 'edit')" color="primary" rounded="0">
+      <v-list-item to="/profile" color="primary" rounded="0">
         <template v-slot:prepend>
           <EditOutlined :style="{ fontSize: '14px' }" class="mr-4" />
         </template>
