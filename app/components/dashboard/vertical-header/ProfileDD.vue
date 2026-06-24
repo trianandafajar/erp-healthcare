@@ -87,11 +87,13 @@ async function confirmLogout() {
         <v-list-item-title class="text-h6">Support</v-list-item-title>
       </v-list-item>
 
-      <v-list-item @click="dialog = true" color="error" rounded="0">
+      <v-divider color="error" />
+
+      <v-list-item @click="dialog = true" color="error" rounded="0" class="text-error">
         <template v-slot:prepend>
-          <LogoutOutlined :style="{ fontSize: '14px' }" class="mr-4" />
+          <LogoutOutlined :style="{ fontSize: '14px', color: 'rgb(var(--v-theme-error))' }" class="mr-4" />
         </template>
-        <v-list-item-title class="text-h6">Logout</v-list-item-title>
+        <v-list-item-title class="text-h6 text-error">Logout</v-list-item-title>
       </v-list-item>
     </v-list>
   </div>
