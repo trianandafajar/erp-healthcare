@@ -39,6 +39,15 @@ const sidebarItem: menu[] = [
   },
 
   {
+    header: 'Reports'
+  },
+  {
+    title: 'Reports',
+    icon: BarChartOutlined,
+    to: '/reports'
+  },
+
+  {
     header: 'Master Data'
   },
   {
@@ -80,16 +89,6 @@ const sidebarItem: menu[] = [
     icon: KeyOutlined,
     to: '/permissions'
   },
-
-  {
-    header: 'Reports'
-  },
-  {
-    title: 'Reports',
-    icon: BarChartOutlined,
-    to: '/reports'
-  },
-
   {
     header: 'Log'
   },
