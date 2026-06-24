@@ -13,17 +13,8 @@ const sidebarMenu = shallowRef(nurseSidebarItem)
 </script>
 
 <template>
-    <v-navigation-drawer
-        left
-        v-model="customizer.Sidebar_drawer"
-        elevation="0"
-        rail-width="60"
-        mobile-breakpoint="lg"
-        app
-        class="leftSidebar"
-        :rail="customizer.mini_sidebar"
-        expand-on-hover
-    >
+    <v-navigation-drawer left v-model="customizer.Sidebar_drawer" elevation="0" rail-width="60" mobile-breakpoint="lg"
+        app class="leftSidebar" :rail="customizer.mini_sidebar" expand-on-hover>
         <div class="pa-5">
             <Logo />
         </div>

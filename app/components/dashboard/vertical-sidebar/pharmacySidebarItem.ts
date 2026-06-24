@@ -1,9 +1,19 @@
+import {
+    AppstoreOutlined,
+    FileTextOutlined,
+    CheckCircleOutlined,
+    MedicineBoxOutlined,
+    InboxOutlined,
+    DownloadOutlined,
+    UploadOutlined,
+} from '@ant-design/icons-vue'
+
 export interface menu {
     header?: string
     title?: string
-    icon?: string
+    icon?: object
     to?: string
-    divider?: boolean
+    divider?: boolean   
     chip?: string
     chipColor?: string
     chipVariant?: string
@@ -15,50 +25,18 @@ export interface menu {
 }
 
 const pharmacySidebarItem: menu[] = [
-    {
-        header: 'Dashboard',
-    },
-    {
-        title: 'Dashboard',
-        icon: 'mdi-view-dashboard-outline',
-        to: '/pharmacy/dashboard',
-    },
-    {
-        header: 'Operations',
-    },
-    {
-        title: 'Incoming Prescriptions',
-        icon: 'mdi-file-document-outline',
-        to: '/pharmacy/prescriptions',
-    },
-    {
-        title: 'Verification',
-        icon: 'mdi-clipboard-check-outline',
-        to: '/pharmacy/verification',
-    },
-    {
-        title: 'Dispensing',
-        icon: 'mdi-pill',
-        to: '/pharmacy/dispensing',
-    },
-    {
-        header: 'Inventory',
-    },
-    {
-        title: 'Stock',
-        icon: 'mdi-archive-outline',
-        to: '/pharmacy/stock',
-    },
-    {
-        title: 'Incoming Stock',
-        icon: 'mdi-tray-arrow-down',
-        to: '/pharmacy/stock-in',
-    },
-    {
-        title: 'Outgoing Stock',
-        icon: 'mdi-tray-arrow-up',
-        to: '/pharmacy/stock-out',
-    },
+    { header: 'Dashboard' },
+    { title: 'Dashboard', icon: AppstoreOutlined, to: '/pharmacy/dashboard' },
+
+    { header: 'Operations' },
+    { title: 'Incoming Prescriptions', icon: FileTextOutlined, to: '/pharmacy/prescriptions' },
+    { title: 'Verification', icon: CheckCircleOutlined, to: '/pharmacy/verification' },
+    { title: 'Dispensing', icon: MedicineBoxOutlined, to: '/pharmacy/dispensing' },
+
+    { header: 'Inventory' },
+    { title: 'Stock', icon: InboxOutlined, to: '/pharmacy/stock' },
+    { title: 'Incoming Stock', icon: DownloadOutlined, to: '/pharmacy/stock-in' },
+    { title: 'Outgoing Stock', icon: UploadOutlined, to: '/pharmacy/stock-out' },
 ]
 
 export default pharmacySidebarItem
