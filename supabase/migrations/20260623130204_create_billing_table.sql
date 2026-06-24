@@ -26,3 +26,8 @@ USING (true)
 WITH CHECK (true);
 
 GRANT ALL ON public.billing TO postgres, authenticated, service_role, anon;
+
+GRANT ALL ON public.medicine_stocks TO anon, authenticated, service_role;
+
+GRANT ALL ON public.medicine_stocks TO anon, authenticated, service_role;
+GRANT ALL ON public.medicine_stock_movements TO anon, authenticated, service_role;

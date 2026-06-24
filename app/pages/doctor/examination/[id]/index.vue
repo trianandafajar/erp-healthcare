@@ -186,18 +186,18 @@ function notify(msg: string, color = 'success') {
     snackbar.value = true
 }
 
-const { data: medicineData } = await useFetch<{ medicine_stocks: any[] }>('/api/pharmacy/stocks')
-const medicines = computed(() => medicineData.value?.medicine_stocks ?? [])
+const { data: medicineData } = await useFetch<any[]>('/api/pharmacy/stocks')
+const medicines = computed(() => medicineData.value ?? [])
 
 function onMedicineSelect(medicineId: string, index: number) {
-  const selected = medicines.value.find(m => m.id === medicineId)
-  if (!selected) return
+    const selected = medicines.value.find(m => m.id === medicineId)
+    if (!selected) return
 
-  const prescription = prescriptions.value[index]
-  if (!prescription) return
+    const prescription = prescriptions.value[index]
+    if (!prescription) return
 
-  prescription.medicine_name = selected.medicine_name
-  prescription.dosage = selected.dosage
+    prescription.medicine_name = selected.medicine_name
+    prescription.dosage = selected.dosage
 }
 
 async function submitExamination(): Promise<string | null> {
@@ -547,7 +547,7 @@ async function uploadAttachments(
                             <tr v-for="(medicine, index) in prescriptions" :key="index">
                                 <td class="py-2" style="min-width: 160px;">
                                     <v-select v-model="medicine.medicine_id" :items="medicines"
-                                        item-title="medicine_name" item-value="id" label="Medicine" density="compact"
+                                        item-title="medicineName" item-value="id" label="Medicine" density="compact"
                                         variant="outlined" hide-details
                                         @update:model-value="(val) => onMedicineSelect(val, index)" />
                                 </td>
