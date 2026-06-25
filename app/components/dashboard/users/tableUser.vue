@@ -9,6 +9,7 @@ const search = ref('');
 const selectedRole = ref('all');
 const currentPage = ref(1);
 const itemsPerPage = 10;
+const loading = ref(false)
 
 interface RoleOption {
     value: string
@@ -143,46 +144,25 @@ function closeModal() {
     selectedUser.value = null
 }
 
+const actionLoading = computed(() => loading.value || pending.value)
+
 async function handleSubmit(payload: any) {
+    loading.value = true
     try {
         if (modalMode.value === 'add') {
-            await $fetch('/api/users', {
-                method: 'POST',
-                body: {
-                    email: payload.email,
-                    password: 'Password123',
-                    full_name: payload.full_name,
-                    role: payload.role,
-                    status: payload.status
-                }
-            })
-            showSnackbar('User has been created.')
+            await $fetch('/api/users', { method: 'POST', body: payload })
+        } else if (modalMode.value === 'edit') {
+            await $fetch('/api/users', { method: 'PUT', body: payload })
+        } else if (modalMode.value === 'delete') {
+            await $fetch('/api/users', { method: 'DELETE', body: payload })
         }
-        else if (modalMode.value === 'edit') {
-            await $fetch('/api/users', {
-                method: 'PUT',
-                body: {
-                    id: payload.id,
-                    full_name: payload.full_name,
-                    role: payload.role,
-                    status: payload.status
-                }
-            })
-            showSnackbar('User has been updated.')
-        }
-        else if (modalMode.value === 'delete') {
-            await $fetch('/api/users', {
-                method: 'DELETE',
-                body: {
-                    id: payload.id
-                }
-            })
-            showSnackbar('User has been deleted.')
-        }
+
         await refreshNuxtData()
         closeModal()
     } catch (err: any) {
-        showSnackbar(err?.data?.message || err?.message || 'Failed to save user.', 'error')
+        showSnackbar(err?.data?.message || 'Failed')
+    } finally {
+        loading.value = false
     }
 }
 </script>
@@ -267,8 +247,7 @@ async function handleSubmit(payload: any) {
                             color="error" density="comfortable" @click="openDelete(user)" />
                         <v-btn icon variant="text" size="small" color="warning" density="comfortable"
                             title="Login as this user" :loading="isLoggingInAs === user.id"
-                            :disabled="isLoggingInAs !== null"
-                            @click="openLoginAs(user)">
+                            :disabled="isLoggingInAs !== null" @click="openLoginAs(user)">
                             <v-icon icon="mdi-account-arrow-right-outline" />
                         </v-btn>
                     </td>
@@ -286,7 +265,8 @@ async function handleSubmit(payload: any) {
     </UiTitleCard>
     <div class="text-xs-center">
         <v-dialog v-model="dialog" width="480" persistent>
-            <UserModal :mode="modalMode" :user="selectedUser" @submit="handleSubmit" @cancel="closeModal" />
+            <UserModal :loading="actionLoading" :mode="modalMode" :user="selectedUser" @submit="handleSubmit"
+                @cancel="closeModal" />
         </v-dialog>
     </div>
 

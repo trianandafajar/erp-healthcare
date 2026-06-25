@@ -8,6 +8,7 @@ const props = defineProps<{
         role: string
         status: string
     } | null
+    loading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -122,8 +123,11 @@ function onSubmit() {
 
         <v-card-actions class="pa-4 pt-3">
             <v-spacer />
-            <v-btn variant="tonal" color="secondary" @click="emit('cancel')">Cancel</v-btn>
-            <v-btn variant="flat" :color="config.confirmColor" @click="onSubmit">
+            <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
+                Cancel
+            </v-btn>
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
+                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>
