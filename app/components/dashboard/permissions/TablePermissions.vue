@@ -21,6 +21,7 @@ const permissions = computed(() => data.value?.permissions ?? [])
 const groupedPermissions = computed(() => data.value?.grouped ?? {})
 const moduleKeys = computed(() => Object.keys(groupedPermissions.value).sort())
 
+const loading = ref(false)
 const currentPage = ref(1)
 const itemsPerPage = 10
 
@@ -54,7 +55,11 @@ function openDelete(permission: Permission) {
     dialog.value = true
 }
 
+const actionLoading = computed(() => loading.value || pending.value)
+
 async function handleSubmit(payload: any) {
+
+    loading.value = true
     if (modalMode.value === 'add') {
         await $fetch('/api/permissions', {
             method: 'POST',
@@ -86,6 +91,7 @@ async function handleSubmit(payload: any) {
             }
         })
     }
+    loading.value = false
     await refreshNuxtData()
     dialog.value = false
 }
@@ -165,6 +171,6 @@ async function handleSubmit(payload: any) {
 
     <v-dialog v-model="dialog" max-width="500" persistent>
         <PermissionModal :mode="modalMode" :permission="selectedPermission" :module-keys="moduleKeys"
-            @submit="handleSubmit" @cancel="dialog = false" />
+            @submit="handleSubmit" @cancel="dialog = false" :loading="actionLoading" />
     </v-dialog>
 </template>
