@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import ApptModal from './ApptModal.vue'
 
@@ -34,9 +34,7 @@ const { data, pending, refresh } = await useFetch<{ appointments: any[] }>(
 
 const { data: patientData } = await useFetch('/api/patients')
 
-const patients = computed(() =>
-    patientData.value?.patients ?? []
-)
+const patients = computed(() => patientData.value?.patients ?? [])
 
 const appointments = computed<Appointment[]>(() =>
     data.value?.appointments ?? []
@@ -59,7 +57,9 @@ function formatTime(timeStr?: string) {
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
     return new Date(dateStr).toLocaleDateString('id-ID', {
-        day: 'numeric', month: 'short', year: 'numeric'
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
     })
 }
 
@@ -136,9 +136,7 @@ async function handleSubmit(payload: any) {
             })
 
             notify('Appointment created successfully')
-        }
-
-        else if (modalMode.value === 'edit') {
+        } else if (modalMode.value === 'edit') {
             await $fetch('/api/doctor/appointments/today', {
                 method: 'PUT',
                 body: {
@@ -154,9 +152,7 @@ async function handleSubmit(payload: any) {
             })
 
             notify('Appointment updated successfully')
-        }
-
-        else if (modalMode.value === 'delete') {
+        } else if (modalMode.value === 'delete') {
             await $fetch('/api/doctor/appointments/today', {
                 method: 'DELETE',
                 body: {
@@ -169,18 +165,12 @@ async function handleSubmit(payload: any) {
 
         await refresh()
         closeModal()
-    }
-
-    catch (e: any) {
+    } catch (e: any) {
         notify(
-            e?.data?.message ??
-            e?.message ??
-            'Something went wrong',
+            e?.data?.message ?? e?.message ?? 'Something went wrong',
             'error'
         )
-    }
-
-    finally {
+    } finally {
         loading.value = false
     }
 }
@@ -287,8 +277,8 @@ async function handleSubmit(payload: any) {
     </UiTitleCard>
 
     <v-dialog v-model="dialog" max-width="480" persistent>
-        <ApptModal :loading="actionLoading" :mode="modalMode" :appointment="selectedAppointment" :patients="patients" @submit="handleSubmit"
-            @cancel="closeModal" />
+        <ApptModal :loading="actionLoading" :mode="modalMode" :appointment="selectedAppointment" :patients="patients"
+            :can-create-patient="can('user.create')" @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" :timeout="3000">

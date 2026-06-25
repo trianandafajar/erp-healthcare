@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import CreatePatientDialog from './CreatePatientDialog.vue'
 
 interface Patient {
     id: string
@@ -88,157 +89,165 @@ watch(
     { immediate: true }
 )
 
-const config = computed(() => ({
-    add: {
-        title: 'Add Appointment',
-        icon: 'mdi-calendar-plus',
-        confirmColor: 'primary',
-        confirmLabel: 'Create Appointment',
-    },
-    edit: {
-        title: 'Edit Appointment',
-        icon: 'mdi-calendar-edit',
-        confirmColor: 'primary',
-        confirmLabel: 'Save Changes',
-    },
-    delete: {
-        title: 'Delete Appointment',
-        icon: 'mdi-calendar-remove',
-        confirmColor: 'error',
-        confirmLabel: 'Delete Appointment',
-    },
-}[props.mode]))
+const config = computed(() =>
+    ({
+        add: {
+            title: 'Add Appointment',
+            icon: 'mdi-calendar-plus',
+            confirmColor: 'primary',
+            confirmLabel: 'Create Appointment',
+        },
+        edit: {
+            title: 'Edit Appointment',
+            icon: 'mdi-calendar-edit',
+            confirmColor: 'primary',
+            confirmLabel: 'Save Changes',
+        },
+        delete: {
+            title: 'Delete Appointment',
+            icon: 'mdi-calendar-remove',
+            confirmColor: 'error',
+            confirmLabel: 'Delete Appointment',
+        },
+    })[props.mode]
+)
 
 function onSubmit() {
     if (props.mode === 'delete') {
-        emit('submit', {
-            id: props.appointment?.id,
-        })
+        emit('submit', { id: props.appointment?.id })
         return
     }
 
     emit('submit', {
         ...form.value,
-        id: props.mode === 'edit'
-            ? props.appointment?.id
-            : undefined,
+        id: props.mode === 'edit' ? props.appointment?.id : undefined,
     })
 }
 
-const isFormValid = computed(() =>
-    form.value.patient_id &&
-    form.value.appointment_date &&
-    form.value.appointment_time &&
-    form.value.type &&
-    form.value.status
-)
+const dialogCreatePatient = ref(false)
+
+function openCreatePatient() {
+    dialogCreatePatient.value = true
+}
+
+function onCreatedPatient(newPatient: any | null) {
+    if (newPatient?.id) {
+        form.value.patient_id = newPatient.id
+    }
+    dialogCreatePatient.value = false
+}
 </script>
 
 <template>
-    <v-card rounded="lg" max-width="600" width="100%">
-        <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
-            <div class="d-flex align-center ga-2">
-                <v-icon :icon="config.icon" />
-                <span class="text-h6 font-weight-bold">
-                    {{ config.title }}
-                </span>
-            </div>
+    <div>
+        <CreatePatientDialog v-model="dialogCreatePatient" :loading="loading" @created="onCreatedPatient"
+            @cancel="dialogCreatePatient = false" />
 
-            <v-btn icon="mdi-close" variant="text" density="compact" @click="emit('cancel')" />
-        </v-card-title>
+        <v-card rounded="lg" max-width="600" width="100%">
+            <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
+                <div class="d-flex align-center ga-2">
+                    <v-icon :icon="config.icon" />
+                    <span class="text-h6 font-weight-bold">{{ config.title }}</span>
+                </div>
 
-        <v-divider />
+                <v-btn icon="mdi-close" variant="text" density="compact" @click="emit('cancel')" />
+            </v-card-title>
 
-        <template v-if="mode === 'delete'">
-            <v-card-text class="pa-5 text-center">
-                <v-avatar color="error" variant="tonal" size="56">
-                    <v-icon icon="mdi-calendar-remove" size="28" />
-                </v-avatar>
+            <v-divider />
 
-                <p class="mt-4 text-body-1 font-weight-medium">
-                    Are you sure you want to delete this appointment?
-                </p>
+            <template v-if="mode === 'delete'">
+                <v-card-text class="pa-5 text-center">
+                    <v-avatar color="error" variant="tonal" size="56">
+                        <v-icon icon="mdi-calendar-remove" size="28" />
+                    </v-avatar>
 
-                <p class="text-body-2 text-medium-emphasis mt-2">
-                    This action cannot be undone.
-                </p>
-            </v-card-text>
-        </template>
+                    <p class="mt-4 text-body-1 font-weight-medium">
+                        Are you sure you want to delete this appointment?
+                    </p>
 
-        <template v-else>
-            <v-card-text class="pa-4">
-                <v-row dense>
-                    <v-col cols="12">
-                        <v-label class="mb-1">Patient</v-label>
+                    <p class="text-body-2 text-medium-emphasis mt-2">
+                        This action cannot be undone.
+                    </p>
+                </v-card-text>
+            </template>
 
-                        <v-autocomplete v-model="form.patient_id" :items="patients" item-title="full_name"
-                            placeholder="Search patient..." item-value="id" variant="outlined" density="compact"
-                            hide-details clearable>
-                            <template #item="{ props, item }">
-                                <v-list-item v-bind="props">
-                                    <v-list-item-subtitle>
-                                        {{ item.raw.medical_record_number }}
-                                    </v-list-item-subtitle>
-                                </v-list-item>
-                            </template>
-                        </v-autocomplete>
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <v-label class="mb-1">Appointment Date</v-label>
+            <template v-else>
+                <v-card-text class="pa-4">
+                    <v-row dense>
+                        <v-col cols="12">
+                            <v-label class="mb-1">Patient</v-label>
 
-                        <v-text-field v-model="form.appointment_date" type="date" variant="outlined" density="compact"
-                            hide-details />
-                    </v-col>
+                            <div class="d-flex ga-2 align-center">
+                                <v-autocomplete v-model="form.patient_id" :items="patients" item-title="full_name"
+                                    placeholder="Search patient..." item-value="id" variant="outlined" density="compact"
+                                    hide-details clearable class="flex-grow-1">
+                                    <template #item="{ props, item }">
+                                        <v-list-item v-bind="props">
+                                            <v-list-item-subtitle>
+                                                {{ item.raw.medical_record_number }}
+                                            </v-list-item-subtitle>
+                                        </v-list-item>
+                                    </template>
+                                </v-autocomplete>
 
-                    <v-col cols="12" md="6">
-                        <v-label class="mb-1">Appointment Time</v-label>
+                                <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus"
+                                    density="comfortable" :disabled="loading" height="40" @click="openCreatePatient">
+                                    Create User
+                                </v-btn>
+                            </div>
+                        </v-col>
 
-                        <v-text-field v-model="form.appointment_time" type="time" variant="outlined" density="compact"
-                            hide-details />
-                    </v-col>
+                        <v-col cols="12" md="6">
+                            <v-label class="mb-1">Appointment Date</v-label>
+                            <v-text-field v-model="form.appointment_date" type="date" variant="outlined"
+                                density="compact" hide-details />
+                        </v-col>
 
-                    <v-col cols="12" md="6">
-                        <v-label class="mb-1">Type</v-label>
+                        <v-col cols="12" md="6">
+                            <v-label class="mb-1">Appointment Time</v-label>
+                            <v-text-field v-model="form.appointment_time" type="time" variant="outlined"
+                                density="compact" hide-details />
+                        </v-col>
 
-                        <v-select v-model="form.type" :items="['appointment', 'consultation', 'follow_up']"
-                            variant="outlined" density="compact" hide-details />
-                    </v-col>
+                        <v-col cols="12" md="6">
+                            <v-label class="mb-1">Type</v-label>
+                            <v-select v-model="form.type" :items="['appointment', 'consultation', 'follow_up']"
+                                variant="outlined" density="compact" hide-details />
+                        </v-col>
 
-                    <v-col cols="12" md="6">
-                        <v-label class="mb-1">Status</v-label>
+                        <v-col cols="12" md="6">
+                            <v-label class="mb-1">Status</v-label>
+                            <v-select v-model="form.status" :items="['waiting', 'in_progress', 'done', 'cancelled']"
+                                variant="outlined" density="compact" hide-details />
+                        </v-col>
 
-                        <v-select v-model="form.status" :items="['waiting', 'in_progress', 'done', 'cancelled']"
-                            variant="outlined" density="compact" hide-details />
-                    </v-col>
+                        <v-col cols="12">
+                            <v-label class="mb-1">Chief Complaint</v-label>
+                            <v-textarea v-model="form.chief_complaint" rows="3" variant="outlined" density="compact"
+                                hide-details />
+                        </v-col>
 
-                    <v-col cols="12">
-                        <v-label class="mb-1">Chief Complaint</v-label>
+                        <v-col cols="12">
+                            <v-label class="mb-1">Notes</v-label>
+                            <v-textarea v-model="form.notes" rows="3" variant="outlined" density="compact"
+                                hide-details />
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+            </template>
 
-                        <v-textarea v-model="form.chief_complaint" rows="3" variant="outlined" density="compact"
-                            hide-details />
-                    </v-col>
+            <v-divider />
 
-                    <v-col cols="12">
-                        <v-label class="mb-1">Notes</v-label>
-
-                        <v-textarea v-model="form.notes" rows="3" variant="outlined" density="compact" hide-details />
-                    </v-col>
-
-                </v-row>
-            </v-card-text>
-        </template>
-
-        <v-divider />
-
-        <v-card-actions class="pa-4">
-            <v-spacer />
-            <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
-                Cancel
-            </v-btn>
-            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
-                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
-                {{ config.confirmLabel }}
-            </v-btn>
-        </v-card-actions>
-    </v-card>
+            <v-card-actions class="pa-4">
+                <v-spacer />
+                <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
+                    Cancel
+                </v-btn>
+                <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
+                    :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
+                    {{ config.confirmLabel }}
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </div>
 </template>
