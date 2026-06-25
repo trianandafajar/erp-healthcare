@@ -53,7 +53,8 @@ const statCards = computed(() => [
         percent: null,
         color: 'primary',
         icon: TeamOutlined,
-        text: 'All examinations today'
+        text: 'All examinations today',
+        to: '/doctor/examination'
     },
     {
         name: 'Waiting Patients',
@@ -61,7 +62,8 @@ const statCards = computed(() => [
         percent: null,
         color: 'warning',
         icon: ClockCircleOutlined,
-        text: 'Patients in queue'
+        text: 'Patients in queue',
+        to: '/doctor/patients/today'
     },
     {
         name: 'Done Today',
@@ -69,7 +71,8 @@ const statCards = computed(() => [
         percent: null,
         color: 'success',
         icon: CheckCircleOutlined,
-        text: 'Completed examinations'
+        text: 'Completed examinations',
+        to: '/doctor/medical-records'
     },
     {
         name: 'Prescriptions',
@@ -77,7 +80,8 @@ const statCards = computed(() => [
         percent: null,
         color: 'info',
         icon: MedicineBoxOutlined,
-        text: 'Total prescriptions issued'
+        text: 'Total prescriptions issued',
+        to: '/doctor/dashboard'
     }
 ])
 
@@ -244,7 +248,7 @@ function formatTime(time?: string) {
         <v-row class="my-0">
             <v-col cols="6" sm="4" md="" v-for="(card, i) in statCards" :key="i" :style="{ flex: '1 1 0' }"
                 class="flex-grow-1">
-                <v-card elevation="0">
+                <v-card :to="card.to" elevation="0">
                     <v-card-text>
                         <div class="d-flex align-items-center justify-space-between">
                             <div>
