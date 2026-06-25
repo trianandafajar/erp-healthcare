@@ -22,6 +22,7 @@ const props = defineProps<{
     mode: 'add' | 'edit' | 'delete'
     appointment?: Appointment | null
     patients?: Patient[]
+    loading: boolean
 }>()
 
 const emit = defineEmits<{
@@ -164,9 +165,6 @@ const isFormValid = computed(() =>
                             item-value="id" variant="outlined" density="compact" hide-details clearable>
                             <template #item="{ props, item }">
                                 <v-list-item v-bind="props">
-                                    <v-list-item-title>
-                                        {{ item.raw.full_name }}
-                                    </v-list-item-title>
                                     <v-list-item-subtitle>
                                         {{ item.raw.medical_record_number }}
                                     </v-list-item-subtitle>
@@ -223,13 +221,11 @@ const isFormValid = computed(() =>
 
         <v-card-actions class="pa-4">
             <v-spacer />
-
-            <v-btn variant="tonal" color="secondary" @click="emit('cancel')">
+            <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
                 Cancel
             </v-btn>
-
-            <v-btn variant="flat" :color="config.confirmColor" :disabled="mode !== 'delete' && !isFormValid"
-                @click="onSubmit">
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
+                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>

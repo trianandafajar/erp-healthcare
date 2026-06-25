@@ -115,6 +115,8 @@ function notify(msg: string, color = 'success') {
     snackbar.value = true
 }
 
+const actionLoading = computed(() => loading.value)
+
 async function handleSubmit(payload: any) {
     loading.value = true
 
@@ -285,7 +287,7 @@ async function handleSubmit(payload: any) {
     </UiTitleCard>
 
     <v-dialog v-model="dialog" max-width="480" persistent>
-        <ApptModal :mode="modalMode" :appointment="selectedAppointment" :patients="patients" @submit="handleSubmit"
+        <ApptModal :loading="actionLoading" :mode="modalMode" :appointment="selectedAppointment" :patients="patients" @submit="handleSubmit"
             @cancel="closeModal" />
     </v-dialog>
 
