@@ -11,6 +11,7 @@ interface Department {
 const props = defineProps<{
     mode: 'add' | 'edit' | 'delete'
     department?: Department | null
+    loading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -159,7 +160,8 @@ function onSubmit() {
                 Cancel
             </v-btn>
 
-            <v-btn variant="flat" :color="config.confirmColor" :loading="false" @click="onSubmit">
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading" block
+                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>

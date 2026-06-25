@@ -63,6 +63,7 @@ const dialog = ref(false)
 const modalMode = ref<'add' | 'edit' | 'delete'>('add')
 const selectedDepartment = ref<Department | null>(null)
 const loading = ref(false)
+const actionLoading = computed(() => loading.value || pending.value)
 
 const snackbar = ref(false)
 const snackbarMsg = ref('')
@@ -79,6 +80,11 @@ function openAdd() {
     selectedDepartment.value = null
     dialog.value = true
 }
+
+function onModalCancel() {
+    if (!loading.value) closeModal()
+}
+
 
 function openEdit(department: Department) {
     modalMode.value = 'edit'
@@ -234,9 +240,10 @@ async function handleSubmit(payload: any) {
     </UiTitleCard>
 
     <v-dialog v-model="dialog" max-width="500" persistent>
-        <DepartmentModal :mode="modalMode" :department="selectedDepartment" @submit="handleSubmit"
-            @cancel="closeModal" />
+        <DepartmentModal :mode="modalMode" :department="selectedDepartment" :loading="actionLoading"
+            @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
+
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
         {{ snackbarMsg }}
