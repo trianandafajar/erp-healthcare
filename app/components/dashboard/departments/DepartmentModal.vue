@@ -160,7 +160,7 @@ function onSubmit() {
                 Cancel
             </v-btn>
 
-            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading" block
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
                 :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>

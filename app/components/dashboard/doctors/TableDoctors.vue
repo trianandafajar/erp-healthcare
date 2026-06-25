@@ -183,14 +183,14 @@ async function handleCreateUser(payload: {
     }
 }
 
-async function handleCreateDepartment(payload: { name: string; code: string; description: string }) {
+async function handleCreateDepartment(payload: { name: string; code: string; description?: string }) {
     try {
         const res: any = await $fetch('/api/departments', {
             method: 'POST',
             body: {
                 name: payload.name,
                 code: payload.code || null,
-                description: payload.description
+                description: payload.description || ''
             }
         })
 
@@ -206,6 +206,8 @@ async function handleCreateDepartment(payload: { name: string; code: string; des
         return null
     }
 }
+
+const actionLoading = computed(() => loading.value || pending.value)
 
 async function handleSubmit(payload: any) {
     loading.value = true
@@ -369,7 +371,7 @@ async function handleSubmit(payload: any) {
     <v-dialog v-model="dialog" max-width="600" persistent>
         <DoctorModal :mode="modalMode" :doctor="selectedDoctor" :available-users="availableUsers"
             :departments="departments" :on-create-user="handleCreateUser" :on-create-department="handleCreateDepartment"
-            @submit="handleSubmit" @cancel="closeModal" />
+            :loading="actionLoading" @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">

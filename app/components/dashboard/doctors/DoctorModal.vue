@@ -40,6 +40,7 @@ const props = defineProps<{
         name: string
         code: string
     }) => Promise<{ id: string; name: string; code?: string } | null>
+    loading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -262,8 +263,6 @@ async function onSubmit() {
         return
     }
 
-    submitting.value = true
-
     try {
         if (photoFile.value) {
             await uploadPhoto()
@@ -279,13 +278,12 @@ async function onSubmit() {
         photoError.value =
             err?.message ??
             'Failed to upload photo.'
-    } finally {
-        submitting.value = false
     }
 }
 
 const isSubmitDisabled = computed(() =>
-    (props.mode === 'add' && !form.value.id) || submitting.value
+    (props.mode === 'add' && !form.value.id) ||
+    !!props.loading
 )
 </script>
 
@@ -469,11 +467,11 @@ const isSubmitDisabled = computed(() =>
 
         <v-card-actions class="pa-4 pt-3">
             <v-spacer />
-            <v-btn variant="tonal" color="secondary" :disabled="submitting" @click="emit('cancel')">
+            <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
                 Cancel
             </v-btn>
-            <v-btn variant="flat" :color="config.confirmColor" :disabled="isSubmitDisabled" :loading="submitting"
-                @click="onSubmit">
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
+                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>
