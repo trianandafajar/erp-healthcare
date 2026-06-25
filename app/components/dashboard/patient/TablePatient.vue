@@ -150,6 +150,8 @@ function closeModal() {
     selectedPatient.value = null
 }
 
+const actionLoading = computed(() => loading.value)
+
 async function handleSubmit(payload: any) {
     loading.value = true
     try {
@@ -310,7 +312,8 @@ async function handleSubmit(payload: any) {
     </UiTitleCard>
 
     <v-dialog v-model="dialog" max-width="600" persistent>
-        <PatientModal :mode="modalMode" :patient="selectedPatient" @submit="handleSubmit" @cancel="closeModal" />
+        <PatientModal :loading="actionLoading" :mode="modalMode" :patient="selectedPatient" @submit="handleSubmit"
+            @cancel="closeModal" />
     </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
