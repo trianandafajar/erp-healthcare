@@ -29,6 +29,16 @@ const emit = defineEmits<{
     (e: 'cancel'): void
 }>()
 
+function getNowDate(): string {
+    const now = new Date()
+    return now.toISOString().split('T')[0] ?? ''
+}
+
+function getNowTime(): string {
+    const now = new Date()
+    return now.toTimeString().slice(0, 5)
+}
+
 const form = ref({
     patient_id: '',
     appointment_date: '',
@@ -55,8 +65,8 @@ watch(
         } else {
             form.value = {
                 patient_id: '',
-                appointment_date: '',
-                appointment_time: '',
+                appointment_date: getNowDate(),
+                appointment_time: getNowTime(),
                 type: 'appointment',
                 status: 'waiting',
                 chief_complaint: '',
@@ -148,73 +158,63 @@ const isFormValid = computed(() =>
             <v-card-text class="pa-4">
                 <v-row dense>
                     <v-col cols="12">
-                        <v-label class="mb-1">
-                            Patient
-                        </v-label>
+                        <v-label class="mb-1">Patient</v-label>
 
-                        <v-select v-model="form.patient_id" :items="patients" item-title="full_name" item-value="id"
-                            variant="outlined" density="compact" hide-details />
+                        <v-autocomplete v-model="form.patient_id" :items="patients" item-title="full_name"
+                            item-value="id" variant="outlined" density="compact" hide-details clearable>
+                            <template #item="{ props, item }">
+                                <v-list-item v-bind="props">
+                                    <v-list-item-title>
+                                        {{ item.raw.full_name }}
+                                    </v-list-item-title>
+                                    <v-list-item-subtitle>
+                                        {{ item.raw.medical_record_number }}
+                                    </v-list-item-subtitle>
+                                </v-list-item>
+                            </template>
+                        </v-autocomplete>
                     </v-col>
-
                     <v-col cols="12" md="6">
-                        <v-label class="mb-1">
-                            Appointment Date
-                        </v-label>
+                        <v-label class="mb-1">Appointment Date</v-label>
 
                         <v-text-field v-model="form.appointment_date" type="date" variant="outlined" density="compact"
                             hide-details />
                     </v-col>
 
                     <v-col cols="12" md="6">
-                        <v-label class="mb-1">
-                            Appointment Time
-                        </v-label>
+                        <v-label class="mb-1">Appointment Time</v-label>
 
                         <v-text-field v-model="form.appointment_time" type="time" variant="outlined" density="compact"
                             hide-details />
                     </v-col>
 
                     <v-col cols="12" md="6">
-                        <v-label class="mb-1">
-                            Type
-                        </v-label>
+                        <v-label class="mb-1">Type</v-label>
 
-                        <v-select v-model="form.type" :items="[
-                            'appointment',
-                            'consultation',
-                            'follow_up'
-                        ]" variant="outlined" density="compact" hide-details />
+                        <v-select v-model="form.type" :items="['appointment', 'consultation', 'follow_up']"
+                            variant="outlined" density="compact" hide-details />
                     </v-col>
 
                     <v-col cols="12" md="6">
-                        <v-label class="mb-1">
-                            Status
-                        </v-label>
+                        <v-label class="mb-1">Status</v-label>
 
-                        <v-select v-model="form.status" :items="[
-                            'waiting',
-                            'in_progress',
-                            'done',
-                            'cancelled'
-                        ]" variant="outlined" density="compact" hide-details />
+                        <v-select v-model="form.status" :items="['waiting', 'in_progress', 'done', 'cancelled']"
+                            variant="outlined" density="compact" hide-details />
                     </v-col>
 
                     <v-col cols="12">
-                        <v-label class="mb-1">
-                            Chief Complaint
-                        </v-label>
+                        <v-label class="mb-1">Chief Complaint</v-label>
 
                         <v-textarea v-model="form.chief_complaint" rows="3" variant="outlined" density="compact"
                             hide-details />
                     </v-col>
 
                     <v-col cols="12">
-                        <v-label class="mb-1">
-                            Notes
-                        </v-label>
+                        <v-label class="mb-1">Notes</v-label>
 
                         <v-textarea v-model="form.notes" rows="3" variant="outlined" density="compact" hide-details />
                     </v-col>
+
                 </v-row>
             </v-card-text>
         </template>
