@@ -36,6 +36,10 @@ const props = defineProps<{
         full_name: string
         email: string
     }) => Promise<{ id: string; full_name: string; email: string } | null>
+    onCreateDepartment: (payload: {
+        name: string
+        code: string
+    }) => Promise<{ id: string; name: string; code?: string } | null>
 }>()
 
 const emit = defineEmits<{
@@ -144,11 +148,7 @@ async function uploadPhoto(): Promise<string> {
 
 const createUserDialog = ref(false)
 const creatingUser = ref(false)
-
-const createUserForm = ref({
-    full_name: '',
-    email: '',
-})
+const createUserForm = ref({ full_name: '', email: '' })
 
 function openCreateUserDialog() {
     createUserForm.value = { full_name: '', email: '' }
@@ -166,6 +166,29 @@ async function submitCreateUser() {
         }
     } finally {
         creatingUser.value = false
+    }
+}
+
+const createDepartmentDialog = ref(false)
+const creatingDepartment = ref(false)
+const createDepartmentForm = ref({ name: '', code: '', description: '' })
+
+function openCreateDepartmentDialog() {
+    createDepartmentForm.value = { name: '', code: '', description: '' }
+    createDepartmentDialog.value = true
+}
+
+async function submitCreateDepartment() {
+    creatingDepartment.value = true
+    try {
+        const newDept = await props.onCreateDepartment({ ...createDepartmentForm.value })
+        if (newDept?.id) {
+            form.value.department_id = newDept.id
+            createDepartmentDialog.value = false
+            createDepartmentForm.value = { name: '', code: '', description: '' }
+        }
+    } finally {
+        creatingDepartment.value = false
     }
 }
 
@@ -305,14 +328,14 @@ const isSubmitDisabled = computed(() =>
 
                         <template v-if="mode === 'add'">
                             <div class="d-flex ga-2 align-center">
-                                <v-select v-model="form.id" :items="availableUsers ?? []" item-title="full_name"
-                                    item-value="id" placeholder="Select a doctor account" variant="outlined"
-                                    density="compact" hide-details="auto" no-data-text="No available doctor accounts"
-                                    class="flex-grow-1">
+                                <v-autocomplete v-model="form.id" :items="availableUsers ?? []" item-title="full_name"
+                                    item-value="id" placeholder="Search doctor account..." variant="outlined"
+                                    density="compact" hide-details="auto" no-data-text="No matching doctor accounts"
+                                    clearable class="flex-grow-1">
                                     <template #item="{ props: itemProps, item }">
                                         <v-list-item v-bind="itemProps" :subtitle="item.raw.email" />
                                     </template>
-                                </v-select>
+                                </v-autocomplete>
 
                                 <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus" height="40"
                                     @click="openCreateUserDialog">
@@ -345,11 +368,9 @@ const isSubmitDisabled = computed(() =>
                                 @click="triggerFileInput">
                                 <v-icon :icon="isDragging ? 'mdi-cloud-download-outline' : 'mdi-image-plus-outline'"
                                     size="24" :color="isDragging ? 'primary' : 'grey'" />
-
                                 <span class="text-caption font-weight-medium">
                                     {{ isDragging ? 'Drop to upload' : 'Click or drag & drop' }}
                                 </span>
-
                                 <span class="text-caption text-medium-emphasis">
                                     JPG, PNG, WebP · Max 2 MB
                                 </span>
@@ -374,9 +395,24 @@ const isSubmitDisabled = computed(() =>
 
                     <v-col cols="12" sm="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Department / Poli</v-label>
-                        <v-select v-model="form.department_id" :items="departments ?? []" item-title="name"
-                            item-value="id" placeholder="Select department" variant="outlined" density="compact"
-                            hide-details clearable />
+                        <div class="d-flex ga-2 align-center">
+
+                            <v-autocomplete v-model="form.department_id" :items="departments ?? []" item-title="name"
+                                item-value="id" placeholder="Search department..." variant="outlined" density="compact"
+                                hide-details clearable class="flex-grow-1">
+                                <template #item="{ props: itemProps, item }">
+                                    <v-list-item v-bind="itemProps"
+                                        :subtitle="item.raw.code ? `Code: ${item.raw.code}` : undefined" />
+                                </template>
+                            </v-autocomplete>
+
+                            <v-tooltip text="Create new department" location="top">
+                                <template #activator="{ props: tooltipProps }">
+                                    <v-btn v-bind="tooltipProps" icon="mdi-plus" color="primary" variant="tonal"
+                                        density="compact" size="40" @click="openCreateDepartmentDialog" />
+                                </template>
+                            </v-tooltip>
+                        </div>
                     </v-col>
 
                     <v-col cols="12" sm="6" class="mt-3">
@@ -411,7 +447,7 @@ const isSubmitDisabled = computed(() =>
 
                     <v-col cols="6" sm="3" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Consultation Fee</v-label>
-                        <v-text-field v-model.number="form.consultation_fee" type="number" min="0" prefix="Rp"
+                        <v-text-field v-model.number="form.consultation_fee" type="number" min="0" prefix="$"
                             variant="outlined" density="compact" hide-details />
                     </v-col>
 
@@ -425,7 +461,6 @@ const isSubmitDisabled = computed(() =>
                         <v-switch v-model="form.is_available" color="success" label="Available for consultation"
                             hide-details density="compact" />
                     </v-col>
-
                 </v-row>
             </v-card-text>
         </template>
@@ -482,6 +517,63 @@ const isSubmitDisabled = computed(() =>
                 <v-btn color="primary" variant="flat" :loading="creatingUser"
                     :disabled="!createUserForm.full_name || !createUserForm.email" @click="submitCreateUser">
                     Create Account
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="createDepartmentDialog" max-width="440">
+        <v-card rounded="lg" width="100%">
+            <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
+                <div class="d-flex align-center ga-2">
+                    <v-icon icon="mdi-hospital-building" size="20" />
+                    <span class="text-h6 font-weight-bold">Create Department</span>
+                </div>
+                <v-btn icon="mdi-close" variant="text" density="compact" :disabled="creatingDepartment"
+                    @click="createDepartmentDialog = false" />
+            </v-card-title>
+
+            <v-divider />
+
+            <v-card-text class="pa-4">
+                <v-row dense>
+                    <v-col cols="12">
+                        <v-label class="text-caption font-weight-medium mb-1">Department Name</v-label>
+                        <v-text-field v-model="createDepartmentForm.name" placeholder="e.g. Pediatrics Clinic"
+                            variant="outlined" density="compact" hide-details autofocus />
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">
+                            Code
+                            <span class="text-medium-emphasis font-weight-regular">(optional)</span>
+                        </v-label>
+                        <v-text-field v-model="createDepartmentForm.code" placeholder="e.g. PED" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">
+                            Description
+                            <span class="text-medium-emphasis font-weight-regular">(optional)</span>
+                        </v-label>
+                        <v-textarea v-model="createDepartmentForm.description" placeholder="Optional" variant="outlined"
+                            density="compact" rows="3" hide-details />
+                    </v-col>
+                </v-row>
+            </v-card-text>
+
+            <v-divider />
+
+            <v-card-actions class="pa-4 pt-3">
+                <v-spacer />
+                <v-btn variant="tonal" color="secondary" :disabled="creatingDepartment"
+                    @click="createDepartmentDialog = false">
+                    Cancel
+                </v-btn>
+                <v-btn color="primary" variant="flat" :loading="creatingDepartment"
+                    :disabled="!createDepartmentForm.name || creatingDepartment" @click="submitCreateDepartment">
+                    Create & Select
                 </v-btn>
             </v-card-actions>
         </v-card>

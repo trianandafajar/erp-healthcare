@@ -30,7 +30,7 @@ const itemsPerPage = 10;
 const { can } = usePermission()
 
 const { data, pending, refresh } = await useFetch<{ doctors: any[] }>('/api/doctors')
-const { data: deptData } = await useFetch<{ departments: any[] }>('/api/departments')
+const { data: deptData, refresh: refreshDepts } = await useFetch<{ departments: any[] }>('/api/departments')
 const { data: availableData, refresh: refreshAvailable } = await useFetch<{ users: any[] }>('/api/doctors/available')
 
 const doctors = computed<Doctor[]>(() =>
@@ -177,6 +177,30 @@ async function handleCreateUser(payload: {
         notify(
             error?.data?.message ??
             'Failed to create doctor account',
+            'error'
+        )
+        return null
+    }
+}
+
+async function handleCreateDepartment(payload: { name: string; code: string; description: string }) {
+    try {
+        const res: any = await $fetch('/api/departments', {
+            method: 'POST',
+            body: {
+                name: payload.name,
+                code: payload.code || null,
+                description: payload.description
+            }
+        })
+
+        await refreshDepts()
+        notify('Department created successfully')
+
+        return res.department ?? res
+    } catch (error: any) {
+        notify(
+            error?.data?.message ?? 'Failed to create department',
             'error'
         )
         return null
@@ -344,7 +368,8 @@ async function handleSubmit(payload: any) {
 
     <v-dialog v-model="dialog" max-width="600" persistent>
         <DoctorModal :mode="modalMode" :doctor="selectedDoctor" :available-users="availableUsers"
-            :departments="departments" :on-create-user="handleCreateUser" @submit="handleSubmit" @cancel="closeModal" />
+            :departments="departments" :on-create-user="handleCreateUser" :on-create-department="handleCreateDepartment"
+            @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
