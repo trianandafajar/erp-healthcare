@@ -26,6 +26,7 @@ const { can } = usePermission()
 const { data, pending } = await useFetch<{ roles: Role[] }>('/api/roles')
 const { data: permData } = await useFetch<{ permissions: Permission[]; grouped: Record<string, Permission[]> }>('/api/permissions')
 
+const loading = ref(false)
 const roles = computed(() => data.value?.roles ?? [])
 const groupedPermissions = computed(() => permData.value?.grouped ?? {})
 const moduleKeys = computed(() => Object.keys(groupedPermissions.value).sort())
@@ -63,7 +64,10 @@ function openDelete(role: Role) {
     dialog.value = true
 }
 
+const actionLoading = computed(() => loading.value || pending.value)
+
 async function handleSubmit(payload: any) {
+    loading.value = true
     if (modalMode.value === 'add') {
         const permissionIds = payload.permissions.map((p: any) => typeof p === 'string' ? p : p.id)
         await $fetch('/api/roles', {
@@ -96,6 +100,7 @@ async function handleSubmit(payload: any) {
         })
     }
     await refreshNuxtData()
+    loading.value = false
     dialog.value = false
 }
 </script>
@@ -200,6 +205,6 @@ async function handleSubmit(payload: any) {
 
     <v-dialog v-model="dialog" max-width="700" persistent>
         <RoleModal :mode="modalMode" :role="selectedRole" :grouped-permissions="groupedPermissions"
-            @submit="handleSubmit" @cancel="dialog = false" />
+            @submit="handleSubmit" @cancel="dialog = false" :loading="actionLoading" />
     </v-dialog>
 </template>
