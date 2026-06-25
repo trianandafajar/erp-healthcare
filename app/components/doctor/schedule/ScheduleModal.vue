@@ -24,6 +24,7 @@ const props = defineProps<{
     mode: 'add' | 'edit' | 'delete'
     schedule?: DoctorSchedule | null
     schedules?: DoctorSchedule[]
+    loading: boolean
 }>()
 
 const availableDays = computed(() => {
@@ -126,7 +127,7 @@ const isFormValid = computed(() =>
                 <v-icon :icon="config.icon" size="20" />
                 <span class="text-h6 font-weight-bold">{{ config.title }}</span>
             </div>
-            <v-btn icon="mdi-close" variant="text" density="compact" @click="emit('cancel')" />
+            <v-btn icon="mdi-close" variant="text" density="compact" @click="emit('cancel')" :disabled="loading" />
         </v-card-title>
 
         <v-divider />
@@ -192,9 +193,11 @@ const isFormValid = computed(() =>
 
         <v-card-actions class="pa-4 pt-3">
             <v-spacer />
-            <v-btn variant="tonal" color="secondary" @click="emit('cancel')">Cancel</v-btn>
-            <v-btn variant="flat" :color="config.confirmColor" :disabled="mode !== 'delete' && !isFormValid"
-                @click="onSubmit">
+            <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
+                Cancel
+            </v-btn>
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
+                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>

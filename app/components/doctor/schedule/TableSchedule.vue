@@ -96,6 +96,8 @@ function notify(msg: string, color = 'success') {
     snackbar.value = true
 }
 
+const actionLoading = computed(() => loading.value)
+
 async function handleSubmit(payload: any) {
     loading.value = true
     try {
@@ -212,8 +214,8 @@ async function handleSubmit(payload: any) {
     </UiTitleCard>
 
     <v-dialog v-model="dialog" max-width="480" persistent>
-        <ScheduleModal :mode="modalMode" :schedule="selectedSchedule" :schedules="schedules" @submit="handleSubmit"
-            @cancel="closeModal" />
+        <ScheduleModal :loading="actionLoading" :mode="modalMode" :schedule="selectedSchedule" :schedules="schedules"
+            @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" :timeout="3000">
