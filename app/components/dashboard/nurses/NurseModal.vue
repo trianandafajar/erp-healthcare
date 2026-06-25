@@ -31,6 +31,7 @@ const props = defineProps<{
         full_name: string
         email: string
     }) => Promise<{ id: string; full_name: string; email: string } | null>
+    loading: boolean
 }>()
 
 const emit = defineEmits<{
@@ -374,11 +375,11 @@ const isSubmitDisabled = computed(() =>
 
         <v-card-actions class="pa-4 pt-3">
             <v-spacer />
-            <v-btn variant="tonal" color="secondary" :disabled="submitting" @click="emit('cancel')">
+            <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
                 Cancel
             </v-btn>
-            <v-btn variant="flat" :color="config.confirmColor" :disabled="isSubmitDisabled" :loading="submitting"
-                @click="onSubmit">
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
+                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>

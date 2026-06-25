@@ -151,6 +151,8 @@ function closeModal() {
     selectedNurse.value = null
 }
 
+const actionLoading = computed(() => loading.value || pending.value)
+
 async function handleSubmit(payload: any) {
     loading.value = true
     try {
@@ -248,7 +250,7 @@ async function handleSubmit(payload: any) {
                 </tr>
                 <tr v-else v-for="nurse in paginatedNurses" :key="nurse.id">
                     <td class="py-3">
-                         <div class="d-flex align-center ga-3">
+                        <div class="d-flex align-center ga-3">
                             <v-avatar size="34" color="primary" variant="tonal">
                                 <v-img v-if="nurse.photo_url" :src="nurse.photo_url" cover />
                                 <span v-else class="text-caption font-weight-bold">
@@ -298,7 +300,7 @@ async function handleSubmit(payload: any) {
     </UiTitleCard>
 
     <v-dialog v-model="dialog" max-width="600" persistent>
-        <NurseModal :mode="modalMode" :nurse="selectedNurse" :available-users="availableUsers"
+        <NurseModal :loading="actionLoading" :mode="modalMode" :nurse="selectedNurse" :available-users="availableUsers"
             :departments="departments" :on-create-user="handleCreateUser" @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
 
