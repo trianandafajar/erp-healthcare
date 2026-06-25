@@ -235,18 +235,18 @@ function formatTime(timeStr?: string) {
 
                     <td class="py-3">
                         <v-chip size="small" label color="primary" variant="tonal">
-                            {{ prescription.dosage }} mg
+                            {{ prescription.dosage }}
                         </v-chip>
                     </td>
 
                     <td class="py-3">
                         <v-chip size="small" label color="success" variant="tonal">
-                            {{ prescription.frequency }}x/day
+                            {{ prescription.frequency }}
                         </v-chip>
                     </td>
 
                     <td class="py-3">
-                        {{ prescription.duration }} days
+                        {{ prescription.duration }}
                     </td>
 
                     <td class="py-3">

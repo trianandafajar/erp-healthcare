@@ -33,7 +33,7 @@ interface AppointmentResponse {
 }
 
 interface Prescription {
-    medicine_id: string
+    medicine_id: string | null
     medicine_name: string
     dosage: string
     frequency: string
@@ -117,23 +117,23 @@ watch(
 
 const prescriptions = ref<Prescription[]>([
     {
-        medicine_id: '',
+        medicine_id: null,
         medicine_name: '',
         dosage: '',
         frequency: '',
         duration: '',
-        instructions: '',
+        instructions: 'Before meal',
     },
 ])
 
 function addMedicine() {
     prescriptions.value.push({
-        medicine_id: '',
+        medicine_id: null,
         medicine_name: '',
         dosage: '',
         frequency: '',
         duration: '',
-        instructions: '',
+        instructions: 'Before meal',
     })
 }
 
@@ -221,7 +221,11 @@ async function submitExamination(): Promise<string | null> {
                 treatment_plan: form.treatment_plan,
                 notes: form.notes,
 
-                prescriptions: prescriptions.value
+                prescriptions: prescriptions.value.map(p => ({
+                    ...p,
+                    frequency: p.frequency ? `${p.frequency}×/day` : '',
+                    duration: p.duration ? `${p.duration} days` : '',
+                }))
             }
         })
 
@@ -546,25 +550,28 @@ async function uploadAttachments(
                         <tbody>
                             <tr v-for="(medicine, index) in prescriptions" :key="index">
                                 <td class="py-2" style="min-width: 160px;">
-                                    <v-select v-model="medicine.medicine_id" :items="medicines"
-                                        item-title="medicineName" item-value="id" label="Medicine" density="compact"
-                                        variant="outlined" hide-details
+                                <td class="py-2" style="min-width: 200px;">
+                                    <v-autocomplete v-model="medicine.medicine_id" :items="medicines"
+                                        item-title="medicineName" item-value="id" placeholder="Search medicine..."
+                                        density="compact" variant="outlined" hide-details clearable
                                         @update:model-value="(val) => onMedicineSelect(val, index)" />
+                                </td>
                                 </td>
                                 <td class="py-2" style="min-width: 110px;">
                                     <v-text-field v-model="medicine.dosage" placeholder="e.g. 500mg" density="compact"
                                         variant="outlined" hide-details />
                                 </td>
                                 <td class="py-2" style="min-width: 120px;">
-                                    <v-text-field v-model="medicine.frequency" placeholder="e.g. 3×/day"
-                                        density="compact" variant="outlined" hide-details />
+                                    <v-text-field v-model="medicine.frequency" placeholder="e.g. 3" density="compact"
+                                        variant="outlined" hide-details suffix="×/day" />
                                 </td>
                                 <td class="py-2" style="min-width: 110px;">
-                                    <v-text-field v-model="medicine.duration" placeholder="e.g. 5 days"
-                                        density="compact" variant="outlined" hide-details />
+                                    <v-text-field v-model="medicine.duration" placeholder="e.g. 5" density="compact"
+                                        variant="outlined" hide-details suffix="days" />
                                 </td>
                                 <td class="py-2" style="min-width: 160px;">
-                                    <v-text-field v-model="medicine.instructions" placeholder="e.g. after meal"
+                                    <v-select v-model="medicine.instructions" placeholder="Search medicine..."
+                                        :items="['Before meal', 'After meal', 'With meal', 'Before sleep', 'As needed']"
                                         density="compact" variant="outlined" hide-details />
                                 </td>
                                 <td class="py-2 text-right">

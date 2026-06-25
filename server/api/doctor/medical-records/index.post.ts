@@ -77,11 +77,24 @@ export default defineEventHandler(async (event) => {
   }
 
   if (Array.isArray(prescriptions) && prescriptions.length > 0) {
+    const medicineIds = prescriptions
+      .map((p: any) => p.medicine_id)
+      .filter(Boolean)
+
+    const { data: medicineList } = await admin
+      .from('medicine_stocks')
+      .select('id, medicine_name')
+      .in('id', medicineIds)
+
+    const medicineMap = Object.fromEntries(
+      (medicineList ?? []).map((m: any) => [m.id, m.medicine_name])
+    )
+
     const prescriptionRows = prescriptions.map((item: any) => ({
       medical_record_id: medicalRecord.id,
       patient_id,
       doctor_id: doctor.id,
-      medication_name: item.medication_name,
+      medication_name: medicineMap[item.medicine_id] ?? '',
       dosage: item.dosage,
       frequency: item.frequency,
       duration: item.duration,
@@ -96,7 +109,6 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, message: prescriptionError.message })
     }
   }
-
   await admin
     .from('appointments')
     .update({ status: 'done' })
