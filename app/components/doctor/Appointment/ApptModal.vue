@@ -9,13 +9,23 @@ interface Patient {
 
 interface Appointment {
     id: string
-    patient_id: string
+    patient_id: string | null
     appointment_date: string
     appointment_time: string
     type: string
     status: string
     chief_complaint: string | null
     notes: string | null
+}
+
+interface AppointmentForm {
+    patient_id: string | null
+    appointment_date: string
+    appointment_time: string
+    type: string
+    status: string
+    chief_complaint: string
+    notes: string
 }
 
 const props = defineProps<{
@@ -40,8 +50,8 @@ function getNowTime(): string {
     return now.toTimeString().slice(0, 5)
 }
 
-const form = ref({
-    patient_id: '',
+const form = ref<AppointmentForm>({
+    patient_id: null,
     appointment_date: '',
     appointment_time: '',
     type: 'appointment',
@@ -65,7 +75,7 @@ watch(
             }
         } else {
             form.value = {
-                patient_id: '',
+                patient_id: null,
                 appointment_date: getNowDate(),
                 appointment_time: getNowTime(),
                 type: 'appointment',
@@ -162,7 +172,8 @@ const isFormValid = computed(() =>
                         <v-label class="mb-1">Patient</v-label>
 
                         <v-autocomplete v-model="form.patient_id" :items="patients" item-title="full_name"
-                            item-value="id" variant="outlined" density="compact" hide-details clearable>
+                            placeholder="Search patient..." item-value="id" variant="outlined" density="compact"
+                            hide-details clearable>
                             <template #item="{ props, item }">
                                 <v-list-item v-bind="props">
                                     <v-list-item-subtitle>
