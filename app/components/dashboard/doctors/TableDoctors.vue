@@ -24,6 +24,8 @@ interface Doctor {
 }
 
 const search = ref('');
+const filterDepartment = ref('');
+const filterAvailable = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
@@ -63,14 +65,6 @@ watch(
     { immediate: true }
 )
 
-const filteredDoctors = computed(() => {
-    return doctors.value.filter((d) =>
-        d.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
-        d.email.toLowerCase().includes(search.value.toLowerCase()) ||
-        d.specialization.toLowerCase().includes(search.value.toLowerCase())
-    )
-})
-
 const paginatedDoctors = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
     return filteredDoctors.value.slice(start, start + itemsPerPage);
@@ -105,7 +99,29 @@ function getInitials(name: string) {
         .toUpperCase();
 }
 
+const filteredDoctors = computed(() => {
+    return doctors.value.filter((d) => {
+        const matchSearch =
+            d.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
+            d.email.toLowerCase().includes(search.value.toLowerCase()) ||
+            d.specialization.toLowerCase().includes(search.value.toLowerCase())
+
+        const matchDept =
+            !filterDepartment.value || d.department?.id === filterDepartment.value
+
+        const matchAvail =
+            filterAvailable.value === '' ||
+            (filterAvailable.value === 'true' ? d.is_available : !d.is_available)
+
+        return matchSearch && matchDept && matchAvail
+    })
+})
+
 function onSearch() {
+    currentPage.value = 1;
+}
+
+function onFilterChange() {
     currentPage.value = 1;
 }
 
@@ -265,6 +281,19 @@ function openView(doctor: Doctor) {
             <v-text-field v-model="search" placeholder="Search by name, email, or specialization..."
                 prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
                 style="max-width: 320px" @update:model-value="onSearch" />
+
+            <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+                <v-select v-model="filterDepartment" :items="[{ id: '', name: 'All Departments' }, ...departments]"
+                    item-title="name" item-value="id" variant="outlined" density="compact" hide-details
+                    style="max-width: 200px" @update:model-value="onFilterChange" />
+
+                <v-select v-model="filterAvailable" :items="[
+                    { title: 'All Status', value: '' },
+                    { title: 'Available', value: 'true' },
+                    { title: 'Unavailable', value: 'false' },
+                ]" item-title="title" item-value="value" variant="outlined" density="compact" hide-details
+                    style="max-width: 160px" @update:model-value="onFilterChange" />
+            </div>
         </div>
 
         <v-divider />
