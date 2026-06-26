@@ -18,6 +18,8 @@ interface Nurse {
 const { can } = usePermission()
 
 const search = ref('');
+const filterDepartment = ref('');
+const filterAvailable = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
@@ -87,11 +89,25 @@ async function handleCreateUser(payload: {
 }
 
 const filteredNurses = computed(() => {
-    return nurses.value.filter((n) =>
-        n.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
-        n.email.toLowerCase().includes(search.value.toLowerCase())
-    )
+    return nurses.value.filter((n) => {
+        const matchSearch =
+            n.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
+            n.email.toLowerCase().includes(search.value.toLowerCase())
+
+        const matchDept =
+            !filterDepartment.value || n.department?.id === filterDepartment.value
+
+        const matchAvail =
+            filterAvailable.value === '' ||
+            (filterAvailable.value === 'true' ? n.is_available : !n.is_available)
+
+        return matchSearch && matchDept && matchAvail
+    })
 })
+
+function onFilterChange() {
+    currentPage.value = 1
+}
 
 const paginatedNurses = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
@@ -220,10 +236,23 @@ function openView(nurses: Nurse) {
     </v-card-item>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+        <div class="d-flex justify-space-between align-center gap-3 px-4 py-3 flex-wrap">
             <v-text-field v-model="search" placeholder="Search by name or email..." prepend-inner-icon="mdi-magnify"
-                variant="outlined" density="compact" hide-details clearable style="max-width: 320px"
+                variant="outlined" density="compact" hide-details clearable style="max-width: 280px"
                 @update:model-value="onSearch" />
+
+            <div class="d-flex justify-space-between align-center gap-3 px-4 py-3 flex-wrap">
+                <v-select v-model="filterDepartment" :items="[{ id: '', name: 'All Departments' }, ...departments]"
+                    item-title="name" item-value="id" variant="outlined" density="compact" hide-details
+                    style="max-width: 200px" @update:model-value="onFilterChange" />
+
+                <v-select v-model="filterAvailable" :items="[
+                    { title: 'All Status', value: '' },
+                    { title: 'Available', value: 'true' },
+                    { title: 'Unavailable', value: 'false' },
+                ]" item-title="title" item-value="value" variant="outlined" density="compact" hide-details
+                    style="max-width: 160px" @update:model-value="onFilterChange" />
+            </div>
         </div>
 
         <v-divider />

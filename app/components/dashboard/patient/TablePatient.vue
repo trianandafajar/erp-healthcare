@@ -25,6 +25,8 @@ interface Patient {
 const { can } = usePermission()
 
 const search = ref('');
+const bloodTypeFilter = ref('all');
+const accountFilter = ref('all');
 const genderFilter = ref('all');
 const currentPage = ref(1);
 const itemsPerPage = 10;
@@ -49,21 +51,49 @@ const patients = computed<Patient[]>(() =>
 )
 
 const genderOptions = [
-    { label: 'All', value: 'all' },
+    { label: 'All Gender', value: 'all' },
     { label: 'Male', value: 'male' },
     { label: 'Female', value: 'female' },
 ]
 
+const bloodTypeOptions = [
+    { label: 'All Blood', value: 'all' },
+    { label: 'A', value: 'A' },
+    { label: 'B', value: 'B' },
+    { label: 'AB', value: 'AB' },
+    { label: 'O', value: 'O' },
+]
+
+const accountOptions = [
+    { label: 'All Account', value: 'all' },
+    { label: 'Registered', value: 'registered' },
+    { label: 'Walk-in', value: 'walkin' },
+]
+
 const filteredPatients = computed(() => {
     return patients.value.filter((p) => {
-        const matchGender = genderFilter.value === 'all' || p.gender === genderFilter.value
         const matchSearch =
             p.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
             p.medical_record_number.toLowerCase().includes(search.value.toLowerCase()) ||
             p.phone.toLowerCase().includes(search.value.toLowerCase())
-        return matchGender && matchSearch
+
+        const matchGender =
+            genderFilter.value === 'all' || p.gender === genderFilter.value
+
+        const matchBlood =
+            bloodTypeFilter.value === 'all' || p.blood_type === bloodTypeFilter.value
+
+        const matchAccount =
+            accountFilter.value === 'all' ||
+            (accountFilter.value === 'registered' ? p.has_account : !p.has_account)
+
+        return matchSearch && matchGender && matchBlood && matchAccount
     })
 })
+
+function onFilterChange() {
+    currentPage.value = 1
+}
 
 const paginatedPatients = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
@@ -98,10 +128,6 @@ function calculateAge(dateStr?: string) {
 }
 
 function onSearch() {
-    currentPage.value = 1;
-}
-
-function onGenderChange() {
     currentPage.value = 1;
 }
 
@@ -215,17 +241,23 @@ async function handleSubmit(payload: any) {
     </v-card-item>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+        <div class="d-flex justify-space-between align-center gap-3 px-4 py-3 flex-wrap">
             <v-text-field v-model="search" placeholder="Search by name, RM number, or phone..."
                 prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
-                style="max-width: 320px" @update:model-value="onSearch" />
+                style="max-width: 280px" @update:model-value="onSearch" />
+            <div class="d-flex justify-space-between align-center gap-3 px-4 py-3 flex-wrap">
+                <v-select v-model="genderFilter" :items="genderOptions" item-title="label" item-value="value"
+                    variant="outlined" density="compact" hide-details style="max-width: 150px"
+                    @update:model-value="onFilterChange" />
 
-            <v-btn-toggle v-model="genderFilter" density="compact" variant="tonal" divided mandatory color="primary"
-                class="flex-wrap" @update:model-value="onGenderChange">
-                <v-btn v-for="g in genderOptions" :key="g.value" :value="g.value" size="small">
-                    {{ g.label }}
-                </v-btn>
-            </v-btn-toggle>
+                <v-select v-model="bloodTypeFilter" :items="bloodTypeOptions" item-title="label" item-value="value"
+                    variant="outlined" density="compact" hide-details style="max-width: 140px"
+                    @update:model-value="onFilterChange" />
+
+                <v-select v-model="accountFilter" :items="accountOptions" item-title="label" item-value="value"
+                    variant="outlined" density="compact" hide-details style="max-width: 150px"
+                    @update:model-value="onFilterChange" />
+            </div>
         </div>
 
         <v-divider />
