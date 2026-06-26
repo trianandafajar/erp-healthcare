@@ -34,11 +34,13 @@ const props = defineProps<{
     appointment?: Appointment | null
     patients?: Patient[]
     loading: boolean
+    canCreatePatient?: boolean
 }>()
 
 const emit = defineEmits<{
     (e: 'submit', data: any): void
     (e: 'cancel'): void
+    (e: 'patientCreated', patient: any): void
 }>()
 
 function getNowDate(): string {
@@ -133,6 +135,7 @@ function openCreatePatient() {
 function onCreatedPatient(newPatient: any | null) {
     if (newPatient?.id) {
         form.value.patient_id = newPatient.id
+        emit('patientCreated', newPatient)
     }
     dialogCreatePatient.value = false
 }

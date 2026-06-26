@@ -39,6 +39,18 @@ export default defineEventHandler(async (event) => {
         await admin.from('profiles').update({ status }).eq('id', userId)
     }
 
+    let patientId = null
+    if (role === 'patient') {
+        const { data: patient } = await admin
+            .from('patients')
+            .select('id, medical_record_number')
+            .eq('profile_id', userId)
+            .single()
+
+        patientId = patient?.id ?? null
+    }
+
+
     await admin.rpc('log_activity', {
         p_actor_id: user?.id,
         p_action: 'create',
@@ -48,5 +60,13 @@ export default defineEventHandler(async (event) => {
         p_metadata: { after: { email, full_name, role, status } }
     })
 
-    return { user: data.user }
+    return {
+        user: {
+            ...data.user,
+            ...(patientId && {
+                id: patientId,
+                medical_record_number: patientId?.medical_record_number
+            })
+        }
+    }
 })

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import ApptModal from './ApptModal.vue'
 
@@ -34,7 +34,15 @@ const { data, pending, refresh } = await useFetch<{ appointments: any[] }>(
 
 const { data: patientData } = await useFetch('/api/patients')
 
-const patients = computed(() => patientData.value?.patients ?? [])
+const patients = ref<any[]>([])
+
+watch(
+    patientData,
+    (val) => {
+        patients.value = val?.patients ?? []
+    },
+    { immediate: true }
+)
 
 const appointments = computed<Appointment[]>(() =>
     data.value?.appointments ?? []
@@ -174,6 +182,33 @@ async function handleSubmit(payload: any) {
         loading.value = false
     }
 }
+
+async function handleCreatePatient(payload: { full_name: string; email: string }) {
+    try {
+        const res: any = await $fetch('/api/users', {
+            method: 'POST',
+            body: {
+                full_name: payload.full_name,
+                email: payload.email,
+                password: 'Password123',
+                role: 'patient'
+            }
+        })
+
+        const newPatient = {
+            id: res.user.id,
+            full_name: payload.full_name,
+            medical_record_number: res.user?.medical_record_number ?? ''
+        }
+
+        patients.value.unshift(newPatient)
+        notify('Patient account created successfully')
+        return newPatient
+    } catch (error: any) {
+        notify(error?.data?.message ?? 'Failed to create patient', 'error')
+        return null
+    }
+}
 </script>
 
 <template>
@@ -278,7 +313,8 @@ async function handleSubmit(payload: any) {
 
     <v-dialog v-model="dialog" max-width="480" persistent>
         <ApptModal :loading="actionLoading" :mode="modalMode" :appointment="selectedAppointment" :patients="patients"
-            :can-create-patient="can('user.create')" @submit="handleSubmit" @cancel="closeModal" />
+            :can-create-patient="can('user.create')" @submit="handleSubmit" @cancel="closeModal"
+            @patient-created="(p) => patients.unshift(p)" />
     </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" :timeout="3000">
