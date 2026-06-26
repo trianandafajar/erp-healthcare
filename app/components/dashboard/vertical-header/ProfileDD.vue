@@ -85,7 +85,9 @@ async function confirmLogout() {
         <template v-slot:prepend>
           <QuestionCircleOutlined :style="{ fontSize: '14px' }" class="mr-4" />
         </template>
-        <v-list-item-title class="text-h6">Support</v-list-item-title>
+        <NuxtLink to="/legal?page=help">
+          <v-list-item-title class="text-h6">Support</v-list-item-title>
+        </NuxtLink>
       </v-list-item>
 
       <v-divider color="error" />
