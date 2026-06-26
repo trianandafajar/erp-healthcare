@@ -28,7 +28,7 @@ interface Department {
 }
 
 const props = defineProps<{
-    mode: 'add' | 'edit' | 'delete'
+    mode: 'add' | 'delete'
     doctor?: Doctor | null
     availableUsers?: AvailableUser[]
     departments?: Department[]
@@ -196,23 +196,7 @@ async function submitCreateDepartment() {
 watch(
     () => props.doctor,
     (doctor) => {
-        if (doctor && props.mode === 'edit') {
-            form.value = {
-                id: doctor.id,
-                department_id: doctor.department?.id ?? null,
-                specialization: doctor.specialization ?? '',
-                str_number: doctor.str_number ?? '',
-                sip_number: doctor.sip_number ?? '',
-                phone: doctor.phone ?? '',
-                photo_url: doctor.photo_url ?? '',
-                biography: doctor.biography ?? '',
-                experience_years: doctor.experience_years ?? 0,
-                consultation_fee: doctor.consultation_fee ?? 0,
-                is_available: doctor.is_available ?? true,
-            }
-            photoPreview.value = doctor.photo_url ?? ''
-            photoFile.value = null
-        } else if (props.mode === 'add') {
+        if (props.mode === 'add') {
             form.value = {
                 id: '',
                 department_id: null,
@@ -240,12 +224,6 @@ const config = computed(() => ({
         icon: 'mdi-doctor',
         confirmColor: 'primary',
         confirmLabel: 'Create Doctor',
-    },
-    edit: {
-        title: 'Edit Doctor',
-        icon: 'mdi-pencil-outline',
-        confirmColor: 'primary',
-        confirmLabel: 'Save Changes',
     },
     delete: {
         title: 'Remove Doctor',

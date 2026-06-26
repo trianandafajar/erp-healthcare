@@ -110,7 +110,7 @@ function onSearch() {
 }
 
 const dialog = ref(false)
-const modalMode = ref<'add' | 'edit' | 'delete'>('add')
+const modalMode = ref<'add' | 'delete'>('add')
 const selectedDoctor = ref<Doctor | null>(null)
 const loading = ref(false)
 
@@ -127,12 +127,6 @@ function notify(msg: string, color = 'success') {
 function openAdd() {
     modalMode.value = 'add'
     selectedDoctor.value = null
-    dialog.value = true
-}
-
-function openEdit(doctor: Doctor) {
-    modalMode.value = 'edit'
-    selectedDoctor.value = doctor
     dialog.value = true
 }
 
@@ -230,24 +224,6 @@ async function handleSubmit(payload: any) {
                 }
             })
             notify('Doctor created successfully')
-        } else if (modalMode.value === 'edit') {
-            await $fetch('/api/doctors', {
-                method: 'PUT',
-                body: {
-                    id: payload.id,
-                    department_id: payload.department_id,
-                    specialization: payload.specialization,
-                    str_number: payload.str_number,
-                    sip_number: payload.sip_number,
-                    phone: payload.phone,
-                    photo_url: payload.photo_url,
-                    biography: payload.biography,
-                    experience_years: payload.experience_years,
-                    consultation_fee: payload.consultation_fee,
-                    is_available: payload.is_available,
-                }
-            })
-            notify('Doctor updated successfully')
         } else if (modalMode.value === 'delete') {
             await $fetch('/api/doctors', {
                 method: 'DELETE',
@@ -264,6 +240,9 @@ async function handleSubmit(payload: any) {
     } finally {
         loading.value = false
     }
+}
+function openView(doctor: Doctor) {
+    navigateTo(`/doctors/${doctor.id}`)
 }
 </script>
 
@@ -350,8 +329,8 @@ async function handleSubmit(payload: any) {
                         </v-chip>
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn v-if="can('doctor.edit')" icon="mdi-pencil-outline" variant="text" size="small"
-                            color="secondary" density="comfortable" @click="openEdit(doctor)" />
+                        <v-btn @click="openView(doctor)" icon="mdi-eye-outline" variant="text" size="small"
+                            color="primary" density="comfortable" />
                         <v-btn v-if="can('doctor.delete')" icon="mdi-delete-outline" variant="text" size="small"
                             color="error" density="comfortable" @click="openDelete(doctor)" />
                     </td>
