@@ -4,9 +4,9 @@ import { shallowRef } from 'vue'
 const year = new Date().getFullYear()
 
 const footerLink = shallowRef([
-    { title: 'Terms and Conditions' },
-    { title: 'Privacy Policy' },
-    { title: 'CA Privacy Notice' }
+    { title: 'About us', to: '/legal?page=about' },
+    { title: 'Privacy', to: '/legal?page=privacy' },
+    { title: 'Terms', to: '/legal?page=terms' },
 ])
 </script>
 
@@ -17,15 +17,14 @@ const footerLink = shallowRef([
                 <p class="text-subtitle-2 text-lightText mb-md-0 mb-4">
                     © {{ year }} This site is protected by
                     <span class="text-primary">Privacy Policy</span>. Distributed by
-                    <a href="#" target="_blank" rel="noopener noreferrer"
-                        class="cursor-pointer text-primary">HealthData</a>
+                    <span rel="noopener noreferrer" class="text-primary">HealthData</span>
                 </p>
             </v-col>
             <v-col class="d-flex flex-md-row flex-column justify-md-end align-center" cols="12" md="6">
-                <a v-for="(item, i) in footerLink" :key="i"
-                    class="cursor-pointer mx-md-3 mx-2 mb-md-0 mb-2 text-subtitle-2 text-lightText" target="_blank">
+                <NuxtLink v-for="(item, i) in footerLink" :key="i" :to="item.to"
+                    class="cursor-pointer mx-md-3 mx-2 mb-md-0 mb-2 text-subtitle-2 text-lightText">
                     {{ item.title }}
-                </a>
+                </NuxtLink>
             </v-col>
         </v-row>
     </v-footer>
