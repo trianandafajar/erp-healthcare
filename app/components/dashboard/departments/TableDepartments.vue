@@ -60,7 +60,7 @@ function onSearch() {
 }
 
 const dialog = ref(false)
-const modalMode = ref<'add' | 'edit' | 'delete'>('add')
+const modalMode = ref<'add' | 'delete'>('add')
 const selectedDepartment = ref<Department | null>(null)
 const loading = ref(false)
 const actionLoading = computed(() => loading.value || pending.value)
@@ -83,13 +83,6 @@ function openAdd() {
 
 function onModalCancel() {
     if (!loading.value) closeModal()
-}
-
-
-function openEdit(department: Department) {
-    modalMode.value = 'edit'
-    selectedDepartment.value = department
-    dialog.value = true
 }
 
 function openDelete(department: Department) {
@@ -116,17 +109,6 @@ async function handleSubmit(payload: any) {
                 }
             })
             notify('Department created successfully')
-        } else if (modalMode.value === 'edit') {
-            await $fetch('/api/departments', {
-                method: 'PUT',
-                body: {
-                    id: payload.id,
-                    name: payload.name,
-                    code: payload.code,
-                    description: payload.description
-                }
-            })
-            notify('Department updated successfully')
         } else if (modalMode.value === 'delete') {
             await $fetch('/api/departments', {
                 method: 'DELETE',
@@ -142,6 +124,9 @@ async function handleSubmit(payload: any) {
     } finally {
         loading.value = false
     }
+}
+function openView(department: Department) {
+    navigateTo(`/departments/${department.id}`)
 }
 </script>
 
@@ -221,8 +206,8 @@ async function handleSubmit(payload: any) {
                         {{ formatDate(department.created) }}
                     </td>
                     <td class="py-3 text-right">
-                        <v-btn v-if="can('department.edit')" icon="mdi-pencil-outline" variant="text" size="small"
-                            color="secondary" density="comfortable" @click="openEdit(department)" />
+                        <v-btn @click="openView(department)" icon="mdi-eye-outline" variant="text" size="small"
+                            color="primary" density="comfortable" />
                         <v-btn v-if="can('department.delete')" icon="mdi-delete-outline" variant="text" size="small"
                             color="error" density="comfortable" @click="openDelete(department)" />
                     </td>

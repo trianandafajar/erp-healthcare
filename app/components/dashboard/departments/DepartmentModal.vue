@@ -9,7 +9,7 @@ interface Department {
 }
 
 const props = defineProps<{
-    mode: 'add' | 'edit' | 'delete'
+    mode: 'add' | 'delete'
     department?: Department | null
     loading?: boolean
 }>()
@@ -28,13 +28,7 @@ const form = ref({
 watch(
     () => props.department,
     (department) => {
-        if (department && props.mode === 'edit') {
-            form.value = {
-                name: department.name === '-' ? '' : department.name,
-                code: department.code === '-' ? '' : department.code,
-                description: department.description === '-' ? '' : department.description,
-            }
-        } else if (props.mode === 'add') {
+        if (props.mode === 'add') {
             form.value = { name: '', code: '', description: '' }
         }
     },
@@ -47,12 +41,6 @@ const config = computed(() => ({
         icon: 'mdi-hospital-building',
         confirmColor: 'primary',
         confirmLabel: 'Create Department',
-    },
-    edit: {
-        title: 'Edit Department',
-        icon: 'mdi-pencil-outline',
-        confirmColor: 'primary',
-        confirmLabel: 'Save Changes',
     },
     delete: {
         title: 'Delete Department',
