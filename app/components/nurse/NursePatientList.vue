@@ -86,6 +86,10 @@ function onSearch() {
 function onGenderChange() {
     currentPage.value = 1
 }
+
+function openView(patient: NursePatient) {
+    navigateTo(`/nurse/patients/${patient.id}`)
+}
 </script>
 
 <template>
@@ -101,33 +105,18 @@ function onGenderChange() {
 
     <v-card elevation="0">
         <div class="d-flex align-center p-4 ga-3 flex-wrap justify-space-between">
-            <v-text-field
-                v-model="search"
-                density="comfortable"
-                hide-details
-                placeholder="Search by name, MRN, or phone..."
-                prepend-inner-icon="mdi-magnify"
-                variant="outlined"
-                clearable
-                style="min-width: 340px; max-width: 420px; flex: 1 1 360px"
-                @update:model-value="onSearch"
-            />
+            <v-text-field v-model="search" density="comfortable" hide-details
+                placeholder="Search by name, MRN, or phone..." prepend-inner-icon="mdi-magnify" variant="outlined"
+                clearable style="min-width: 340px; max-width: 420px; flex: 1 1 360px" @update:model-value="onSearch" />
             <div class="d-flex align-center ga-2 flex-wrap">
-                <v-btn-toggle
-                    v-model="genderFilter"
-                    density="comfortable"
-                    variant="tonal"
-                    divided
-                    mandatory
-                    color="primary"
-                    class="flex-wrap"
-                    @update:model-value="onGenderChange"
-                >
+                <v-btn-toggle v-model="genderFilter" density="comfortable" variant="tonal" divided mandatory
+                    color="primary" class="flex-wrap" @update:model-value="onGenderChange">
                     <v-btn v-for="option in genderOptions" :key="option.value" :value="option.value" size="default">
                         {{ option.label }}
                     </v-btn>
                 </v-btn-toggle>
-                <v-btn icon="mdi-refresh" variant="text" color="primary" size="default" :loading="pending" @click="refresh" />
+                <v-btn icon="mdi-refresh" variant="text" color="primary" size="default" :loading="pending"
+                    @click="refresh" />
             </div>
         </div>
 
@@ -141,16 +130,17 @@ function onGenderChange() {
                     <th class="text-left text-caption font-weight-bold text-uppercase">Blood Type</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
                     <th class="text-right text-caption font-weight-bold text-uppercase">Registered</th>
+                    <th class="text-right text-caption font-weight-bold text-uppercase">Action</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-if="pending">
-                    <td colspan="7" class="text-center py-8">
+                    <td colspan="8" class="text-center py-8">
                         <v-progress-circular indeterminate color="primary" />
                     </td>
                 </tr>
                 <tr v-else-if="paginatedPatients.length === 0">
-                    <td colspan="7" class="text-center py-8 text-medium-emphasis">
+                    <td colspan="8" class="text-center py-8 text-medium-emphasis">
                         No patients found
                     </td>
                 </tr>
@@ -194,6 +184,10 @@ function onGenderChange() {
                     </td>
                     <td class="py-3 text-right text-caption text-medium-emphasis">
                         {{ formatDate(patient.created_at) }}
+                    </td>
+                    <td class="py-3 text-right">
+                        <v-btn @click="openView(patient)" icon="mdi-eye-outline" variant="text" size="x-small"
+                            color="primary" />
                     </td>
                 </tr>
             </tbody>
