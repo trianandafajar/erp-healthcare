@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-    layout: 'default',
+    layout: 'nurse',
     middleware: ['auth', 'permission'],
     permissions: ['patient.view'],
 })
