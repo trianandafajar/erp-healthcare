@@ -112,20 +112,20 @@
   .scrollnavbar {
     .v-list-item {
       .v-list-item__prepend {
-        margin-left: 0 !important;
-        width: 24px !important;
-        min-width: 24px !important;
+        margin-left: 12 !important;
+        // width: 24px !important;
+        // min-width: 24px !important;
         .anticon {
           svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
           }
         }
       }
     }
     .v-list-group__items .v-list-item,
     .v-list-item {
-      padding-inline-start: calc(8px + var(--indent-padding) / 2) !important;
+      padding-inline-start: calc(18px + var(--indent-padding) / 2) !important;
     }
     .ExtraBox {
       display: none;
