@@ -8,23 +8,30 @@ definePageMeta({
 const route = useRoute()
 const id = route.params.id as string
 
-const { data, pending } = await useFetch(`/api/doctors/${id}`)
+const { data, pending, refresh } = await useFetch(`/api/doctors/${id}`, {
+    key: `doctor-${id}`,
+})
+
+const { data: appointmentsData, pending: apptPending, refresh: refreshAppt } = await useFetch(`/api/doctors/${id}/appointments`, {
+    key: `doctor-${id}-appointments`,
+    query: { limit: 50 },
+})
+const { data: patientsData, pending: patientPending, refresh: refreshPatients } = await useFetch(`/api/doctors/${id}/patients`, {
+    key: `doctor-${id}-patients`,
+    query: { limit: 50 },
+})
 
 const doctor = computed(() => data.value)
 const profile = computed(() => doctor.value?.profiles)
 const department = computed(() => doctor.value?.departments)
 const stats = computed(() => doctor.value?.stats)
 const schedules = computed(() => doctor.value?.active_schedules ?? [])
-
-const { data: appointmentsData, pending: apptPending } = await useFetch(`/api/doctors/${id}/appointments`, {
-    query: { limit: 50 }
-})
-const { data: patientsData, pending: patientPending } = await useFetch(`/api/doctors/${id}/patients`, {
-    query: { limit: 50 }
-})
-
 const appointments = computed(() => appointmentsData.value?.data ?? [])
 const patients = computed(() => patientsData.value?.data ?? [])
+
+onActivated(async () => {
+    await Promise.all([refresh(), refreshAppt(), refreshPatients()])
+})
 
 const activeTab = ref('info')
 
