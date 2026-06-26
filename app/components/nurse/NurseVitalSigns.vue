@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import CreatePatientDialog from '../doctor/appointment/CreatePatientDialog.vue'
+
 type NursePatientOption = {
     id: string
     full_name: string
@@ -21,7 +23,7 @@ type NurseVitalRecord = {
 
 const { can } = usePermission()
 
-const { data: patientData, pending: patientPending } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
+const { data: patientData, pending: patientPending, refresh: refreshPatients } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
 const { data: vitalData, pending, refresh } = useLazyFetch<{ vitals: NurseVitalRecord[] }>('/api/nurse/vitals')
 
 const patientOptions = computed(() =>
@@ -41,6 +43,7 @@ const dialog = ref(false)
 const editingVitalId = ref<string | null>(null)
 const selectedVital = ref<NurseVitalRecord | null>(null)
 const deleteDialog = ref(false)
+const dialogCreatePatient = ref(false)
 
 const historyPatientOptions = computed(() => [
     { title: 'All patients', value: 'all' },
@@ -111,6 +114,18 @@ const filteredVitals = computed(() => {
         return matchPatient && matchSingleDay && matchRange && matchSearch
     })
 })
+
+function openCreatePatient() {
+    dialogCreatePatient.value = true
+}
+
+function onCreatedPatient(newPatient: any | null) {
+    if (newPatient?.id) {
+        form.patientId = newPatient.id
+        refreshPatients()
+    }
+    dialogCreatePatient.value = false
+}
 
 function openAddDialog() {
     editingVitalId.value = null
@@ -332,61 +347,113 @@ function formatDate(dateStr: string) {
         </v-table>
     </v-card>
 
-    <v-dialog v-model="dialog" max-width="640">
-        <v-card>
-            <v-card-title class="text-h6">
-                {{ editingVitalId ? 'Edit Vital Signs' : 'Add Vital Signs' }}
+    <v-dialog v-model="dialog" max-width="640" persistent>
+        <v-card rounded="lg">
+            <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
+                <div class="d-flex align-center ga-2">
+                    <v-icon :icon="editingVitalId ? 'mdi-heart-pulse' : 'mdi-plus-circle-outline'" size="20" />
+                    <span class="text-h6 font-weight-bold">
+                        {{ editingVitalId ? 'Edit Vital Signs' : 'Add Vital Signs' }}
+                    </span>
+                </div>
+                <v-btn icon="mdi-close" variant="text" density="compact" :disabled="submitting"
+                    @click="dialog = false" />
             </v-card-title>
-            <v-card-text>
-                <v-form class="d-flex flex-column ga-4" @submit.prevent="submitVital">
-                    <v-autocomplete v-model="form.patientId" :items="patientOptions" :loading="patientPending"
-                        item-title="title" item-value="value" label="Patient" placeholder="Search patient..."
-                        variant="outlined" density="comfortable" clearable />
-                    <v-text-field v-model="form.bloodPressure" label="Blood pressure" placeholder="120/80"
-                        variant="outlined" density="comfortable" />
-                    <v-row dense>
-                        <v-col cols="12" md="6">
-                            <v-text-field v-model="form.temperature" label="Temperature" placeholder="36.8" suffix="°C"
-                                variant="outlined" density="comfortable" />
-                        </v-col>
-                        <v-col cols="12" md="6">
-                            <v-text-field v-model="form.pulse" label="Pulse" placeholder="78" suffix="bpm"
-                                variant="outlined" density="comfortable" />
-                        </v-col>
-                    </v-row>
-                    <v-row dense>
-                        <v-col cols="12" md="6">
-                            <v-text-field v-model="form.weight" label="Weight" placeholder="60" suffix="kg"
-                                variant="outlined" density="comfortable" />
-                        </v-col>
-                        <v-col cols="12" md="6">
-                            <v-text-field v-model="form.height" label="Height" placeholder="165" suffix="cm"
-                                variant="outlined" density="comfortable" />
-                        </v-col>
-                    </v-row>
-                    <v-textarea v-model="form.notes" label="Short note" rows="3" variant="outlined"
-                        density="comfortable" />
-                    <div class="d-flex ga-2 justify-end">
-                        <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                        <v-btn type="submit" color="primary" variant="flat" :loading="submitting">
-                            {{ editingVitalId ? 'Update' : 'Save' }}
-                        </v-btn>
-                    </div>
-                </v-form>
+
+            <v-divider />
+
+            <v-card-text class="pa-4">
+                <v-row dense>
+                    <!-- Patient -->
+                    <v-col cols="12">
+                        <v-label class="text-caption font-weight-medium mb-1">Patient</v-label>
+                        <div class="d-flex ga-2 align-center">
+                            <v-autocomplete v-model="form.patientId" :items="patientOptions" :loading="patientPending"
+                                item-title="title" item-value="value" placeholder="Search patient..." variant="outlined"
+                                density="compact" hide-details clearable class="flex-grow-1" />
+
+                            <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus" density="comfortable"
+                                :disabled="patientPending" height="40" @click="openCreatePatient">
+                                Create Patient
+                            </v-btn>
+                        </div>
+                    </v-col>
+
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Blood Pressure</v-label>
+                        <v-text-field v-model="form.bloodPressure" placeholder="120/80" suffix="mmHg" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+
+                    <v-col cols="12" md="6" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Temperature</v-label>
+                        <v-text-field v-model="form.temperature" placeholder="36.8" suffix="°C" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+                    <v-col cols="12" md="6" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Pulse</v-label>
+                        <v-text-field v-model="form.pulse" placeholder="78" suffix="bpm" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+
+                    <v-col cols="12" md="6" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Weight</v-label>
+                        <v-text-field v-model="form.weight" placeholder="60" suffix="kg" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+                    <v-col cols="12" md="6" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Height</v-label>
+                        <v-text-field v-model="form.height" placeholder="165" suffix="cm" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Notes</v-label>
+                        <v-textarea v-model="form.notes" placeholder="Additional notes..." rows="3" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+                </v-row>
             </v-card-text>
+
+            <v-divider />
+
+            <v-card-actions class="pa-4">
+                <v-spacer />
+                <v-btn variant="tonal" color="secondary" :disabled="submitting" @click="dialog = false">
+                    Cancel
+                </v-btn>
+                <v-btn color="primary" variant="flat" :loading="submitting" :disabled="!form.patientId || submitting"
+                    @click="submitVital">
+                    {{ editingVitalId ? 'Update' : 'Save' }}
+                </v-btn>
+            </v-card-actions>
         </v-card>
     </v-dialog>
 
-    <v-dialog v-model="deleteDialog" max-width="420">
-        <v-card>
-            <v-card-title class="text-h6">Delete vital signs?</v-card-title>
-            <v-card-text>
-                This record will be removed permanently.
+    <v-dialog v-model="deleteDialog" max-width="420" persistent>
+        <v-card rounded="lg">
+            <v-card-text class="pa-6 text-center">
+                <v-avatar color="error" variant="tonal" size="56" class="mb-4">
+                    <v-icon icon="mdi-delete-outline" size="28" />
+                </v-avatar>
+                <div class="text-body-1 font-weight-medium mb-2">Delete vital signs?</div>
+                <div class="text-body-2 text-medium-emphasis">
+                    This record for <strong>{{ selectedVital?.patient_name }}</strong> will be permanently removed.
+                </div>
             </v-card-text>
-            <v-card-actions class="justify-end">
-                <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
+
+            <v-divider />
+
+            <v-card-actions class="pa-4">
+                <v-spacer />
+                <v-btn variant="tonal" color="secondary" :disabled="submitting"
+                    @click="deleteDialog = false">Cancel</v-btn>
                 <v-btn color="error" variant="flat" :loading="submitting" @click="deleteSelectedVital">Delete</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <CreatePatientDialog v-model="dialogCreatePatient" @created="onCreatedPatient"
+        @cancel="dialogCreatePatient = false" />
 </template>

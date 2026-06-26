@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
+import CreatePatientDialog from '../doctor/appointment/CreatePatientDialog.vue'
 
 type NursePatientOption = {
     id: string
@@ -28,7 +29,7 @@ type CalendarView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'
 
 const { can } = usePermission()
 
-const { data: patientData, pending: patientPending } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
+const { data: patientData, pending: patientPending, refresh: refreshPatients } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
 const { data: procedureData, pending, refresh } = useLazyFetch<{ procedures: NurseProcedure[] }>('/api/nurse/procedures')
 
 const patientOptions = computed(() =>
@@ -56,6 +57,7 @@ const itemsPerPage = 8
 const search = ref('')
 const categoryFilter = ref('all')
 const statusFilter = ref('all')
+const dialogCreatePatient = ref(false)
 
 const categoryOptions = [
     { title: 'All categories', value: 'all' },
@@ -190,6 +192,18 @@ function openCreateDialog(dateInput?: string) {
         form.endAt = toDatetimeLocal(new Date(new Date(dateInput).getTime() + 60 * 60 * 1000).toISOString())
     }
     dialog.value = true
+}
+
+function openCreatePatient() {
+    dialogCreatePatient.value = true
+}
+
+function onCreatedPatient(newPatient: any | null) {
+    if (newPatient?.id) {
+        form.patientId = newPatient.id
+        refreshPatients()
+    }
+    dialogCreatePatient.value = false
 }
 
 function openEditDialog(procedure: NurseProcedure) {
@@ -589,9 +603,17 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
             </v-card-title>
             <v-card-text>
                 <v-form class="d-flex flex-column ga-4" @submit.prevent="submitProcedure">
-                    <v-autocomplete v-model="form.patientId" :items="patientOptions" :loading="patientPending"
-                        item-title="title" item-value="value" label="Patient" placeholder="Search patient..."
-                        variant="outlined" density="comfortable" clearable />
+                    <div class="d-flex ga-2">
+                        <v-autocomplete v-model="form.patientId" label="Patient" :items="patientOptions"
+                            :loading="patientPending" item-title="title" item-value="value"
+                            placeholder="Search patient..." variant="outlined" density="compact" hide-details clearable
+                            class="flex-grow-1" />
+
+                        <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus" density="comfortable"
+                            :disabled="patientPending" height="40" @click="openCreatePatient">
+                            Create Patient
+                        </v-btn>
+                    </div>
                     <v-text-field v-model="form.procedureName" label="Procedure" placeholder="Wound dressing change"
                         variant="outlined" density="comfortable" />
                     <v-row dense>
@@ -637,6 +659,9 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <CreatePatientDialog v-model="dialogCreatePatient" @created="onCreatedPatient"
+        @cancel="dialogCreatePatient = false" />
 </template>
 
 <style scoped>

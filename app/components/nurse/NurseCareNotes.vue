@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CreatePatientDialog from '../doctor/appointment/CreatePatientDialog.vue'
 type NursePatientOption = {
     id: string
     full_name: string
@@ -23,7 +24,7 @@ const router = useRouter()
 
 const { can } = usePermission()
 
-const { data: patientData, pending: patientPending } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
+const { data: patientData, pending: patientPending, refresh: refreshPatients } = useLazyFetch<{ patients: NursePatientOption[] }>('/api/nurse/patients')
 const { data: noteData, pending, refresh } = useLazyFetch<{ notes: NurseCareNote[] }>('/api/nurse/care-notes')
 
 const patientOptions = computed(() =>
@@ -43,6 +44,7 @@ const editingNoteId = ref<string | null>(null)
 const selectedNote = ref<NurseCareNote | null>(null)
 const deleteDialog = ref(false)
 const submitting = ref(false)
+const dialogCreatePatient = ref(false)
 
 const categoryOptions = [
     { title: 'All categories', value: 'all' },
@@ -133,6 +135,18 @@ onMounted(() => {
         })
     }
 })
+
+function openCreatePatient() {
+    dialogCreatePatient.value = true
+}
+
+function onCreatedPatient(newPatient: any | null) {
+    if (newPatient?.id) {
+        form.patientId = newPatient.id
+        refreshPatients()
+    }
+    dialogCreatePatient.value = false
+}
 
 function openAddDialog() {
     editingNoteId.value = null
@@ -371,9 +385,18 @@ function closeDialog() {
             </v-card-title>
             <v-card-text>
                 <v-form class="d-flex flex-column ga-4" @submit.prevent="submitNote">
-                    <v-autocomplete v-model="form.patientId" :items="patientOptions" :loading="patientPending"
-                        item-title="title" item-value="value" label="Patient" placeholder="Search patient..."
-                        variant="outlined" density="comfortable" clearable />
+                    <div class="d-flex ga-2">
+                        <v-autocomplete v-model="form.patientId" label="Patient" :items="patientOptions"
+                            :loading="patientPending" item-title="title" item-value="value"
+                            placeholder="Search patient..." variant="outlined" density="compact" hide-details clearable
+                            class="flex-grow-1" />
+
+                        <v-btn color="primary" variant="tonal" prepend-icon="mdi-account-plus" density="comfortable"
+                            :disabled="patientPending" height="40" @click="openCreatePatient">
+                            Create Patient
+                        </v-btn>
+                    </div>
+
                     <v-select v-model="form.category" :items="categoryOptions" item-title="title" item-value="value"
                         label="Category" variant="outlined" density="comfortable" />
                     <v-text-field v-model="form.authorName" label="Note author" variant="outlined"
@@ -401,6 +424,9 @@ function closeDialog() {
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <CreatePatientDialog v-model="dialogCreatePatient" @created="onCreatedPatient"
+        @cancel="dialogCreatePatient = false" />
 </template>
 
 <style scoped>
