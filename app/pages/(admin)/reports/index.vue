@@ -20,87 +20,112 @@ const isLoading = computed(() =>
 const now = new Date()
 const currentYear = now.getFullYear()
 const currentMonth = now.getMonth()
-const monthStart = new Date(currentYear, currentMonth, 1)
+
+const filterMode = ref<'month' | 'range'>('month')
+const filterYear = ref(currentYear)
+const filterMonth = ref(currentMonth)
+const filterDateFrom = ref('')
+const filterDateTo = ref('')
+
+const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i)
+const monthOptions = [
+    { label: 'January', value: 0 }, { label: 'February', value: 1 },
+    { label: 'March', value: 2 }, { label: 'April', value: 3 },
+    { label: 'May', value: 4 }, { label: 'June', value: 5 },
+    { label: 'July', value: 6 }, { label: 'August', value: 7 },
+    { label: 'September', value: 8 }, { label: 'October', value: 9 },
+    { label: 'November', value: 10 }, { label: 'December', value: 11 },
+]
+
+const activeRange = computed<{ from: Date; to: Date }>(() => {
+    if (filterMode.value === 'range' && filterDateFrom.value && filterDateTo.value) {
+        return {
+            from: new Date(filterDateFrom.value),
+            to: new Date(filterDateTo.value + 'T23:59:59'),
+        }
+    }
+    const from = new Date(filterYear.value, filterMonth.value, 1)
+    const to = new Date(filterYear.value, filterMonth.value + 1, 0, 23, 59, 59)
+    return { from, to }
+})
+
+const activePeriodLabel = computed(() => {
+    if (filterMode.value === 'range' && filterDateFrom.value && filterDateTo.value) {
+        return `${filterDateFrom.value} – ${filterDateTo.value}`
+    }
+    return new Date(filterYear.value, filterMonth.value, 1)
+        .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+})
+
+function inRange(dateStr: string) {
+    if (!dateStr) return false
+    const d = new Date(dateStr)
+    return d >= activeRange.value.from && d <= activeRange.value.to
+}
+
+function resetFilters() {
+    filterMode.value = 'month'
+    filterYear.value = currentYear
+    filterMonth.value = currentMonth
+    filterDateFrom.value = ''
+    filterDateTo.value = ''
+}
 
 const summaryCards = computed(() => {
     const allAppointments = appointmentsData.value?.appointments ?? []
     const allReferrals = referralsData.value?.referrals ?? []
     const allRecords = medicalRecordsData.value?.medical_records ?? []
 
-    const visitsThisMonth = allAppointments.filter((a: any) => {
-        const d = new Date(a.appointment_date)
-        return d >= monthStart && d.getFullYear() === currentYear
-    })
+    const visitsInRange = allAppointments.filter((a: any) => inRange(a.appointment_date))
+    const newPatientIds = new Set(visitsInRange.map((a: any) => a.patient?.id).filter(Boolean))
+    const referralsInRange = allReferrals.filter((r: any) => inRange(r.created_at))
+    const recordsInRange = allRecords.filter((r: any) => inRange(r.created_at))
 
-    const newPatientIds = new Set(
-        visitsThisMonth.map((a: any) => a.patient?.id).filter(Boolean)
-    )
+    const rangeMs = activeRange.value.to.getTime() - activeRange.value.from.getTime()
+    const prevTo = new Date(activeRange.value.from.getTime() - 1)
+    const prevFrom = new Date(prevTo.getTime() - rangeMs)
 
-    const referralsThisMonth = allReferrals.filter((r: any) => {
-        const d = new Date(r.created_at)
-        return d >= monthStart && d.getFullYear() === currentYear
-    })
+    const inPrev = (dateStr: string) => {
+        const d = new Date(dateStr)
+        return d >= prevFrom && d <= prevTo
+    }
 
-    const prescriptionsThisMonth = allRecords.filter((r: any) => {
-        const d = new Date(r.created_at)
-        return d >= monthStart && d.getFullYear() === currentYear
-    })
-
-    const prevMonthStart = new Date(currentYear, currentMonth - 1, 1)
-    const prevMonthEnd = new Date(currentYear, currentMonth, 0)
-    const visitsPrevMonth = allAppointments.filter((a: any) => {
-        const d = new Date(a.appointment_date)
-        return d >= prevMonthStart && d <= prevMonthEnd
-    })
-    const referralsPrevMonth = allReferrals.filter((r: any) => {
-        const d = new Date(r.created_at)
-        return d >= prevMonthStart && d <= prevMonthEnd
-    })
+    const visitsPrev = allAppointments.filter((a: any) => inPrev(a.appointment_date)).length
+    const referralsPrev = allReferrals.filter((r: any) => inPrev(r.created_at)).length
 
     const calcTrend = (current: number, prev: number) => {
         if (prev === 0) return { text: '+100%', up: true }
         const pct = ((current - prev) / prev) * 100
-        return {
-            text: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`,
-            up: pct >= 0
-        }
+        return { text: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`, up: pct >= 0 }
     }
 
-    const visitsTrend = calcTrend(visitsThisMonth.length, visitsPrevMonth.length)
-    const referralsTrend = calcTrend(referralsThisMonth.length, referralsPrevMonth.length)
+    const visitsTrend = calcTrend(visitsInRange.length, visitsPrev)
+    const referralsTrend = calcTrend(referralsInRange.length, referralsPrev)
 
     return [
         {
-            label: 'Total Visits (This Month)',
-            value: visitsThisMonth.length.toString(),
-            icon: 'mdi-calendar-check',
-            color: 'primary',
-            trend: visitsTrend.text,
-            trendUp: visitsTrend.up
+            label: 'Total Visits',
+            value: visitsInRange.length.toString(),
+            icon: 'mdi-calendar-check', color: 'primary',
+            trend: visitsTrend.text, trendUp: visitsTrend.up,
         },
         {
             label: 'New Patients',
             value: newPatientIds.size.toString(),
-            icon: 'mdi-account-plus-outline',
-            color: 'success',
-            trend: '—',
-            trendUp: true
+            icon: 'mdi-account-plus-outline', color: 'success',
+            trend: '—', trendUp: true,
         },
         {
             label: 'Referrals Made',
-            value: referralsThisMonth.length.toString(),
-            icon: 'mdi-share-variant-outline',
-            color: 'secondary',
-            trend: referralsTrend.text,
-            trendUp: referralsTrend.up
+            value: referralsInRange.length.toString(),
+            icon: 'mdi-share-variant-outline', color: 'secondary',
+            trend: referralsTrend.text, trendUp: referralsTrend.up,
         },
         {
-            label: 'Medical Records (This Month)',
-            value: prescriptionsThisMonth.length.toString(),
-            icon: 'mdi-file-document-outline',
-            color: 'warning',
-            trend: '—',
-            trendUp: true
+            label: 'Medical Records',
+            value: recordsInRange.length.toString(),
+            icon: 'mdi-file-document-outline', color: 'warning',
+            trend: '—', trendUp: true,
         },
     ]
 })
@@ -120,52 +145,40 @@ const visitsChartOptions = computed(() => ({
 
 const visitsChartSeries = computed(() => [{ name: 'Visits', data: visitsByMonth.value }])
 
-const departmentChartOptions = computed(() => {
-    const deptLoad = computedDeptLoad.value
-    return {
-        chart: { type: 'donut', fontFamily: 'inherit' },
-        labels: deptLoad.map((d: any) => d.name),
-        colors: ['#1677ff', '#52c41a', '#722ed1', '#13c2c2', '#faad14', '#ff4d4f', '#fa8c16'],
-        legend: { position: 'bottom' },
-        dataLabels: { enabled: true, formatter: (val: number) => `${val.toFixed(0)}%` },
-        tooltip: { theme: 'light' },
-        noData: { text: 'No data available' },
-    }
-})
-
 const computedDeptLoad = computed(() => {
     const allAppointments = appointmentsData.value?.appointments ?? []
-    const deptList = departmentsData.value?.departments ?? []
-
-    if (!allAppointments.length || !deptList.length) return []
-
+    const filtered = allAppointments.filter((a: any) => inRange(a.appointment_date))
     const deptCount: Record<string, { name: string; count: number }> = {}
-
-    for (const appt of allAppointments) {
+    for (const appt of filtered) {
         const deptName = appt.department?.name ?? appt.doctor?.department?.[0]?.name
         if (!deptName) continue
         if (!deptCount[deptName]) deptCount[deptName] = { name: deptName, count: 0 }
         deptCount[deptName].count++
     }
-
-    return Object.values(deptCount)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 7)
+    return Object.values(deptCount).sort((a, b) => b.count - a.count).slice(0, 7)
 })
+
+const departmentChartOptions = computed(() => ({
+    chart: { type: 'donut', fontFamily: 'inherit' },
+    labels: computedDeptLoad.value.map((d: any) => d.name),
+    colors: ['#1677ff', '#52c41a', '#722ed1', '#13c2c2', '#faad14', '#ff4d4f', '#fa8c16'],
+    legend: { position: 'bottom' },
+    dataLabels: { enabled: true, formatter: (val: number) => `${val.toFixed(0)}%` },
+    tooltip: { theme: 'light' },
+    noData: { text: 'No data available' },
+}))
 
 const departmentChartSeries = computed(() => computedDeptLoad.value.map((d: any) => d.count))
 
 const topDiagnoses = computed(() => {
-    const records = medicalRecordsData.value?.medical_records ?? []
+    const records = (medicalRecordsData.value?.medical_records ?? [])
+        .filter((r: any) => inRange(r.created_at))
     const diagCount: Record<string, number> = {}
-
     for (const rec of records) {
-        const diag = rec.diagnosis
-        if (!diag) continue
-        const key = diag.trim()
+        const key = rec.diagnosis?.trim()
+        if (!key) continue
         diagCount[key] = (diagCount[key] ?? 0) + 1
     }
-
     return Object.entries(diagCount)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
@@ -173,20 +186,22 @@ const topDiagnoses = computed(() => {
 })
 
 const reportTableHeaders = ['Report', 'Period', 'Generated', 'Format']
-const currentMonthLabel = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 const todayLabel = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 
 const availableReports = computed(() => {
-    const totalVisits = (appointmentsData.value?.appointments ?? []).length
-    const totalReferrals = (referralsData.value?.referrals ?? []).length
-    const totalRecords = (medicalRecordsData.value?.medical_records ?? []).length
+    const totalVisits = (appointmentsData.value?.appointments ?? [])
+        .filter((a: any) => inRange(a.appointment_date)).length
+    const totalReferrals = (referralsData.value?.referrals ?? [])
+        .filter((r: any) => inRange(r.created_at)).length
+    const totalRecords = (medicalRecordsData.value?.medical_records ?? [])
+        .filter((r: any) => inRange(r.created_at)).length
 
     return [
-        { name: `Monthly Visit Summary (${totalVisits} total)`, period: currentMonthLabel, generated: todayLabel, format: 'PDF' },
-        { name: 'Doctor Performance Report', period: 'Q2 2026', generated: todayLabel, format: 'XLSX' },
-        { name: `Department Utilization (${computedDeptLoad.value.length} depts)`, period: currentMonthLabel, generated: todayLabel, format: 'PDF' },
-        { name: `Referral Activity Log (${totalReferrals} referrals)`, period: currentMonthLabel, generated: todayLabel, format: 'XLSX' },
-        { name: `Medical Records Summary (${totalRecords} records)`, period: currentMonthLabel, generated: todayLabel, format: 'PDF' },
+        { name: `Monthly Visit Summary (${totalVisits} total)`, period: activePeriodLabel.value, generated: todayLabel, format: 'PDF' },
+        { name: 'Doctor Performance Report', period: activePeriodLabel.value, generated: todayLabel, format: 'XLSX' },
+        { name: `Department Utilization (${computedDeptLoad.value.length} depts)`, period: activePeriodLabel.value, generated: todayLabel, format: 'PDF' },
+        { name: `Referral Activity Log (${totalReferrals} referrals)`, period: activePeriodLabel.value, generated: todayLabel, format: 'XLSX' },
+        { name: `Medical Records Summary (${totalRecords} records)`, period: activePeriodLabel.value, generated: todayLabel, format: 'PDF' },
     ]
 })
 </script>
@@ -195,14 +210,46 @@ const availableReports = computed(() => {
     <v-row>
         <v-col cols="12">
             <v-card-item class="pb-2 px-0 pt-0">
-                <div class="d-flex justify-space-between align-center flex-wrap ga-3">
+                <div class="d-flex justify-space-between align-center flex-wrap ga-3 mb-4">
                     <div>
                         <v-card-title class="text-h3">Reports</v-card-title>
                         <v-card-subtitle class="mt-1">
-                            Overview of clinic activity — live data
+                            Overview of clinic activity — {{ activePeriodLabel }}
                         </v-card-subtitle>
                     </div>
                 </div>
+
+                <v-card elevation="0" border class="pa-3">
+                    <div class="d-flex align-center gap-3 flex-wrap">
+                        <v-btn-toggle v-model="filterMode" density="compact" variant="tonal" divided mandatory
+                            color="primary">
+                            <v-btn value="month" size="small" prepend-icon="mdi-calendar-month">
+                                Month
+                            </v-btn>
+                            <v-btn value="range" size="small" prepend-icon="mdi-calendar-range">
+                                Date Range
+                            </v-btn>
+                        </v-btn-toggle>
+
+                        <v-divider vertical class="mx-1" style="height: 36px;" />
+                        <template v-if="filterMode === 'month'">
+                            <v-select v-model="filterYear" :items="yearOptions" variant="outlined" density="compact"
+                                hide-details style="max-width: 110px" />
+                            <v-select v-model="filterMonth" :items="monthOptions" item-title="label" item-value="value"
+                                variant="outlined" density="compact" hide-details style="max-width: 160px" />
+                        </template>
+
+                        <template v-else>
+                            <v-text-field v-model="filterDateFrom" type="date" label="From" variant="outlined"
+                                density="compact" hide-details style="max-width: 170px" />
+                            <v-text-field v-model="filterDateTo" type="date" label="To" variant="outlined"
+                                density="compact" hide-details style="max-width: 170px" />
+                        </template>
+
+                        <v-btn variant="text" size="small" density="comfortable" icon="mdi-refresh"
+                            title="Reset to current month" @click="resetFilters" />
+                    </div>
+                </v-card>
             </v-card-item>
         </v-col>
 
@@ -224,8 +271,9 @@ const availableReports = computed(() => {
                                         class="mr-1" />
                                     {{ card.trend }}
                                 </v-chip>
-                                <span v-else class="text-caption text-medium-emphasis mt-2 d-block">vs. last
-                                    month</span>
+                                <span v-else class="text-caption text-medium-emphasis mt-2 d-block">
+                                    vs. previous period
+                                </span>
                             </div>
                             <v-avatar :color="card.color" variant="tonal" size="44">
                                 <v-icon :icon="card.icon" size="22" />
@@ -239,7 +287,7 @@ const availableReports = computed(() => {
                 <v-card elevation="0" class="h-100">
                     <v-card-item>
                         <v-card-title class="text-h5">Monthly Visits</v-card-title>
-                        <v-card-subtitle>Total appointments per month — {{ currentYear }}</v-card-subtitle>
+                        <v-card-subtitle>Total appointments per month — {{ filterYear }}</v-card-subtitle>
                     </v-card-item>
                     <v-card-text>
                         <ClientOnly>
@@ -249,11 +297,13 @@ const availableReports = computed(() => {
                     </v-card-text>
                 </v-card>
             </v-col>
+
             <v-col cols="12" md="5">
                 <v-card elevation="0" class="h-100">
                     <v-card-item>
                         <v-card-title class="text-h5">Department Load</v-card-title>
-                        <v-card-subtitle>Share of appointments per department (all-time)</v-card-subtitle>
+                        <v-card-subtitle>Share of appointments per department — {{ activePeriodLabel
+                            }}</v-card-subtitle>
                     </v-card-item>
                     <v-card-text>
                         <template v-if="departmentChartSeries.length">
@@ -263,16 +313,20 @@ const availableReports = computed(() => {
                             </ClientOnly>
                         </template>
                         <div v-else class="d-flex align-center justify-center" style="height: 300px;">
-                            <v-icon icon="mdi-chart-donut" size="48" color="medium-emphasis" />
+                            <div class="text-center text-medium-emphasis">
+                                <v-icon icon="mdi-chart-donut" size="48" class="mb-2 d-block" />
+                                <span class="text-body-2">No appointments in this period</span>
+                            </div>
                         </div>
                     </v-card-text>
                 </v-card>
             </v-col>
+
             <v-col cols="12" md="5">
                 <v-card elevation="0" class="h-100">
                     <v-card-item>
                         <v-card-title class="text-h5">Top Diagnoses</v-card-title>
-                        <v-card-subtitle>Most frequent diagnoses from all medical records</v-card-subtitle>
+                        <v-card-subtitle>Most frequent diagnoses — {{ activePeriodLabel }}</v-card-subtitle>
                     </v-card-item>
                     <v-divider />
                     <template v-if="topDiagnoses.length">
@@ -291,17 +345,18 @@ const availableReports = computed(() => {
                         </v-list>
                     </template>
                     <div v-else class="pa-6 text-center text-medium-emphasis text-body-2">
-                        No diagnosis data available yet.
+                        No diagnosis data for this period.
                     </div>
                 </v-card>
             </v-col>
+
             <v-col cols="12" md="7">
                 <v-card elevation="0" class="h-100">
                     <v-card-item>
                         <div class="d-flex justify-space-between align-center">
                             <div>
                                 <v-card-title class="text-h5">Generated Reports</v-card-title>
-                                <v-card-subtitle>Based on live clinic data</v-card-subtitle>
+                                <v-card-subtitle>Based on live clinic data — {{ activePeriodLabel }}</v-card-subtitle>
                             </div>
                             <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-plus" disabled>
                                 New Report
