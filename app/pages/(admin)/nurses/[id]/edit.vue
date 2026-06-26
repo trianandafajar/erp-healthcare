@@ -15,6 +15,11 @@ const profile = computed(() => data.value?.profiles)
 const { data: deptData } = await useFetch('/api/departments')
 const departments = computed(() => deptData.value?.departments ?? [])
 const photoPreview = ref('')
+const photoFile = ref<File | null>(null)
+const photoError = ref('')
+const photoInputRef = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
+const uploadingPhoto = ref(false)
 const saving = ref(false)
 const snackbar = ref({ show: false, message: '', color: 'success' })
 
@@ -25,17 +30,39 @@ const form = reactive({
     is_available: true,
 })
 
-watch(data, (val) => {
+watch(data, (val: any) => {
     if (!val) return
     form.phone = val.phone ?? ''
     form.department_id = val.departments?.id ?? null
     form.experience_years = val.experience_years ?? null
     form.is_available = val.is_available ?? true
     photoPreview.value = profile.value?.avatar_url ?? ''
+    photoFile.value = null
+    photoError.value = ''
 }, { immediate: true })
 
 function notify(message: string, color = 'success') {
     snackbar.value = { show: true, message, color }
+}
+
+function triggerFileInput() {
+    photoInputRef.value?.click()
+}
+
+function validateFile(file: File): string | null {
+    const allowed = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+    ]
+
+    if (!allowed.includes(file.type))
+        return 'Only JPG, PNG, or WebP images are allowed.'
+
+    if (file.size > 2 * 1024 * 1024)
+        return 'Image must be smaller than 2 MB.'
+
+    return null
 }
 
 function applyFile(file: File) {
