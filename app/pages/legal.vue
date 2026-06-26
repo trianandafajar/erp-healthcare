@@ -33,7 +33,7 @@ const pageTitles: Record<string, string> = {
 }
 
 useSeoMeta({
-    title: computed(() => `${pageTitles[activePage.value] ?? 'Legal'} – Megagiga Solusindo`),
+    title: computed(() => `${pageTitles[activePage.value] ?? 'Legal'} – HealthData ERP`),
 })
 
 const navItems = [
@@ -114,13 +114,74 @@ const privacySections: Record<string, { icon: string; color: string; title: stri
 const openPanels = ref<number[]>([0])
 
 const terms = [
-    { title: 'Acceptance of terms', icon: 'mdi-file-sign', color: 'primary', body: `By accessing the Megagiga Solusindo Healthcare ERP platform, you agree to be bound by these Terms of Service. If you do not agree, you may not use the platform.\n\nThese terms apply to all users including administrators, doctors, nurses, pharmacists, and any staff granted access by your organization.` },
+    { title: 'Acceptance of terms', icon: 'mdi-file-sign', color: 'primary', body: `By accessing the HealthData ERP Healthcare ERP platform, you agree to be bound by these Terms of Service. If you do not agree, you may not use the platform.\n\nThese terms apply to all users including administrators, doctors, nurses, pharmacists, and any staff granted access by your organization.` },
     { title: 'Platform access & accounts', icon: 'mdi-account-key', color: 'info', body: `Access is provisioned by your organization's administrator. Each account is personal and non-transferable. You are responsible for maintaining the confidentiality of your credentials.\n\nUsers may only access modules and data within the scope of their assigned role. Attempting to access data outside your permitted scope is a violation of these terms.` },
     { title: 'Acceptable use', icon: 'mdi-check-decagram', color: 'success', body: `You agree to use the platform only for lawful healthcare purposes. You must not:\n\n• Process data unrelated to legitimate healthcare operations\n• Attempt to reverse-engineer or redistribute any part of the platform\n• Introduce malicious code or unauthorized automation\n• Share credentials or use another user's account` },
-    { title: 'Data ownership & confidentiality', icon: 'mdi-database-lock', color: 'warning', body: `All patient and organizational data remains the property of your organization. Megagiga Solusindo acts as a data processor on your behalf.\n\nYou acknowledge the platform processes sensitive medical information and agree to comply with applicable Indonesian health data regulations.` },
-    { title: 'Limitation of liability', icon: 'mdi-shield-alert-outline', color: 'error', body: `The platform is a clinical support tool and does not replace professional medical judgment. Megagiga Solusindo shall not be liable for clinical decisions made based on platform data.\n\nTotal liability for any claim shall not exceed fees paid by your organization in the three months preceding the claim.` },
+    { title: 'Data ownership & confidentiality', icon: 'mdi-database-lock', color: 'warning', body: `All patient and organizational data remains the property of your organization. HealthData ERP acts as a data processor on your behalf.\n\nYou acknowledge the platform processes sensitive medical information and agree to comply with applicable Indonesian health data regulations.` },
+    { title: 'Limitation of liability', icon: 'mdi-shield-alert-outline', color: 'error', body: `The platform is a clinical support tool and does not replace professional medical judgment. HealthData ERP shall not be liable for clinical decisions made based on platform data.\n\nTotal liability for any claim shall not exceed fees paid by your organization in the three months preceding the claim.` },
     { title: 'Changes to these terms', icon: 'mdi-file-edit-outline', color: 'secondary', body: `We may update these Terms from time to time. We will update the version number and notify administrators via email or in-platform notification.\n\nContinued use of the platform after changes take effect constitutes acceptance of the revised terms.` },
 ]
+
+const faqCategories = [
+    {
+        title: 'General',
+        icon: 'mdi-help-circle-outline',
+        items: [
+            {
+                question: 'What is HealthData ERP Healthcare ERP?',
+                answer: 'HealthData ERP Healthcare ERP is an integrated healthcare management platform that helps hospitals and clinics manage patients, appointments, medical records, pharmacy, billing, and administrative operations in one secure system.',
+            },
+            {
+                question: 'Who can use this platform?',
+                answer: 'The platform is designed for healthcare organizations, including administrators, doctors, nurses, pharmacists, laboratory staff, finance teams, and other authorized personnel.',
+            },
+        ],
+    },
+    {
+        title: 'Account & Login',
+        icon: 'mdi-account-circle-outline',
+        items: [
+            {
+                question: 'I forgot my password. What should I do?',
+                answer: 'Please contact your organization administrator or use the password reset feature if it has been enabled for your account.',
+            },
+            {
+                question: 'Why can’t I access certain modules?',
+                answer: 'Access is controlled using Role-Based Access Control (RBAC). If you believe you should have access, contact your administrator.',
+            },
+        ],
+    },
+    {
+        title: 'Appointments',
+        icon: 'mdi-calendar-check-outline',
+        items: [
+            {
+                question: 'How do I create a new appointment?',
+                answer: 'Navigate to the Appointments module, click "New Appointment", select a patient, doctor, date, and time, then save the appointment.',
+            },
+            {
+                question: 'Can appointments be rescheduled?',
+                answer: 'Yes. Authorized users can edit an appointment and choose a new available date and time.',
+            },
+        ],
+    },
+    {
+        title: 'Security & Privacy',
+        icon: 'mdi-shield-lock-outline',
+        items: [
+            {
+                question: 'Is patient data secure?',
+                answer: 'Yes. Patient information is protected using encryption, role-based permissions, and audit logging to ensure confidentiality and compliance.',
+            },
+            {
+                question: 'Are user activities recorded?',
+                answer: 'Yes. Important actions such as login, data updates, and administrative changes are stored in audit logs.',
+            },
+        ],
+    },
+]
+
+const faqPanel = ref<number[]>([0])
 </script>
 
 <template>
@@ -202,7 +263,7 @@ const terms = [
                                             <v-divider />
                                             <v-card-text class="text-body-2 text-medium-emphasis"
                                                 style="line-height:1.8">
-                                                Megagiga Solusindo is dedicated to transforming healthcare operations
+                                                HealthData ERP is dedicated to transforming healthcare operations
                                                 through intelligent, integrated ERP solutions.
                                                 We empower hospitals and clinics to deliver better patient outcomes by
                                                 streamlining clinical, administrative, and
@@ -286,7 +347,7 @@ const terms = [
                                                             </v-avatar>
                                                         </template>
                                                         <v-card-title class="text-body-2 font-weight-bold">{{ item.title
-                                                        }}</v-card-title>
+                                                            }}</v-card-title>
                                                     </v-card-item>
                                                     <v-divider />
                                                     <v-card-text class="text-body-2 text-medium-emphasis"
@@ -357,6 +418,62 @@ const terms = [
                                         </v-expansion-panels>
                                     </div>
                                 </div>
+                            </template>
+
+                            <template v-else-if="activePage === 'help'">
+                                <div class="d-flex align-center ga-3 mb-6 pb-4"
+                                    style="border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));">
+                                    <v-avatar size="48" color="primary" variant="tonal">
+                                        <v-icon icon="mdi-frequently-asked-questions" size="26" />
+                                    </v-avatar>
+
+                                    <div>
+                                        <div class="text-h5 font-weight-bold">
+                                            Frequently Asked Questions
+                                        </div>
+                                        <div class="text-caption text-medium-emphasis">
+                                            Find answers to common questions about the Healthcare ERP platform.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <v-alert type="info" variant="tonal" class="mb-6" icon="mdi-lightbulb-outline">
+                                    Can't find what you're looking for? Contact your system administrator or our support
+                                    team.
+                                </v-alert>
+
+                                <v-row>
+                                    <v-col v-for="category in faqCategories" :key="category.title" cols="12" md="6">
+                                        <v-card variant="outlined" height="100%">
+                                            <v-card-item>
+                                                <template #prepend>
+                                                    <v-avatar color="primary" variant="tonal">
+                                                        <v-icon :icon="category.icon" />
+                                                    </v-avatar>
+                                                </template>
+
+                                                <v-card-title>
+                                                    {{ category.title }}
+                                                </v-card-title>
+                                            </v-card-item>
+
+                                            <v-divider />
+
+                                            <v-expansion-panels v-model="faqPanel" multiple variant="accordion">
+                                                <v-expansion-panel v-for="(faq, index) in category.items"
+                                                    :key="faq.question" :value="`${category.title}-${index}`">
+                                                    <v-expansion-panel-title>
+                                                        {{ faq.question }}
+                                                    </v-expansion-panel-title>
+
+                                                    <v-expansion-panel-text class="text-medium-emphasis">
+                                                        {{ faq.answer }}
+                                                    </v-expansion-panel-text>
+                                                </v-expansion-panel>
+                                            </v-expansion-panels>
+                                        </v-card>
+                                    </v-col>
+                                </v-row>
                             </template>
 
                             <template v-else>
