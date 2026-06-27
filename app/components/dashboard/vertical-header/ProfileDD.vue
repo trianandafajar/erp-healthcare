@@ -81,13 +81,11 @@ async function confirmLogout() {
         <v-list-item-title class="text-h6">Billing</v-list-item-title>
       </v-list-item>
 
-      <v-list-item color="primary" rounded="0">
+      <v-list-item to="/legal?page=help" color="primary" rounded="0">
         <template v-slot:prepend>
           <QuestionCircleOutlined :style="{ fontSize: '14px' }" class="mr-4" />
         </template>
-        <NuxtLink to="/legal?page=help">
-          <v-list-item-title class="text-h6">Support</v-list-item-title>
-        </NuxtLink>
+        <v-list-item-title class="text-h6">Support</v-list-item-title>
       </v-list-item>
 
       <v-divider color="error" />
