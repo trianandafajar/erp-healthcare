@@ -130,7 +130,7 @@ async function uploadPhoto() {
         const body = new FormData()
 
         body.append('file', photoFile.value)
-        body.append('profile_id', profile.value?.id)
+        body.append('profile_id', id)
 
         const result = await $fetch<{ url: string }>(
             '/api/upload/nurse-photo',

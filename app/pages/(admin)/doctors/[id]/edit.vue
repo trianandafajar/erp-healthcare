@@ -177,7 +177,7 @@ async function uploadPhoto() {
         const body = new FormData()
 
         body.append('file', photoFile.value)
-        body.append('profile_id', profile.value?.id)
+        body.append('profile_id', id)
 
         const result = await $fetch<{ url: string }>(
             '/api/upload/doctor-photo',
@@ -218,6 +218,7 @@ async function saveProfile() {
         })
 
         notify('Doctor profile updated')
+        await navigateTo(`/doctors/${id}`)
     }
     catch (e: any) {
         notify(e?.data?.message ?? 'Failed to save', 'error')

@@ -315,8 +315,8 @@ function openView(nurses: Nurse) {
                     <td class="py-3 text-right">
                         <v-btn @click="openView(nurse)" icon="mdi-eye-outline" variant="text" size="small"
                             color="primary" density="comfortable" />
-                        <v-btn v-if="can('nurse.edit')" icon="mdi-pencil-outline" variant="text" size="small"
-                            color="secondary" density="comfortable" @click="openEdit(nurse)" />
+                        <!-- <v-btn v-if="can('nurse.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(nurse)" /> -->
                         <v-btn v-if="can('nurse.delete')" icon="mdi-delete-outline" variant="text" size="small"
                             color="error" density="comfortable" @click="openDelete(nurse)" />
                     </td>
