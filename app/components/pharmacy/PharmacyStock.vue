@@ -235,8 +235,14 @@ function formatDate(value: string) {
                         Math.min(safeCurrentPage * itemsPerPage, filteredStock.length) }} of {{ filteredStock.length }}
                     medicines
                 </div>
-                <v-pagination v-model="currentPage" :length="totalPages" :total-visible="6" density="compact"
-                    rounded="circle" show-first-last-page />
+                <v-pagination 
+                    v-model="currentPage" 
+                    :length="totalPages" 
+                    :total-visible="6" 
+                    density="compact"
+                    rounded="circle" 
+                    show-first-last-page
+                />
             </div>
         </v-card-text>
     </v-card>

@@ -514,7 +514,12 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                     </v-table>
 
                     <div v-if="filteredProcedures.length > itemsPerPage" class="d-flex justify-end">
-                        <v-pagination v-model="currentPage" :length="totalPages" rounded="circle" />
+                        <v-pagination 
+                            v-model="currentPage" 
+                            :length="totalPages" 
+                            :total-visible="6"
+                            rounded="circle" 
+                        />
                     </div>
                 </v-window-item>
             </v-window>

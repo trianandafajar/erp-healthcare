@@ -164,8 +164,14 @@ async function handleSubmit(payload: any) {
             <span class="text-caption text-medium-emphasis">
                 Showing {{ paginatedPermissions.length }} of {{ permissions.length }} permissions
             </span>
-            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
-                size="small" />
+            <v-pagination 
+                v-if="totalPages > 1" 
+                v-model="currentPage"        
+                :total-visible="6" 
+                :length="totalPages" 
+                density="compact"
+                size="small" 
+            />
         </div>
     </UiTitleCard>
 

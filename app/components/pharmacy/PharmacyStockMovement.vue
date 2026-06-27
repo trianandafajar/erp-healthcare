@@ -168,8 +168,14 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                         Math.min(safeCurrentPage * itemsPerPage, filteredMovements.length) }} of {{ filteredMovements.length
                     }} logs
                 </div>
-                <v-pagination v-model="currentPage" :length="totalPages" :total-visible="7" density="compact"
-                    rounded="circle" show-first-last-page />
+                <v-pagination 
+                    v-model="currentPage" 
+                    :length="totalPages" 
+                    :total-visible="6" 
+                    density="compact"
+                    rounded="circle" 
+                    show-first-last-page
+                />
             </div>
         </v-card-text>
     </v-card>

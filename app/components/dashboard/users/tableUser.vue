@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import UserModal from './UserModal.vue';
 
@@ -84,12 +84,19 @@ const filteredUsers = computed(() => {
     });
 });
 
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / itemsPerPage)));
+const safeCurrentPage = computed(() => Math.min(currentPage.value, totalPages.value));
+
 const paginatedUsers = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
+    const start = (safeCurrentPage.value - 1) * itemsPerPage;
     return filteredUsers.value.slice(start, start + itemsPerPage);
 });
 
-const totalPages = computed(() => Math.ceil(filteredUsers.value.length / itemsPerPage));
+watch(totalPages, () => {
+    if (currentPage.value > totalPages.value) {
+        currentPage.value = totalPages.value;
+    }
+});
 
 function getInitials(name: string) {
     return name
@@ -259,8 +266,14 @@ async function handleSubmit(payload: any) {
             <span class="text-caption text-medium-emphasis">
                 Showing {{ paginatedUsers.length }} of {{ filteredUsers.length }} users
             </span>
-            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
-                size="small" />
+            <v-pagination 
+                v-if="totalPages > 1" 
+                v-model="currentPage" 
+                :length="totalPages" 
+                :total-visible="6"
+                density="compact" 
+                size="small"
+            />
         </div>
     </UiTitleCard>
     <div class="text-xs-center">

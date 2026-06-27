@@ -197,8 +197,14 @@ function openView(patient: NursePatient) {
             <span class="text-caption text-medium-emphasis">
                 Showing {{ paginatedPatients.length }} of {{ filteredPatients.length }} patients
             </span>
-            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
-                size="small" />
+            <v-pagination 
+                v-if="totalPages > 1" 
+                v-model="currentPage" 
+                :length="totalPages" 
+                density="compact"
+                :total-visible="6"
+                size="small"
+            />
         </div>
     </v-card>
 </template>

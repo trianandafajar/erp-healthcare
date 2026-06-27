@@ -214,8 +214,14 @@ watch(
             <span class="text-caption text-medium-emphasis">
                 Page {{ currentPage }} of {{ totalPages }}
             </span>
-            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
-                size="small" />
+            <v-pagination 
+                v-if="totalPages > 1" 
+                v-model="currentPage" 
+                :length="totalPages" 
+                :total-visible="6"
+                density="compact"   
+                size="small" 
+            />
         </div>
 
     </UiTitleCard>
