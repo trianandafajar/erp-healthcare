@@ -70,7 +70,7 @@ function appointmentStatusColor(status: string) {
 
     <template v-else>
         <!-- Header -->
-        <v-card class="mb-4">
+        <v-card variant="flat" class="mb-4">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center justify-space-between flex-wrap ga-4">
                     <div class="d-flex align-center ga-4">
@@ -105,7 +105,7 @@ function appointmentStatusColor(status: string) {
                 { label: 'Today', value: stats?.appointments_today, icon: 'mdi-calendar-today', color: 'warning' },
                 { label: 'Completed', value: stats?.completed, icon: 'mdi-check-all', color: 'success' },
             ]" :key="s.label">
-                <v-card height="100%">
+                <v-card variant="flat" height="100%">
                     <v-card-text class="d-flex align-center ga-3 pa-4">
                         <v-avatar :color="s.color" variant="tonal" size="40">
                             <v-icon :icon="s.icon" size="20" />
@@ -120,7 +120,7 @@ function appointmentStatusColor(status: string) {
         </v-row>
 
         <!-- Tabs -->
-        <v-card>
+        <v-card variant="flat">
             <v-tabs v-model="activeTab" color="primary" density="comfortable">
                 <v-tab value="info" prepend-icon="mdi-information">Info</v-tab>
                 <v-tab value="doctors" prepend-icon="mdi-doctor">
@@ -145,42 +145,125 @@ function appointmentStatusColor(status: string) {
                 <v-window-item value="info">
                     <v-card-text class="pa-6">
                         <v-row>
+
+                            <!-- Department -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined">
+                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="md"
+                                    class="h-100">
                                     <v-card-item>
                                         <template #prepend>
-                                            <v-avatar color="primary" variant="tonal" size="36">
-                                                <v-icon icon="mdi-hospital-building" size="20" />
+                                            <v-avatar color="primary" variant="tonal" size="42">
+                                                <v-icon icon="mdi-hospital-building" />
                                             </v-avatar>
                                         </template>
-                                        <v-card-title class="text-body-1">Department Details</v-card-title>
+
+                                        <v-card-title class="font-weight-bold">
+                                            Department Details
+                                        </v-card-title>
                                     </v-card-item>
+
                                     <v-divider />
-                                    <v-list density="compact">
-                                        <v-list-item title="Name" :subtitle="department.name" />
-                                        <v-list-item title="Code" :subtitle="department.code ?? '-'" />
-                                        <v-list-item title="Created" :subtitle="formatDate(department.created_at)" />
-                                        <v-list-item title="Last Updated"
-                                            :subtitle="formatDate(department.updated_at)" />
-                                    </v-list>
-                                </v-card>
-                            </v-col>
-                            <v-col cols="12" md="6" v-if="department.description">
-                                <v-card variant="outlined" height="100%">
-                                    <v-card-item>
-                                        <template #prepend>
-                                            <v-avatar color="info" variant="tonal" size="36">
-                                                <v-icon icon="mdi-text" size="20" />
-                                            </v-avatar>
-                                        </template>
-                                        <v-card-title class="text-body-1">Description</v-card-title>
-                                    </v-card-item>
-                                    <v-divider />
-                                    <v-card-text class="text-body-2 text-medium-emphasis">
-                                        {{ department.description }}
+
+                                    <v-card-text>
+
+                                        <v-row dense>
+
+                                            <v-col cols="6">
+                                                <div class="text-caption text-medium-emphasis">
+                                                    Name
+                                                </div>
+                                                <div class="text-body-1 font-weight-medium">
+                                                    {{ department.name }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-caption text-medium-emphasis">
+                                                    Code
+                                                </div>
+
+                                                <v-chip size="small" color="primary" variant="tonal">
+                                                    {{ department.code || "-" }}
+                                                </v-chip>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-caption text-medium-emphasis">
+                                                    Doctors
+                                                </div>
+
+                                                <div class="text-body-1 font-weight-medium">
+                                                    {{ stats?.total_doctors ?? 0 }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-caption text-medium-emphasis">
+                                                    Status
+                                                </div>
+
+                                                <v-chip color="success" size="small" variant="tonal">
+                                                    Active
+                                                </v-chip>
+                                            </v-col>
+
+                                            <v-col cols="6" class="mt-5">
+                                                <div class="text-caption text-medium-emphasis">
+                                                    Created
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ formatDate(department.created_at) }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6" class="mt-5">
+                                                <div class="text-caption text-medium-emphasis">
+                                                    Last Updated
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ formatDate(department.updated_at) }}
+                                                </div>
+                                            </v-col>
+
+                                        </v-row>
+
                                     </v-card-text>
                                 </v-card>
                             </v-col>
+
+                            <!-- Description -->
+                            <v-col cols="12" md="6">
+                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="md"
+                                    class="h-100">
+                                    <v-card-item>
+                                        <template #prepend>
+                                            <v-avatar color="info" variant="tonal" size="42">
+                                                <v-icon icon="mdi-text-box-outline" />
+                                            </v-avatar>
+                                        </template>
+
+                                        <v-card-title class="font-weight-bold">
+                                            Description
+                                        </v-card-title>
+                                    </v-card-item>
+
+                                    <v-divider />
+
+                                    <v-card-text>
+
+                                        <div class="text-body-2" style="
+                                min-height:140px;
+                                line-height:1.7;
+                            ">
+                                            {{ department.description || "No description available." }}
+                                        </div>
+
+                                    </v-card-text>
+                                </v-card>
+                            </v-col>
+
                         </v-row>
                     </v-card-text>
                 </v-window-item>

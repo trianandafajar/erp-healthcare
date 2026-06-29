@@ -71,7 +71,7 @@ async function save() {
 
     <template v-else>
         <!-- Header -->
-        <v-card class="mb-4">
+        <v-card variant="flat" class="mb-4">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center ga-4">
                     <v-btn icon="mdi-arrow-left" variant="text"
@@ -93,7 +93,7 @@ async function save() {
 
         <v-row>
             <v-col cols="12" md="8">
-                <v-card>
+                <v-card variant="flat">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="primary" variant="tonal" size="36">
@@ -137,13 +137,13 @@ async function save() {
             </v-col>
 
             <v-col cols="12" md="4">
-                <v-card>
+                <v-card variant="flat">
                     <v-card-text class="pa-5">
-                        <v-btn block color="primary" size="large"
+                        <v-btn  block color="primary" size="large"
                             :prepend-icon="isCreate ? 'mdi-plus' : 'mdi-content-save'" :loading="saving" @click="save">
                             {{ isCreate ? 'Create Department' : 'Save Changes' }}
                         </v-btn>
-                        <v-btn block variant="text" class="mt-2"
+                        <v-btn block variant="tonal" class="mt-2"
                             @click="navigateTo(isCreate ? '/departments' : `/departments/${id}`)">
                             Cancel
                         </v-btn>

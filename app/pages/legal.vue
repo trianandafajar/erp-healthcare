@@ -192,8 +192,7 @@ const faqPanel = ref<number[]>([0])
                     <div class="d-flex" style="min-height: 100vh">
 
                         <!-- Sidebar -->
-                        <div
-                            style="width: 220px; flex-shrink: 0; border-right: thin solid rgba(var(--v-border-color), var(--v-border-opacity));">
+                        <div style="width: 220px; flex-shrink: 0;">
                             <div class="pa-4">
                                 <!-- Back button -->
                                 <v-btn variant="text" prepend-icon="mdi-arrow-left" size="small" class="mb-4"
@@ -219,11 +218,12 @@ const faqPanel = ref<number[]>([0])
                             </div>
                         </div>
 
+                        <v-divider vertical />
+
                         <div class="flex-grow-1 pa-6" style="min-width: 0;">
                             <template v-if="activePage === 'about'">
-                                <div class="d-flex align-center ga-3 mb-6 pb-4"
-                                    style="border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));">
-                                    <v-avatar size="48" color="primary" variant="tonal">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar size="48" color="primary">
                                         <v-icon icon="mdi-information-outline" size="26" />
                                     </v-avatar>
                                     <div>
@@ -232,11 +232,13 @@ const faqPanel = ref<number[]>([0])
                                     </div>
                                 </div>
 
+                                <v-divider class="mb-6" />
+
                                 <v-row class="mb-4">
                                     <v-col v-for="stat in stats" :key="stat.label" cols="6" md="3">
-                                        <v-card variant="outlined">
+                                        <v-card elevation="1">
                                             <v-card-text class="d-flex align-center ga-3 pa-3">
-                                                <v-avatar :color="stat.color" variant="tonal" size="36">
+                                                <v-avatar :color="stat.color" size="36">
                                                     <v-icon :icon="stat.icon" size="18" />
                                                 </v-avatar>
                                                 <div>
@@ -251,10 +253,10 @@ const faqPanel = ref<number[]>([0])
 
                                 <v-row class="mb-4">
                                     <v-col cols="12" md="7">
-                                        <v-card variant="outlined" height="100%">
+                                        <v-card elevation="1" height="100%">
                                             <v-card-item>
                                                 <template #prepend>
-                                                    <v-avatar color="primary" variant="tonal" size="34">
+                                                    <v-avatar color="primary" size="34">
                                                         <v-icon icon="mdi-bullseye-arrow" size="18" />
                                                     </v-avatar>
                                                 </template>
@@ -273,10 +275,10 @@ const faqPanel = ref<number[]>([0])
                                     </v-col>
 
                                     <v-col cols="12" md="5">
-                                        <v-card variant="outlined" height="100%">
+                                        <v-card elevation="1" height="100%">
                                             <v-card-item>
                                                 <template #prepend>
-                                                    <v-avatar color="secondary" variant="tonal" size="34">
+                                                    <v-avatar color="secondary" size="34">
                                                         <v-icon icon="mdi-account-group" size="18" />
                                                     </v-avatar>
                                                 </template>
@@ -287,7 +289,7 @@ const faqPanel = ref<number[]>([0])
                                                 <v-list-item v-for="member in team" :key="member.name"
                                                     :title="member.name" :subtitle="member.role">
                                                     <template #prepend>
-                                                        <v-avatar :color="member.color" variant="tonal" size="34">
+                                                        <v-avatar :color="member.color" size="34">
                                                             <span class="text-caption font-weight-bold">{{
                                                                 member.initials }}</span>
                                                         </v-avatar>
@@ -299,9 +301,9 @@ const faqPanel = ref<number[]>([0])
                                 </v-row>
                                 <v-row>
                                     <v-col v-for="val in values" :key="val.title" cols="6" md="3">
-                                        <v-card variant="outlined" height="100%">
+                                        <v-card elevation="1" height="100%">
                                             <v-card-text class="text-center pa-4">
-                                                <v-avatar :color="val.color" variant="tonal" size="44" class="mb-3">
+                                                <v-avatar :color="val.color" size="44" class="mb-3">
                                                     <v-icon :icon="val.icon" size="24" />
                                                 </v-avatar>
                                                 <div class="text-body-2 font-weight-bold mb-1">{{ val.title }}</div>
@@ -313,9 +315,8 @@ const faqPanel = ref<number[]>([0])
                             </template>
 
                             <template v-else-if="activePage === 'privacy'">
-                                <div class="d-flex align-center ga-3 mb-6 pb-4"
-                                    style="border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));">
-                                    <v-avatar size="48" color="success" variant="tonal">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar size="48" color="success">
                                         <v-icon icon="mdi-shield-lock" size="26" />
                                     </v-avatar>
                                     <div>
@@ -324,6 +325,8 @@ const faqPanel = ref<number[]>([0])
                                             Version 2.1</div>
                                     </div>
                                 </div>
+
+                                <v-divider class="mb-6" />
 
                                 <v-tabs v-model="privacyTab" color="primary" density="comfortable" class="mb-4">
                                     <v-tab v-for="tab in privacyTabs" :key="tab.value" :value="tab.value"
@@ -339,23 +342,22 @@ const faqPanel = ref<number[]>([0])
                                         <v-row>
                                             <v-col v-for="item in privacySections[tab.value]" :key="item.title"
                                                 cols="12" md="6">
-                                                <v-card variant="outlined" height="100%">
+                                                <v-card elevation="1" height="100%">
                                                     <v-card-item>
                                                         <template #prepend>
-                                                            <v-avatar :color="item.color" variant="tonal" size="34">
+                                                            <v-avatar :color="item.color" size="34">
                                                                 <v-icon :icon="item.icon" size="18" />
                                                             </v-avatar>
                                                         </template>
                                                         <v-card-title class="text-body-2 font-weight-bold">{{ item.title
-                                                            }}</v-card-title>
+                                                        }}</v-card-title>
                                                     </v-card-item>
                                                     <v-divider />
                                                     <v-card-text class="text-body-2 text-medium-emphasis"
                                                         style="line-height:1.7">
                                                         {{ item.body }}
-                                                        <v-alert v-if="item.highlight" type="info" variant="tonal"
-                                                            density="compact" class="mt-3 text-caption"
-                                                            :text="item.highlight" />
+                                                        <v-alert v-if="item.highlight" type="info" density="compact"
+                                                            class="mt-3 text-caption" :text="item.highlight" />
                                                     </v-card-text>
                                                 </v-card>
                                             </v-col>
@@ -365,9 +367,8 @@ const faqPanel = ref<number[]>([0])
                             </template>
 
                             <template v-else-if="activePage === 'terms'">
-                                <div class="d-flex align-center ga-3 mb-6 pb-4"
-                                    style="border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));">
-                                    <v-avatar size="48" color="warning" variant="tonal">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar size="48" color="warning">
                                         <v-icon icon="mdi-file-document-outline" size="26" />
                                     </v-avatar>
                                     <div>
@@ -377,9 +378,11 @@ const faqPanel = ref<number[]>([0])
                                     </div>
                                 </div>
 
+                                <v-divider class="mb-6" />
+
                                 <div class="d-flex ga-4" style="align-items: flex-start;">
                                     <div style="width: 200px; flex-shrink: 0; position: sticky; top: 0;">
-                                        <v-card variant="outlined">
+                                        <v-card elevation="1">
                                             <v-card-item class="pb-1">
                                                 <v-card-title
                                                     class="text-caption text-uppercase font-weight-bold text-medium-emphasis">In
@@ -400,7 +403,7 @@ const faqPanel = ref<number[]>([0])
                                             <v-expansion-panel v-for="(term, i) in terms" :key="i" :value="i">
                                                 <v-expansion-panel-title>
                                                     <div class="d-flex align-center ga-3">
-                                                        <v-avatar :color="term.color" variant="tonal" size="30">
+                                                        <v-avatar :color="term.color" size="30">
                                                             <v-icon :icon="term.icon" size="16" />
                                                         </v-avatar>
                                                         <span class="text-body-2 font-weight-medium">
@@ -421,9 +424,8 @@ const faqPanel = ref<number[]>([0])
                             </template>
 
                             <template v-else-if="activePage === 'help'">
-                                <div class="d-flex align-center ga-3 mb-6 pb-4"
-                                    style="border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));">
-                                    <v-avatar size="48" color="primary" variant="tonal">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar size="48" color="primary">
                                         <v-icon icon="mdi-frequently-asked-questions" size="26" />
                                     </v-avatar>
 
@@ -437,17 +439,19 @@ const faqPanel = ref<number[]>([0])
                                     </div>
                                 </div>
 
-                                <v-alert type="info" variant="tonal" class="mb-6" icon="mdi-lightbulb-outline">
+                                <v-divider class="mb-6" />
+
+                                <v-alert type="info" class="mb-6" icon="mdi-lightbulb-outline">
                                     Can't find what you're looking for? Contact your system administrator or our support
                                     team.
                                 </v-alert>
 
                                 <v-row>
                                     <v-col v-for="category in faqCategories" :key="category.title" cols="12" md="6">
-                                        <v-card variant="outlined" height="100%">
+                                        <v-card elevation="1" height="100%">
                                             <v-card-item>
                                                 <template #prepend>
-                                                    <v-avatar color="primary" variant="tonal">
+                                                    <v-avatar color="primary">
                                                         <v-icon :icon="category.icon" />
                                                     </v-avatar>
                                                 </template>
