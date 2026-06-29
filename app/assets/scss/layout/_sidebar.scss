@@ -2,6 +2,29 @@
 
 /*This is for the logo*/
 .leftSidebar {
+  .v-navigation-drawer__content {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--v-theme-primary), 0.2) transparent;
+
+    &::-webkit-scrollbar {
+      width: 1px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(var(--v-theme-primary), 0.3);
+      border-radius: 0;
+    }
+
+    &::-webkit-scrollbar-button {
+      display: none;
+    }
+  }
+
   border: 0px;
   box-shadow: none !important;
   border-right: 1px solid rgba(var(--v-theme-borderLight), 0.8);
