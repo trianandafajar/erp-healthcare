@@ -13,6 +13,9 @@ const adjustDialog = ref(false)
 const selectedId = ref<string | null>(null)
 const itemsPerPage = 8
 
+const loadingSave = ref(false)
+const loadingAdjust = ref(false)
+
 const form = reactive({
     medicineName: '',
     dosage: '',
@@ -63,6 +66,19 @@ const selectedStock = computed(() =>
     stockItems.value.find((item) => item.id === selectedId.value) ?? null,
 )
 
+const isSaveFormValid = computed(() =>
+    !!form.medicineName.trim() &&
+    !!form.dosage.trim() &&
+    !!form.supplier.trim() &&
+    !!form.batchNumber.trim() &&
+    !!form.expiredDate &&
+    form.quantity > 0
+)
+
+const isAdjustFormValid = computed(() =>
+    !!selectedId.value && adjustForm.quantityDelta !== 0
+)
+
 function resetForm() {
     form.medicineName = ''
     form.dosage = ''
@@ -106,28 +122,37 @@ function openAdjust(item: StockItem) {
 }
 
 async function saveStock() {
-    if (!form.medicineName.trim() || !form.dosage.trim() || !form.supplier.trim() || !form.batchNumber.trim() || !form.expiredDate || !form.quantity) {
-        return
-    }
+    if (!isSaveFormValid.value) return
 
-    await workspace.upsertStockMedicine({
-        id: selectedId.value ?? undefined,
-        medicineName: form.medicineName.trim(),
-        dosage: form.dosage.trim(),
-        supplier: form.supplier.trim(),
-        batchNumber: form.batchNumber.trim(),
-        expiredDate: new Date(form.expiredDate).toISOString(),
-        quantity: Number(form.quantity),
-        minimumStock: Number(form.minimumStock),
-        unit: form.unit.trim() || 'tablet',
-    })
-    dialog.value = false
+    loadingSave.value = true
+    try {
+        await workspace.upsertStockMedicine({
+            id: selectedId.value ?? undefined,
+            medicineName: form.medicineName.trim(),
+            dosage: form.dosage.trim(),
+            supplier: form.supplier.trim(),
+            batchNumber: form.batchNumber.trim(),
+            expiredDate: new Date(form.expiredDate).toISOString(),
+            quantity: Number(form.quantity),
+            minimumStock: Number(form.minimumStock),
+            unit: form.unit.trim() || 'tablet',
+        })
+        dialog.value = false
+    } finally {
+        loadingSave.value = false
+    }
 }
 
 async function saveAdjust() {
-    if (!selectedId.value) return
-    await workspace.adjustStock(selectedId.value, Number(adjustForm.quantityDelta))
-    adjustDialog.value = false
+    if (!isAdjustFormValid.value) return
+
+    loadingAdjust.value = true
+    try {
+        await workspace.adjustStock(selectedId.value!, Number(adjustForm.quantityDelta))
+        adjustDialog.value = false
+    } finally {
+        loadingAdjust.value = false
+    }
 }
 
 function lowStockColor(item: StockItem) {
@@ -142,7 +167,6 @@ function formatDate(value: string) {
     })
 }
 </script>
-
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
         <div class="d-flex flex-wrap align-center justify-space-between ga-3">
@@ -320,11 +344,15 @@ function formatDate(value: string) {
             <v-card-actions class="pa-4 pt-3">
                 <v-spacer />
 
-                <v-btn variant="tonal" color="secondary" @click="dialog = false">
+                <v-btn variant="tonal" color="secondary"
+                    :style="!isAdjustFormValid || loadingAdjust ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    :disabled="loadingSave" @click="dialog = false">
                     Cancel
                 </v-btn>
 
-                <v-btn color="primary" variant="flat" min-width="120" @click="saveStock">
+                <v-btn color="primary" variant="flat" min-width="120" :loading="loadingSave"
+                    :style="!isAdjustFormValid || loadingAdjust ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    :disabled="!isSaveFormValid || loadingSave" @click="saveStock">
                     {{ mode === 'create' ? 'Add Medicine' : 'Save Changes' }}
                 </v-btn>
             </v-card-actions>
@@ -369,11 +397,15 @@ function formatDate(value: string) {
             <v-card-actions class="pa-4 pt-3">
                 <v-spacer />
 
-                <v-btn variant="tonal" color="secondary" @click="adjustDialog = false">
+                <v-btn variant="tonal" color="secondary"
+                    :style="!isAdjustFormValid || loadingAdjust ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    :disabled="loadingAdjust" @click="adjustDialog = false">
                     Cancel
                 </v-btn>
 
-                <v-btn color="warning" variant="flat" min-width="120" @click="saveAdjust">
+                <v-btn :style="!isAdjustFormValid || loadingAdjust ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    color="warning" variant="flat" min-width="120" :loading="loadingAdjust"
+                    :disabled="!isAdjustFormValid || loadingAdjust" @click="saveAdjust">
                     Apply Adjustment
                 </v-btn>
             </v-card-actions>
