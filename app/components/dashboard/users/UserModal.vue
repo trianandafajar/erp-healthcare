@@ -58,7 +58,11 @@ function onSubmit() {
     if (props.mode === 'delete') {
         emit('submit', { id: props.user?.id })
     } else {
-        emit('submit', { ...form.value, id: props.user?.id })
+        emit('submit', {
+            ...form.value,
+            id: props.user?.id,
+            password: 'Password123'
+        })
     }
 }
 </script>
