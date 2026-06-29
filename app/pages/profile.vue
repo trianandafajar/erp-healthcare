@@ -13,6 +13,13 @@ const authStore = useAuthStore()
 const profile = computed(() => profileStore.profile)
 const roles = computed(() => profileStore.roles)
 
+const avatarCacheBust = ref(Date.now())
+const avatarUrl = computed(() => {
+    const url = profile.value?.avatar_url
+    if (!url) return null
+    return `${url}?t=${avatarCacheBust.value}`
+})
+
 // form
 const isSaving = ref(false)
 const saveSuccess = ref(false)
@@ -28,7 +35,7 @@ async function saveProfile() {
     saveSuccess.value = false
     try {
         await $fetch('/api/profile', { method: 'PATCH', body: { full_name: form.value.full_name } })
-        await profileStore.fetchProfile()
+        await profileStore.fetchProfile(true)
         saveSuccess.value = true
         setTimeout(() => saveSuccess.value = false, 3000)
     } catch (e) {
@@ -65,7 +72,8 @@ async function onAvatarChange(e: Event) {
 
         if (!res.ok) throw await res.json()
 
-        await profileStore.fetchProfile()
+        await profileStore.fetchProfile(true)
+        avatarCacheBust.value = Date.now() // ✅ trigger re-render
     } catch (err) {
         console.error(err)
     } finally {
@@ -128,10 +136,10 @@ async function submitPasswordChange() {
                     <v-hover v-slot="{ isHovering, props: hoverProps }">
                         <v-avatar v-bind="hoverProps" size="96" :color="profile?.avatar_url ? undefined : 'primary'"
                             variant="tonal" style="cursor: pointer; position: relative" @click="triggerAvatarUpload">
-                            <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" cover />
+                            <v-img v-if="profile?.avatar_url" :src="avatarUrl" cover />
                             <span v-else class="text-h5 font-weight-bold">
                                 {{ getInitials(profile?.full_name ?? '') }}
-                            </span>
+                            </span> 
 
                             <v-overlay :model-value="isHovering || isUploadingAvatar" contained
                                 class="align-center justify-center">
