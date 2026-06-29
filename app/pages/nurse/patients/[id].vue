@@ -104,7 +104,7 @@ function referralStatusColor(status: string) {
 
     <template v-else>
         <!-- Header -->
-        <v-card class="mb-4">
+        <v-card variant="flat" class="mb-4">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center justify-space-between flex-wrap ga-4">
                     <div class="d-flex align-center ga-4">
@@ -146,7 +146,7 @@ function referralStatusColor(status: string) {
                 { label: 'Total Billing', value: formatCurrency(summary?.total_billing), icon: 'mdi-cash', color: 'success' },
                 { label: 'Unpaid', value: formatCurrency(summary?.unpaid_billing), icon: 'mdi-alert-circle', color: 'error' },
             ]" :key="s.label">
-                <v-card height="100%">
+                <v-card variant="flat" height="100%">
                     <v-card-text class="d-flex align-center ga-3 pa-4">
                         <v-avatar :color="s.color" variant="tonal" size="44">
                             <v-icon :icon="s.icon" />
@@ -161,7 +161,7 @@ function referralStatusColor(status: string) {
         </v-row>
 
         <!-- Tabs -->
-        <v-card>
+        <v-card variant="flat">
             <v-tabs v-model="activeTab" color="primary" density="comfortable">
                 <v-tab value="info" prepend-icon="mdi-account">Info</v-tab>
                 <v-tab value="appointments" prepend-icon="mdi-calendar">
@@ -210,50 +210,183 @@ function referralStatusColor(status: string) {
                 <v-window-item value="info">
                     <v-card-text class="pa-6">
                         <v-row>
+
+                            <!-- Personal Information -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" height="100%">
-                                    <v-card-item>
+                                <v-card variant="outlined" rounded="lg" class="h-100 info-card">
+                                    <v-card-item class="py-4">
                                         <template #prepend>
-                                            <v-avatar color="primary" variant="tonal" size="36">
-                                                <v-icon icon="mdi-account" size="20" />
+                                            <v-avatar color="primary" variant="tonal" size="42">
+                                                <v-icon icon="mdi-account" />
                                             </v-avatar>
                                         </template>
-                                        <v-card-title class="text-body-1">Personal Information</v-card-title>
+
+                                        <div>
+                                            <div class="text-h6 font-weight-bold">
+                                                Personal Information
+                                            </div>
+
+                                            <div class="text-caption text-medium-emphasis">
+                                                Patient identity and personal details
+                                            </div>
+                                        </div>
                                     </v-card-item>
+
                                     <v-divider />
-                                    <v-list density="compact">
-                                        <v-list-item title="Full Name" :subtitle="patient.full_name" />
-                                        <v-list-item title="Date of Birth"
-                                            :subtitle="formatDate(patient.date_of_birth)" />
-                                        <v-list-item title="Age" :subtitle="calcAge(patient.date_of_birth)" />
-                                        <v-list-item title="Gender" :subtitle="patient.gender ?? '-'" />
-                                        <v-list-item title="Blood Type" :subtitle="patient.blood_type ?? '-'" />
-                                        <v-list-item title="Phone" :subtitle="patient.phone ?? '-'" />
-                                        <v-list-item title="Address" :subtitle="patient.address ?? '-'" />
-                                    </v-list>
+
+                                    <v-card-text class="pa-6">
+                                        <v-row>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Full Name
+                                                </div>
+
+                                                <div class="text-body-1 font-weight-bold">
+                                                    {{ patient.full_name }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Date of Birth
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ formatDate(patient.date_of_birth) }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Age
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ calcAge(patient.date_of_birth) }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis mb-2">
+                                                    Gender
+                                                </div>
+
+                                                <v-chip :color="patient.gender === 'male'
+                                                    ? 'info'
+                                                    : 'pink'" variant="tonal" size="small">
+                                                    {{ patient.gender || "-" }}
+                                                </v-chip>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis mb-2">
+                                                    Blood Type
+                                                </div>
+
+                                                <v-chip color="error" variant="tonal" size="small">
+                                                    {{ patient.blood_type || "-" }}
+                                                </v-chip>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Phone Number
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ patient.phone || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Address
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ patient.address || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                        </v-row>
+                                    </v-card-text>
                                 </v-card>
                             </v-col>
 
+                            <!-- Account Information -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" height="100%">
-                                    <v-card-item>
+                                <v-card variant="outlined" rounded="lg" class="h-100 info-card">
+                                    <v-card-item class="py-4">
                                         <template #prepend>
-                                            <v-avatar color="secondary" variant="tonal" size="36">
-                                                <v-icon icon="mdi-shield-account" size="20" />
+                                            <v-avatar color="secondary" variant="tonal" size="42">
+                                                <v-icon icon="mdi-shield-account" />
                                             </v-avatar>
                                         </template>
-                                        <v-card-title class="text-body-1">Account Information</v-card-title>
+
+                                        <div>
+                                            <div class="text-h6 font-weight-bold">
+                                                Account Information
+                                            </div>
+
+                                            <div class="text-caption text-medium-emphasis">
+                                                Medical record and account details
+                                            </div>
+                                        </div>
                                     </v-card-item>
+
                                     <v-divider />
-                                    <v-list density="compact">
-                                        <v-list-item title="Medical Record Number"
-                                            :subtitle="patient.medical_record_number ?? '-'" />
-                                        <v-list-item title="Email" :subtitle="profile?.email ?? '-'" />
-                                        <v-list-item title="Account Status" :subtitle="profile?.status ?? '-'" />
-                                        <v-list-item title="Registered" :subtitle="formatDate(patient.created_at)" />
-                                    </v-list>
+
+                                    <v-card-text class="pa-6">
+                                        <v-row>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis mb-2">
+                                                    Medical Record Number
+                                                </div>
+
+                                                <v-chip color="primary" variant="tonal" label>
+                                                    {{ patient.medical_record_number || "-" }}
+                                                </v-chip>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Email Address
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ profile?.email || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis mb-2">
+                                                    Account Status
+                                                </div>
+
+                                                <v-chip :color="profile?.status === 'active'
+                                                    ? 'success'
+                                                    : 'warning'" variant="tonal" size="small">
+                                                    {{ profile?.status || "-" }}
+                                                </v-chip>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Registered
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ formatDate(patient.created_at) }}
+                                                </div>
+                                            </v-col>
+
+                                        </v-row>
+                                    </v-card-text>
                                 </v-card>
                             </v-col>
+
                         </v-row>
                     </v-card-text>
                 </v-window-item>
@@ -556,3 +689,15 @@ function referralStatusColor(status: string) {
         </v-card>
     </template>
 </template>
+
+<style scoped>
+.info-card {
+    border-color: #e0e0e0 !important;
+    transition: all .25s ease;
+}
+
+.text-overline {
+    font-size: .72rem;
+    letter-spacing: .08em;
+}
+</style>
