@@ -7,7 +7,8 @@ const route = useRoute()
 
 const isActive = computed(() => {
   if (!props.item?.to || props.item.type === 'external') return false
-  return route.path.startsWith(props.item.to)
+  if (route.path === props.item.to) return true
+  return route.path.startsWith(props.item.to + '/')
 })
 </script>
 
