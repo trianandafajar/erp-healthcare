@@ -279,7 +279,7 @@ async function deleteSchedule(scheduleId: string) {
 
     <template v-else>
         <!-- Header -->
-        <v-card class="mb-4 p-12">
+        <v-card variant="flat" class="mb-4 p-12">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center ga-4">
                     <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/doctors/${id}`)" />
@@ -302,7 +302,7 @@ async function deleteSchedule(scheduleId: string) {
             <v-col cols="12" md="8">
 
                 <!-- Professional Info -->
-                <v-card class="mb-4">
+                <v-card variant="flat" class="mb-4">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="primary" variant="tonal" size="36">
@@ -350,7 +350,7 @@ async function deleteSchedule(scheduleId: string) {
                 </v-card>
 
                 <!-- Schedules -->
-                <v-card>
+                <v-card variant="flat">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="info" variant="tonal" size="36">
@@ -441,7 +441,7 @@ async function deleteSchedule(scheduleId: string) {
 
             <!-- kanan -->
             <v-col cols="12" md="4">
-                <v-card class="mb-4">
+                <v-card variant="flat" class="mb-4">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="success" variant="tonal" size="36">
@@ -504,7 +504,7 @@ async function deleteSchedule(scheduleId: string) {
                     </v-card-text>
                 </v-card>
 
-                <v-card class="mb-4">
+                <v-card variant="flat" class="mb-4">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="warning" variant="tonal" size="36">
@@ -519,7 +519,7 @@ async function deleteSchedule(scheduleId: string) {
                             density="comfortable" prepend-inner-icon="mdi-shield-check" />
                     </v-card-text>
                 </v-card>
-                <v-card class="mb-4">
+                <v-card variant="flat" class="mb-4">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="success" variant="tonal" size="36">
@@ -538,13 +538,13 @@ async function deleteSchedule(scheduleId: string) {
                     </v-card-text>
                 </v-card>
                 <!-- Save button -->
-                <v-card>
+                <v-card variant="flat">
                     <v-card-text class="pa-5">
                         <v-btn block color="primary" size="large" prepend-icon="mdi-content-save" :loading="saving"
                             @click="saveProfile">
                             Save Changes
                         </v-btn>
-                        <v-btn block variant="text" class="mt-2" @click="navigateTo(`/doctors/${id}`)">
+                        <v-btn block variant="tonal" class="mt-2" @click="navigateTo(`/doctors/${id}`)">
                             Cancel
                         </v-btn>
                     </v-card-text>

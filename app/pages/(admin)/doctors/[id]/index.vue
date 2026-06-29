@@ -113,7 +113,7 @@ function genderColor(gender?: string | null) {
 
     <template v-else>
         <!-- Header -->
-        <v-card class="mb-4">
+        <v-card variant="flat" class="mb-4">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center justify-space-between flex-wrap ga-4">
                     <div class="d-flex align-center ga-4">
@@ -165,7 +165,7 @@ function genderColor(gender?: string | null) {
                 { label: 'Medical Records', value: stats?.total_medical_records, icon: 'mdi-file-document', color: 'secondary' },
                 { label: 'Prescriptions', value: stats?.total_prescriptions, icon: 'mdi-pill', color: 'error' },
             ]" :key="s.label">
-                <v-card height="100%">
+                <v-card variant="flat" height="100%">
                     <v-card-text class="d-flex align-center ga-3 pa-4">
                         <v-avatar :color="s.color" variant="tonal" size="40">
                             <v-icon :icon="s.icon" size="20" />
@@ -180,7 +180,7 @@ function genderColor(gender?: string | null) {
         </v-row>
 
         <!-- Tabs -->
-        <v-card>
+        <v-card variant="flat">
             <v-tabs v-model="activeTab" color="primary" density="comfortable">
                 <v-tab value="info" prepend-icon="mdi-account">Info</v-tab>
                 <v-tab value="schedules" prepend-icon="mdi-calendar-clock">
@@ -211,67 +211,218 @@ function genderColor(gender?: string | null) {
                 <v-window-item value="info">
                     <v-card-text class="pa-6">
                         <v-row>
-                            <!-- Professional Info -->
+                            <!-- Professional Information -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" height="100%">
-                                    <v-card-item>
+                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="lg" class="h-100">
+                                    <v-card-item class="py-4">
                                         <template #prepend>
-                                            <v-avatar color="primary" variant="tonal" size="36">
-                                                <v-icon icon="mdi-stethoscope" size="20" />
+                                            <v-avatar color="primary" variant="tonal" size="42">
+                                                <v-icon icon="mdi-stethoscope" />
                                             </v-avatar>
                                         </template>
-                                        <v-card-title class="text-body-1">Professional Information</v-card-title>
+
+                                        <div>
+                                            <div class="text-h6 font-weight-bold">
+                                                Professional Information
+                                            </div>
+
+                                            <div class="text-caption text-medium-emphasis">
+                                                Medical credentials and practice details
+                                            </div>
+                                        </div>
                                     </v-card-item>
+
                                     <v-divider />
-                                    <v-list density="compact">
-                                        <v-list-item title="Specialization" :subtitle="doctor.specialization ?? '-'" />
-                                        <v-list-item title="STR Number" :subtitle="doctor.str_number ?? '-'" />
-                                        <v-list-item title="SIP Number" :subtitle="doctor.sip_number ?? '-'" />
-                                        <v-list-item title="Department" :subtitle="department?.name ?? '-'" />
-                                        <v-list-item title="Experience"
-                                            :subtitle="doctor.experience_years ? `${doctor.experience_years} years` : '-'" />
-                                        <v-list-item title="Consultation Fee"
-                                            :subtitle="formatCurrency(doctor.consultation_fee)" />
-                                        <v-list-item title="Phone" :subtitle="doctor.phone ?? '-'" />
-                                    </v-list>
+
+                                    <v-card-text class="pa-6">
+                                        <v-row>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Specialization
+                                                </div>
+
+                                                <div class="text-body-1 font-weight-bold">
+                                                    {{ doctor.specialization || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Department
+                                                </div>
+
+                                                <div class="text-body-1 font-weight-bold">
+                                                    {{ department?.name || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Experience
+                                                </div>
+
+                                                <div class="text-body-1">
+                                                    {{ doctor.experience_years || 0 }}
+                                                    Years
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Consultation Fee
+                                                </div>
+
+                                                <div class="text-h6 font-weight-bold text-primary">
+                                                    {{ formatCurrency(doctor.consultation_fee) }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    STR Number
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ doctor.str_number || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    SIP Number
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ doctor.sip_number || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Phone Number
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ doctor.phone || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                        </v-row>
+                                    </v-card-text>
                                 </v-card>
                             </v-col>
 
-                            <!-- Account Info -->
+                            <!-- Account Information -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" height="100%">
-                                    <v-card-item>
+                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="lg" class="h-100">
+                                    <v-card-item class="py-4">
                                         <template #prepend>
-                                            <v-avatar color="secondary" variant="tonal" size="36">
-                                                <v-icon icon="mdi-shield-account" size="20" />
+                                            <v-avatar color="secondary" variant="tonal" size="42">
+                                                <v-icon icon="mdi-account-circle-outline" />
                                             </v-avatar>
                                         </template>
-                                        <v-card-title class="text-body-1">Account Information</v-card-title>
+
+                                        <div>
+                                            <div class="text-h6 font-weight-bold">
+                                                Account Information
+                                            </div>
+
+                                            <div class="text-caption text-medium-emphasis">
+                                                User profile and account details
+                                            </div>
+                                        </div>
                                     </v-card-item>
+
                                     <v-divider />
-                                    <v-list density="compact">
-                                        <v-list-item title="Full Name" :subtitle="profile?.full_name ?? '-'" />
-                                        <v-list-item title="Email" :subtitle="profile?.email ?? '-'" />
-                                        <v-list-item title="Account Status" :subtitle="profile?.status ?? '-'" />
-                                        <v-list-item title="Joined" :subtitle="formatDate(doctor.created_at)" />
-                                        <v-list-item title="Last Updated" :subtitle="formatDate(doctor.updated_at)" />
-                                    </v-list>
+
+                                    <v-card-text class="pa-6">
+                                        <v-row>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Full Name
+                                                </div>
+
+                                                <div class="text-body-1 font-weight-bold">
+                                                    {{ profile?.full_name || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Email Address
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ profile?.email || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis mb-2">
+                                                    Account Status
+                                                </div>
+
+                                                <v-chip :color="profile?.status === 'active'
+                                                    ? 'success'
+                                                    : 'warning'" variant="tonal" size="small">
+                                                    {{ profile?.status || "-" }}
+                                                </v-chip>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Joined
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ formatDate(doctor.created_at) }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Last Updated
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ formatDate(doctor.updated_at) }}
+                                                </div>
+                                            </v-col>
+
+                                        </v-row>
+                                    </v-card-text>
                                 </v-card>
                             </v-col>
 
                             <!-- Biography -->
                             <v-col cols="12" v-if="doctor.biography">
-                                <v-card variant="outlined">
-                                    <v-card-item>
-                                        <template #prepend>
-                                            <v-avatar color="info" variant="tonal" size="36">
-                                                <v-icon icon="mdi-text-account" size="20" />
-                                            </v-avatar>
-                                        </template>
-                                        <v-card-title class="text-body-1">Biography</v-card-title>
+                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="lg">
+                                    <v-card-item class="py-4">
+                                    <template #prepend>
+                                        <v-avatar color="info" variant="tonal" size="42">
+                                            <v-icon icon="mdi-text-box-outline" />
+                                        </v-avatar>
+                                    </template>
+
+                                    <div>
+                                        <div class="text-h6 font-weight-bold">
+                                            Biography
+                                        </div>
+
+                                        <div class="text-caption text-medium-emphasis">
+                                            Doctor profile and background
+                                        </div>
+                                    </div>
                                     </v-card-item>
+
                                     <v-divider />
-                                    <v-card-text class="text-body-2 text-medium-emphasis">
+
+                                    <v-card-text class="text-body-1 text-medium-emphasis" style="
+                            line-height:1.9;
+                            white-space:pre-line;
+                        ">
                                         {{ doctor.biography }}
                                     </v-card-text>
                                 </v-card>
@@ -289,7 +440,7 @@ function genderColor(gender?: string | null) {
                         </div>
                         <v-row v-else>
                             <v-col v-for="schedule in schedules" :key="schedule.id" cols="12" sm="6" md="4">
-                                <v-card variant="outlined">
+                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="md">
                                     <v-card-item>
                                         <template #prepend>
                                             <v-avatar color="primary" variant="tonal" size="36">
