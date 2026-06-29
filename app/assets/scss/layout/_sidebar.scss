@@ -127,59 +127,82 @@
   }
 }
 
-.v-navigation-drawer--rail {
+.v-navigation-drawer {
+  &--rail {
+    .scrollnavbar .v-list .v-list-group__items,
+    .hide-menu {
+      opacity: 0;
+    }
+  
+    .scrollnavbar {
+      .v-list-item {
+        .v-list-item__prepend {
+          margin-left: 12 !important;
+  
+          // width: 24px !important;
+          // min-width: 24px !important;
+          .anticon {
+            svg {
+              width: 20px;
+              height: 20px;
+            }
+          }
+        }
+      }
+  
+      .v-list-group__items .v-list-item,
+      .v-list-item {
+        padding-inline-start: calc(18px + var(--indent-padding) / 2) !important;
+      }
+  
+      .ExtraBox {
+        display: none;
+      }
+    }
+  
+    .sidebar-user {
+      margin-left: -6px;
+    }
+  
+    .leftPadding {
+      margin-left: 0px;
+    }
+  
+    &.leftSidebar {
+      .v-list-subheader {
+        display: block;
+        height: 0;
+        min-height: 0;
+        padding: 0;
+        margin: 0;
+        opacity: 0;
+        overflow: hidden;
+        transform: translateX(-6px);
+        transition:
+          height 0.2s ease,
+          min-height 0.2s ease,
+          opacity 0.2s ease,
+          transform 0.2s ease;
+      }
 
-  .scrollnavbar .v-list .v-list-group__items,
-  .hide-menu {
-    opacity: 0;
-  }
+      .v-navigation-drawer__content {
+        .pa-5 {
+          padding-left: 10px !important;
 
-  .scrollnavbar {
-    .v-list-item {
-      .v-list-item__prepend {
-        margin-left: 12 !important;
-
-        // width: 24px !important;
-        // min-width: 24px !important;
-        .anticon {
-          svg {
-            width: 20px;
-            height: 20px;
+          .logo {
+            padding-left: 4px;
           }
         }
       }
     }
-
-    .v-list-group__items .v-list-item,
-    .v-list-item {
-      padding-inline-start: calc(18px + var(--indent-padding) / 2) !important;
-    }
-
-    .ExtraBox {
-      display: none;
-    }
   }
-
-  .sidebar-user {
-    margin-left: -6px;
-  }
-
-  .leftPadding {
-    margin-left: 0px;
-  }
-
-  &.leftSidebar {
-    .v-list-subheader {
-      display: none;
-    }
-
-    .v-navigation-drawer__content {
-      .pa-5 {
-        padding-left: 10px !important;
-
-        .logo {
-          padding-left: 4px;
-        }
+  &--is-hovering {
+    &.leftSidebar {
+      .v-list-subheader {
+        height: 40px;
+        min-height: 40px;
+        opacity: 1;
+        transform: translateX(0);
       }
     }
   }
