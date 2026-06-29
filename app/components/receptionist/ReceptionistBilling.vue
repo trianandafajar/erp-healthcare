@@ -269,7 +269,9 @@ function openReceipt(invoiceNumber: string) {
             <v-card-actions class="px-6 pb-4">
                 <v-spacer />
                 <v-btn variant="text" @click="createDialog = false">Cancel</v-btn>
-                <v-btn color="primary" variant="flat" :loading="createLoading" @click="submitCreateBilling">
+                <v-btn color="primary" variant="flat" :loading="createLoading" :disable="createLoading"
+                    :style="createLoading ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    @click="submitCreateBilling">
                     Create Invoice
                 </v-btn>
             </v-card-actions>

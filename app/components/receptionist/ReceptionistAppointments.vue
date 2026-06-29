@@ -377,7 +377,8 @@ async function updateStatus(id: string, status: string) {
             </v-card-text>
             <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                <v-btn color="primary" variant="flat" :loading="loading" @click="createAppointment">
+                <v-btn color="primary" variant="flat" :loading="loading" :disable="loading"
+                    :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="createAppointment">
                     Save
                 </v-btn>
             </v-card-actions>
