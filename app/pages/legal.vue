@@ -33,7 +33,7 @@ const pageTitles: Record<string, string> = {
 }
 
 useSeoMeta({
-    title: computed(() => `${pageTitles[activePage.value] ?? 'Legal'} – HealthData ERP`),
+    title: computed(() => pageTitles[activePage.value] ?? 'Legal'),
 })
 
 const navItems = [

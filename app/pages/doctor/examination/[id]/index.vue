@@ -10,7 +10,7 @@ definePageMeta({
 const { can } = usePermission()
 
 useSeoMeta({
-    title: 'Examination Input Page',
+    title: 'Examination Details',
     ogTitle: 'My Amazing Site',
     description: 'This is my amazing site, let me tell you all about it.',
     ogDescription: 'This is my amazing site, let me tell you all about it.',

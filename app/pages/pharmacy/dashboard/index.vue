@@ -15,6 +15,7 @@ useSeoMeta({
     ogDescription: 'Overview of pharmacy prescription and stock operations.',
     twitterCard: 'summary_large_image',
 })
+
 </script>
 
 <template>
