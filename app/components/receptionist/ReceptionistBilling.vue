@@ -26,6 +26,44 @@ const snackbarColor = ref<'success' | 'error'>('success')
 const { data: patientsData, status } = useFetch<{ patients: any[] }>('/api/patients')
 const patients = computed(() => patientsData.value?.patients ?? [])
 
+const { data: departmentsData } = useFetch<{ departments: any[] }>('/api/departments')
+const departments = computed(() => departmentsData.value?.departments ?? [])
+
+const medicalRecords = ref<{ id: string; diagnosis: string; date: string }[]>([])
+
+watch(
+    () => form.value.patientId,
+    async (patientId) => {
+        if (!patientId) {
+            medicalRecords.value = []
+            form.value.medicalRecordId = ''
+            return
+        }
+        try {
+            const res = await $fetch<{ medicalRecords: any[] }>(
+                `/api/patients/${patientId}/medical-records`
+            )
+            medicalRecords.value = res.medicalRecords ?? []
+            if (medicalRecords.value.length === 1) {
+                const firstRecord = medicalRecords.value[0]
+                form.value.medicalRecordId = firstRecord?.id ?? ''
+            } else {
+                form.value.medicalRecordId = ''
+            }
+        } catch {
+            medicalRecords.value = []
+        }
+    },
+    { immediate: false }
+)
+
+const medicalRecordOptions = computed(() =>
+    medicalRecords.value.map((mr) => ({
+        title: `${mr.diagnosis} — ${new Date(mr.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`,
+        id: mr.id,
+    }))
+)
+
 async function submitCreateBilling() {
     createLoading.value = true
 
@@ -212,11 +250,14 @@ function openReceipt(invoiceNumber: string) {
             <v-card-title class="text-h6 pa-6 pb-2">New Billing Invoice</v-card-title>
             <v-card-text class="d-flex flex-column ga-3">
                 <v-select v-model="form.patientId" :items="patients" item-title="full_name" item-value="id"
-                    label="Patient" />
-                <v-text-field v-model="form.medicalRecordId" label="Medical Record ID" variant="outlined"
-                    density="compact" />
+                    label="Patient" variant="outlined" density="compact" />
+                <v-select v-model="form.medicalRecordId" :items="medicalRecordOptions" item-title="title"
+                    item-value="id" label="Medical Record" variant="outlined" density="compact"
+                    :disabled="!form.patientId" :loading="medicalRecords.length === 0 && !!form.patientId"
+                    no-data-text="No medical records found for this patient" />
                 <v-text-field v-model="form.serviceName" label="Service Name" variant="outlined" density="compact" />
-                <v-text-field v-model="form.department" label="Department" variant="outlined" density="compact" />
+                <v-select v-model="form.department" :items="departments" item-title="name" item-value="name"
+                    label="Department" variant="outlined" density="compact" />
                 <v-text-field v-model.number="form.amount" label="Amount" type="number" variant="outlined"
                     density="compact" prefix="$" />
                 <v-select v-model="form.paymentMethod"
@@ -234,7 +275,10 @@ function openReceipt(invoiceNumber: string) {
             </v-card-actions>
         </v-card>
     </v-dialog>
-    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="2500">
+    <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
         {{ snackbarMessage }}
+        <template #actions>
+            <v-btn variant="text" icon="mdi-close" @click="snackbar = false" />
+        </template>
     </v-snackbar>
 </template>
