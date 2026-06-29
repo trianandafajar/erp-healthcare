@@ -351,7 +351,7 @@ function formatDate(value: string) {
                 </v-btn>
 
                 <v-btn color="primary" variant="flat" min-width="120" :loading="loadingSave"
-                    :style="!isAdjustFormValid || loadingAdjust ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    :style="!isSaveFormValid || loadingSave ? 'cursor: not-allowed; pointer-events: auto;' : ''"
                     :disabled="!isSaveFormValid || loadingSave" @click="saveStock">
                     {{ mode === 'create' ? 'Add Medicine' : 'Save Changes' }}
                 </v-btn>
