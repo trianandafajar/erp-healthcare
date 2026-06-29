@@ -108,7 +108,7 @@ function formatTime(timeStr?: string) {
 
     <template v-else>
         <!-- Header -->
-        <v-card class="mb-4">
+        <v-card variant="flat" class="mb-4">
             <v-card-item>
                 <div class="d-flex justify-space-between align-center">
                     <div class="d-flex align-center ga-3">
@@ -158,7 +158,7 @@ function formatTime(timeStr?: string) {
         </v-card>
 
         <!-- Tabs -->
-        <v-card>
+        <v-card variant="flat">
             <v-tabs v-model="activeTab" color="primary" density="comfortable">
                 <v-tab value="vitals" prepend-icon="mdi-heart-pulse">Vital Signs</v-tab>
                 <v-tab value="soap" prepend-icon="mdi-stethoscope">SOAP Notes</v-tab>
@@ -185,7 +185,8 @@ function formatTime(timeStr?: string) {
                     <v-card-text>
                         <v-row>
                             <v-col v-for="vital in vitalItems" :key="vital.label" cols="6" md="">
-                                <v-card variant="outlined" class="text-center pa-4" height="140">
+                                <v-card :style="{ borderColor: '#e0e0e0' }" variant="outlined" class="text-center pa-4"
+                                    height="140">
                                     <v-icon :icon="vital.icon" :color="vital.color" size="28" class="mb-2" />
                                     <div class="text-h6 font-weight-bold">{{ vital.value }}</div>
                                     <div class="text-caption text-medium-emphasis">{{ vital.label }}</div>
@@ -201,7 +202,7 @@ function formatTime(timeStr?: string) {
                     <v-card-text>
                         <v-row align="stretch">
                             <v-col v-for="soap in soapItems" :key="soap.key" cols="12" md="6">
-                                <v-card variant="outlined" class="fill-height">
+                                <v-card :style="{ borderColor: '#e0e0e0' }" variant="outlined" class="fill-height">
                                     <v-card-item>
                                         <template #prepend>
                                             <v-avatar :color="soap.color" variant="tonal" size="36">
@@ -218,7 +219,7 @@ function formatTime(timeStr?: string) {
                             </v-col>
 
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" class="fill-height">
+                                <v-card :style="{ borderColor: '#e0e0e0' }" variant="outlined" class="fill-height">
                                     <v-card-item>
                                         <template #prepend>
                                             <v-avatar color="warning" variant="tonal" size="36">
@@ -238,7 +239,7 @@ function formatTime(timeStr?: string) {
                             </v-col>
 
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" class="fill-height">
+                                <v-card :style="{ borderColor: '#e0e0e0' }" variant="outlined" class="fill-height">
                                     <v-card-item>
                                         <template #prepend>
                                             <v-avatar color="secondary" variant="tonal" size="36">
