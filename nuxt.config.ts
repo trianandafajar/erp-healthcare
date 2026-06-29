@@ -1,3 +1,5 @@
+import vuetify from 'vite-plugin-vuetify'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: {
@@ -23,11 +25,16 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    plugins: [
+      vuetify({
+        autoImport: true,
+      }),
+    ],
     ssr: {
       noExternal: ['vuetify'],
     },
     optimizeDeps: {
-      include: ['vuetify'],
+      include: ['vuetify', '@ant-design/icons-vue'],
     },
   },
 

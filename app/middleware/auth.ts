@@ -16,25 +16,17 @@ function getAllowedRolesForPath(path: string): string[] | null {
 }
 
 export default defineNuxtRouteMiddleware(async (to) => {
-    const authStore = useAuthStore()
-    const supabase = useSupabase()
-    if (!supabase) return navigateTo('/login')
-
     const allowedRoles = getAllowedRolesForPath(to.path)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return navigateTo('/login')
+    const authState = await ensureAuthState()
+    if (!authState?.user) {
+        if (import.meta.server) return
+        return navigateTo('/login', { replace: true })
+    }
 
     if (!allowedRoles) return
-
-    const { data } = await supabase
-        .from('user_roles')
-        .select('roles(name)')
-        .eq('user_id', user.id)
-        .returns<any[]>()
-
-    const role = (data as any)?.[0]?.roles?.name as string | undefined
+    const role = authState.role ?? null
 
     if (role && allowedRoles.includes(role)) return
 
-    return navigateTo(getDashboardPath(role ?? authStore.role ?? null))
+    return navigateTo(getDashboardPath(role), { replace: true })
 })

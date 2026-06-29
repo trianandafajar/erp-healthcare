@@ -1,14 +1,83 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
-import doctorSidebarItem from './doctorSidebarItem';
+import {
+  AppstoreOutlined,
+  CalendarOutlined,
+  TeamOutlined,
+  FileTextOutlined,
+  AuditOutlined,
+  ShareAltOutlined,
+  HistoryOutlined,
+} from '@ant-design/icons-vue';
 import NavGroup from './NavGroup/NavGroup.vue';
 import NavItem from './NavItem/NavItem.vue';
 import NavCollapse from './NavCollapse/NavCollapse.vue';
 import Logo from '../logo/LogoDark.vue';
 
+type MenuItem = {
+  header?: string
+  title?: string
+  icon?: object
+  to?: string
+  divider?: boolean
+  chip?: string
+  chipColor?: string
+  chipVariant?: string
+  chipIcon?: string
+  children?: MenuItem[]
+  disabled?: boolean
+  type?: string
+  subCaption?: string
+}
+
 const customizer = useCustomizerStore();
-const sidebarMenu = shallowRef(doctorSidebarItem);
+const sidebarMenu = shallowRef<MenuItem[]>([
+  {
+    header: 'Dashboard',
+  },
+  {
+    title: 'Dashboard',
+    icon: AppstoreOutlined,
+    to: '/doctor/dashboard',
+  },
+  {
+    header: 'Practice',
+  },
+  {
+    title: 'My Schedule',
+    icon: CalendarOutlined,
+    to: '/doctor/schedule',
+  },
+  {
+    title: "Today's Patients",
+    icon: TeamOutlined,
+    to: '/doctor/patients/today',
+  },
+  {
+    title: 'Patient History',
+    icon: HistoryOutlined,
+    to: '/doctor/patients/history',
+  },
+  {
+    header: 'Medical',
+  },
+  {
+    title: 'Examination',
+    icon: AuditOutlined,
+    to: '/doctor/examination',
+  },
+  {
+    title: 'Medical Records',
+    icon: FileTextOutlined,
+    to: '/doctor/medical-records',
+  },
+  {
+    title: 'Referrals',
+    icon: ShareAltOutlined,
+    to: '/doctor/referrals',
+  },
+]);
 </script>
 
 <template>

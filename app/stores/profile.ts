@@ -28,7 +28,10 @@ export const useProfileStore = defineStore('profile', () => {
         if (inFlight) return inFlight
 
         pending.value = true
-        inFlight = $fetch<CurrentProfileResponse>('/api/profile')
+        inFlight = $fetch<CurrentProfileResponse>('/api/profile', {
+            timeout: 8000,
+            retry: 0,
+        })
             .then((response) => {
                 data.value = response
                 loaded.value = true

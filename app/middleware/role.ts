@@ -1,18 +1,11 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-    const supabase = useSupabase()
+    const authState = await ensureAuthState()
+    if (!authState?.user) {
+        if (import.meta.server) return
+        return navigateTo('/login', { replace: true })
+    }
 
-    if (!supabase) return navigateTo('/login')
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return navigateTo('/login')
-
-    const { data } = await supabase
-        .from('user_roles')
-        .select('roles(name)')
-        .eq('user_id', user.id)
-        .returns<any[]>()
-
-    const role = (data as any)?.[0]?.roles?.name
+    const role = authState.role
     const requiredRoles = to.meta.role
         ? [to.meta.role]
         : Array.isArray(to.meta.roles)
@@ -33,5 +26,5 @@ export default defineNuxtRouteMiddleware(async (to) => {
         patient: '/patient/dashboard',
     }
 
-    return navigateTo(redirectMap[role] ?? '/dashboard')
+    return navigateTo(redirectMap[role ?? ''] ?? '/dashboard', { replace: true })
 })
