@@ -27,6 +27,7 @@
     "resend": "^6.14.0",
     "vue": "^3.5.35",
     "vue3-apexcharts": "^1.11.1",
+    "vue3-perfect-scrollbar": "^2.0.0",
     "vuetify": "^3.7.6"
   },
   "devDependencies": {
