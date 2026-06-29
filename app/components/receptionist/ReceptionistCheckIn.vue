@@ -293,8 +293,8 @@ async function confirmCheckIn() {
             </v-card-text>
             <v-card-actions class="px-6 pb-4">
                 <v-spacer />
-                <v-btn variant="text" @click="queueDialog = false">Close</v-btn>
-                <v-btn color="secondary" variant="tonal" prepend-icon="mdi-printer-outline"
+                <v-btn color="secondary" variant="tonal" @click="queueDialog = false">Close</v-btn>
+                <v-btn color="primary" variant="flat" prepend-icon="mdi-printer-outline"
                     to="/receptionist/queue/print">
                     Print
                 </v-btn>
