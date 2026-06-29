@@ -118,6 +118,7 @@ export const initialMovements: StockMovementItem[] = [
         createdAt: '2026-06-16T07:20:00.000Z',
         batchNumber: 'B-PR-2606',
         expiredDate: '2027-02-28T00:00:00.000Z',
+        performedBy: 'Admin User',
     },
     {
         id: 'mov-002',
@@ -131,6 +132,7 @@ export const initialMovements: StockMovementItem[] = [
         createdAt: '2026-06-16T09:10:00.000Z',
         batchNumber: 'B-AX-2606',
         expiredDate: '2027-06-30T00:00:00.000Z',
+        performedBy: 'Admin User',
     },
     {
         id: 'mov-003',
@@ -144,6 +146,7 @@ export const initialMovements: StockMovementItem[] = [
         createdAt: '2026-06-15T13:30:00.000Z',
         batchNumber: 'B-ON-2605',
         expiredDate: '2026-12-31T00:00:00.000Z',
+        performedBy: 'Admin User',
     },
 ]
 

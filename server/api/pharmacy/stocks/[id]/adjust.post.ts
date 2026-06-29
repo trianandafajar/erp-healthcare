@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    const { data: { user } } = await serverSupabase(event).auth.getUser()
     const admin = supabaseAdmin()
 
     const { data: stock, error: stockError } = await admin
@@ -53,6 +54,7 @@ export default defineEventHandler(async (event) => {
         note: `Adjusted by ${quantityDelta >= 0 ? '+' : ''}${quantityDelta}`,
         batch_number: stock.batch_number,
         expired_date: stock.expired_date,
+        created_by: user?.id ?? null,
     })
 
     return { ok: true }

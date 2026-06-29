@@ -32,6 +32,7 @@ const filteredMovements = computed(() => {
             item.note,
             item.batchNumber,
             item.expiredDate,
+            item.performedBy,
         ]
             .join(' ')
             .toLowerCase()
@@ -110,13 +111,14 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                         <th class="text-left text-caption font-weight-bold text-uppercase">{{ metaLabel }}</th>
                         <th class="text-left text-caption font-weight-bold text-uppercase">Quantity</th>
                         <th class="text-left text-caption font-weight-bold text-uppercase">Batch / Expiry</th>
+                        <th class="text-left text-caption font-weight-bold text-uppercase">Performed By</th>
                         <th class="text-left text-caption font-weight-bold text-uppercase">Logged At</th>
                         <th class="text-left text-caption font-weight-bold text-uppercase">Note</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-if="filteredMovements.length === 0">
-                        <td colspan="7" class="text-center py-8 text-medium-emphasis">
+                        <td colspan="8" class="text-center py-8 text-medium-emphasis">
                             No logs found
                         </td>
                     </tr>
@@ -150,6 +152,9 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                             <div class="text-body-2" v-else>
                                 {{ formatDateTime(movement.createdAt) }}
                             </div>
+                        </td>
+                        <td class="py-3 text-body-2">
+                            {{ movement.performedBy || '-' }}
                         </td>
                         <td class="py-3 text-body-2 text-medium-emphasis">
                             {{ formatDateTime(movement.createdAt) }}
@@ -200,6 +205,10 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
                     <v-col cols="12" md="6">
                         <div class="text-caption text-medium-emphasis">Quantity</div>
                         <div class="text-body-2">{{ selectedMovement.quantity }}</div>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                        <div class="text-caption text-medium-emphasis">Performed By</div>
+                        <div class="text-body-2">{{ selectedMovement.performedBy || '-' }}</div>
                     </v-col>
                     <v-col cols="12" md="6" v-if="props.type === 'Incoming'">
                         <div class="text-caption text-medium-emphasis">Batch Number</div>

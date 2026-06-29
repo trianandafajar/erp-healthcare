@@ -640,7 +640,8 @@ insert into public.medicine_stock_movements (
     note,
     batch_number,
     expired_date,
-    created_at
+    created_at,
+    created_by
 )
 values
     (
@@ -655,7 +656,8 @@ values
         'Restocked for ward requests',
         'B-PR-2606',
         date '2027-02-28',
-        now() - interval '1 day'
+        now() - interval '1 day',
+        null
     ),
     (
         'eeeeeeee-ffff-0000-1111-222222222222',
@@ -669,7 +671,8 @@ values
         'Postoperative patient supply',
         'B-AX-2606',
         date '2027-06-30',
-        now() - interval '12 hours'
+        now() - interval '12 hours',
+        null
     ),
     (
         'eeeeeeee-ffff-0000-1111-333333333333',
@@ -683,7 +686,8 @@ values
         'Small batch top-up',
         'B-ON-2605',
         date '2026-12-31',
-        now() - interval '1 day'
+        now() - interval '1 day',
+        null
     )
 on conflict (id) do update
 set medicine_stock_id = excluded.medicine_stock_id,
@@ -696,7 +700,8 @@ set medicine_stock_id = excluded.medicine_stock_id,
     note = excluded.note,
     batch_number = excluded.batch_number,
     expired_date = excluded.expired_date,
-    created_at = excluded.created_at;
+    created_at = excluded.created_at,
+    created_by = excluded.created_by;
 
 -- -------------------------------------------------------------------
 -- Nurse vitals

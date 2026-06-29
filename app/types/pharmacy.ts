@@ -48,4 +48,5 @@ export type StockMovementItem = {
     createdAt: string
     batchNumber: string
     expiredDate: string
+    performedBy?: string | null
 }

@@ -13,6 +13,7 @@ type MovementRow = {
     batch_number: string | null
     expired_date: string | null
     created_at: string
+    created_by: string | null
 }
 
 export default defineEventHandler(async () => {
@@ -31,9 +32,24 @@ export default defineEventHandler(async () => {
         })
     }
 
-    return (data ?? []).map((item) => {
-        const row = item as unknown as MovementRow
+    const rows = (data ?? []) as unknown as MovementRow[]
 
+    const userIds = [...new Set(rows.map((r) => r.created_by).filter(Boolean))] as string[]
+
+    let profileMap: Record<string, string> = {}
+
+    if (userIds.length > 0) {
+        const { data: profiles } = await admin
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', userIds)
+
+        for (const p of profiles ?? []) {
+            profileMap[p.id] = p.full_name ?? 'Unknown'
+        }
+    }
+
+    return rows.map((row) => {
         return {
             id: row.id,
             type: row.movement_type,
@@ -47,6 +63,7 @@ export default defineEventHandler(async () => {
             createdAt: row.created_at,
             batchNumber: row.batch_number ?? '-',
             expiredDate: row.expired_date ?? row.created_at,
+            performedBy: row.created_by ? (profileMap[row.created_by] ?? 'Unknown') : null,
         } satisfies StockMovementItem
     })
 })

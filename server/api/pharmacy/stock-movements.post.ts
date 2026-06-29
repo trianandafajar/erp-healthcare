@@ -22,6 +22,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    const { data: { user } } = await serverSupabase(event).auth.getUser()
     const admin = supabaseAdmin()
     const medicineName = payload.medicineName.trim()
     const dosage = payload.dosage.trim()
@@ -130,6 +131,7 @@ export default defineEventHandler(async (event) => {
             note: payload.note?.trim() || '',
             batch_number: batchNumber,
             expired_date: expiredDate,
+            created_by: user?.id ?? null,
         })
         .select('*')
         .single()
