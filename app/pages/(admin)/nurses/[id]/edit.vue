@@ -185,7 +185,7 @@ function getInitials(name?: string | null) {
 
     <template v-else>
         <!-- Header -->
-        <v-card class="mb-4">
+        <v-card variant="flat" class="mb-4">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center ga-4">
                     <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/nurses/${id}`)" />
@@ -208,7 +208,7 @@ function getInitials(name?: string | null) {
         <v-row>
             <v-col cols="12" md="8">
                 <!-- Nurse Information -->
-                <v-card class="mb-4">
+                <v-card variant="flat" class="mb-4">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="primary" variant="tonal" size="36">
@@ -263,7 +263,7 @@ function getInitials(name?: string | null) {
                 </v-card>
 
                 <!-- Assignment -->
-                <v-card>
+                <v-card variant="flat">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="secondary" variant="tonal" size="36">
@@ -327,7 +327,7 @@ function getInitials(name?: string | null) {
 
             <!-- Actions -->
             <v-col cols="12" md="4">
-                <v-card class="mb-4">
+                <v-card variant="flat" class="mb-4">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="success" variant="tonal" size="36">
@@ -389,20 +389,9 @@ function getInitials(name?: string | null) {
 
                     </v-card-text>
                 </v-card>
-                <v-card>
-                    <v-card-text class="pa-5">
-                        <v-btn block color="primary" size="large" prepend-icon="mdi-content-save" :loading="saving"
-                            @click="save">
-                            Save Changes
-                        </v-btn>
-                        <v-btn block variant="text" class="mt-2" @click="navigateTo(`/nurses/${id}`)">
-                            Cancel
-                        </v-btn>
-                    </v-card-text>
-                </v-card>
 
                 <!-- Nurse summary card -->
-                <v-card class="mt-4" v-if="nurse">
+                <v-card variant="flat" class="mb-4" v-if="nurse">
                     <v-card-item>
                         <template #prepend>
                             <v-avatar color="info" variant="tonal" size="36">
@@ -426,6 +415,18 @@ function getInitials(name?: string | null) {
                             </template>
                         </v-list-item>
                     </v-list>
+                </v-card>
+
+                <v-card variant="flat">
+                    <v-card-text class="pa-5">
+                        <v-btn block color="primary" size="large" prepend-icon="mdi-content-save" :loading="saving"
+                            @click="save">
+                            Save Changes
+                        </v-btn>
+                        <v-btn block variant="text" class="mt-2" @click="navigateTo(`/nurses/${id}`)">
+                            Cancel
+                        </v-btn>
+                    </v-card-text>
                 </v-card>
             </v-col>
         </v-row>

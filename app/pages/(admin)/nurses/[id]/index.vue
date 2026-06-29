@@ -85,7 +85,7 @@ const careNoteColor: Record<string, string> = {
 
     <template v-else>
         <!-- Header -->
-        <v-card class="mb-4">
+        <v-card variant="flat" class="mb-4">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center justify-space-between flex-wrap ga-4">
                     <div class="d-flex align-center ga-4">
@@ -131,7 +131,7 @@ const careNoteColor: Record<string, string> = {
                 { label: 'Completed', value: stats?.procedures_completed, icon: 'mdi-check-all', color: 'success' },
                 { label: 'Vitals Today', value: stats?.vitals_today, icon: 'mdi-calendar-today', color: 'teal' },
             ]" :key="s.label">
-                <v-card height="100%">
+                <v-card variant="flat" height="100%">
                     <v-card-text class="d-flex align-center ga-3 pa-4">
                         <v-avatar :color="s.color" variant="tonal" size="40">
                             <v-icon :icon="s.icon" size="20" />
@@ -146,7 +146,7 @@ const careNoteColor: Record<string, string> = {
         </v-row>
 
         <!-- Tabs -->
-        <v-card>
+        <v-card variant="flat">
             <v-tabs v-model="activeTab" color="primary" density="comfortable">
                 <v-tab value="info" prepend-icon="mdi-information">Info</v-tab>
                 <v-tab value="schedules" prepend-icon="mdi-calendar-clock">
@@ -177,70 +177,187 @@ const careNoteColor: Record<string, string> = {
                 <v-window-item value="info">
                     <v-card-text class="pa-6">
                         <v-row>
+
+                            <!-- Nurse Details -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined">
-                                    <v-card-item>
+                                <v-card variant="outlined" rounded="lg" class="h-100 info-card">
+                                    <v-card-item class="py-4">
                                         <template #prepend>
-                                            <v-avatar color="primary" variant="tonal" size="36">
-                                                <v-icon icon="mdi-account-heart" size="20" />
+                                            <v-avatar color="primary" variant="tonal" size="42">
+                                                <v-icon icon="mdi-account-heart" />
                                             </v-avatar>
                                         </template>
-                                        <v-card-title class="text-body-1">Nurse Details</v-card-title>
+
+                                        <div>
+                                            <div class="text-h6 font-weight-bold">
+                                                Nurse Details
+                                            </div>
+
+                                            <div class="text-caption text-medium-emphasis">
+                                                Professional profile and department information
+                                            </div>
+                                        </div>
                                     </v-card-item>
+
                                     <v-divider />
-                                    <v-list density="compact">
-                                        <v-list-item title="Full Name" :subtitle="profile?.full_name ?? '-'" />
-                                        <v-list-item title="Email" :subtitle="profile?.email ?? '-'" />
-                                        <v-list-item title="Phone" :subtitle="nurse.phone ?? '-'" />
-                                        <v-list-item title="Experience"
-                                            :subtitle="nurse.experience_years ? `${nurse.experience_years} years` : '-'" />
-                                        <v-list-item title="Department" :subtitle="department?.name ?? '-'" />
-                                        <v-list-item title="Created" :subtitle="formatDate(nurse.created_at)" />
-                                        <v-list-item title="Last Updated" :subtitle="formatDate(nurse.updated_at)" />
-                                    </v-list>
+
+                                    <v-card-text class="pa-6">
+                                        <v-row>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Full Name
+                                                </div>
+
+                                                <div class="text-body-1 font-weight-bold">
+                                                    {{ profile?.full_name || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Email Address
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ profile?.email || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Phone Number
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ nurse.phone || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Experience
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ nurse.experience_years || 0 }} Years
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Department
+                                                </div>
+
+                                                <div class="text-body-1 font-weight-medium">
+                                                    {{ department?.name || "-" }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Created
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ formatDate(nurse.created_at) }}
+                                                </div>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <div class="text-overline text-medium-emphasis">
+                                                    Last Updated
+                                                </div>
+
+                                                <div class="text-body-2">
+                                                    {{ formatDate(nurse.updated_at) }}
+                                                </div>
+                                            </v-col>
+
+                                        </v-row>
+                                    </v-card-text>
                                 </v-card>
                             </v-col>
 
+                            <!-- Account -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" height="100%">
-                                    <v-card-item>
+                                <v-card variant="outlined" rounded="lg" class="h-100 info-card">
+                                    <v-card-item class="py-4">
                                         <template #prepend>
-                                            <v-avatar color="secondary" variant="tonal" size="36">
-                                                <v-icon icon="mdi-account-circle" size="20" />
+                                            <v-avatar color="secondary" variant="tonal" size="42">
+                                                <v-icon icon="mdi-account-circle-outline" />
                                             </v-avatar>
                                         </template>
-                                        <v-card-title class="text-body-1">Account Status</v-card-title>
+
+                                        <div>
+                                            <div class="text-h6 font-weight-bold">
+                                                Account Information
+                                            </div>
+
+                                            <div class="text-caption text-medium-emphasis">
+                                                Account status and availability
+                                            </div>
+                                        </div>
                                     </v-card-item>
+
                                     <v-divider />
-                                    <v-card-text class="pa-4">
-                                        <div class="d-flex align-center ga-3 mb-4">
-                                            <v-avatar size="64" color="primary" variant="tonal">
+
+                                    <v-card-text class="pa-6">
+
+                                        <div class="d-flex align-center ga-4 mb-6">
+
+                                            <v-avatar size="72" color="primary" variant="tonal">
                                                 <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" cover />
+
                                                 <span v-else class="text-h5 font-weight-bold">
                                                     {{ getInitials(profile?.full_name) }}
                                                 </span>
                                             </v-avatar>
+
                                             <div>
-                                                <div class="text-body-1 font-weight-bold">{{ profile?.full_name ?? '-'
-                                                }}</div>
-                                                <div class="text-body-2 text-medium-emphasis">{{ profile?.email ?? '-'
-                                                }}</div>
-                                                <v-chip class="mt-1"
-                                                    :color="profile?.status === 'active' ? 'success' : 'warning'"
-                                                    size="small" variant="tonal">
-                                                    {{ profile?.status ?? 'unknown' }}
+
+                                                <div class="text-h6 font-weight-bold">
+                                                    {{ profile?.full_name || "-" }}
+                                                </div>
+
+                                                <div class="text-body-2 text-medium-emphasis">
+                                                    {{ profile?.email || "-" }}
+                                                </div>
+
+                                                <v-chip class="mt-3" :color="profile?.status === 'active'
+                                                    ? 'success'
+                                                    : 'warning'" variant="tonal" size="small">
+                                                    {{ profile?.status || "-" }}
                                                 </v-chip>
+
                                             </div>
+
                                         </div>
-                                        <v-chip :color="nurse.is_available ? 'success' : 'error'" variant="tonal" label
-                                            class="w-100 justify-center">
-                                            <v-icon :icon="nurse.is_available ? 'mdi-check-circle' : 'mdi-close-circle'"
-                                                class="mr-2" size="16" />
-                                            {{ nurse.is_available ? 'Currently Available' : 'Currently Unavailable' }}
+
+                                        <v-divider class="mb-6" />
+
+                                        <div class="text-overline text-medium-emphasis mb-2">
+                                            Availability
+                                        </div>
+
+                                        <v-chip :color="nurse.is_available ? 'success' : 'error'" variant="tonal"
+                                            size="default" class="px-4">
+                                            <v-icon start :icon="nurse.is_available
+                                                    ? 'mdi-check-circle'
+                                                    : 'mdi-close-circle'
+                                                " />
+
+                                            {{
+                                                nurse.is_available
+                                                    ? 'Currently Available'
+                                                    : 'Currently Unavailable'
+                                            }}
                                         </v-chip>
+
                                     </v-card-text>
                                 </v-card>
                             </v-col>
+
                         </v-row>
                     </v-card-text>
                 </v-window-item>
@@ -375,3 +492,15 @@ const careNoteColor: Record<string, string> = {
         </v-card>
     </template>
 </template>
+
+<style scoped>
+.info-card {
+    border-color: #e0e0e0 !important;
+    transition: all .25s ease;
+}
+
+.text-overline {
+    font-size: .72rem;
+    letter-spacing: .08em;
+}
+</style>
