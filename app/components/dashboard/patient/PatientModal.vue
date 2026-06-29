@@ -235,7 +235,7 @@ function onSubmit() {
                 Cancel
             </v-btn>
             <v-btn variant="flat" :color="config.confirmColor" :loading="props.loading" :disabled="props.loading"
-                :style="props.loading ? 'pointer-events: none;' : ''" @click="onSubmit">
+                :style="props.loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>
