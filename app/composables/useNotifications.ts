@@ -19,6 +19,7 @@ export type NotificationViewItem = NotificationRow & {
   relativeTime: string
   shortTime: string
   summary: string
+  targetRoute: string | null
 }
 
 type NotificationCatalogEntry = {
@@ -26,6 +27,7 @@ type NotificationCatalogEntry = {
   icon: string
   color: string
   audienceRoles: string[]
+  routes: Partial<Record<string, string>>
 }
 
 const NOTIFICATION_CATALOG: Record<string, NotificationCatalogEntry> = {
@@ -34,72 +36,161 @@ const NOTIFICATION_CATALOG: Record<string, NotificationCatalogEntry> = {
     icon: 'mdi-account-plus',
     color: 'success',
     audienceRoles: ['doctor', 'specialist', 'admin', 'receptionist'],
+    routes: {
+      doctor: '/doctor/patients/today',
+      specialist: '/doctor/patients/today',
+      receptionist: '/receptionist/patients/register',
+      admin: '/patients',
+    },
+  },
+  vital_recorded: {
+    level: 'success',
+    icon: 'mdi-heart-plus-outline',
+    color: 'success',
+    audienceRoles: ['nurse'],
+    routes: {
+      nurse: '/nurse/vitals',
+    },
+  },
+  schedule_created: {
+    level: 'info',
+    icon: 'mdi-calendar-plus',
+    color: 'info',
+    audienceRoles: ['doctor', 'receptionist', 'admin'],
+    routes: {
+      doctor: '/doctor/schedule',
+      receptionist: '/receptionist/doctor-schedules',
+    },
+  },
+  schedule_updated: {
+    level: 'warning',
+    icon: 'mdi-calendar-edit',
+    color: 'warning',
+    audienceRoles: ['doctor', 'receptionist', 'admin'],
+    routes: {
+      doctor: '/doctor/schedule',
+      receptionist: '/receptionist/doctor-schedules',
+    },
+  },
+  schedule_deleted: {
+    level: 'critical',
+    icon: 'mdi-calendar-remove',
+    color: 'error',
+    audienceRoles: ['doctor', 'receptionist', 'admin'],
+    routes: {
+      doctor: '/doctor/schedule',
+      receptionist: '/receptionist/doctor-schedules',
+    },
   },
   patient_critical: {
     level: 'critical',
     icon: 'mdi-heart-pulse',
     color: 'error',
     audienceRoles: ['nurse', 'doctor', 'specialist', 'admin'],
+    routes: {
+      nurse: '/nurse/monitoring',
+      doctor: '/doctor/patients/today',
+      specialist: '/doctor/patients/today',
+    },
   },
   appointment_new: {
     level: 'info',
     icon: 'mdi-calendar-plus',
     color: 'info',
     audienceRoles: ['doctor', 'specialist', 'admin', 'receptionist'],
+    routes: {
+      doctor: '/doctor/patients/today',
+      specialist: '/doctor/patients/today',
+      receptionist: '/receptionist/appointments',
+    },
   },
   appointment_confirmed: {
     level: 'success',
     icon: 'mdi-calendar-check',
     color: 'success',
     audienceRoles: ['patient', 'admin'],
+    routes: {
+      patient: '/patient/dashboard',
+    },
   },
   appointment_cancelled: {
     level: 'warning',
     icon: 'mdi-calendar-remove',
     color: 'warning',
     audienceRoles: ['patient', 'doctor', 'specialist', 'admin'],
+    routes: {
+      patient: '/patient/dashboard',
+      doctor: '/doctor/patients/today',
+      specialist: '/doctor/patients/today',
+    },
   },
   queue_assigned: {
     level: 'info',
     icon: 'mdi-ticket-confirmation',
     color: 'info',
     audienceRoles: ['patient', 'receptionist', 'admin'],
+    routes: {
+      patient: '/patient/dashboard',
+      receptionist: '/receptionist/queue',
+    },
   },
   prescription_new: {
     level: 'warning',
     icon: 'mdi-pill',
     color: 'warning',
     audienceRoles: ['pharmacy', 'admin'],
+    routes: {
+      pharmacy: '/pharmacy/prescriptions',
+    },
   },
   prescription_verified: {
     level: 'success',
     icon: 'mdi-check-decagram',
     color: 'success',
     audienceRoles: ['patient', 'pharmacy', 'admin'],
+    routes: {
+      patient: '/patient/prescriptions',
+      pharmacy: '/pharmacy/verification',
+    },
   },
   prescription_ready: {
     level: 'success',
     icon: 'mdi-bag-personal',
     color: 'success',
     audienceRoles: ['patient', 'pharmacy', 'admin'],
+    routes: {
+      patient: '/patient/prescriptions',
+      pharmacy: '/pharmacy/dispensing',
+    },
   },
   prescription_rejected: {
     level: 'critical',
     icon: 'mdi-alert-circle',
     color: 'error',
     audienceRoles: ['doctor', 'specialist', 'admin'],
+    routes: {
+      doctor: '/doctor/medical-records',
+      specialist: '/doctor/medical-records',
+      pharmacy: '/pharmacy/verification',
+    },
   },
   low_stock: {
     level: 'warning',
     icon: 'mdi-capsule',
     color: 'warning',
     audienceRoles: ['pharmacy', 'admin'],
+    routes: {
+      pharmacy: '/pharmacy/stock',
+    },
   },
   medicine_expiring: {
     level: 'warning',
     icon: 'mdi-calendar-alert',
     color: 'warning',
     audienceRoles: ['pharmacy', 'admin'],
+    routes: {
+      pharmacy: '/pharmacy/stock',
+    },
   },
 }
 
@@ -108,7 +199,11 @@ const DEFAULT_NOTIFICATION_CATALOG: NotificationCatalogEntry = {
   icon: 'mdi-bell-outline',
   color: 'primary',
   audienceRoles: ['admin'],
+  routes: {},
 }
+
+let audioContext: AudioContext | null = null
+let soundListenersBound = false
 
 function formatRelativeTime(value: string) {
   const createdAt = new Date(value).getTime()
@@ -149,7 +244,7 @@ function formatShortTime(value: string) {
   }).format(date)
 }
 
-function toViewItem(notification: NotificationRow): NotificationViewItem {
+function toViewItem(notification: NotificationRow, currentRole: string | null): NotificationViewItem {
   const catalog = NOTIFICATION_CATALOG[notification.type] ?? DEFAULT_NOTIFICATION_CATALOG
   const dataAudience = notification.data?.audience_role
   const audienceRoles = Array.isArray(dataAudience)
@@ -171,7 +266,77 @@ function toViewItem(notification: NotificationRow): NotificationViewItem {
     relativeTime: formatRelativeTime(notification.created_at),
     shortTime: formatShortTime(notification.created_at),
     summary: notification.body ?? notification.title,
+    targetRoute: resolveRoute(notification, catalog, audienceRoles, currentRole),
   }
+}
+
+function resolveRoute(notification: NotificationRow, catalog: NotificationCatalogEntry, audienceRoles: string[], currentRole: string | null) {
+  const explicitRoute = notification.data?.redirect_to
+  if (typeof explicitRoute === 'string' && explicitRoute.trim()) {
+    return explicitRoute.trim()
+  }
+
+  if (!currentRole) return null
+
+  const route = catalog.routes[currentRole] ?? null
+  if (route) return route
+
+  for (const role of audienceRoles) {
+    const fallback = catalog.routes[role]
+    if (fallback) return fallback
+  }
+
+  return null
+}
+
+function ensureAudioContext() {
+  if (import.meta.server || typeof window === 'undefined') return null
+
+  if (!audioContext) {
+    const AudioCtor = window.AudioContext || (window as Window & typeof globalThis & {
+      webkitAudioContext?: typeof AudioContext
+    }).webkitAudioContext
+
+    if (!AudioCtor) return null
+    audioContext = new AudioCtor()
+  }
+
+  return audioContext
+}
+
+async function primeAudioContext() {
+  const context = ensureAudioContext()
+  if (!context) return
+
+  if (context.state === 'suspended') {
+    try {
+      await context.resume()
+    } catch {
+      return
+    }
+  }
+}
+
+function playBibSound() {
+  const context = ensureAudioContext()
+  if (!context) return
+
+  const oscillator = context.createOscillator()
+  const gain = context.createGain()
+  const now = context.currentTime
+
+  oscillator.type = 'sine'
+  oscillator.frequency.setValueAtTime(880, now)
+  oscillator.frequency.exponentialRampToValueAtTime(660, now + 0.08)
+
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18)
+
+  oscillator.connect(gain)
+  gain.connect(context.destination)
+  oscillator.start(now)
+  oscillator.stop(now + 0.2)
 }
 
 export const useNotifications = () => {
@@ -185,6 +350,7 @@ export const useNotifications = () => {
   const refreshing = ref(false)
   const error = ref<string | null>(null)
   const connectionStatus = ref<'idle' | 'connecting' | 'connected' | 'error'>('idle')
+  const knownNotificationIds = new Set<string>()
 
   let realtimeChannel: any = null
   let disposed = false
@@ -205,8 +371,9 @@ export const useNotifications = () => {
   }
 
   function upsertLocalRow(row: NotificationRow) {
-    const nextItem = toViewItem(row)
+    const nextItem = toViewItem(row, role.value)
     const exists = items.value.findIndex(item => item.id === row.id)
+    const isNewRow = !knownNotificationIds.has(row.id)
 
     if (exists >= 0) {
       items.value.splice(exists, 1, nextItem)
@@ -214,11 +381,23 @@ export const useNotifications = () => {
       items.value = sortItems([nextItem, ...items.value])
     }
 
+    knownNotificationIds.add(row.id)
     unreadCount.value = items.value.filter(item => !item.is_read).length
+
+    if (isNewRow && !nextItem.is_read) {
+      void primeAudioContext().then(() => {
+        try {
+          playBibSound()
+        } catch {
+          // Ignore audio failures when the browser blocks autoplay.
+        }
+      })
+    }
   }
 
   function removeLocalRow(notificationId: string) {
     items.value = items.value.filter(item => item.id !== notificationId)
+    knownNotificationIds.delete(notificationId)
     unreadCount.value = items.value.filter(item => !item.is_read).length
   }
 
@@ -244,7 +423,11 @@ export const useNotifications = () => {
       return
     }
 
-    items.value = sortItems((data ?? []).map(notification => toViewItem(notification)))
+    items.value = sortItems((data ?? []).map(notification => toViewItem(notification, role.value)))
+    knownNotificationIds.clear()
+    for (const item of items.value) {
+      knownNotificationIds.add(item.id)
+    }
     unreadCount.value = items.value.filter(item => !item.is_read).length
     loading.value = false
   }
@@ -297,6 +480,23 @@ export const useNotifications = () => {
     unreadCount.value = 0
   }
 
+  async function deleteNotification(notificationId: string) {
+    if (!supabase || !userId.value || !notificationId) return
+
+    const { error: deleteError } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('id', notificationId)
+      .eq('user_id', userId.value)
+
+    if (deleteError) {
+      error.value = deleteError.message
+      return
+    }
+
+    removeLocalRow(notificationId)
+  }
+
   function readNotification(notificationId: string) {
     void markAsRead(notificationId)
   }
@@ -305,6 +505,17 @@ export const useNotifications = () => {
     clearRealtime()
 
     if (import.meta.server || !supabase || !userId.value) return
+
+    if (!soundListenersBound && typeof window !== 'undefined') {
+      soundListenersBound = true
+      const unlockAudio = () => {
+        void primeAudioContext()
+      }
+
+      window.addEventListener('pointerdown', unlockAudio, { once: true, passive: true })
+      window.addEventListener('keydown', unlockAudio, { once: true })
+      window.addEventListener('touchstart', unlockAudio, { once: true, passive: true })
+    }
 
     connectionStatus.value = 'connecting'
 
@@ -381,6 +592,7 @@ export const useNotifications = () => {
     refresh,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
     readNotification,
     resolveNotification: toViewItem,
   }

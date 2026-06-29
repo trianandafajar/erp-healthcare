@@ -1,3 +1,5 @@
+import { getRecipientIdsByRoles, insertNotifications, resolveVitalLevel } from '~~/server/utils/notifications'
+
 export default defineEventHandler(async (event) => {
     const supabase = serverSupabase(event)
     const admin = supabaseAdmin()
@@ -88,6 +90,50 @@ export default defineEventHandler(async (event) => {
 
     if (error) {
         throw createError({ statusCode: 400, message: error.message })
+    }
+
+    await insertNotifications(admin, [{
+        user_id: user.id,
+        type: 'vital_recorded',
+        title: 'Vital signs recorded',
+        body: `${patient.full_name} vital signs have been saved.`,
+        data: {
+            entity_type: 'nurse_vital_sign',
+            entity_id: data.id,
+            patient_id: patient.id,
+            recorded_by: user.id,
+            level: 'success',
+            audience_role: 'nurse',
+        },
+    }])
+
+    const level = resolveVitalLevel({
+        bloodPressure,
+        temperature: Number.isFinite(temperature) ? temperature : null,
+        pulse: Number.isFinite(pulse) ? pulse : null,
+    })
+
+    if (level === 'critical') {
+        const recipientIds = await getRecipientIdsByRoles(admin, ['doctor', 'specialist', 'admin'], user.id)
+
+        await insertNotifications(
+            admin,
+            recipientIds.map(user_id => ({
+                user_id,
+                type: 'patient_critical',
+                title: 'Critical patient alert',
+                body: `${patient.full_name} has a critical vital sign reading.`,
+                data: {
+                    entity_type: 'nurse_vital_sign',
+                    entity_id: data.id,
+                    patient_id: patient.id,
+                    blood_pressure: data.blood_pressure ?? bloodPressure,
+                    temperature: data.temperature ?? null,
+                    pulse: data.pulse ?? null,
+                    recorded_by: user.id,
+                },
+            })),
+        )
     }
 
     return {

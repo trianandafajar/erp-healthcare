@@ -1,3 +1,5 @@
+import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
+
 export default defineEventHandler(async (event) => {
     const doctorId = getRouterParam(event, 'id')
     const scheduleId = getRouterParam(event, 'scheduleId')
@@ -47,6 +49,56 @@ export default defineEventHandler(async (event) => {
             before: before ?? null,
         },
     })
+
+    const receptionistRecipientIds = await getRecipientIdsByRoles(admin, ['receptionist'])
+    const adminRecipientIds = await getRecipientIdsByRoles(admin, ['admin'])
+
+    await insertNotifications(
+        admin,
+        [
+            {
+                user_id: doctorId,
+                type: 'schedule_deleted',
+                title: 'Schedule removed',
+                body: 'A schedule on your practice calendar has been removed.',
+                data: {
+                    entity_type: 'doctor_schedule',
+                    entity_id: scheduleId,
+                    doctor_id: doctorId,
+                    level: 'critical',
+                    audience_role: 'doctor',
+                    redirect_to: '/doctor/schedule',
+                },
+            },
+            ...receptionistRecipientIds.map((user_id) => ({
+                user_id,
+                type: 'schedule_deleted',
+                title: 'Doctor schedule removed',
+                body: 'A doctor schedule has been removed from the roster.',
+                data: {
+                    entity_type: 'doctor_schedule',
+                    entity_id: scheduleId,
+                    doctor_id: doctorId,
+                    level: 'critical',
+                    audience_role: 'receptionist',
+                    redirect_to: '/receptionist/doctor-schedules',
+                },
+            })),
+            ...adminRecipientIds.map((user_id) => ({
+                user_id,
+                type: 'schedule_deleted',
+                title: 'Doctor schedule removed',
+                body: 'A doctor schedule has been removed from the roster.',
+                data: {
+                    entity_type: 'doctor_schedule',
+                    entity_id: scheduleId,
+                    doctor_id: doctorId,
+                    level: 'critical',
+                    audience_role: 'admin',
+                },
+            })),
+        ],
+    )
 
     return {
         message: 'Doctor schedule removed successfully',

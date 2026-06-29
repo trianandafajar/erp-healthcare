@@ -1,26 +1,19 @@
 <script setup lang="ts">
 import { BellOutlined, CheckCircleOutlined } from '@ant-design/icons-vue'
 
-const { items, unreadCount, loading, refreshing, connectionStatus, markAllAsRead, readNotification, refresh } = useNotifications()
+const { items, unreadCount, loading, refreshing, markAllAsRead, readNotification, deleteNotification, refresh } = useNotifications()
 
-function handleItemClick(id: string) {
-  readNotification(id)
+async function handleItemClick(item: typeof items.value[number]) {
+  readNotification(item.id)
+
+  if (item.targetRoute) {
+    await navigateTo(item.targetRoute)
+  }
 }
 
-const statusLabel = computed(() => {
-  switch (connectionStatus.value) {
-    case 'connected':
-      return 'Live'
-    case 'polling':
-      return 'Syncing'
-    case 'connecting':
-      return 'Connecting'
-    case 'error':
-      return 'Offline'
-    default:
-      return 'Idle'
-  }
-})
+function handleDeleteClick(id: string) {
+  void deleteNotification(id)
+}
 
 const unreadLabel = computed(() => {
   if (unreadCount.value <= 0) return '0'
@@ -33,35 +26,22 @@ const unreadLabel = computed(() => {
   <v-menu :close-on-content-click="false" offset="6, 0">
     <template v-slot:activator="{ props }">
       <v-btn icon class="text-secondary ml-sm-2 ml-1" color="darkText" rounded="sm" size="small" v-bind="props">
-        <v-badge :content="unreadLabel" color="primary" offset-x="-4" offset-y="-5">
+        <v-badge v-if="unreadCount > 0" :content="unreadLabel" color="primary" offset-x="-4" offset-y="-5">
           <BellOutlined :style="{ fontSize: '16px' }" />
         </v-badge>
+
+        <BellOutlined v-else :style="{ fontSize: '16px' }" />
       </v-btn>
     </template>
 
     <v-sheet rounded="md" width="387" class="notification-dropdown">
       <div class="pa-4 pb-3">
         <div class="d-flex align-center justify-space-between gap-3">
-          <div>
-            <h6 class="text-subtitle-1 mb-0">Notifications</h6>
-            <p class="text-caption text-medium-emphasis mb-0">{{ statusLabel }}</p>
-          </div>
-          <div class="d-flex align-center ga-2">
-            <v-btn variant="text" color="secondary" icon rounded="sm" size="small" :loading="refreshing" @click="refresh">
-              <v-icon icon="mdi-refresh" size="18" />
-            </v-btn>
-            <v-btn
-              variant="text"
-              color="success"
-              icon
-              rounded
-              size="small"
-              :disabled="unreadCount === 0"
-              @click="markAllAsRead"
-            >
-              <CheckCircleOutlined :style="{ fontSize: '16px' }" />
-            </v-btn>
-          </div>
+          <h6 class="text-subtitle-1 mb-0">Notifications</h6>
+          <v-btn variant="text" color="success" icon rounded size="small" :disabled="unreadCount === 0"
+            @click="markAllAsRead">
+            <CheckCircleOutlined :style="{ fontSize: '16px' }" />
+          </v-btn>
         </div>
       </div>
 
@@ -75,27 +55,34 @@ const unreadLabel = computed(() => {
         <v-list v-else class="py-0" lines="two" aria-label="notification list">
           <template v-if="items.length > 0">
             <template v-for="item in items" :key="item.id">
-              <v-list-item
-                class="notification-item no-spacer py-1"
-                :class="{ 'notification-item--read': item.is_read }"
-                :active="!item.is_read"
-                @click="handleItemClick(item.id)"
-              >
+              <v-list-item class="notification-item no-spacer py-1" :class="{ 'notification-item--read': item.is_read }"
+                :active="!item.is_read" @click="handleItemClick(item)">
+                <div class="notification-delete-wrap">
+                  <v-btn size="x-small" variant="text" class="notification-delete-btn"
+                    @click.stop="handleDeleteClick(item.id)">
+                    <v-icon icon="mdi-close" size="15" />
+                  </v-btn>
+                </div>
+
                 <template v-slot:prepend>
-                  <v-avatar size="40" variant="tonal" :color="item.color" class="mr-3 py-2" :class="`text-${item.color}`">
+                  <v-avatar size="40" variant="tonal" :color="item.color" class="mr-3 py-2"
+                    :class="`text-${item.color}`">
                     <v-icon :icon="item.icon" />
                   </v-avatar>
                 </template>
 
-                <div class="d-inline-flex justify-space-between w-100 align-start">
+                <div class="d-flex justify-space-between w-100 align-start gap-3">
                   <div class="pr-2">
-                    <h6 class="text-subtitle-1 font-weight-regular mb-1" :class="{ 'font-weight-semibold': !item.is_read }">
+                    <h6 class="text-subtitle-1 font-weight-regular mb-1"
+                      :class="{ 'font-weight-semibold': !item.is_read }">
                       {{ item.title }}
                     </h6>
                     <p class="text-caption text-medium-emphasis my-0">{{ item.summary }}</p>
                     <p class="text-caption text-medium-emphasis my-0">{{ item.relativeTime }}</p>
                   </div>
-                  <span class="text-caption text-no-wrap text-medium-emphasis">{{ item.shortTime }}</span>
+                  <div class="d-flex flex-column align-end ga-1 pr-5">
+                    <span class="text-caption text-no-wrap text-medium-emphasis">{{ item.shortTime }}</span>
+                  </div>
                 </div>
               </v-list-item>
               <v-divider />
@@ -119,7 +106,7 @@ const unreadLabel = computed(() => {
 
 <style lang="scss">
 .v-tooltip {
-  > .v-overlay__content.custom-tooltip {
+  >.v-overlay__content.custom-tooltip {
     padding: 2px 6px;
   }
 }
@@ -127,6 +114,7 @@ const unreadLabel = computed(() => {
 .notification-item {
   cursor: pointer;
   transition: background-color 0.15s ease, opacity 0.15s ease;
+  position: relative;
 }
 
 .notification-item:hover {
@@ -135,5 +123,18 @@ const unreadLabel = computed(() => {
 
 .notification-item--read {
   opacity: 0.72;
+}
+
+.notification-delete-btn {
+  min-width: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.notification-delete-wrap {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  z-index: 2;
 }
 </style>

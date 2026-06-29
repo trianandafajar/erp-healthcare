@@ -1,3 +1,5 @@
+import { getRecipientIdsByRoles, insertNotifications, resolveVitalLevel } from '~~/server/utils/notifications'
+
 export default defineEventHandler(async (event) => {
     const supabase = serverSupabase(event)
     const admin = supabaseAdmin()
@@ -80,6 +82,50 @@ export default defineEventHandler(async (event) => {
 
     if (error) {
         throw createError({ statusCode: 400, message: error.message })
+    }
+
+    await insertNotifications(admin, [{
+        user_id: user.id,
+        type: 'vital_recorded',
+        title: 'Vital signs updated',
+        body: `${data.patients?.full_name ?? 'Patient'} vital signs have been updated.`,
+        data: {
+            entity_type: 'nurse_vital_sign',
+            entity_id: data.id,
+            patient_id: data.patient_id,
+            recorded_by: user.id,
+            level: 'success',
+            audience_role: 'nurse',
+        },
+    }])
+
+    const level = resolveVitalLevel({
+        bloodPressure,
+        temperature: Number.isFinite(temperature) ? temperature : null,
+        pulse: Number.isFinite(pulse) ? pulse : null,
+    })
+
+    if (level === 'critical') {
+        const recipientIds = await getRecipientIdsByRoles(admin, ['doctor', 'specialist', 'admin'], user.id)
+
+        await insertNotifications(
+            admin,
+            recipientIds.map(user_id => ({
+                user_id,
+                type: 'patient_critical',
+                title: 'Critical patient alert updated',
+                body: `${data.patients?.full_name ?? 'Patient'} still shows critical vital signs.`,
+                data: {
+                    entity_type: 'nurse_vital_sign',
+                    entity_id: data.id,
+                    patient_id: data.patient_id,
+                    blood_pressure: data.blood_pressure ?? bloodPressure,
+                    temperature: data.temperature ?? null,
+                    pulse: data.pulse ?? null,
+                    recorded_by: user.id,
+                },
+            })),
+        )
     }
 
     return {

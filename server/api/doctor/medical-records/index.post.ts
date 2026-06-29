@@ -1,3 +1,5 @@
+import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
+
 export default defineEventHandler(async (event) => {
   const {
     appointment_id,
@@ -108,6 +110,29 @@ export default defineEventHandler(async (event) => {
     if (prescriptionError) {
       throw createError({ statusCode: 400, message: prescriptionError.message })
     }
+
+    const recipientIds = await getRecipientIdsByRoles(admin, ['pharmacy', 'admin'])
+    await insertNotifications(
+      admin,
+      prescriptionRows.flatMap((item) =>
+        recipientIds.map(user_id => ({
+          user_id,
+          type: 'prescription_new',
+          title: 'New prescription received',
+          body: `${item.medication_name} has been sent to pharmacy.`,
+          data: {
+            entity_type: 'medical_record',
+            entity_id: medicalRecord.id,
+            patient_id,
+            doctor_id: doctor.id,
+            medication_name: item.medication_name,
+            level: 'warning',
+            audience_role: 'pharmacy',
+            redirect_to: '/pharmacy/prescriptions',
+          },
+        })),
+      ),
+    )
   }
   await admin
     .from('appointments')
