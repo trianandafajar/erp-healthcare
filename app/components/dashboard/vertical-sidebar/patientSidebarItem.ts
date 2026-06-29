@@ -79,14 +79,6 @@ const patientSidebarItem: menu[] = [
         icon: CreditCardOutlined,
         to: '/patient/payments'
     },
-    {
-        header: 'Account'
-    },
-    {
-        title: 'Profile',
-        icon: UserOutlined,
-        to: '/patient/profile'
-    },
 ];
 
 export default patientSidebarItem;
