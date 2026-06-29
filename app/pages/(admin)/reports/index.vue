@@ -5,18 +5,6 @@ definePageMeta({
     permissions: ['report.view'],
 })
 
-const { data: statsData, pending: statsPending } = await useFetch('/api/dashboard/stats')
-const { data: monthlyData, pending: monthlyPending } = await useFetch('/api/dashboard/monthly-appointments')
-const { data: appointmentsData, pending: appointmentsPending } = await useFetch('/api/appointments')
-const { data: medicalRecordsData, pending: recordsPending } = await useFetch('/api/doctor/medical-records')
-const { data: departmentsData, pending: deptPending } = await useFetch('/api/departments')
-const { data: referralsData, pending: referralsPending } = await useFetch('/api/doctor/referrals/made')
-
-const isLoading = computed(() =>
-    statsPending.value || monthlyPending.value || appointmentsPending.value ||
-    recordsPending.value || deptPending.value || referralsPending.value
-)
-
 const now = new Date()
 const currentYear = now.getFullYear()
 const currentMonth = now.getMonth()
@@ -36,6 +24,20 @@ const monthOptions = [
     { label: 'September', value: 8 }, { label: 'October', value: 9 },
     { label: 'November', value: 10 }, { label: 'December', value: 11 },
 ]
+
+const { data: statsData, pending: statsPending } = await useFetch('/api/dashboard/stats')
+const { data: monthlyData, pending: monthlyPending, refresh: refreshMonthly } = await useFetch('/api/dashboard/monthly-appointments', {
+    query: { year: filterYear },
+})
+const { data: appointmentsData, pending: appointmentsPending } = await useFetch('/api/appointments')
+const { data: medicalRecordsData, pending: recordsPending } = await useFetch('/api/doctor/medical-records')
+const { data: departmentsData, pending: deptPending } = await useFetch('/api/departments')
+const { data: referralsData, pending: referralsPending } = await useFetch('/api/doctor/referrals/made')
+
+const isLoading = computed(() =>
+    statsPending.value || monthlyPending.value || appointmentsPending.value ||
+    recordsPending.value || deptPending.value || referralsPending.value
+)
 
 const activeRange = computed<{ from: Date; to: Date }>(() => {
     if (filterMode.value === 'range' && filterDateFrom.value && filterDateTo.value) {
@@ -70,6 +72,8 @@ function resetFilters() {
     filterDateFrom.value = ''
     filterDateTo.value = ''
 }
+
+watch(filterYear, () => refreshMonthly())
 
 const summaryCards = computed(() => {
     const allAppointments = appointmentsData.value?.appointments ?? []

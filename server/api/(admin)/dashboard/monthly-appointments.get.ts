@@ -1,10 +1,11 @@
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
     const admin = supabaseAdmin()
 
-    const currentYear = new Date().getFullYear()
+    const { year } = getQuery(event)
+    const targetYear = year ? parseInt(year as string) : new Date().getFullYear()
 
-    const startDate = `${currentYear}-01-01`
-    const endDate = `${currentYear}-12-31`
+    const startDate = `${targetYear}-01-01`
+    const endDate = `${targetYear}-12-31`
 
     const { data, error } = await admin
         .from('appointments')
