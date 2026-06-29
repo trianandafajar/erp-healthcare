@@ -12,7 +12,7 @@ useSeoMeta({
     description: 'Patient appointment booking page',
 })
 
-type AppointmentStatus = 'Scheduled' | 'Cancelled'
+type AppointmentStatus = 'waiting' | 'Cancelled'
 
 interface PatientAppointment {
     id: string
@@ -50,6 +50,20 @@ const editingId = ref<string | null>(null)
 const deletingAppointment = ref<PatientAppointment | null>(null)
 const snackbar = ref(false)
 const snackbarMessage = ref('')
+const snackbarColor = ref('success')
+
+const isDisabled = computed(() =>
+    !form.value.doctorId ||
+    !form.value.departmentId ||
+    !form.value.date ||
+    !form.value.complaint
+)
+
+function showSnackbar(msg: string, color = 'success') {
+    snackbarMessage.value = msg
+    snackbarColor.value = color
+    snackbar.value = true
+}
 
 const emptyForm = () => ({
     departmentId: '' as string,
@@ -57,7 +71,7 @@ const emptyForm = () => ({
     date: '',
     time: '',
     complaint: '',
-    status: 'Scheduled' as AppointmentStatus
+    status: 'waiting' as AppointmentStatus
 })
 
 const form = ref(emptyForm())
@@ -132,7 +146,7 @@ async function loadAppointments() {
         date: item.appointment_date ?? '',
         time: item.appointment_time ?? '',
         complaint: item.chief_complaint ?? item.notes ?? '',
-        status: item.status === 'Cancelled' ? 'Cancelled' : 'Scheduled',
+        status: item.status === 'Cancelled' ? 'Cancelled' : 'waiting',
     }))
 }
 
@@ -144,7 +158,10 @@ async function loadSchedules() {
 
 async function saveAppointment() {
     if (editingId.value) {
-        snackbarMessage.value = 'Editing existing appointments is not implemented in this page.'
+        showSnackbar(
+            'Editing existing appointments is not implemented in this page.',
+            'warning'
+        )
         snackbar.value = true
         return
     }
@@ -171,12 +188,11 @@ async function saveAppointment() {
     })
 
     if ((error.value as any)?.message) {
-        snackbarMessage.value = (error.value as any).message
-        snackbar.value = true
+        showSnackbar((error.value as any).message, 'error')
         return
     }
 
-    snackbarMessage.value = 'Appointment has been booked.'
+    showSnackbar('Appointment has been booked.', 'success')
     snackbar.value = true
     dialog.value = false
     form.value = emptyForm()
@@ -191,7 +207,7 @@ function openDelete(item: PatientAppointment) {
 function deleteAppointment() {
     if (!deletingAppointment.value) return
     appointments.value = appointments.value.filter((item) => item.id !== deletingAppointment.value?.id)
-    snackbarMessage.value = 'Appointment has been deleted.'
+    showSnackbar('Appointment has been deleted.', 'success')
     snackbar.value = true
     deleteDialog.value = false
     deletingAppointment.value = null
@@ -207,7 +223,7 @@ function formatDate(dateStr: string) {
 }
 
 function statusColor(status: AppointmentStatus) {
-    return status === 'Scheduled' ? 'primary' : 'error'
+    return status === 'waiting' ? 'primary' : 'error'
 }
 
 // init
@@ -264,7 +280,7 @@ await Promise.all([loadAppointments(), loadSchedules()])
                     <td class="text-wrap">{{ item.complaint }}</td>
                     <td>
                         <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
-                            }}</v-chip>
+                        }}</v-chip>
                     </td>
                     <td class="text-right">
                         <div class="d-flex justify-end ga-2">
@@ -343,7 +359,7 @@ await Promise.all([loadAppointments(), loadSchedules()])
                 <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
                 <v-btn color="primary" variant="flat" prepend-icon="mdi-content-save-outline"
                     :disabled="!form.doctorId || !form.departmentId || !form.date || !form.complaint"
-                    @click="saveAppointment">
+                    :style="isDisabled ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="saveAppointment">
                     {{ editingId ? 'Save Changes' : 'Save Appointment' }}
                 </v-btn>
             </v-card-actions>
@@ -365,7 +381,13 @@ await Promise.all([loadAppointments(), loadSchedules()])
         </v-card>
     </v-dialog>
 
-    <v-snackbar v-model="snackbar" color="success">
+    <!-- <v-snackbar v-model="snackbar" color="success">
         {{ snackbarMessage }}
+    </v-snackbar> -->
+    <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
+        {{ snackbarMessage }}
+        <template #actions>
+            <v-btn variant="text" icon="mdi-close" @click="snackbar = false" />
+        </template>
     </v-snackbar>
 </template>
