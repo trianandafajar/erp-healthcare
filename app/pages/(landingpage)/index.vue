@@ -24,7 +24,7 @@ const { data: homePage } = await useAsyncData('home', () =>
   import('~/utils/contentParser').then(m => m.getListPage("content/_index.md"))
 );
 
-const { frontmatter } = homePage.value;
+const frontmatter = homePage.value?.frontmatter ?? {};
 const { banner, feature, services, workflow, call_to_action } = frontmatter;
 const callToAction = call_to_action;
 const { title } = config.site;
