@@ -3,7 +3,7 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import CreatePatientDialog from '../doctor/appointment/CreatePatientDialog.vue'
+import CreatePatientDialog from '@/components/doctor/Appointment/CreatePatientDialog.vue'
 
 type NursePatientOption = {
     id: string
