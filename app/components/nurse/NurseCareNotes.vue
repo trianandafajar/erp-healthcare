@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CreatePatientDialog from '../doctor/appointment/CreatePatientDialog.vue'
+import CreatePatientDialog from '../doctor/Appointment/CreatePatientDialog.vue'
 type NursePatientOption = {
     id: string
     full_name: string
