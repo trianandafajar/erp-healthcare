@@ -1,40 +1,47 @@
 <template>
-  <header class="header">
-    <nav class="navbar container mx-auto flex items-center justify-between py-4">
+  <header
+    :class="['header fixed top-0 left-0 w-full z-50 transition-all duration-300', scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-transparent']">
+    <nav class="container mx-auto flex items-center justify-between h-16 md:h-[72px]">
       <div class="flex shrink-0 items-center">
-         <Logo :src="logo" />
+        <Logo :src="logo" />
       </div>
 
-      <button class="flex shrink-0 cursor-pointer items-center md:hidden" @click="navOpen = !navOpen">
-        <svg v-if="navOpen" class="h-6 w-6 fill-current" viewBox="0 0 20 20">
-          <polygon points="11 9 22 9 22 11 11 11 11 22 9 22 9 11 -2 11 -2 9 9 9 9 -2 11 -2"
-            transform="rotate(45 10 10)" />
+      <button class="flex shrink-0 cursor-pointer items-center md:hidden p-2" @click="navOpen = !navOpen">
+        <svg v-if="navOpen" class="h-6 w-6 text-[#176D37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
-        <svg v-else class="h-6 w-6 fill-current" viewBox="0 0 20 20">
-          <path d="M0 3h20v2H0V3z m0 6h20v2H0V9z m0 6h20v2H0V0z" />
+        <svg v-else class="h-6 w-6 text-[#176D37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
 
       <div :class="[
-        'w-full md:flex md:w-auto md:flex-1 md:justify-center',
+        'fixed md:static inset-x-0 top-16 md:top-0 md:bg-transparent shadow-lg md:shadow-none md:flex md:flex-1 md:justify-center',
         navOpen ? 'block' : 'hidden md:flex'
       ]">
-        <ul class="block w-full md:flex md:w-auto md:items-center md:space-x-8">
+        <ul
+          class="flex flex-col md:flex-row items-start md:items-center px-6 md:px-0 py-4 md:py-0 space-y-2 md:space-y-0 md:space-x-8">
           <li v-for="item in menuItems" :key="item.name">
-            <a :href="item.url" :class="[
-              'block py-2 font-semibold md:py-0',
-              item.url === currentPath ? 'text-teal-500' : 'text-gray-800 hover:text-teal-500'
+            <NuxtLink :to="item.url" :class="[
+              'block py-2 text-sm font-semibold transition-colors',
+              item.url === currentPath ? 'text-[#176D37]' : 'text-gray-700 hover:text-[#176D37]'
             ]" @click="navOpen = false">
               {{ item.name }}
-            </a>
+            </NuxtLink>
           </li>
         </ul>
       </div>
 
-      <div class="hidden shrink-0 items-center justify-end md:flex">
-        <a href="/login" class="rounded-full bg-teal-500 px-6 py-3 font-semibold text-white hover:bg-teal-600">
-          Get Started
-        </a>
+      <div class="hidden md:flex shrink-0 items-center space-x-3">
+        <NuxtLink to="/login" class="text-sm font-semibold text-gray-700 hover:text-[#176D37] transition-colors">
+          Sign In
+        </NuxtLink>
+        <NuxtLink to="/login"
+          class="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-[#176D37] rounded-full hover:bg-[#089695] transition-all hover:shadow-lg hover:shadow-[#176D37]/20">
+          Free Demo
+        </NuxtLink>
       </div>
     </nav>
   </header>
@@ -47,13 +54,26 @@ import config from "~/config/config.json";
 const { logo } = config.site;
 
 const route = useRoute();
+const currentPath = computed(() => route.path);
 const navOpen = ref(false);
+const scrolled = ref(false);
 
 const menuItems = [
   { name: "Home", url: "/" },
-  { name: "Blog", url: "/blog" },
+  { name: "Features", url: "#features" },
   { name: "Pricing", url: "/pricing" },
   { name: "Contact", url: "/contact" },
-  { name: "FAQ", url: "/faq" },
 ];
+
+let scrollHandler;
+onMounted(() => {
+  scrollHandler = () => {
+    scrolled.value = window.scrollY > 20;
+  };
+  window.addEventListener('scroll', scrollHandler, { passive: true });
+});
+
+onUnmounted(() => {
+  if (scrollHandler) window.removeEventListener('scroll', scrollHandler);
+});
 </script>

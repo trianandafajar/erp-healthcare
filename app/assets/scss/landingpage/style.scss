@@ -66,8 +66,22 @@
     }
   }
 
-  @import "base";
-}
+@import "base";
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+      .animate-scroll,
+      .animate-pulse {
+        animation: none !important;
+      }
+    }
+  }
 
 @layer components {
   @import "components";
