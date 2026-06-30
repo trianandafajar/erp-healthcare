@@ -77,37 +77,37 @@ const industries = [
     title: 'Hospitals',
     description:
       'Complete hospital management with multi-department coordination, inpatient wards, and emergency services.',
-    image: 'https://picsum.photos/seed/hospital/800/600'
+    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
   },
   {
     title: 'Clinics',
     description:
       'Efficient clinic operations with appointment scheduling, patient flow, and integrated digital records.',
-    image: 'https://picsum.photos/seed/clinic/800/600'
+    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
   },
   {
     title: 'Pharmacies',
     description:
       'End-to-end pharmacy management including prescription processing, inventory, and regulatory compliance.',
-    image: 'https://picsum.photos/seed/pharmacy/800/600'
+    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
   },
   {
     title: 'Laboratories',
     description:
       'Laboratory information system with test tracking, result reporting, and referral integration.',
-    image: 'https://picsum.photos/seed/lab/800/600'
+    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
   },
   {
     title: 'Community Health Centers',
     description:
       'Public health management with immunization tracking, maternal health, and community outreach programs.',
-    image: 'https://picsum.photos/seed/puskesmas/800/600'
+    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
   },
   {
     title: 'Private Practices',
     description:
       'Solo and group practice management with scheduling, e-prescriptions, and insurance claims.',
-    image: 'https://picsum.photos/seed/practice/800/600'
+    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
   }
 ]
 </script>
