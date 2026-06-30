@@ -12,16 +12,19 @@ useSeoMeta({
     description: 'Patient appointment booking page',
 })
 
-type AppointmentStatus = 'waiting' | 'Cancelled'
+type AppointmentStatus = 'waiting' | 'in_progress' | 'done' | 'cancelled'
 
 interface PatientAppointment {
     id: string
+    doctorId: string
+    departmentId: string
     department: string
     doctor: string
     specialty: string
     date: string
     time: string
     complaint: string
+    notes: string
     status: AppointmentStatus
 }
 
@@ -36,14 +39,11 @@ type DbSchedule = {
     departmentName: string
 }
 
-// state
-const { visits } = usePatientPortalMock()
-
 const appointments = useState<PatientAppointment[]>('patient-book-appointments', () => [])
 const schedules = ref<DbSchedule[]>([])
 
 const search = ref('')
-const statusFilter = ref<'All' | AppointmentStatus>('All')
+const statusFilter = ref<'all' | AppointmentStatus>('all')
 const dialog = ref(false)
 const deleteDialog = ref(false)
 const editingId = ref<string | null>(null)
@@ -51,13 +51,10 @@ const deletingAppointment = ref<PatientAppointment | null>(null)
 const snackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('success')
-
-const isDisabled = computed(() =>
-    !form.value.doctorId ||
-    !form.value.departmentId ||
-    !form.value.date ||
-    !form.value.complaint
-)
+const loadingAppointments = ref(false)
+const savingAppointment = ref(false)
+const deletingAppointmentLoading = ref(false)
+const syncingFormState = ref(false)
 
 function showSnackbar(msg: string, color = 'success') {
     snackbarMessage.value = msg
@@ -66,21 +63,25 @@ function showSnackbar(msg: string, color = 'success') {
 }
 
 const emptyForm = () => ({
-    departmentId: '' as string,
-    doctorId: '' as string,
+    departmentId: '',
+    doctorId: '',
     date: '',
     time: '',
     complaint: '',
-    status: 'waiting' as AppointmentStatus
+    notes: '',
+    status: 'waiting' as AppointmentStatus,
 })
 
 const form = ref(emptyForm())
 
-// computed
 const departmentOptions = computed(() =>
     [...new Map(schedules.value.map((s) => [s.departmentId ?? '', s.departmentName])).entries()]
         .filter(([id]) => id)
         .map(([id, name]) => ({ id, name }))
+)
+
+const departmentNameById = computed(() =>
+    new Map(departmentOptions.value.map((item) => [item.id, item.name]))
 )
 
 const doctorOptions = computed(() => {
@@ -88,7 +89,7 @@ const doctorOptions = computed(() => {
     return schedules.value
         .filter((s) => s.departmentId === form.value.departmentId)
         .map((s) => ({ doctorId: s.doctorId, doctorName: s.doctorName, specialty: s.specialty }))
-        .filter((v, i, arr) => arr.findIndex((x) => x.doctorId === v.doctorId) === i)
+        .filter((value, index, arr) => arr.findIndex((entry) => entry.doctorId === value.doctorId) === index)
 })
 
 const filteredAppointments = computed(() =>
@@ -100,17 +101,39 @@ const filteredAppointments = computed(() =>
             item.specialty.toLowerCase().includes(keyword) ||
             item.complaint.toLowerCase().includes(keyword) ||
             item.id.toLowerCase().includes(keyword)
-        const matchesStatus = statusFilter.value === 'All' || item.status === statusFilter.value
+        const matchesStatus = statusFilter.value === 'all' || item.status === statusFilter.value
         return matchesSearch && matchesStatus
     })
 )
 
 const selectedSchedule = computed(() =>
-    schedules.value.find((s) => s.doctorId === form.value.doctorId) ?? null
+    schedules.value.find((s) => s.doctorId === form.value.doctorId && s.departmentId === form.value.departmentId) ??
+    schedules.value.find((s) => s.doctorId === form.value.doctorId) ??
+    null
 )
 
-// watchers
-watch(() => form.value.departmentId, () => {
+const isSaveDisabled = computed(() =>
+    savingAppointment.value ||
+    !form.value.doctorId ||
+    !form.value.departmentId ||
+    !form.value.date ||
+    !form.value.complaint
+)
+
+function normalizeStatus(status?: string | null): AppointmentStatus {
+    if (status === 'in_progress') return 'in_progress'
+    if (status === 'done') return 'done'
+    if (status === 'cancelled' || status === 'Cancelled') return 'cancelled'
+    return 'waiting'
+}
+
+function getScheduleStartTime(schedule: DbSchedule) {
+    return schedule.time.split(' - ')[0] ?? schedule.time
+}
+
+watch(() => form.value.departmentId, (nextDepartmentId, previousDepartmentId) => {
+    if (syncingFormState.value) return
+    if (nextDepartmentId === previousDepartmentId) return
     form.value.doctorId = ''
     form.value.time = ''
 })
@@ -119,84 +142,113 @@ watch(() => form.value.doctorId, () => {
     form.value.time = selectedSchedule.value?.time ?? ''
 })
 
-// functions
 function openCreate() {
     editingId.value = null
+    syncingFormState.value = true
     form.value = emptyForm()
+    nextTick(() => {
+        syncingFormState.value = false
+    })
     dialog.value = true
 }
 
 function openEdit(item: PatientAppointment) {
     editingId.value = item.id
+    syncingFormState.value = true
+    form.value = {
+        departmentId: item.departmentId,
+        doctorId: item.doctorId,
+        date: item.date,
+        time: item.time,
+        complaint: item.complaint,
+        notes: item.notes,
+        status: item.status === 'done' || item.status === 'in_progress' ? 'waiting' : item.status,
+    }
+    nextTick(() => {
+        syncingFormState.value = false
+    })
     dialog.value = true
 }
 
 async function loadAppointments() {
-    const { data, error } = await useFetch('/api/patient/appointments/today', {
-        method: 'GET',
-    })
-    if (error.value) return
-
-    const apiAppointments = data.value?.appointments ?? []
-    appointments.value = apiAppointments.map((item: any) => ({
-        id: item.id ?? '',
-        department: item.department ?? item.department_id ?? '',
-        doctor: item.doctors?.profiles?.full_name ?? '',
-        specialty: item.doctors?.specialization ?? '',
-        date: item.appointment_date ?? '',
-        time: item.appointment_time ?? '',
-        complaint: item.chief_complaint ?? item.notes ?? '',
-        status: item.status === 'Cancelled' ? 'Cancelled' : 'waiting',
-    }))
+    loadingAppointments.value = true
+    try {
+        const data = await $fetch<any>('/api/patient/appointments/today')
+        const apiAppointments = data?.appointments ?? []
+        appointments.value = apiAppointments.map((item: any) => ({
+            id: item.id ?? '',
+            doctorId: item.doctor_id ?? '',
+            departmentId: item.department_id ?? '',
+            department: departmentNameById.value.get(item.department_id ?? '') ?? item.department_id ?? '',
+            doctor: item.doctors?.profiles?.full_name ?? '',
+            specialty: item.doctors?.specialization ?? '',
+            date: item.appointment_date ?? '',
+            time: item.appointment_time ?? '',
+            complaint: item.chief_complaint ?? '',
+            notes: item.notes ?? '',
+            status: normalizeStatus(item.status),
+        }))
+    } catch (e: any) {
+        showSnackbar(e?.data?.message ?? 'Failed to load appointments.', 'error')
+    } finally {
+        loadingAppointments.value = false
+    }
 }
 
 async function loadSchedules() {
-    const { data, error } = await useFetch('/api/patient/schedules', { method: 'GET' })
-    if (error.value) return
-    schedules.value = (data.value?.schedules ?? []) as DbSchedule[]
+    try {
+        const data = await $fetch<any>('/api/patient/schedules')
+        schedules.value = (data?.schedules ?? []) as DbSchedule[]
+    } catch (e: any) {
+        showSnackbar(e?.data?.message ?? 'Failed to load schedules.', 'error')
+    }
 }
 
 async function saveAppointment() {
-    if (editingId.value) {
-        showSnackbar(
-            'Editing existing appointments is not implemented in this page.',
-            'warning'
-        )
-        snackbar.value = true
-        return
-    }
-
-    if (!form.value.doctorId || !form.value.departmentId || !form.value.date || !form.value.complaint) return
+    if (isSaveDisabled.value) return
 
     const schedule = selectedSchedule.value
-    if (!schedule) return
+    if (!schedule) {
+        showSnackbar('Doctor schedule is required.', 'error')
+        return
+    }
 
     const payload = {
         doctor_id: form.value.doctorId,
         department_id: form.value.departmentId,
         appointment_date: form.value.date,
-        appointment_time: schedule.time.split(' - ')[0] ?? schedule.time,
+        appointment_time: getScheduleStartTime(schedule),
         type: 'appointment',
-        status: 'waiting',
+        status: form.value.status,
         chief_complaint: form.value.complaint,
-        notes: form.value.complaint,
+        notes: form.value.notes || form.value.complaint,
     }
 
-    const { error } = await useFetch('/api/patient/appointments/today', {
-        method: 'POST',
-        body: payload,
-    })
+    savingAppointment.value = true
+    try {
+        if (editingId.value) {
+            await $fetch(`/api/patient/appointments/${editingId.value}`, {
+                method: 'PATCH',
+                body: payload,
+            })
+            showSnackbar('Appointment has been updated.', 'success')
+        } else {
+            await $fetch('/api/patient/appointments/today', {
+                method: 'POST',
+                body: payload,
+            })
+            showSnackbar('Appointment has been booked.', 'success')
+        }
 
-    if ((error.value as any)?.message) {
-        showSnackbar((error.value as any).message, 'error')
-        return
+        await loadAppointments()
+        dialog.value = false
+        editingId.value = null
+        form.value = emptyForm()
+    } catch (e: any) {
+        showSnackbar(e?.data?.message ?? 'Failed to save appointment.', 'error')
+    } finally {
+        savingAppointment.value = false
     }
-
-    showSnackbar('Appointment has been booked.', 'success')
-    snackbar.value = true
-    dialog.value = false
-    form.value = emptyForm()
-    await loadAppointments()
 }
 
 function openDelete(item: PatientAppointment) {
@@ -204,13 +256,23 @@ function openDelete(item: PatientAppointment) {
     deleteDialog.value = true
 }
 
-function deleteAppointment() {
+async function deleteAppointment() {
     if (!deletingAppointment.value) return
-    appointments.value = appointments.value.filter((item) => item.id !== deletingAppointment.value?.id)
-    showSnackbar('Appointment has been deleted.', 'success')
-    snackbar.value = true
-    deleteDialog.value = false
-    deletingAppointment.value = null
+
+    deletingAppointmentLoading.value = true
+    try {
+        await $fetch(`/api/patient/appointments/${deletingAppointment.value.id}`, {
+            method: 'DELETE',
+        })
+        await loadAppointments()
+        showSnackbar('Appointment has been deleted.', 'success')
+        deleteDialog.value = false
+        deletingAppointment.value = null
+    } catch (e: any) {
+        showSnackbar(e?.data?.message ?? 'Failed to delete appointment.', 'error')
+    } finally {
+        deletingAppointmentLoading.value = false
+    }
 }
 
 function formatDate(dateStr: string) {
@@ -218,16 +280,19 @@ function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-US', {
         day: 'numeric',
         month: 'short',
-        year: 'numeric'
+        year: 'numeric',
     })
 }
 
 function statusColor(status: AppointmentStatus) {
-    return status === 'waiting' ? 'primary' : 'error'
+    if (status === 'waiting') return 'primary'
+    if (status === 'in_progress') return 'info'
+    if (status === 'done') return 'success'
+    return 'error'
 }
 
-// init
-await Promise.all([loadAppointments(), loadSchedules()])
+await loadSchedules()
+await loadAppointments()
 </script>
 
 <template>
@@ -248,9 +313,11 @@ await Promise.all([loadAppointments(), loadSchedules()])
                 style="max-width: 430px" />
 
             <v-btn-toggle v-model="statusFilter" mandatory density="compact" variant="tonal" color="primary">
-                <v-btn value="All">All</v-btn>
-                <v-btn value="Scheduled">Scheduled</v-btn>
-                <v-btn value="Cancelled">Cancelled</v-btn>
+                <v-btn value="all">All</v-btn>
+                <v-btn value="waiting">Waiting</v-btn>
+                <v-btn value="in_progress">In Progress</v-btn>
+                <v-btn value="done">Done</v-btn>
+                <v-btn value="cancelled">Cancelled</v-btn>
             </v-btn-toggle>
         </div>
 
@@ -268,42 +335,50 @@ await Promise.all([loadAppointments(), loadSchedules()])
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in filteredAppointments" :key="item.id">
-                    <td>{{ item.id }}</td>
-                    <td>{{ formatDate(item.date) }}</td>
-                    <td>
-                        <div class="font-weight-medium">{{ item.doctor }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.specialty }}</div>
-                    </td>
-                    <td>{{ item.department }}</td>
-                    <td>{{ item.time }}</td>
-                    <td class="text-wrap">{{ item.complaint }}</td>
-                    <td>
-                        <v-chip size="small" :color="statusColor(item.status)" variant="tonal">{{ item.status
-                        }}</v-chip>
-                    </td>
-                    <td class="text-right">
-                        <div class="d-flex justify-end ga-2">
-                            <v-tooltip text="Edit appointment">
-                                <template #activator="{ props }">
-                                    <v-btn v-if="can('book-appt.edit')" v-bind="props" icon="mdi-pencil-outline"
-                                        size="small" color="primary" variant="tonal" aria-label="Edit appointment"
-                                        @click="openEdit(item)" />
-                                </template>
-                            </v-tooltip>
-                            <v-tooltip text="Delete appointment">
-                                <template #activator="{ props }">
-                                    <v-btn v-if="can('book-appt.delete')" v-bind="props" icon="mdi-delete-outline"
-                                        size="small" color="error" variant="tonal" aria-label="Delete appointment"
-                                        @click="openDelete(item)" />
-                                </template>
-                            </v-tooltip>
-                        </div>
+                <tr v-if="loadingAppointments">
+                    <td colspan="8" class="text-center py-6">
+                        <v-progress-circular indeterminate color="primary" />
                     </td>
                 </tr>
-                <tr v-if="filteredAppointments.length === 0">
-                    <td colspan="8" class="text-center py-6 text-medium-emphasis">No appointment found.</td>
-                </tr>
+                <template v-else>
+                    <tr v-for="item in filteredAppointments" :key="item.id">
+                        <td>{{ item.id }}</td>
+                        <td>{{ formatDate(item.date) }}</td>
+                        <td>
+                            <div class="font-weight-medium">{{ item.doctor }}</div>
+                            <div class="text-caption text-medium-emphasis">{{ item.specialty }}</div>
+                        </td>
+                        <td>{{ item.department }}</td>
+                        <td>{{ item.time }}</td>
+                        <td class="text-wrap">{{ item.complaint }}</td>
+                        <td>
+                            <v-chip size="small" :color="statusColor(item.status)" variant="tonal">
+                                {{ item.status }}
+                            </v-chip>
+                        </td>
+                        <td class="text-right">
+                            <div class="d-flex justify-end ga-2">
+                                <v-tooltip text="Edit appointment">
+                                    <template #activator="{ props }">
+                                        <v-btn v-if="can('book-appt.edit')" v-bind="props" icon="mdi-pencil-outline"
+                                            size="small" color="primary" variant="tonal" aria-label="Edit appointment"
+                                            @click="openEdit(item)" />
+                                    </template>
+                                </v-tooltip>
+                                <v-tooltip text="Delete appointment">
+                                    <template #activator="{ props }">
+                                        <v-btn v-if="can('book-appt.delete')" v-bind="props" icon="mdi-delete-outline"
+                                            size="small" color="error" variant="tonal" aria-label="Delete appointment"
+                                            @click="openDelete(item)" />
+                                    </template>
+                                </v-tooltip>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr v-if="filteredAppointments.length === 0">
+                        <td colspan="8" class="text-center py-6 text-medium-emphasis">No appointment found.</td>
+                    </tr>
+                </template>
             </tbody>
         </v-table>
     </UiTitleCard>
@@ -344,11 +419,17 @@ await Promise.all([loadAppointments(), loadSchedules()])
                     </v-col>
 
                     <v-col v-if="editingId" cols="12" md="6">
-                        <v-select v-model="form.status" :items="['Scheduled', 'Cancelled']" label="Status"
-                            variant="outlined" hide-details />
+                        <v-select v-model="form.status" :items="[
+                            { title: 'Waiting', value: 'waiting' },
+                            { title: 'Cancelled', value: 'cancelled' }
+                        ]" label="Status" item-title="title" item-value="value" variant="outlined" hide-details />
                     </v-col>
                     <v-col cols="12">
                         <v-textarea v-model="form.complaint" label="Complaint or Notes" variant="outlined" rows="4"
+                            hide-details />
+                    </v-col>
+                    <v-col cols="12">
+                        <v-textarea v-model="form.notes" label="Additional Notes" variant="outlined" rows="3"
                             hide-details />
                     </v-col>
                 </v-row>
@@ -356,10 +437,11 @@ await Promise.all([loadAppointments(), loadSchedules()])
 
             <v-card-actions class="px-6 pb-4">
                 <v-spacer />
-                <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
+                <v-btn variant="text" :disabled="savingAppointment" @click="dialog = false">Cancel</v-btn>
                 <v-btn color="primary" variant="flat" prepend-icon="mdi-content-save-outline"
-                    :disabled="!form.doctorId || !form.departmentId || !form.date || !form.complaint"
-                    :style="isDisabled ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="saveAppointment">
+                    :loading="savingAppointment" :disabled="isSaveDisabled"
+                    :style="isSaveDisabled ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    @click="saveAppointment">
                     {{ editingId ? 'Save Changes' : 'Save Appointment' }}
                 </v-btn>
             </v-card-actions>
@@ -375,15 +457,17 @@ await Promise.all([loadAppointments(), loadSchedules()])
             </v-card-text>
             <v-card-actions class="px-6 pb-4">
                 <v-spacer />
-                <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
-                <v-btn color="error" variant="flat" @click="deleteAppointment">Delete</v-btn>
+                <v-btn variant="text" :disabled="deletingAppointmentLoading" @click="deleteDialog = false">Cancel</v-btn>
+                <v-btn color="error" variant="flat" :loading="deletingAppointmentLoading"
+                    :disabled="deletingAppointmentLoading"
+                    :style="deletingAppointmentLoading ? 'cursor: wait; pointer-events: auto;' : ''"
+                    @click="deleteAppointment">
+                    Delete
+                </v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 
-    <!-- <v-snackbar v-model="snackbar" color="success">
-        {{ snackbarMessage }}
-    </v-snackbar> -->
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
         {{ snackbarMessage }}
         <template #actions>

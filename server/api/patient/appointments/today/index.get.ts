@@ -37,10 +37,11 @@ export default defineEventHandler(async (event) => {
             department_id,
             doctor_id,
             doctors!appointments_doctor_id_fkey (
-            id,
-            profiles!doctors_id_fkey (
-                full_name
-            )
+                id,
+                specialization,
+                profiles!doctors_id_fkey (
+                    full_name
+                )
             )
         `)
         .eq('patient_id', patient.id)
