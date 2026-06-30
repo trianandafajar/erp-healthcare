@@ -1,3 +1,6 @@
 <template>
-    <slot />
+    <!-- jangan diubah blank layout ini berfungsi container riset tw -->
+    <div class="blank-layout">
+        <slot />
+    </div>
 </template>

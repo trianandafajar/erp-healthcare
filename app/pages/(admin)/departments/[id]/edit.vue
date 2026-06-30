@@ -55,6 +55,10 @@ async function save() {
                 body: { name: form.name, code: form.code || null, description: form.description || null },
             })
             notify('Department updated')
+            await navigateTo({
+                path: `/departments/${id}`,
+                query: { refresh: Date.now().toString() },
+            })
         }
     } catch (e: any) {
         notify(e?.data?.message ?? 'Failed to save', 'error')

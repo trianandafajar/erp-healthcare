@@ -3,26 +3,9 @@
 /*This is for the logo*/
 .leftSidebar {
   .v-navigation-drawer__content {
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(var(--v-theme-primary), 0.2) transparent;
-
-    &::-webkit-scrollbar {
-      width: 1px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(var(--v-theme-primary), 0.3);
-      border-radius: 0;
-    }
-
-    &::-webkit-scrollbar-button {
-      display: none;
-    }
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   border: 0px;
@@ -36,7 +19,28 @@
 
 /*This is for the Vertical sidebar*/
 .scrollnavbar {
-  height: calc(100vh - 110px);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--v-theme-primary), 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    width: 1px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(var(--v-theme-primary), 0.3);
+    border-radius: 0;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
 
   .smallCap {
     padding: 0px 0 0 20px !important;

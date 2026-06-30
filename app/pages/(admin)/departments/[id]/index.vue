@@ -7,16 +7,17 @@ definePageMeta({
 
 const route = useRoute()
 const id = route.params.id as string
+const refreshToken = Array.isArray(route.query.refresh) ? route.query.refresh[0] : route.query.refresh ?? ''
 
 const { data, pending, refresh } = await useFetch(`/api/departments/${id}`, {
-    key: `department-${id}`,
+    key: `department-${id}-${refreshToken}`,
 })
 const department = computed(() => data.value)
 const stats = computed(() => data.value?.stats)
 const doctors = computed(() => data.value?.doctors ?? [])
 
 const { data: apptData, pending: apptPending, refresh: refreshAppt } = await useFetch(`/api/departments/${id}/appointments`, {
-    key: `department-${id}-appointments`,
+    key: `department-${id}-appointments-${refreshToken}`,
     query: { limit: 50 },
 })
 const appointments = computed(() => apptData.value?.data ?? [])

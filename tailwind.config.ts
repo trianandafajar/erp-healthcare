@@ -24,12 +24,14 @@ if (theme.fonts.font_family.secondary) {
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+    corePlugins: {
+        preflight: false,
+    },  
     content: [
         './app/layouts/landing.vue',
         './app/pages/(landingpage)/**/*.vue',
         './app/components/landingpage/**/*.vue',
-        "./components/**/*.{js,ts,vue}",
-        "./layouts/**/*.{js,ts,vue}",
+        "./components/landingpage/**/*.{js,ts,vue}",
         "./content/**/*.{md,mdx}",
     ],
     theme: {
