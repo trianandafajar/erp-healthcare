@@ -1,79 +1,59 @@
 <template>
   <header class="header">
-    <nav class="navbar container flex items-center justify-between">
-      <div class="order-1">
-      HALO
+    <nav class="navbar container mx-auto flex items-center justify-between py-4">
+      <div class="flex shrink-0 items-center">
+         <Logo :src="logo" />
       </div>
 
-      <button
-        id="show-button"
-        class="order-2 flex cursor-pointer items-center md:order-3 md:hidden"
-        @click="navOpen = !navOpen"
-      >
-        <svg v-if="navOpen" class="h-6 fill-current" viewBox="0 0 20 20">
-          <title>Menu Open</title>
-          <polygon points="11 9 22 9 22 11 11 11 11 22 9 22 9 11 -2 11 -2 9 9 9 9 -2 11 -2" transform="rotate(45 10 10)" />
+      <button class="flex shrink-0 cursor-pointer items-center md:hidden" @click="navOpen = !navOpen">
+        <svg v-if="navOpen" class="h-6 w-6 fill-current" viewBox="0 0 20 20">
+          <polygon points="11 9 22 9 22 11 11 11 11 22 9 22 9 11 -2 11 -2 9 9 9 9 -2 11 -2"
+            transform="rotate(45 10 10)" />
         </svg>
-        <svg v-else class="h-6 fill-current" viewBox="0 0 20 20">
-          <title>Menu Close</title>
+        <svg v-else class="h-6 w-6 fill-current" viewBox="0 0 20 20">
           <path d="M0 3h20v2H0V3z m0 6h20v2H0V9z m0 6h20v2H0V0z" />
         </svg>
       </button>
 
-      <div
-        id="nav-menu"
-        :class="['order-4 w-full md:order-2 md:w-auto', navOpen ? 'max-h-[1000px]' : 'max-h-0']"
-      >
-        <ul class="navbar-nav block w-full md:flex md:w-auto lg:space-x-2">
-          <li v-for="(menu, i) in main" :key="'menu-' + i" class="nav-item">
-            <template v-if="menu.hasChildren">
-              <span class="nav-dropdown group relative">
-                <span class="nav-link inline-flex items-center">
-                  {{ menu.name }}
-                  <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                  </svg>
-                </span>
-                <ul class="nav-dropdown-list hidden group-hover:block md:invisible md:absolute md:block md:opacity-0 md:group-hover:visible md:group-hover:opacity-100">
-                  <li v-for="(child, ci) in menu.children" :key="'children-' + ci" class="nav-dropdown-item">
-                    <NuxtLink :to="child.url" class="nav-dropdown-link block">{{ child.name }}</NuxtLink>
-                  </li>
-                </ul>
-              </span>
-            </template>
-            <template v-else>
-              <NuxtLink
-                :to="menu.url"
-                :class="['nav-link block', route.path === menu.url ? 'nav-link-active' : '']"
-                @click="navOpen = false"
-              >
-                {{ menu.name }}
-              </NuxtLink>
-            </template>
-          </li>
-          <li v-if="enable" class="md:hidden">
-            <NuxtLink class="btn btn-primary z-0 py-[14px]" :to="link">{{ label }}</NuxtLink>
+      <div :class="[
+        'w-full md:flex md:w-auto md:flex-1 md:justify-center',
+        navOpen ? 'block' : 'hidden md:flex'
+      ]">
+        <ul class="block w-full md:flex md:w-auto md:items-center md:space-x-8">
+          <li v-for="item in menuItems" :key="item.name">
+            <a :href="item.url" :class="[
+              'block py-2 font-semibold md:py-0',
+              item.url === currentPath ? 'text-teal-500' : 'text-gray-800 hover:text-teal-500'
+            ]" @click="navOpen = false">
+              {{ item.name }}
+            </a>
           </li>
         </ul>
       </div>
 
-      <div
-        v-if="enable"
-        class="order-3 hidden min-w-[160px] items-center justify-end md:flex"
-      >
-        <NuxtLink class="btn btn-primary z-0 py-[14px]" :to="link">{{ label }}</NuxtLink>
+      <div class="hidden shrink-0 items-center justify-end md:flex">
+        <a href="/login" class="rounded-full bg-teal-500 px-6 py-3 font-semibold text-white hover:bg-teal-600">
+          Get Started
+        </a>
       </div>
     </nav>
   </header>
 </template>
 
 <script setup>
+import Logo from "./Logo.vue";
 import config from "~/config/config.json";
-import menu from "~/config/menu.json";
 
-const { main } = menu;
 const { logo } = config.site;
-const { enable, label, link } = config.nav_button;
+
 const route = useRoute();
 const navOpen = ref(false);
+
+const menuItems = [
+  { name: "Home", url: "/" },
+  { name: "Blog", url: "/blog" },
+  { name: "Pricing", url: "/pricing" },
+  { name: "Contact", url: "/contact" },
+  { name: "FAQ", url: "/faq" },
+];
 </script>
