@@ -18,6 +18,7 @@ export default defineNuxtConfig({
     '@mdi/font/css/materialdesignicons.min.css',
     '~/assets/scss/style.scss',
     '~/assets/css/tailwind.css',
+    '~/assets/scss/landingpage/style.scss',
   ],
 
   build: {

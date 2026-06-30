@@ -31,3 +31,4 @@ logs
 .vercel
 
 TODO.md
+.env*.local
