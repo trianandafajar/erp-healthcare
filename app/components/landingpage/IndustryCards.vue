@@ -1,5 +1,5 @@
 <template>
-  <section class="py-8 md:py-12">
+  <section class="py-12 md:py-24">
     <div class="mx-6 rounded-3xl bg-[#0a0a0a] overflow-hidden">
       <div class="p-8 lg:p-14">
         <div class="max-w-3xl mb-12">
