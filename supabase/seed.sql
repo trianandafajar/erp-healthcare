@@ -158,7 +158,13 @@
     ('examination.download', 'Download Examination Result', 'examination', 'patient'),
 
     -- Admin-only extra permission (from migration)
-    ('user.impersonate', 'Login as User', 'user', 'admin')
+    ('user.impersonate', 'Login as User', 'user', 'admin'),
+
+    -- Landing Page
+    ('landingpage.industries.view', 'View Industries', 'landingpage', 'admin'),
+    ('landingpage.industries.create', 'Create Industries', 'landingpage', 'admin'),
+    ('landingpage.industries.edit', 'Edit Industries', 'landingpage', 'admin'),
+    ('landingpage.industries.delete', 'Delete Industries', 'landingpage', 'admin')
 
     ON CONFLICT (name) DO NOTHING;
 

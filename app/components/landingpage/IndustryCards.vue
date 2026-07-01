@@ -16,7 +16,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-[repeat(13,minmax(0,1fr))] gap-5">
 
-          <div v-for="(industry, index) in industries" :key="industry.title" :class="[
+          <div v-for="(industry, index) in displayIndustries" :key="industry.id" :class="[
             'group relative overflow-hidden rounded-3xl min-h-[340px]',
             widthClasses[index]
           ]">
@@ -63,51 +63,27 @@
 </template>
 
 <script setup>
-const widthClasses = [
+const widthPattern = [
   'md:col-span-5',
-  'md:col-span-4  ',
+  'md:col-span-4',
   'md:col-span-4',
   'md:col-span-4',
   'md:col-span-5',
   'md:col-span-4',
 ]
 
-const industries = [
-  {
-    title: 'Hospitals',
-    description:
-      'Complete hospital management with multi-department coordination, inpatient wards, and emergency services.',
-    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
-  },
-  {
-    title: 'Clinics',
-    description:
-      'Efficient clinic operations with appointment scheduling, patient flow, and integrated digital records.',
-    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
-  },
-  {
-    title: 'Pharmacies',
-    description:
-      'End-to-end pharmacy management including prescription processing, inventory, and regulatory compliance.',
-    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
-  },
-  {
-    title: 'Laboratories',
-    description:
-      'Laboratory information system with test tracking, result reporting, and referral integration.',
-    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
-  },
-  {
-    title: 'Community Health Centers',
-    description:
-      'Public health management with immunization tracking, maternal health, and community outreach programs.',
-    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
-  },
-  {
-    title: 'Private Practices',
-    description:
-      'Solo and group practice management with scheduling, e-prescriptions, and insurance claims.',
-    image: 'https://www.trinityhealthma.org/sites/default/files/2025-11/location-nazareth-hospital_1.jpg'
-  }
-]
+const { data: industries } = await useFetch('/api/landingpage/industries')
+
+const displayIndustries = computed(() =>
+  (industries.value ?? []).map(item => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    image: item.image_url
+  }))
+)
+
+const widthClasses = computed(() =>
+  displayIndustries.value.map((_, i) => widthPattern[i % widthPattern.length])
+)
 </script>
