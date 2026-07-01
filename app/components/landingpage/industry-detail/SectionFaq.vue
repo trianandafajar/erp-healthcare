@@ -76,14 +76,17 @@ const currentSrc = ref('')
 
 function getImageUrl(index) {
   const i = index ?? 0
-  return props.faq[i]?.image_url || props.image || '/landingpage/service-slide-1.png'
+  return props.faq[i]?.image_url || props.faq[0]?.image_url || '/landingpage/service-slide-1.png'
 }
 
 function toggle(index) {
   if (index === openIndex.value) {
     animateAnswerOut(() => {
       openIndex.value = null
-      animateImageOut()
+      animateImageOut(() => {
+        currentSrc.value = getImageUrl(0)
+        animateImageIn()
+      })
     })
   } else {
     animateImageOut(() => {
