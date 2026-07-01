@@ -195,6 +195,11 @@ function onFaqItemDragOver(index: number) {
     if (u) u.dragging = true
 }
 
+function onFaqItemFileChange(index: number, event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (file) applyFaqItemFile(index, file)
+}
+
 function onFaqItemDragLeave(index: number) {
     const u = faqItemUploads.value[index]
     if (u) u.dragging = false
@@ -500,14 +505,18 @@ async function onSubmit() {
                                             :class="{
                                                 'photo-dropzone--dragging': faqItemUploads[index]?.dragging,
                                                 'photo-dropzone--error': !!faqItemUploads[index]?.error
-                                            }"
-                                            @dragover.prevent="if (faqItemUploads[index]) faqItemUploads[index].dragging = true"
-                                            @dragleave="if (faqItemUploads[index]) faqItemUploads[index].dragging = false"
-                                            @drop.prevent="if (faqItemUploads[index]) faqItemUploads[index].dragging = false; const f = ($event as DragEvent).dataTransfer?.files?.[0]; if (f) applyFaqItemFile(index, f)"
-                                            @click="(faqItemUploads[index] as any)?.inputRef?.click()">
+                                            }" @dragover.prevent="onFaqItemDragOver(index)"
+                                            @dragleave="onFaqItemDragLeave(index)"
+                                            @drop.prevent="onFaqItemDrop(index, $event)"
+                                            @click="triggerFaqItemInput(index)">
                                             <v-icon icon="mdi-image-plus-outline" size="20" color="grey" />
                                             <span class="text-caption">Upload photo</span>
                                         </div>
+
+                                        <input type="file" accept="image/jpeg,image/png,image/webp"
+                                            style="display: none"
+                                            :ref="(el: any) => { if (faqItemUploads[index]) (faqItemUploads[index] as any).inputRef = el }"
+                                            @change="onFaqItemFileChange(index, $event)" />
 
                                         <input type="file" accept="image/jpeg,image/png,image/webp"
                                             style="display: none"
