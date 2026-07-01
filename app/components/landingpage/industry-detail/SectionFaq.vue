@@ -12,7 +12,7 @@
 
       <div class="grid md:grid-cols-2 gap-10 md:gap-14 items-center">
         <div class="rounded-xl border border-gray-200 divide-y divide-gray-200 overflow-hidden bg-white">
-          <div v-for="(item, index) in faq" :key="index">
+          <div v-for="(item, index) in faq" :key="index" :ref="el => faqItemRefs[index] = el">
             <button @click="toggle(index)" class="w-full flex items-center gap-4 px-6 py-6 text-left group"
               :aria-expanded="openIndex === index">
               <span class="flex h-8 w-8 shrink-0 items-center justify-center text-orange-500">
@@ -22,14 +22,14 @@
               <v-icon :icon="openIndex === index ? 'mdi-chevron-up' : 'mdi-chevron-down'"
                 class="shrink-0 text-gray-400 transition-transform" size="22" />
             </button>
-            <div v-show="openIndex === index"
+            <div :ref="el => answerOuterRefs[index] = el" style="display:none"
               class="px-6 pb-6 pl-[3.75rem] -mt-2 text-sm md:text-base leading-relaxed text-gray-600">
               {{ item.answer }}
             </div>
           </div>
         </div>
         <div class="relative flex min-h-[320px] items-center justify-center">
-          <img :key="openIndex ?? -1" :src="faq[openIndex]?.image_url || faq[0]?.image_url" :alt="title"
+          <img ref="imgEl" :src="currentSrc" :alt="title"
             class="relative z-10 w-full max-w-lg object-contain select-none pointer-events-none" />
         </div>
       </div>
@@ -38,7 +38,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
+import { animate, stagger, utils } from 'animejs'
 
 const props = defineProps({
   faq: {
@@ -68,8 +69,99 @@ const props = defineProps({
 })
 
 const openIndex = ref(0)
+const faqItemRefs = reactive([])
+const answerOuterRefs = reactive([])
+const imgEl = ref(null)
+const currentSrc = ref('')
+
+function getImageUrl(index) {
+  const i = index ?? 0
+  return props.faq[i]?.image_url || props.image || '/landingpage/service-slide-1.png'
+}
 
 function toggle(index) {
-  openIndex.value = openIndex.value === index ? null : index
+  if (index === openIndex.value) {
+    animateAnswerOut(() => {
+      openIndex.value = null
+      animateImageOut()
+    })
+  } else {
+    animateImageOut(() => {
+      animateAnswerOut(() => {
+        openIndex.value = index
+        nextTick(() => {
+          currentSrc.value = getImageUrl(index)
+          animateAnswerIn()
+          animateImageIn()
+        })
+      })
+    })
+  }
 }
+
+function animateFaqItemsIn() {
+  animate(faqItemRefs.filter(Boolean), {
+    opacity: [0, 1],
+    delay: stagger(60),
+    duration: 350,
+    ease: 'outCubic',
+  })
+}
+
+function animateAnswerIn() {
+  const el = answerOuterRefs[openIndex.value]
+  if (!el) return
+  el.style.display = 'block'
+  el.style.opacity = '0'
+  animate(el, {
+    opacity: [0, 1],
+    duration: 300,
+    ease: 'outCubic',
+  })
+}
+
+function animateAnswerOut(done) {
+  const el = answerOuterRefs[openIndex.value]
+  if (!el) { done?.(); return }
+  animate(el, {
+    opacity: [1, 0],
+    duration: 200,
+    ease: 'inCubic',
+    onComplete: () => {
+      el.style.display = 'none'
+      done?.()
+    },
+  })
+}
+
+function animateImageIn() {
+  if (!imgEl.value) return
+  animate(imgEl.value, {
+    opacity: [0, 1],
+    duration: 300,
+    ease: 'outCubic',
+  })
+}
+
+function animateImageOut(done) {
+  if (!imgEl.value) { done?.(); return }
+  animate(imgEl.value, {
+    opacity: [1, 0],
+    duration: 200,
+    ease: 'inCubic',
+    onComplete: done,
+  })
+}
+
+onMounted(async () => {
+  await nextTick()
+  currentSrc.value = getImageUrl(openIndex.value)
+  const el = answerOuterRefs[openIndex.value]
+  if (el) {
+    el.style.display = 'block'
+    el.style.opacity = '1'
+  }
+  animateFaqItemsIn()
+  animateImageIn()
+})
 </script>
