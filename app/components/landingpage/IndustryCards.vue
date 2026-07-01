@@ -41,8 +41,8 @@
                       {{ industry.description }}
                     </p>
 
-                    <a href="#"
-                      class="inline-flex items-center gap-2 text-[#0aa8a7] font-semibold hover:text-[#16d5d4]">
+                    <NuxtLink v-if="industry.slug" :to="'/industries/' + industry.slug"
+                      class="inline-flex items-center gap-2 text-[#0aa8a7] font-semibold hover:text-[#16d5d4] no-underline">
                       Learn More
 
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition group-hover:translate-x-1"
@@ -50,7 +50,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                       </svg>
 
-                    </a>
+                    </NuxtLink>
                   </div>
                 </div>
               </div>
@@ -79,7 +79,8 @@ const displayIndustries = computed(() =>
     id: item.id,
     title: item.title,
     description: item.description,
-    image: item.image_url
+    image: item.image_url,
+    slug: item.slug
   }))
 )
 

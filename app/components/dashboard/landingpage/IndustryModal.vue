@@ -6,6 +6,7 @@ interface Industry {
     title: string
     description: string
     image_url: string
+    slug: string | null
     sort_order: number
     is_active: boolean
 }
@@ -25,6 +26,7 @@ const form = ref({
     title: '',
     description: '',
     image_url: '',
+    slug: '',
     sort_order: 0,
 })
 
@@ -116,13 +118,14 @@ watch(
                 title: industry.title,
                 description: industry.description,
                 image_url: industry.image_url,
+                slug: industry.slug ?? '',
                 sort_order: industry.sort_order,
             }
             photoPreview.value = industry.image_url || ''
             photoFile.value = null
             photoError.value = ''
         } else {
-            form.value = { title: '', description: '', image_url: '', sort_order: 0 }
+            form.value = { title: '', description: '', image_url: '', slug: '', sort_order: 0 }
             photoPreview.value = ''
             photoFile.value = null
             photoError.value = ''
@@ -168,6 +171,7 @@ async function onSubmit() {
             title: form.value.title,
             description: form.value.description,
             image_url: form.value.image_url,
+            slug: form.value.slug || null,
             sort_order: form.value.sort_order,
         })
     } catch (err: any) {
@@ -213,6 +217,15 @@ async function onSubmit() {
                         <v-label class="text-caption font-weight-medium mb-1">Title</v-label>
                         <v-text-field v-model="form.title" placeholder="e.g. Hospitals" variant="outlined"
                             density="compact" hide-details="auto" />
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Slug (URL)</v-label>
+                        <v-text-field v-model="form.slug" placeholder="e.g. hospitals" variant="outlined"
+                            density="compact" hide-details />
+                        <div class="text-caption text-medium-emphasis mt-1">
+                            Used for the detail page URL: /industries/{slug}
+                        </div>
                     </v-col>
 
                     <v-col cols="12" class="mt-3">

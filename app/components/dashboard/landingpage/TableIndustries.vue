@@ -9,6 +9,7 @@ definePageMeta({
 
 interface Industry {
     id: string
+    slug: string
     title: string
     description: string
     image_url: string
@@ -87,6 +88,10 @@ function openDelete(industry: Industry) {
     dialog.value = true
 }
 
+function openPreview(slug: string) {
+    window.open('/industries/' + slug, '_blank')
+}
+
 function closeModal() {
     dialog.value = false
     selectedIndustry.value = null
@@ -103,6 +108,7 @@ async function handleSubmit(payload: any) {
                     description: payload.description,
                     image_url: payload.image_url,
                     sort_order: payload.sort_order,
+                    slug: payload.slug
                 }
             })
             notify('Industry created successfully')
@@ -114,6 +120,7 @@ async function handleSubmit(payload: any) {
                     description: payload.description,
                     image_url: payload.image_url,
                     sort_order: payload.sort_order,
+                    slug: payload.slug
                 }
             })
             notify('Industry updated successfully')
@@ -218,9 +225,17 @@ async function handleSubmit(payload: any) {
                     <td class="py-3 text-right">
                         <v-btn v-if="can('landingpage.industries.edit')" @click="openEdit(industry)"
                             icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                            density="comfortable" />
+                            density="comfortable" title="Edit" />
+                        <v-btn v-if="can('landingpage.industries.edit')"
+                            @click="navigateTo('/landingpage/industries/' + industry.id + '/content')"
+                            icon="mdi-file-document-edit-outline" variant="text" size="small" color="info"
+                            density="comfortable" title="Edit Content" />
+                        <v-btn v-if="industry.slug" @click="openPreview(industry.slug)"
+                            icon="mdi-eye-outline" variant="text" size="small" color="primary"
+                            density="comfortable" title="Preview" />
                         <v-btn v-if="can('landingpage.industries.delete')" @click="openDelete(industry)"
-                            icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable" />
+                            icon="mdi-delete-outline" variant="text" size="small" color="error"
+                            density="comfortable" title="Delete" />
                     </td>
                 </tr>
             </tbody>

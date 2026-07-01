@@ -1,4 +1,4 @@
-gcreate table "public"."industry_details" (
+create table "public"."industry_details" (
     "id" uuid not null default gen_random_uuid(),
     "industry_id" uuid not null references public.landingpage_industries(id) on delete cascade,
     "content" jsonb not null default '{}',
