@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useCustomizerStore } from '../../../stores/customizer';
+import { useDisplay } from 'vuetify';
 // icons
 import { MenuFoldOutlined, SearchOutlined, GithubOutlined } from '@ant-design/icons-vue';
 
@@ -9,9 +10,19 @@ import ProfileDD from './ProfileDD.vue';
 
 const customizer = useCustomizerStore();
 const profileStore = useProfileStore()
+const display = useDisplay()
 
 onMounted(() => {
+  if (display.smAndDown.value && customizer.Sidebar_drawer) {
+    customizer.SET_SIDEBAR_DRAWER()
+  }
   profileStore.fetchProfile().catch(() => { })
+})
+
+onBeforeMount(() => {
+  if (display.smAndDown.value && customizer.Sidebar_drawer) {
+    customizer.SET_SIDEBAR_DRAWER()
+  }
 })
 
 const profile = computed(() => profileStore.profile)
@@ -56,24 +67,39 @@ async function handleExit() {
 </script>
 
 <template>
-  <v-app-bar v-if="isImpersonating" flat height="44" :order="-1" color="orange-darken-2" style="z-index: 1005;">
-    <v-icon icon="mdi-shield-account" size="18" class="ml-4 mr-2" />
+  <v-app-bar v-if="isImpersonating" flat :height="display.smAndDown.value ? 56 : 44" :order="-1"
+    color="orange-darken-2" style="z-index: 1005;">
+    <v-icon icon="mdi-shield-account" size="18" class="ml-3 ml-sm-4 mr-2 flex-shrink-0" />
 
-    <span class="text-body-2">
-      You are currently logged in as
-      <strong>{{ impersonatedName }}</strong>
-    </span>
+    <div class="d-flex align-center min-w-0 flex-grow-1">
+      <span class="text-body-2 text-truncate">
+        <span class="d-none d-sm-inline">You are currently logged in as </span>
+        <span class="d-inline d-sm-none">Impersonating </span>
+        <strong>{{ impersonatedName }}</strong>
+      </span>
 
-    <v-chip size="x-small" variant="tonal" color="white" label class="ml-2 text-capitalize">
-      {{ impersonatedRole }}
-    </v-chip>
+      <v-chip v-if="!display.xs.value" size="x-small" variant="tonal" color="white" label
+        class="ml-2 text-capitalize flex-shrink-0">
+        {{ impersonatedRole }}
+      </v-chip>
+    </div>
 
-    <v-spacer />
+    <v-spacer class="d-none d-sm-flex" />
 
-    <v-btn size="small" variant="outlined" color="white" :loading="isExiting" prepend-icon="mdi-logout-variant"
-      class="mr-4" style="border-color: rgba(255,255,255,0.6);" @click="handleExit">
+    <v-btn v-if="display.mdAndUp.value" size="small" variant="outlined" color="white" :loading="isExiting"
+      prepend-icon="mdi-logout-variant" class="mr-4 flex-shrink-0" style="border-color: rgba(255,255,255,0.6);"
+      @click="handleExit">
       Return to Admin Account
     </v-btn>
+
+    <v-tooltip v-else text="Return to Admin Account" location="bottom">
+      <template #activator="{ props }">
+        <v-btn v-bind="props" icon size="small" variant="outlined" color="white" :loading="isExiting"
+          class="mr-2 flex-shrink-0" style="border-color: rgba(255,255,255,0.6);" @click="handleExit">
+          <v-icon icon="mdi-logout-variant" size="18" />
+        </v-btn>
+      </template>
+    </v-tooltip>
   </v-app-bar>
 
   <v-app-bar elevation="0" height="60">
