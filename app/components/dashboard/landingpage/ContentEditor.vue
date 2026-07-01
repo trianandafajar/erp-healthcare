@@ -11,6 +11,10 @@ interface Feature {
     icon: string
     title: string
     description: string
+    image_url: string
+    points: string[]
+    cta_text: string
+    cta_link: string
 }
 
 interface FaqItem {
@@ -76,6 +80,7 @@ const faqPhotoError = ref<string>('')
 const faqPhotoInputRef = ref<HTMLInputElement | null>(null)
 const faqDragging = ref(false)
 const faqItemUploads = ref<FaqItemUpload[]>([])
+const featureItemUploads = ref<FaqItemUpload[]>([])
 const cta = ref<CtaData>({ title: '', button_text: '', button_link: '' })
 
 watch(
@@ -84,7 +89,23 @@ watch(
         if (val) {
             hero.value = val.hero ?? { title: '', description: '', image_url: '' }
             heroPhotoPreview.value = val.hero?.image_url || ''
-            features.value = val.features ?? []
+            const rawFeatures = val.features ?? []
+            features.value = rawFeatures.map((f: any) => ({
+                icon: f.icon ?? '',
+                title: f.title ?? '',
+                description: f.description ?? '',
+                image_url: f.image_url ?? '',
+                points: f.points ?? [],
+                cta_text: f.cta_text ?? '',
+                cta_link: f.cta_link ?? '',
+            }))
+            featureItemUploads.value = rawFeatures.map((f: any) => ({
+                file: null,
+                preview: f.image_url || '',
+                uploading: false,
+                error: '',
+                dragging: false,
+            }))
             const f = val.faq
             const items = f?.items ?? []
             faq.value = {
@@ -246,11 +267,61 @@ async function uploadFaqItemPhoto(index: number): Promise<string> {
 }
 
 function addFeature() {
-    features.value.push({ icon: 'mdi-check-circle', title: '', description: '' })
+    features.value.push({ icon: 'mdi-check-circle', title: '', description: '', image_url: '', points: [], cta_text: '', cta_link: '' })
+    featureItemUploads.value.push({ file: null, preview: '', uploading: false, error: '', dragging: false })
 }
 
 function removeFeature(index: number) {
     features.value.splice(index, 1)
+    featureItemUploads.value.splice(index, 1)
+}
+
+function addFeaturePoint(featureIndex: number) {
+    features.value[featureIndex].points.push('')
+}
+
+function removeFeaturePoint(featureIndex: number, pointIndex: number) {
+    features.value[featureIndex].points.splice(pointIndex, 1)
+}
+
+function applyFeatureFile(index: number, file: File) {
+    const err = validateFile(file)
+    if (err) {
+        featureItemUploads.value[index].error = err
+        return
+    }
+    featureItemUploads.value[index].error = ''
+    featureItemUploads.value[index].file = file
+    if (featureItemUploads.value[index].preview.startsWith('blob:')) {
+        URL.revokeObjectURL(featureItemUploads.value[index].preview)
+    }
+    featureItemUploads.value[index].preview = URL.createObjectURL(file)
+}
+
+function removeFeaturePhoto(index: number) {
+    const u = featureItemUploads.value[index]
+    if (!u) return
+    if (u.preview.startsWith('blob:')) URL.revokeObjectURL(u.preview)
+    u.file = null
+    u.preview = ''
+    u.error = ''
+    if (features.value[index]) features.value[index].image_url = ''
+}
+
+async function uploadFeaturePhoto(index: number): Promise<string> {
+    const u = featureItemUploads.value[index]
+    const item = features.value[index]
+    if (!u || !item || !u.file) return item?.image_url ?? ''
+    u.uploading = true
+    try {
+        const body = new FormData()
+        body.append('file', u.file)
+        const result = await $fetch<{ url: string }>('/api/upload/industry-photo', { method: 'POST', body })
+        item.image_url = result.url
+        return result.url
+    } finally {
+        u.uploading = false
+    }
 }
 
 function addFaq() {
@@ -270,6 +341,11 @@ async function onSubmit() {
     for (let i = 0; i < faq.value.items.length; i++) {
         if (faqItemUploads.value[i]?.file) {
             await uploadFaqItemPhoto(i)
+        }
+    }
+    for (let i = 0; i < features.value.length; i++) {
+        if (featureItemUploads.value[i]?.file) {
+            await uploadFeaturePhoto(i)
         }
     }
 
@@ -408,6 +484,85 @@ async function onSubmit() {
                                         <v-label class="text-caption font-weight-medium mb-1">Description</v-label>
                                         <v-textarea v-model="feature.description" placeholder="Describe this feature..."
                                             variant="outlined" density="compact" rows="2" hide-details />
+                                    </v-col>
+
+                                    <v-col cols="12" class="mt-2">
+                                        <v-label class="text-caption font-weight-medium mb-1">Image</v-label>
+                                        <div class="d-flex ga-2 align-stretch">
+                                            <v-avatar size="56" rounded="lg" color="grey-lighten-3"
+                                                class="flex-shrink-0">
+                                                <v-img v-if="featureItemUploads[index]?.preview"
+                                                    :src="featureItemUploads[index].preview" cover />
+                                                <v-icon v-else icon="mdi-image-outline" size="28"
+                                                    color="grey-lighten-1" />
+                                            </v-avatar>
+
+                                            <div class="photo-dropzone photo-dropzone--sm flex-grow-1 d-flex flex-column align-center justify-center ga-1 rounded-lg"
+                                                :class="{
+                                                    'photo-dropzone--dragging': featureItemUploads[index]?.dragging,
+                                                    'photo-dropzone--error': !!featureItemUploads[index]?.error
+                                                }"
+                                                @dragover.prevent="featureItemUploads[index].dragging = true"
+                                                @dragleave="featureItemUploads[index].dragging = false"
+                                                @drop.prevent="featureItemUploads[index].dragging = false; const f = ($event as DragEvent).dataTransfer?.files?.[0]; if (f) applyFeatureFile(index, f)"
+                                                @click="(featureItemUploads[index] as any)?.inputRef?.click()">
+                                                <v-icon icon="mdi-image-plus-outline" size="20" color="grey" />
+                                                <span class="text-caption">Upload photo</span>
+                                            </div>
+
+                                            <input type="file" accept="image/jpeg,image/png,image/webp"
+                                                style="display: none"
+                                                :ref="(el: any) => { if (featureItemUploads[index]) (featureItemUploads[index] as any).inputRef = el }"
+                                                @change="applyFeatureFile(index, ($event.target as HTMLInputElement).files![0])" />
+                                        </div>
+
+                                        <div v-if="featureItemUploads[index]?.error"
+                                            class="text-caption text-error mt-1 d-flex align-center ga-1">
+                                            <v-icon icon="mdi-alert-circle-outline" size="14" />
+                                            {{ featureItemUploads[index].error }}
+                                        </div>
+
+                                        <div v-if="featureItemUploads[index]?.preview" class="mt-1">
+                                            <v-btn variant="text" color="error" size="x-small"
+                                                prepend-icon="mdi-delete-outline" @click="removeFeaturePhoto(index)">
+                                                Remove
+                                            </v-btn>
+                                        </div>
+                                    </v-col>
+
+                                    <v-col cols="12" class="mt-2">
+                                        <v-divider class="mb-2" />
+                                        <div class="d-flex align-center justify-space-between">
+                                            <span class="text-subtitle-2 font-weight-bold">Points</span>
+                                            <v-btn color="primary" variant="tonal" prepend-icon="mdi-plus" size="x-small"
+                                                @click="addFeaturePoint(index)">
+                                                Add Point
+                                            </v-btn>
+                                        </div>
+
+                                        <div v-if="feature.points.length === 0" class="text-center py-3 text-medium-emphasis">
+                                            <p class="text-caption">No points yet.</p>
+                                        </div>
+
+                                        <div v-for="(point, pIdx) in feature.points" :key="pIdx"
+                                            class="d-flex align-center ga-2 mt-2">
+                                            <v-text-field v-model="feature.points[pIdx]" placeholder="e.g. 24/7 patient support"
+                                                variant="outlined" density="compact" hide-details />
+                                            <v-btn icon="mdi-close" variant="text" density="compact" size="x-small"
+                                                color="error" @click="removeFeaturePoint(index, pIdx)" />
+                                        </div>
+                                    </v-col>
+
+                                    <v-col cols="12" sm="6" class="mt-2">
+                                        <v-label class="text-caption font-weight-medium mb-1">CTA Text</v-label>
+                                        <v-text-field v-model="feature.cta_text" placeholder="e.g. Learn More"
+                                            variant="outlined" density="compact" hide-details />
+                                    </v-col>
+
+                                    <v-col cols="12" sm="6" class="mt-2">
+                                        <v-label class="text-caption font-weight-medium mb-1">CTA Link</v-label>
+                                        <v-text-field v-model="feature.cta_link" placeholder="e.g. /contact"
+                                            variant="outlined" density="compact" hide-details />
                                     </v-col>
                                 </v-row>
                             </v-card-text>
