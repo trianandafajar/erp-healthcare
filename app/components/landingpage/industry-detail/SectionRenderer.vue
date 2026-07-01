@@ -1,6 +1,8 @@
 <template>
   <SectionFeatures v-if="content?.features?.length" :features="content.features" />
-  <SectionFaq v-if="content?.faq?.length" :faq="content.faq" />
+  <SectionFaq v-if="content?.faq?.items?.length" :faq="content.faq.items" :title="content.faq.title"
+    :title-highlight="content.faq.titleHighlight" :title-suffix="content.faq.titleSuffix"
+    :description="content.faq.description" :image="content.faq.image_url" />
   <SectionCta v-if="content?.cta?.title" :cta="content.cta" />
 </template>
 

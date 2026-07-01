@@ -14,8 +14,26 @@ interface Feature {
 }
 
 interface FaqItem {
+    icon: string
     question: string
     answer: string
+    image_url: string
+}
+
+interface FaqItemUpload {
+    file: File | null
+    preview: string
+    uploading: boolean
+    error: string
+    dragging: boolean
+}
+
+interface FaqSection {
+    title: string
+    titleHighlight: string
+    titleSuffix: string
+    description: string
+    items: FaqItem[]
 }
 
 interface CtaData {
@@ -27,7 +45,7 @@ interface CtaData {
 interface ContentData {
     hero: HeroData | null
     features: Feature[]
-    faq: FaqItem[]
+    faq: FaqSection | null
     cta: CtaData | null
 }
 
@@ -50,7 +68,14 @@ const heroPhotoInputRef = ref<HTMLInputElement | null>(null)
 const heroDragging = ref(false)
 
 const features = ref<Feature[]>([])
-const faq = ref<FaqItem[]>([])
+const faq = ref<FaqSection>({ title: '', titleHighlight: '', titleSuffix: '', description: '', items: [] })
+const faqPhotoFile = ref<File | null>(null)
+const faqPhotoPreview = ref<string>('')
+const faqUploading = ref(false)
+const faqPhotoError = ref<string>('')
+const faqPhotoInputRef = ref<HTMLInputElement | null>(null)
+const faqDragging = ref(false)
+const faqItemUploads = ref<FaqItemUpload[]>([])
 const cta = ref<CtaData>({ title: '', button_text: '', button_link: '' })
 
 watch(
@@ -60,7 +85,22 @@ watch(
             hero.value = val.hero ?? { title: '', description: '', image_url: '' }
             heroPhotoPreview.value = val.hero?.image_url || ''
             features.value = val.features ?? []
-            faq.value = val.faq ?? []
+            const f = val.faq
+            const items = f?.items ?? []
+            faq.value = {
+                title: f?.title ?? '',
+                titleHighlight: f?.titleHighlight ?? '',
+                titleSuffix: f?.titleSuffix ?? '',
+                description: f?.description ?? '',
+                items: items.map(i => ({ ...i, image_url: i.image_url ?? '' })),
+            }
+            faqItemUploads.value = items.map(i => ({
+                file: null,
+                preview: i.image_url || '',
+                uploading: false,
+                error: '',
+                dragging: false,
+            }))
             cta.value = val.cta ?? { title: '', button_text: '', button_link: '' }
         }
     },
@@ -134,6 +174,72 @@ async function uploadHeroPhoto(): Promise<string> {
     }
 }
 
+function applyFaqItemFile(index: number, file: File) {
+    const u = faqItemUploads.value[index]
+    if (!u) return
+    const err = validateFile(file)
+    if (err) {
+        u.error = err
+        return
+    }
+    u.error = ''
+    u.file = file
+    if (u.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(u.preview)
+    }
+    u.preview = URL.createObjectURL(file)
+}
+
+function onFaqItemDragOver(index: number) {
+    const u = faqItemUploads.value[index]
+    if (u) u.dragging = true
+}
+
+function onFaqItemDragLeave(index: number) {
+    const u = faqItemUploads.value[index]
+    if (u) u.dragging = false
+}
+
+function onFaqItemDrop(index: number, event: DragEvent) {
+    const u = faqItemUploads.value[index]
+    if (u) u.dragging = false
+    const file = event.dataTransfer?.files?.[0]
+    if (file) applyFaqItemFile(index, file)
+}
+
+function triggerFaqItemInput(index: number) {
+    const u = faqItemUploads.value[index]
+    if (u && (u as any).inputRef) {
+        ; (u as any).inputRef.click()
+    }
+}
+
+function removeFaqItemPhoto(index: number) {
+    const u = faqItemUploads.value[index]
+    if (!u) return
+    if (u.preview.startsWith('blob:')) URL.revokeObjectURL(u.preview)
+    u.file = null
+    u.preview = ''
+    u.error = ''
+    if (faq.value.items[index]) faq.value.items[index].image_url = ''
+}
+
+async function uploadFaqItemPhoto(index: number): Promise<string> {
+    const u = faqItemUploads.value[index]
+    const item = faq.value.items[index]
+    if (!u || !item || !u.file) return item?.image_url ?? ''
+    u.uploading = true
+    try {
+        const body = new FormData()
+        body.append('file', u.file)
+        const result = await $fetch<{ url: string }>('/api/upload/industry-photo', { method: 'POST', body })
+        item.image_url = result.url
+        return result.url
+    } finally {
+        u.uploading = false
+    }
+}
+
 function addFeature() {
     features.value.push({ icon: 'mdi-check-circle', title: '', description: '' })
 }
@@ -143,22 +249,41 @@ function removeFeature(index: number) {
 }
 
 function addFaq() {
-    faq.value.push({ question: '', answer: '' })
+    faq.value.items.push({ icon: 'mdi-help-circle-outline', question: '', answer: '', image_url: '' })
+    faqItemUploads.value.push({ file: null, preview: '', uploading: false, error: '', dragging: false })
 }
 
 function removeFaq(index: number) {
-    faq.value.splice(index, 1)
+    faq.value.items.splice(index, 1)
+    faqItemUploads.value.splice(index, 1)
 }
 
 async function onSubmit() {
     if (heroPhotoFile.value) {
         await uploadHeroPhoto()
     }
+    for (let i = 0; i < faq.value.items.length; i++) {
+        if (faqItemUploads.value[i]?.file) {
+            await uploadFaqItemPhoto(i)
+        }
+    }
+
+    const filteredItems = faq.value.items.filter(f => f.question)
+    const hasFaqItems = filteredItems.length > 0
+    const faqSection = hasFaqItems || faq.value.title || faq.value.description
+        ? {
+            title: faq.value.title,
+            titleHighlight: faq.value.titleHighlight,
+            titleSuffix: faq.value.titleSuffix,
+            description: faq.value.description,
+            items: filteredItems,
+        }
+        : null
 
     emit('save', {
         hero: hero.value.title ? { ...hero.value } : null,
         features: features.value.filter(f => f.title),
-        faq: faq.value.filter(f => f.question),
+        faq: faqSection,
         cta: cta.value.title ? { ...cta.value } : null,
     })
 }
@@ -168,7 +293,6 @@ async function onSubmit() {
     <v-form @submit.prevent="onSubmit">
         <UiTitleCard class-name="px-0 pb-0 rounded-md">
             <v-card-text class="pa-4">
-                <!-- Hero Section -->
                 <span class="text-h6 font-weight-bold">Hero</span>
                 <p class="text-caption text-medium-emphasis mt-1 mb-3">
                     Hero section banner at the top of the detail page
@@ -185,8 +309,8 @@ async function onSubmit() {
 
                     <v-col cols="12" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Description</v-label>
-                        <v-textarea v-model="hero.description" placeholder="Hero description..."
-                            variant="outlined" density="compact" rows="2" hide-details />
+                        <v-textarea v-model="hero.description" placeholder="Hero description..." variant="outlined"
+                            density="compact" rows="2" hide-details />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">
@@ -232,8 +356,6 @@ async function onSubmit() {
                 </v-row>
 
                 <v-divider class="my-4" />
-
-                <!-- Features Section -->
                 <div class="d-flex align-center justify-space-between mb-3">
                     <div>
                         <span class="text-h6 font-weight-bold">Features</span>
@@ -289,29 +411,56 @@ async function onSubmit() {
                 </v-row>
 
                 <v-divider class="my-4" />
-
-                <!-- FAQ Section -->
-                <div class="d-flex align-center justify-space-between mb-3">
-                    <div>
-                        <span class="text-h6 font-weight-bold">FAQ</span>
-                        <p class="text-caption text-medium-emphasis mt-1">
-                            Frequently asked questions for this industry
-                        </p>
-                    </div>
-                    <v-btn color="primary" variant="tonal" prepend-icon="mdi-plus" size="small" @click="addFaq">
-                        Add FAQ
-                    </v-btn>
-                </div>
+                <span class="text-h6 font-weight-bold">FAQ</span>
+                <p class="text-caption text-medium-emphasis mt-1 mb-3">
+                    Frequently asked questions section
+                </p>
 
                 <v-divider class="mb-4" />
 
-                <div v-if="faq.length === 0" class="text-center py-6 text-medium-emphasis">
+                <v-row dense>
+                    <v-col cols="12" sm="4">
+                        <v-label class="text-caption font-weight-medium mb-1">Section Title</v-label>
+                        <v-text-field v-model="faq.title" placeholder="e.g. Why Choose" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+
+                    <v-col cols="12" sm="4">
+                        <v-label class="text-caption font-weight-medium mb-1">Title Highlight</v-label>
+                        <v-text-field v-model="faq.titleHighlight" placeholder="e.g. Hospital ERP" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
+
+                    <v-col cols="12" sm="4">
+                        <v-label class="text-caption font-weight-medium mb-1">Title Suffix</v-label>
+                        <v-text-field v-model="faq.titleSuffix" placeholder="e.g. for Modern Healthcare"
+                            variant="outlined" density="compact" hide-details />
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Description</v-label>
+                        <v-textarea v-model="faq.description" placeholder="Section description..." variant="outlined"
+                            density="compact" rows="2" hide-details />
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-divider class="mb-3" />
+                        <div class="d-flex align-center justify-space-between">
+                            <span class="text-subtitle-2 font-weight-bold">FAQ Items</span>
+                            <v-btn color="primary" variant="tonal" prepend-icon="mdi-plus" size="small" @click="addFaq">
+                                Add Item
+                            </v-btn>
+                        </div>
+                    </v-col>
+                </v-row>
+
+                <div v-if="faq.items.length === 0" class="text-center py-6 text-medium-emphasis">
                     <v-icon icon="mdi-frequently-asked-questions" size="32" class="mb-2" />
-                    <p class="text-body-2">No FAQs yet. Click "Add FAQ" to create one.</p>
+                    <p class="text-body-2">No FAQ items yet. Click "Add Item" to create one.</p>
                 </div>
 
                 <div v-else>
-                    <v-card v-for="(item, index) in faq" :key="index" variant="outlined" class="mb-3">
+                    <v-card v-for="(item, index) in faq.items" :key="index" variant="outlined" class="mb-3">
                         <v-card-text class="pa-3">
                             <div class="d-flex align-center justify-space-between mb-2">
                                 <span class="text-subtitle-2 font-weight-bold">FAQ {{ index + 1 }}</span>
@@ -320,7 +469,13 @@ async function onSubmit() {
                             </div>
 
                             <v-row dense>
-                                <v-col cols="12">
+                                <v-col cols="12" sm="4">
+                                    <v-label class="text-caption font-weight-medium mb-1">Icon</v-label>
+                                    <v-text-field v-model="item.icon" placeholder="mdi-help-circle-outline"
+                                        variant="outlined" density="compact" hide-details />
+                                </v-col>
+
+                                <v-col cols="12" sm="8">
                                     <v-label class="text-caption font-weight-medium mb-1">Question</v-label>
                                     <v-text-field v-model="item.question" placeholder="e.g. What services do you offer?"
                                         variant="outlined" density="compact" hide-details />
@@ -331,14 +486,54 @@ async function onSubmit() {
                                     <v-textarea v-model="item.answer" placeholder="Answer here..." variant="outlined"
                                         density="compact" rows="2" hide-details />
                                 </v-col>
+
+                                <v-col cols="12" class="mt-2">
+                                    <v-label class="text-caption font-weight-medium mb-1">Image</v-label>
+                                    <div class="d-flex ga-2 align-stretch">
+                                        <v-avatar size="56" rounded="lg" color="grey-lighten-3" class="flex-shrink-0">
+                                            <v-img v-if="faqItemUploads[index]?.preview"
+                                                :src="faqItemUploads[index].preview" cover />
+                                            <v-icon v-else icon="mdi-image-outline" size="28" color="grey-lighten-1" />
+                                        </v-avatar>
+
+                                        <div class="photo-dropzone photo-dropzone--sm flex-grow-1 d-flex flex-column align-center justify-center ga-1 rounded-lg"
+                                            :class="{
+                                                'photo-dropzone--dragging': faqItemUploads[index]?.dragging,
+                                                'photo-dropzone--error': !!faqItemUploads[index]?.error
+                                            }"
+                                            @dragover.prevent="if (faqItemUploads[index]) faqItemUploads[index].dragging = true"
+                                            @dragleave="if (faqItemUploads[index]) faqItemUploads[index].dragging = false"
+                                            @drop.prevent="if (faqItemUploads[index]) faqItemUploads[index].dragging = false; const f = ($event as DragEvent).dataTransfer?.files?.[0]; if (f) applyFaqItemFile(index, f)"
+                                            @click="(faqItemUploads[index] as any)?.inputRef?.click()">
+                                            <v-icon icon="mdi-image-plus-outline" size="20" color="grey" />
+                                            <span class="text-caption">Upload photo</span>
+                                        </div>
+
+                                        <input type="file" accept="image/jpeg,image/png,image/webp"
+                                            style="display: none"
+                                            :ref="(el: any) => { if (faqItemUploads[index]) (faqItemUploads[index] as any).inputRef = el }"
+                                            @change="const f = ($event.target as HTMLInputElement).files?.[0]; if (f) applyFaqItemFile(index, f)" />
+                                    </div>
+
+                                    <div v-if="faqItemUploads[index]?.error"
+                                        class="text-caption text-error mt-1 d-flex align-center ga-1">
+                                        <v-icon icon="mdi-alert-circle-outline" size="14" />
+                                        {{ faqItemUploads[index].error }}
+                                    </div>
+
+                                    <div v-if="faqItemUploads[index]?.preview" class="mt-1">
+                                        <v-btn variant="text" color="error" size="x-small"
+                                            prepend-icon="mdi-delete-outline" @click="removeFaqItemPhoto(index)">
+                                            Remove
+                                        </v-btn>
+                                    </div>
+                                </v-col>
                             </v-row>
                         </v-card-text>
                     </v-card>
                 </div>
 
                 <v-divider class="my-4" />
-
-                <!-- CTA Section -->
                 <span class="text-h6 font-weight-bold">Call to Action</span>
                 <p class="text-caption text-medium-emphasis mt-1 mb-3">
                     Optional CTA banner at the bottom of the detail page
@@ -372,8 +567,8 @@ async function onSubmit() {
             <v-btn variant="tonal" color="secondary" :disabled="loading || heroUploading" @click="emit('cancel')">
                 Cancel
             </v-btn>
-            <v-btn variant="flat" color="primary" :loading="loading || heroUploading" :disabled="loading || heroUploading"
-                type="submit">
+            <v-btn variant="flat" color="primary" :loading="loading || heroUploading"
+                :disabled="loading || heroUploading" type="submit">
                 Save Content
             </v-btn>
         </div>
@@ -403,5 +598,10 @@ async function onSubmit() {
 
 .photo-dropzone--error {
     border-color: rgb(var(--v-theme-error));
+}
+
+.photo-dropzone--sm {
+    height: 56px;
+    min-height: 56px;
 }
 </style>

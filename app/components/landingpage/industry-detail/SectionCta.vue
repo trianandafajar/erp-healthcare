@@ -1,14 +1,20 @@
 <template>
-  <section class="py-12 md:py-24 bg-[#0a0a0a]">
-    <div class="mx-6 max-w-3xl mx-auto text-center">
-      <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-        {{ cta.title }}
-      </h2>
-      <NuxtLink :to="cta.button_link || '/'" 
-        class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#0aa8a7] text-white font-semibold hover:bg-[#16d5d4] transition-colors no-underline">
-        {{ cta.button_text || 'Get Started' }}
-        <v-icon icon="mdi-arrow-right" />
-      </NuxtLink>
+  <section class="py-20 md:py-28">
+    <div class="container mx-auto">
+      <div
+        class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-8 py-16 md:py-20 text-center">
+        <div class="absolute inset-0 opacity-[0.03]"
+          style="background-image: radial-gradient(circle at 30% 50%, #176D37 0%, transparent 60%)" />
+        <div class="relative z-10 max-w-2xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold text-white"> {{ cta.title }}</h2>
+          <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <NuxtLink :to="cta.button_link || '/'"
+              class="inline-flex items-center px-7 py-3.5 text-sm font-bold text-gray-900 bg-white rounded-full hover:bg-gray-100 transition-all hover:shadow-xl">
+              {{ cta.button_text || 'Get Started' }}
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </template>

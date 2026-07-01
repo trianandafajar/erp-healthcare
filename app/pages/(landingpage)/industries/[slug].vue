@@ -23,20 +23,20 @@
               {{ industry.detail?.hero?.title || industry.title }}
             </h1>
 
-            <p
-              class="mt-6 text-gray-400 text-base md:text-lg leading-relaxed max-w-xl break-words [overflow-wrap:anywhere]">
+            <p class="mt-6 text-gray-400 text-base md:text-lg leading-relaxed max-w-xl [overflow-wrap:anywhere]">
               {{ industry.detail?.hero?.description || industry.description }}
             </p>
 
             <div class="mt-9 flex flex-wrap items-center gap-4">
-              <a href="#solusi"
+
+              <NuxtLink :to="`${route.path}#faq`" @click.prevent="scrollToFaq"
                 class="inline-flex items-center justify-center rounded-lg bg-orange-500 px-7 py-3.5 text-sm md:text-base font-bold text-white shadow-lg shadow-orange-500/25 transition-colors hover:bg-orange-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
-                Temukan Solusi Anda
-              </a>
-              <a href="#trial"
+                Find Your Solution
+              </NuxtLink>
+              <NuxtLink to="/login"
                 class="inline-flex items-center justify-center rounded-lg bg-[#7a1f1f] px-7 py-3.5 text-sm md:text-base font-bold text-white transition-colors hover:bg-[#8f2626] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
-                Coba Gratis
-              </a>
+                Try Free
+              </NuxtLink>
             </div>
           </div>
           <div class="relative mx-auto w-full max-w-md md:max-w-none min-w-0">
@@ -55,7 +55,7 @@
 
     <div class="text-center py-8">
       <NuxtLink to="/" class="text-[#0aa8a7] hover:text-[#16d5d4] font-semibold no-underline">
-        &larr; Back to Home
+        Back to Home
       </NuxtLink>
     </div>
   </template>
