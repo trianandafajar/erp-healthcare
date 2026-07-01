@@ -35,12 +35,9 @@
       </div>
 
       <div class="hidden md:flex shrink-0 items-center space-x-3">
-        <NuxtLink to="/login" class="text-sm font-semibold text-gray-700 hover:text-[#176D37] transition-colors">
-          Sign In
-        </NuxtLink>
         <NuxtLink to="/login"
           class="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-[#176D37] rounded-full hover:bg-[#089695] transition-all hover:shadow-lg hover:shadow-[#176D37]/20">
-          Free Demo
+         Sign In
         </NuxtLink>
       </div>
     </nav>
@@ -61,8 +58,8 @@ const scrolled = ref(false);
 const menuItems = [
   { name: "Home", url: "/" },
   { name: "Features", url: "#features" },
-  { name: "Pricing", url: "/pricing" },
-  { name: "Contact", url: "/contact" },
+  { name: "Industries", url: "#industries" },
+  { name: "Testimonials", url: "#testimonials" },
 ];
 
 let scrollHandler;

@@ -5,20 +5,12 @@
       "url": "/"
     },
     {
-      "name": "Blog",
-      "url": "/blogs"
+      "name": "Industries",
+      "url": "#industries"
     },
     {
-      "name": "Pricing",
-      "url": "/pricing"
-    },
-    {
-      "name": "Contact",
-      "url": "/contact"
-    },
-    {
-      "name": "FAQ",
-      "url": "/faq"
+      "name": "Testimonials",
+      "url": "#testimonials"
     }
   ],
   "footer": [
@@ -26,12 +18,8 @@
       "name": "Company",
       "menu": [
         {
-          "text": "Pricing",
-          "url": "/pricing"
-        },
-        {
-          "text": "Quick Start",
-          "url": "#"
+          "text": "About Us",
+          "url": "/legal?page=about"
         }
       ]
     },
@@ -39,16 +27,12 @@
       "name": "Product",
       "menu": [
         {
+          "text": "Industries",
+          "url": "#industries"
+        },
+        {
           "text": "Features",
-          "url": "#"
-        },
-        {
-          "text": "Platform",
-          "url": "#"
-        },
-        {
-          "text": "Pricing",
-          "url": "/pricing"
+          "url": "#features"
         }
       ]
     },
@@ -56,16 +40,20 @@
       "name": "Support",
       "menu": [
         {
-          "text": "FAQ",
-          "url": "/faq"
+          "text": "Help & FAQ",
+          "url": "/legal?page=help"
+        },
+        {
+          "text": "Contact Us",
+          "url": "/legal?page=contact"
         },
         {
           "text": "Privacy Policy",
-          "url": "#"
+          "url": "/legal?page=privacy"
         },
         {
-          "text": "Terms & Conditions",
-          "url": "#"
+          "text": "Terms of Service",
+          "url": "/legal?page=terms"
         }
       ]
     }

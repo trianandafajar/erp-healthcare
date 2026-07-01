@@ -1,5 +1,5 @@
 <template>
-  <section class="py-20 md:py-28 bg-[#edf6f5]">
+  <section id="testimonials" class="py-20 md:py-28 bg-[#edf6f5]">
     <div class="container mx-auto">
       <div class="text-center max-w-2xl mx-auto mb-14">
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Trusted by Healthcare<br class="hidden sm:block" />
