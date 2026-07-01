@@ -1,6 +1,6 @@
 <template>
   <section class="py-12 md:py-24 bg-white">
-    <div class="mx-6 max-w-6xl mx-auto">
+    <div class="max-w-6xl mx-auto">
       <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
         Key Features
       </h2>

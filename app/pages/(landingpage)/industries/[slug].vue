@@ -8,13 +8,6 @@
   </div>
   <template v-else>
     <section class="relative min-h-screen w-full overflow-hidden bg-[#0a0a0a] flex items-center py-20 md:py-0">
-      <div class="pointer-events-none absolute inset-0 opacity-60" style="
-          background-image: radial-gradient(rgba(245, 166, 35, 0.35) 1px, transparent 1px);
-          background-size: 20px 20px;
-          -webkit-mask-image: radial-gradient(ellipse 55% 70% at 88% 35%, black 0%, transparent 70%);
-          mask-image: radial-gradient(ellipse 55% 70% at 88% 35%, black 0%, transparent 70%);
-        "></div>
-
       <div class="relative z-10 max-w-6xl w-full mx-auto px-6">
         <div class="grid md:grid-cols-2 gap-12 md:gap-8 items-center">
           <div class="min-w-0">
@@ -28,7 +21,6 @@
             </p>
 
             <div class="mt-9 flex flex-wrap items-center gap-4">
-
               <NuxtLink :to="`${route.path}#faq`" @click.prevent="scrollToFaq"
                 class="inline-flex items-center justify-center rounded-lg bg-orange-500 px-7 py-3.5 text-sm md:text-base font-bold text-white shadow-lg shadow-orange-500/25 transition-colors hover:bg-orange-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
                 Find Your Solution
@@ -40,12 +32,24 @@
             </div>
           </div>
           <div class="relative mx-auto w-full max-w-md md:max-w-none min-w-0">
-            <div
-              class="absolute left-1/2 -bottom-8 h-32 w-[85%] -translate-x-1/2 bg-gradient-to-b from-orange-500/50 to-transparent blur-2xl"
-              style="clip-path: polygon(0 0, 100% 0, 52% 100%, 48% 100%);" aria-hidden="true"></div>
-
             <img :src="industry.detail?.hero?.image_url || industry.image_url" :alt="industry.title"
-              class="relative w-full rounded-2xl object-cover max-h-[420px] shadow-2xl ring-1 ring-white/10" />
+              class="relative w-full object-contain max-h-[420px]" />
+          </div>
+        </div>
+
+        <div class="mt-32 pt-10 border-t border-white/10">
+          <div class="flex flex-wrap items-center gap-x-12 gap-y-6">
+            <p class="text-sm font-bold text-white shrink-0">Trusted by:</p>
+            <div class="flex-1 overflow-hidden min-w-[200px]">
+              <div class="flex gap-16 items-center animate-scroll" style="animation-duration: 30s;">
+                <img v-for="logo in logos" :key="logo" :src="logo" :alt="'Client logo'"
+                  class="h-7 md:h-9 opacity-70 brightness-0 invert hover:opacity-100 transition-opacity duration-300"
+                  onerror="this.style.display='none'" />
+                <img v-for="logo in logos" :key="logo + '-dup'" :src="logo" :alt="'Client logo'"
+                  class="h-7 md:h-9 opacity-70 brightness-0 invert hover:opacity-100 transition-opacity duration-300"
+                  onerror="this.style.display='none'" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -80,4 +84,45 @@ useSeoMeta({
 definePageMeta({
   layout: 'blank',
 })
+
+const logos = [
+  '/landingpage/logo.png',
+  '/landingpage/logo.png',
+  '/landingpage/logo.png',
+  '/landingpage/logo.png',
+  '/landingpage/logo.png',
+  '/landingpage/logo.png',
+];
+
+function scrollToFaq() {
+  const el = document.getElementById('faq')
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' })
+  } else {
+    navigateTo(`${route.path}#faq`)
+  }
+}
 </script>
+
+<style scoped>
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+  width: fit-content;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll {
+    animation: none;
+  }
+}
+</style>
