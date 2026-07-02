@@ -1,5 +1,8 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+
+    const { admin, tenantId } = await getTenantContext(event)
     const departmentId = getRouterParam(event, 'id')
 
     if (!departmentId) throw createError({ statusCode: 400, message: 'Department ID is required' })
@@ -13,6 +16,7 @@ export default defineEventHandler(async (event) => {
             .from('departments')
             .select('id, name, code, description, created_at, updated_at')
             .eq('id', departmentId)
+            .eq('tenant_id', tenantId)
             .single()
             .returns<any>(),
 
@@ -28,12 +32,14 @@ export default defineEventHandler(async (event) => {
                 profiles ( full_name, email, avatar_url, status )
             `)
             .eq('department_id', departmentId)
+            .eq('tenant_id', tenantId)
             .returns<any[]>(),
 
         admin
             .from('appointments')
             .select('id, status, appointment_date, patient_id')
             .eq('department_id', departmentId)
+            .eq('tenant_id', tenantId)
             .returns<any[]>(),
     ])
 

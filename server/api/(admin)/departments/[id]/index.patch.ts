@@ -1,5 +1,7 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId } = await getTenantContext(event)
     const departmentId = getRouterParam(event, 'id')
 
     if (!departmentId) throw createError({ statusCode: 400, message: 'Department ID is required' })

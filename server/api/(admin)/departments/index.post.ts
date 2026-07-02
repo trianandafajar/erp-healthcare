@@ -1,15 +1,15 @@
-export default defineEventHandler(async (event) => {
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+    const { admin, user, tenantId } = await getTenantContext(event)
+
     const { name, code, description } = await readBody(event)
 
     if (!name) throw createError({ statusCode: 400, message: 'Name is required' })
 
-    const admin = supabaseAdmin()
-    const supabase = serverSupabase(event)
-    const { data: { user } } = await supabase.auth.getUser()
-
     const { data, error } = await admin
         .from('departments')
-        .insert({ name, code, description })
+        .insert({ name, code, description, tenant_id: tenantId })
         .select()
         .single()
 
