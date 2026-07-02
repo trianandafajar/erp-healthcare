@@ -41,6 +41,16 @@ export default defineEventHandler(async (event) => {
 
   const roles = userRoles?.map((r: any) => r.roles).filter(Boolean) ?? []
 
+  let tenant = null
+  if (profile?.tenant_id) {
+    const { data: tenantData } = await supabase
+      .from('tenants')
+      .select('id, name, slug, subscription_plan, subscription_status')
+      .eq('id', profile.tenant_id)
+      .single()
+    tenant = tenantData
+  }
+
   return {
     user: {
       id: user.id,
@@ -48,5 +58,6 @@ export default defineEventHandler(async (event) => {
     },
     profile,
     roles,
+    tenant,
   }
 })

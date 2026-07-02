@@ -2,6 +2,7 @@ type EnsuredAuthState = {
   user: any
   role: string | null
   permissions: string[]
+  tenantId: string | null
 }
 
 const AUTH_TIMEOUT_MS = 8000
@@ -40,6 +41,7 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
       user: authStore.user,
       role: authStore.role,
       permissions: authStore.permissions,
+      tenantId: authStore.tenantId,
     }
   }
 
@@ -65,17 +67,20 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
     const permissions: string[] = primaryRole?.role_permissions
       ?.map((rp: any) => rp.permissions?.name)
       .filter(Boolean) ?? []
+    const tenantId = currentProfile.tenant?.id ?? currentProfile.profile?.tenant_id ?? null
 
     authStore.setUser({
       user: currentProfile.user,
       role,
       permissions,
+      tenantId,
     })
 
     return {
       user: currentProfile.user,
       role,
       permissions,
+      tenantId,
     }
   } catch {
     authStore.clearUser()

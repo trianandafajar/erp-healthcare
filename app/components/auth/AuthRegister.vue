@@ -7,6 +7,7 @@ const lastname = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const tenantName = ref('')
 const errorMsg = ref('')
 const loading = ref(false)
 const showPassword = ref(false)
@@ -14,6 +15,7 @@ const showConfirmPassword = ref(false)
 
 const firstRules = [(v: string) => !!v || 'First name is required']
 const lastRules = [(v: string) => !!v || 'Last name is required']
+const tenantRules = [(v: string) => !!v || 'The name of the clinic or hospital must be filled in.']
 
 async function register() {
     if (password.value !== confirmPassword.value) {
@@ -30,7 +32,8 @@ async function register() {
             body: {
                 email: email.value,
                 password: password.value,
-                full_name: `${firstname.value} ${lastname.value}`
+                full_name: `${firstname.value} ${lastname.value}`,
+                tenant_name: tenantName.value,
             },
         })
 
@@ -100,6 +103,12 @@ async function register() {
                     </v-btn>
                 </template>
             </v-text-field>
+        </div>
+
+        <div class="mb-6">
+            <v-label>Clinic / Hospital Name*</v-label>
+            <v-text-field v-model="tenantName" :rules="tenantRules" placeholder="Enter the clinic name"
+                hide-details="auto" required variant="outlined" color="primary" class="mt-2" />
         </div>
 
         <div class="d-sm-inline-flex align-center mt-2 mb-7 mb-sm-0 font-weight-bold">

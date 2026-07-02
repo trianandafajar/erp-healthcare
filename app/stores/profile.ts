@@ -14,6 +14,13 @@ type CurrentProfileResponse = {
             } | null
         }[]
     }[]
+    tenant?: {
+        id: string
+        name: string
+        slug: string
+        subscription_plan: string
+        subscription_status: string
+    } | null
 }
 
 export const useProfileStore = defineStore('profile', () => {

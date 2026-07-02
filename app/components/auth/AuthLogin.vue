@@ -75,6 +75,7 @@ async function validate() {
         authStore.setUser({ user, role, permissions })
 
         const redirectMap: Record<string, string> = {
+            superadmin: '/superadmin/dashboard',
             admin: '/dashboard',
             doctor: '/doctor/dashboard',
             specialist: '/doctor/dashboard',
