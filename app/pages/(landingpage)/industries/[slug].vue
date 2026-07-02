@@ -12,7 +12,7 @@
         <div class="grid md:grid-cols-2 gap-12 md:gap-8 items-center">
           <div class="min-w-0">
             <h1
-              class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.12] bg-gradient-to-r from-amber-300 via-orange-400 to-orange-500 bg-clip-text text-transparent break-words">
+              class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.12] bg-gradient-to-r from-emerald-500 via-green-400 to-[#176D37] bg-clip-text text-transparent break-words">
               {{ industry.detail?.hero?.title || industry.title }}
             </h1>
 
@@ -22,18 +22,18 @@
 
             <div class="mt-9 flex flex-wrap items-center gap-4">
               <NuxtLink :to="`${route.path}#faq`" @click.prevent="scrollToFaq"
-                class="inline-flex items-center justify-center rounded-lg bg-orange-500 px-7 py-3.5 text-sm md:text-base font-bold text-white shadow-lg shadow-orange-500/25 transition-colors hover:bg-orange-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
+                class="inline-flex items-center justify-center rounded-lg bg-[#176D37] px-7 py-3.5 text-sm md:text-base font-bold text-white shadow-lg shadow-[#176D37]/25 transition-colors hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
                 Find Your Solution
               </NuxtLink>
               <NuxtLink to="/login"
-                class="inline-flex items-center justify-center rounded-lg bg-[#7a1f1f] px-7 py-3.5 text-sm md:text-base font-bold text-white transition-colors hover:bg-[#8f2626] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
+                class="inline-flex items-center justify-center rounded-lg bg-[#0f4326] px-7 py-3.5 text-sm md:text-base font-bold text-white transition-colors hover:bg-[#176D37] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
                 Try Free
               </NuxtLink>
             </div>
           </div>
           <div class="relative mx-auto w-full max-w-md md:max-w-none min-w-0">
             <img :src="industry.detail?.hero?.image_url || industry.image_url" :alt="industry.title"
-              class="relative w-full object-contain max-h-[420px]" />
+              class="relative w-full object-contain rounded-md max-h-[420px]" />
           </div>
         </div>
 
