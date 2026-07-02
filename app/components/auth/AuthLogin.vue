@@ -62,30 +62,45 @@ async function validate() {
 
         if (roleError) throw roleError
 
-        console.log(roleData)
-
         const role = (roleData as any)?.roles?.name
 
         const permissions: string[] = (roleData as any)?.roles?.role_permissions
             ?.map((rp: any) => rp.permissions?.name)
             .filter(Boolean) ?? []
 
-        // simpan ke Pinia store
-        const authStore = useAuthStore()
-        authStore.setUser({ user, role, permissions })
+        const { data: tenant, error: tenantError } = await supabase
+            .from('tenants')
+            .select('id, slug')
+            .eq('owner_id', user!.id)
+            .single()
 
-        const redirectMap: Record<string, string> = {
-            superadmin: '/superadmin/dashboard',
-            admin: '/dashboard',
-            doctor: '/doctor/dashboard',
-            specialist: '/doctor/dashboard',
-            pharmacy: '/pharmacy/dashboard',
-            nurse: '/nurse/dashboard',
-            receptionist: '/receptionist/dashboard',
-            patient: '/patient/dashboard',
+        if (tenantError || !tenant) {
+            apiError.value = 'Your account is not yet linked to any tenant.'
+            return
         }
 
-        await navigateTo(redirectMap[role] ?? '/dashboard')
+        const authStore = useAuthStore()
+        authStore.setUser({
+            user,
+            role,
+            permissions,
+            tenantId: tenant.id,
+            tenantSlug: tenant.slug,
+        })
+
+        const redirectMap: Record<string, string> = {
+            superadmin: 'superadmin/dashboard',
+            admin: 'dashboard',
+            doctor: 'doctor/dashboard',
+            specialist: 'doctor/dashboard',
+            pharmacy: 'pharmacy/dashboard',
+            nurse: 'nurse/dashboard',
+            receptionist: 'receptionist/dashboard',
+            patient: 'patient/dashboard',
+        }
+
+        const path = redirectMap[role] ?? 'dashboard'
+        await navigateTo(`/${tenant.slug}/${path}`)
 
     } catch (err: any) {
         apiError.value = err?.data?.message || err?.message || 'Login failed.'

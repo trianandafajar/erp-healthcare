@@ -29,84 +29,31 @@ export interface menu {
   subCaption?: string;
 }
 
-const sidebarItem: menu[] = [
-  {
-    header: 'Dashboard'
-  },
-  {
-    title: 'Dashboard',
-    icon: AppstoreOutlined,
-    to: '/dashboard'
-  },
+export function getSidebarItems(slug: string): menu[] {
+  const base = `/${slug}`
 
-  {
-    header: 'Reports'
-  },
-  {
-    title: 'Reports',
-    icon: BarChartOutlined,
-    to: '/reports'
-  },
+  return [
+    { header: 'Dashboard' },
+    { title: 'Dashboard', icon: AppstoreOutlined, to: `${base}/dashboard` },
 
-  {
-    header: 'Master Data'
-  },
-  {
-    title: 'Departments',
-    icon: ApartmentOutlined,
-    to: '/departments'
-  },
-  {
-    title: 'Doctors',
-    icon: MedicineBoxOutlined,
-    to: '/doctors'
-  },
-  {
-    title: 'Nurses',
-    icon: UsergroupAddOutlined,
-    to: '/nurses'
-  },
-  {
-    title: 'Patient',
-    icon: SolutionOutlined,
-    to: '/patients'
-  },
+    { header: 'Reports' },
+    { title: 'Reports', icon: BarChartOutlined, to: `${base}/reports` },
 
-  {
-    header: 'Access Management'
-  },
-  {
-    title: 'Users',
-    icon: TeamOutlined,
-    to: '/users-management'
-  },
-  {
-    title: 'Roles',
-    icon: SafetyCertificateOutlined,
-    to: '/roles'
-  },
-  {
-    title: 'Permissions',
-    icon: KeyOutlined,
-    to: '/permissions'
-  },
-  {
-    header: 'Landing Page'
-  },
-  {
-    title: 'Industries',
-    icon: BuildOutlined,
-    to: '/landingpage/industries'
-  },
+    { header: 'Master Data' },
+    { title: 'Departments', icon: ApartmentOutlined, to: `${base}/departments` },
+    { title: 'Doctors', icon: MedicineBoxOutlined, to: `${base}/doctors` },
+    { title: 'Nurses', icon: UsergroupAddOutlined, to: `${base}/nurses` },
+    { title: 'Patient', icon: SolutionOutlined, to: `${base}/patients` },
 
-  {
-    header: 'Log'
-  },
-  {
-    title: 'Log Activity',
-    icon: HistoryOutlined,
-    to: '/log-activity'
-  },
-]
+    { header: 'Access Management' },
+    { title: 'Users', icon: TeamOutlined, to: `${base}/users-management` },
+    { title: 'Roles', icon: SafetyCertificateOutlined, to: `${base}/roles` },
+    { title: 'Permissions', icon: KeyOutlined, to: `${base}/permissions` },
 
-export default sidebarItem;
+    { header: 'Landing Page' },
+    { title: 'Industries', icon: BuildOutlined, to: `${base}/landingpage/industries` },
+
+    { header: 'Log' },
+    { title: 'Log Activity', icon: HistoryOutlined, to: `${base}/log-activity` },
+  ]
+}

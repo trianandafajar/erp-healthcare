@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue';
+import { computed } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
-import sidebarItems from './sidebarItem';
+import { getSidebarItems } from './sidebarItem';
 
 import NavGroup from './NavGroup/NavGroup.vue';
 import NavItem from './NavItem/NavItem.vue';
@@ -9,7 +9,13 @@ import NavCollapse from './NavCollapse/NavCollapse.vue';
 import Logo from '../logo/LogoDark.vue';
 
 const customizer = useCustomizerStore();
-const sidebarMenu = shallowRef(sidebarItems);
+const route = useRoute();
+
+const sidebarMenu = computed(() => {
+  const slug = route.params.slug as string;
+  if (!slug) return [];
+  return getSidebarItems(slug);
+});
 </script>
 
 <template>

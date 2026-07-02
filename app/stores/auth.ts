@@ -3,17 +3,20 @@ export const useAuthStore = defineStore('auth', () => {
     const role = ref<string | null>(null)
     const permissions = ref<string[]>([])
     const tenantId = ref<string | null>(null)
+    const tenantSlug = ref<string | null>(null)
 
     function setUser(payload: {
         user: any
         role: string | null
         permissions: string[]
         tenantId?: string | null
+        tenantSlug?: string | null
     }) {
         user.value = payload.user
         role.value = payload.role
         permissions.value = payload.permissions
         tenantId.value = payload.tenantId ?? null
+        tenantSlug.value = payload.tenantSlug ?? null
     }
 
     function hasPermission(permission: string): boolean {
@@ -29,12 +32,13 @@ export const useAuthStore = defineStore('auth', () => {
         role.value = null
         permissions.value = []
         tenantId.value = null
+        tenantSlug.value = null
     }
 
     const isAuthenticated = computed(() => !!user.value)
 
     return {
-        user, role, permissions, tenantId, isAuthenticated,
+        user, role, permissions, tenantId, tenantSlug, isAuthenticated,
         setUser, hasPermission, hasAnyPermission, clearUser
     }
 })
