@@ -1,10 +1,9 @@
-export default defineEventHandler(async (event) => {
-    const adminSupabase = supabaseAdmin()
-    const supabase = serverSupabase(event)
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 
-    const { data: { user } } = await supabase.auth.getUser()
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId, user } = await getTenantContext(event)
 
-    const { data: profiles, error } = await adminSupabase
+    const { data: profiles, error } = await admin
         .from('profiles')
         .select(`
         id,
@@ -20,6 +19,7 @@ export default defineEventHandler(async (event) => {
             )
         )
     `)
+        .eq('tenant_id', tenantId)
         .neq('id', user?.id)
         .returns<any[]>()
 
