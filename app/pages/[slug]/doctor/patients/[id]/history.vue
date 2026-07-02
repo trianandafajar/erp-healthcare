@@ -2,7 +2,7 @@
 definePageMeta({
     layout: 'doctor',
     middleware: ['auth', 'permission'],
-    permissions: ['patient-history.view'], 
+    permissions: ['patient-history.view'],
 })
 
 useSeoMeta({
@@ -27,6 +27,7 @@ interface TimelineItem {
 }
 
 const route = useRoute()
+const slug = route.params.slug as string
 const patientId = route.params.id as string
 
 const { data, pending } = await useFetch<{ timeline: TimelineItem[] }>(
@@ -67,7 +68,7 @@ function formatDateTime(dateStr: string) {
     <v-row>
         <v-col cols="12">
             <div class="d-flex align-center ga-2 mb-2">
-                <v-btn icon="mdi-arrow-left" variant="text" size="large" to="/doctor/patients/history" />
+                <v-btn icon="mdi-arrow-left" variant="text" size="large" :to="`/${slug}/doctor/patients/history`" />
                 <div>
                     <v-card-title class="text-h3 pl-0">Patient Activity History</v-card-title>
                     <v-card-subtitle class="pl-0 mt-1">

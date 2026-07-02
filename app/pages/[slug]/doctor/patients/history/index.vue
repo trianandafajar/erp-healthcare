@@ -22,6 +22,9 @@ interface Patient {
     phone: string
 }
 
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
+
 const search = ref('')
 
 const { data, pending } = await useFetch<{ patients: any[] }>('/api/patients')
@@ -53,7 +56,7 @@ function getInitials(name: string) {
 }
 
 function openHistory(patientId: string) {
-    navigateTo(`/doctor/patients/${patientId}/history`)
+    navigateTo(`/${slug.value}/doctor/patients/${patientId}/history`)
 }
 </script>
 
@@ -109,7 +112,7 @@ function openHistory(patientId: string) {
                                 <div class="d-flex align-center ga-3">
                                     <v-avatar size="34" color="secondary" variant="tonal">
                                         <span class="text-caption font-weight-bold">{{ getInitials(patient.full_name)
-                                            }}</span>
+                                        }}</span>
                                     </v-avatar>
                                     <span class="text-body-2 font-weight-medium">{{ patient.full_name }}</span>
                                 </div>

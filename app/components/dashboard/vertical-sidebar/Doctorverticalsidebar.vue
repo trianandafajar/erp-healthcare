@@ -32,6 +32,9 @@ type MenuItem = {
 }
 
 const customizer = useCustomizerStore();
+const route = useRoute();
+const slug = route.params.slug as string;
+
 const sidebarMenu = shallowRef<MenuItem[]>([
   {
     header: 'Dashboard',
@@ -39,7 +42,7 @@ const sidebarMenu = shallowRef<MenuItem[]>([
   {
     title: 'Dashboard',
     icon: AppstoreOutlined,
-    to: '/doctor/dashboard',
+    to: `/${slug}/doctor/dashboard`,
   },
   {
     header: 'Practice',
@@ -47,17 +50,17 @@ const sidebarMenu = shallowRef<MenuItem[]>([
   {
     title: 'My Schedule',
     icon: CalendarOutlined,
-    to: '/doctor/schedule',
+    to: `/${slug}/doctor/schedule`,
   },
   {
     title: "Today's Patients",
     icon: TeamOutlined,
-    to: '/doctor/patients/today',
+    to: `/${slug}/doctor/patients/today`,
   },
   {
     title: 'Patient History',
     icon: HistoryOutlined,
-    to: '/doctor/patients/history',
+    to: `/${slug}/doctor/patients/history`,
   },
   {
     header: 'Medical',
@@ -65,17 +68,17 @@ const sidebarMenu = shallowRef<MenuItem[]>([
   {
     title: 'Examination',
     icon: AuditOutlined,
-    to: '/doctor/examination',
+    to: `/${slug}/doctor/examination`,
   },
   {
     title: 'Medical Records',
     icon: FileTextOutlined,
-    to: '/doctor/medical-records',
+    to: `/${slug}/doctor/medical-records`,
   },
   {
     title: 'Referrals',
     icon: ShareAltOutlined,
-    to: '/doctor/referrals',
+    to: `/${slug}/doctor/referrals`,
   },
 ]);
 </script>

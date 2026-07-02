@@ -18,6 +18,7 @@ useSeoMeta({
 })
 
 const route = useRoute()
+const slug = route.params.slug as string
 const id = route.params.id as string
 
 const { data, pending } = await useFetch<{
@@ -112,7 +113,8 @@ function formatTime(timeStr?: string) {
             <v-card-item>
                 <div class="d-flex justify-space-between align-center">
                     <div class="d-flex align-center ga-3">
-                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo('/doctor/medical-records')" />
+                        <v-btn icon="mdi-arrow-left" variant="text"
+                            @click="navigateTo(`/${slug}/doctor/medical-records`)" />
                         <div>
                             <div class="text-h6 font-weight-bold">Medical Record Detail</div>
                             <div class="text-caption text-medium-emphasis">

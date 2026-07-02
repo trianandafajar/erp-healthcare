@@ -8,6 +8,8 @@ definePageMeta({
 })
 
 const { can } = usePermission()
+const route = useRoute()
+const slug = route.params.slug as string
 
 useSeoMeta({
     title: 'Examination Details',
@@ -46,8 +48,6 @@ interface ExaminationAttachment {
     category: string
     file: File | null
 }
-
-const route = useRoute()
 
 const { data, pending } = await useFetch<AppointmentResponse>(
     `/api/doctor/examinations/${route.params.id as string}`
@@ -309,7 +309,7 @@ async function handleReferralSubmit(payload: {
         notify('Examination saved and patient referred successfully')
 
         setTimeout(() => {
-            navigateTo('/doctor/medical-records')
+            navigateTo(`/${slug}/doctor/medical-records`)
         }, 1000)
     } catch (error: any) {
         notify(
@@ -653,7 +653,7 @@ async function uploadAttachments(
 
         <v-col cols="12">
             <div class="d-flex justify-end ga-3">
-                <v-btn variant="outlined">
+                <v-btn variant="outlined" :to="`/${slug}/doctor/examination`">
                     Cancel
                 </v-btn>
                 <v-btn color="secondary" variant="tonal" prepend-icon="mdi-share-variant-outline"

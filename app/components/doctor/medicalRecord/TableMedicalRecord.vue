@@ -5,6 +5,8 @@ import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 definePageMeta({ middleware: ['auth'] })
 
 const { can } = usePermission()
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
 
 interface MedicalRecord {
     id: string
@@ -59,7 +61,7 @@ function getInitials(name: string) {
 }
 
 function openDetail(record: MedicalRecord) {
-    navigateTo(`/doctor/medical-records/${record.id}`)
+    navigateTo(`/${slug.value}/doctor/medical-records/${record.id}`)
 }
 </script>
 

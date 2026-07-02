@@ -21,6 +21,9 @@ useSeoMeta({
     twitterCard: 'summary_large_image',
 })
 
+const route = useRoute()
+const slug = route.params.slug as string
+
 const { data } = await useFetch<any>(
     '/api/doctor/dashboard'
 )
@@ -57,7 +60,7 @@ const statCards = computed(() => [
         color: 'primary',
         icon: TeamOutlined,
         text: 'All examinations today',
-        to: '/doctor/examination'
+        to: `/${slug}/doctor/examination`
     },
     {
         name: 'Waiting Patients',
@@ -66,7 +69,7 @@ const statCards = computed(() => [
         color: 'warning',
         icon: ClockCircleOutlined,
         text: 'Patients in queue',
-        to: '/doctor/patients/today'
+        to: `/${slug}/doctor/patients/today`
     },
     {
         name: 'Done Today',
@@ -75,7 +78,7 @@ const statCards = computed(() => [
         color: 'success',
         icon: CheckCircleOutlined,
         text: 'Completed examinations',
-        to: '/doctor/medical-records'
+        to: `/${slug}/doctor/medical-records`
     },
     {
         name: 'Prescriptions',
@@ -84,7 +87,7 @@ const statCards = computed(() => [
         color: 'info',
         icon: MedicineBoxOutlined,
         text: 'Total prescriptions issued',
-        to: '/doctor/dashboard'
+        to: `/${slug}/doctor/dashboard`
     }
 ])
 

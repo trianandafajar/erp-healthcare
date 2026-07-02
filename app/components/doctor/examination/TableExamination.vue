@@ -5,6 +5,8 @@ import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 definePageMeta({ middleware: ['auth'] })
 
 const { can } = usePermission()
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
 
 interface Examination {
     id: string
@@ -72,7 +74,7 @@ function getQueueNumber(index: number) {
 }
 
 function openExamination(record: Examination) {
-    navigateTo(`/doctor/examination/${record.id}`)
+    navigateTo(`/${slug.value}/doctor/examination/${record.id}`)
 }
 </script>
 
@@ -173,14 +175,8 @@ function openExamination(record: Examination) {
                 of {{ examinations.length }} examinations
             </span>
 
-            <v-pagination 
-                v-if="totalPages > 1" 
-                v-model="currentPage" 
-                :length="totalPages"
-                :total-visible="6" 
-                density="compact"
-                size="small"
-            />
+            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
+                density="compact" size="small" />
         </div>
     </UiTitleCard>
 </template>
