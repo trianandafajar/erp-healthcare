@@ -30,6 +30,8 @@ const currentPage = ref(1);
 const itemsPerPage = 10;
 
 const { can } = usePermission()
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
 
 const { data, pending, refresh } = await useFetch<{ doctors: any[] }>('/api/doctors')
 const { data: deptData, refresh: refreshDepts } = await useFetch<{ departments: any[] }>('/api/departments')
@@ -258,7 +260,7 @@ async function handleSubmit(payload: any) {
     }
 }
 function openView(doctor: Doctor) {
-    navigateTo(`/doctors/${doctor.id}`)
+    navigateTo(`/${slug.value}/doctors/${doctor.id}`)
 }
 </script>
 

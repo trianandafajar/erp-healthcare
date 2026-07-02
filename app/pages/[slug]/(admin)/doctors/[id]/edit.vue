@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const slug = route.params.slug as string
 const id = route.params.id as string
 
 const { data, pending } = await useFetch(`/api/doctors/${id}`)
@@ -218,7 +219,7 @@ async function saveProfile() {
         })
 
         notify('Doctor profile updated')
-        await navigateTo(`/doctors/${id}`)
+        await navigateTo(`/${slug}/doctors/${id}`)
     }
     catch (e: any) {
         notify(e?.data?.message ?? 'Failed to save', 'error')
@@ -282,7 +283,7 @@ async function deleteSchedule(scheduleId: string) {
         <v-card variant="flat" class="mb-4 p-12">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center ga-4">
-                    <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/doctors/${id}`)" />
+                    <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/${slug}/doctors/${id}`)" />
                     <v-avatar size="48" color="primary" variant="tonal">
                         <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" cover />
                         <span v-else class="text-body-1 font-weight-bold">
@@ -544,7 +545,7 @@ async function deleteSchedule(scheduleId: string) {
                             @click="saveProfile">
                             Save Changes
                         </v-btn>
-                        <v-btn block variant="tonal" class="mt-2" @click="navigateTo(`/doctors/${id}`)">
+                        <v-btn block variant="tonal" class="mt-2" @click="navigateTo(`/${slug.value}/doctors/${id}`)">
                             Cancel
                         </v-btn>
                     </v-card-text>

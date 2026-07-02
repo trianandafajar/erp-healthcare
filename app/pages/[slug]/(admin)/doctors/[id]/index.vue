@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const slug = route.params.slug as string
 const id = route.params.id as string
 
 const { data, pending, refresh } = await useFetch(`/api/doctors/${id}`, {
@@ -117,7 +118,7 @@ function genderColor(gender?: string | null) {
             <v-card-item class="pa-5">
                 <div class="d-flex align-center justify-space-between flex-wrap ga-4">
                     <div class="d-flex align-center ga-4">
-                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo('/doctors')" />
+                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/${slug}/doctors`)" />
                         <v-avatar size="56" color="primary" variant="tonal">
                             <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" cover />
                             <span v-else class="text-h6 font-weight-bold">
@@ -147,7 +148,7 @@ function genderColor(gender?: string | null) {
                     </div>
                     <div class="d-flex ga-2">
                         <v-btn variant="tonal" color="primary" prepend-icon="mdi-pencil"
-                            @click="navigateTo(`/doctors/${id}/edit`)">
+                            @click="navigateTo(`/${slug}/doctors/${id}/edit`)">
                             Edit
                         </v-btn>
                     </div>
@@ -213,7 +214,8 @@ function genderColor(gender?: string | null) {
                         <v-row>
                             <!-- Professional Information -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="lg" class="h-100">
+                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="lg"
+                                    class="h-100">
                                     <v-card-item class="py-4">
                                         <template #prepend>
                                             <v-avatar color="primary" variant="tonal" size="42">
@@ -315,7 +317,8 @@ function genderColor(gender?: string | null) {
 
                             <!-- Account Information -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="lg" class="h-100">
+                                <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="lg"
+                                    class="h-100">
                                     <v-card-item class="py-4">
                                         <template #prepend>
                                             <v-avatar color="secondary" variant="tonal" size="42">
@@ -400,21 +403,21 @@ function genderColor(gender?: string | null) {
                             <v-col cols="12" v-if="doctor.biography">
                                 <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="lg">
                                     <v-card-item class="py-4">
-                                    <template #prepend>
-                                        <v-avatar color="info" variant="tonal" size="42">
-                                            <v-icon icon="mdi-text-box-outline" />
-                                        </v-avatar>
-                                    </template>
+                                        <template #prepend>
+                                            <v-avatar color="info" variant="tonal" size="42">
+                                                <v-icon icon="mdi-text-box-outline" />
+                                            </v-avatar>
+                                        </template>
 
-                                    <div>
-                                        <div class="text-h6 font-weight-bold">
-                                            Biography
-                                        </div>
+                                        <div>
+                                            <div class="text-h6 font-weight-bold">
+                                                Biography
+                                            </div>
 
-                                        <div class="text-caption text-medium-emphasis">
-                                            Doctor profile and background
+                                            <div class="text-caption text-medium-emphasis">
+                                                Doctor profile and background
+                                            </div>
                                         </div>
-                                    </div>
                                     </v-card-item>
 
                                     <v-divider />
