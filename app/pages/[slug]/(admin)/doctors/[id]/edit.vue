@@ -545,7 +545,7 @@ async function deleteSchedule(scheduleId: string) {
                             @click="saveProfile">
                             Save Changes
                         </v-btn>
-                        <v-btn block variant="tonal" class="mt-2" @click="navigateTo(`/${slug.value}/doctors/${id}`)">
+                        <v-btn block variant="tonal" class="mt-2" @click="navigateTo(`/${slug}/doctors/${id}`)">
                             Cancel
                         </v-btn>
                     </v-card-text>

@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const slug = route.params.slug as string
 const id = route.params.id as string
 
 const { data, pending } = await useFetch(`/api/nurses/${id}`)
@@ -164,7 +165,7 @@ async function save() {
             },
         })
         notify('Nurse profile updated')
-        await navigateTo(`/nurses/${id}`)
+        await navigateTo(`/${slug}/nurses/${id}`)
     } catch (e: any) {
         notify(e?.data?.message ?? 'Failed to save', 'error')
     } finally {
@@ -188,7 +189,7 @@ function getInitials(name?: string | null) {
         <v-card variant="flat" class="mb-4">
             <v-card-item class="pa-5">
                 <div class="d-flex align-center ga-4">
-                    <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/nurses/${id}`)" />
+                    <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/${slug}/nurses/${id}`)" />
                     <v-avatar size="48" color="primary" variant="tonal">
                         <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" cover />
                         <span v-else class="text-body-1 font-weight-bold">
@@ -423,7 +424,7 @@ function getInitials(name?: string | null) {
                             @click="save">
                             Save Changes
                         </v-btn>
-                        <v-btn block variant="text" class="mt-2" @click="navigateTo(`/nurses/${id}`)">
+                        <v-btn block variant="text" class="mt-2" @click="navigateTo(`/${slug}/nurses/${id}`)">
                             Cancel
                         </v-btn>
                     </v-card-text>

@@ -16,6 +16,8 @@ interface Nurse {
 }
 
 const { can } = usePermission()
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
 
 const search = ref('');
 const filterDepartment = ref('');
@@ -216,7 +218,7 @@ async function handleSubmit(payload: any) {
     }
 }
 function openView(nurses: Nurse) {
-    navigateTo(`/nurses/${nurses.id}`)
+    navigateTo(`/${slug.value}/nurses/${nurses.id}`)
 }
 </script>
 

@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const slug = route.params.slug as string
 const id = route.params.id as string
 
 const { data, pending, refresh } = await useFetch(`/api/nurses/${id}`, {
@@ -89,7 +90,7 @@ const careNoteColor: Record<string, string> = {
             <v-card-item class="pa-5">
                 <div class="d-flex align-center justify-space-between flex-wrap ga-4">
                     <div class="d-flex align-center ga-4">
-                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo('/nurses')" />
+                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/${slug}/nurses`)" />
                         <v-avatar size="56" color="primary" variant="tonal">
                             <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" cover />
                             <span v-else class="text-h6 font-weight-bold">
@@ -112,7 +113,7 @@ const careNoteColor: Record<string, string> = {
                         </div>
                     </div>
                     <v-btn variant="tonal" color="primary" prepend-icon="mdi-pencil"
-                        @click="navigateTo(`/nurses/${id}/edit`)">
+                        @click="navigateTo(`/${slug}/nurses/${id}/edit`)">
                         Edit
                     </v-btn>
                 </div>
@@ -343,8 +344,8 @@ const careNoteColor: Record<string, string> = {
                                         <v-chip :color="nurse.is_available ? 'success' : 'error'" variant="tonal"
                                             size="default" class="px-4">
                                             <v-icon start :icon="nurse.is_available
-                                                    ? 'mdi-check-circle'
-                                                    : 'mdi-close-circle'
+                                                ? 'mdi-check-circle'
+                                                : 'mdi-close-circle'
                                                 " />
 
                                             {{
