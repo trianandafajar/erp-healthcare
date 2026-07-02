@@ -1,16 +1,17 @@
-export default defineEventHandler(async () => {
-  const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+  const { admin, tenantId } = await getTenantContext(event)
 
   const { data: userRoles, error: roleError } = await admin
     .from('user_roles')
-    .select('user_id, roles!inner(name)')
+    .select('user_id, roles!inner(name), profiles!inner(tenant_id)')
     .eq('roles.name', 'doctor')
+    .eq('profiles.tenant_id', tenantId)
     .returns<any[]>()
 
   if (roleError)
-    throw createError({
-      statusCode: 400, message: roleError.message
-    })
+    throw createError({ statusCode: 400, message: roleError.message })
 
   const userIds = userRoles.map(ur => ur.user_id)
 
@@ -22,9 +23,7 @@ export default defineEventHandler(async () => {
     .in('id', userIds)
 
   if (doctorError)
-    throw createError({
-      statusCode: 400, message: doctorError.message
-    })
+    throw createError({ statusCode: 400, message: doctorError.message })
 
   const existingIds = new Set((existingDoctors ?? []).map(d => d.id))
   const availableIds = userIds.filter(id => !existingIds.has(id))
@@ -37,9 +36,7 @@ export default defineEventHandler(async () => {
     .in('id', availableIds)
 
   if (profileError)
-    throw createError({
-      statusCode: 400, message: profileError.message
-    })
+    throw createError({ statusCode: 400, message: profileError.message })
 
   return { users: profiles }
 })
