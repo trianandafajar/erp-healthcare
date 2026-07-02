@@ -1,6 +1,7 @@
 <template>
-  <header
-    :class="['header fixed top-0 left-0 w-full z-50 transition-all duration-300', scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-transparent']">
+  <header :class="['header fixed top-0 left-0 w-full z-50 transition-all duration-300',
+    (scrolled || alwaysShadow) ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
+  ]">
     <nav class="container mx-auto flex items-center justify-between h-16 md:h-[72px]">
       <div class="flex shrink-0 items-center">
         <Logo :src="logo" :class="['transition-all duration-300', isLight ? 'brightness-0 invert' : '']" />
@@ -56,6 +57,10 @@ const { logo } = config.site;
 
 const props = defineProps({
   darkHero: {
+    type: Boolean,
+    default: false,
+  },
+  alwaysShadow: {
     type: Boolean,
     default: false,
   },
