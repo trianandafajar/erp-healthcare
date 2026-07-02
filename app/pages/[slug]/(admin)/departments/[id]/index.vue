@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const slug = route.params.slug as string
 const id = route.params.id as string
 const refreshToken = Array.isArray(route.query.refresh) ? route.query.refresh[0] : route.query.refresh ?? ''
 
@@ -75,7 +76,7 @@ function appointmentStatusColor(status: string) {
             <v-card-item class="pa-5">
                 <div class="d-flex align-center justify-space-between flex-wrap ga-4">
                     <div class="d-flex align-center ga-4">
-                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo('/departments')" />
+                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/${slug}/departments`)" />
                         <v-avatar size="56" color="primary" variant="tonal">
                             <v-icon icon="mdi-hospital-building" size="28" />
                         </v-avatar>
@@ -89,7 +90,7 @@ function appointmentStatusColor(status: string) {
                         </div>
                     </div>
                     <v-btn variant="tonal" color="primary" prepend-icon="mdi-pencil"
-                        @click="navigateTo(`/departments/${id}/edit`)">
+                        @click="navigateTo(`/${slug}/departments/${id}/edit`)">
                         Edit
                     </v-btn>
                 </div>

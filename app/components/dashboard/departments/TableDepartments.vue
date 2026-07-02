@@ -15,6 +15,8 @@ interface Department {
     created?: string
 }
 const { can } = usePermission()
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
 
 const search = ref('');
 const currentPage = ref(1);
@@ -126,7 +128,7 @@ async function handleSubmit(payload: any) {
     }
 }
 function openView(department: Department) {
-    navigateTo(`/departments/${department.id}`)
+    navigateTo(`/${slug.value}/departments/${department.id}`)
 }
 </script>
 
@@ -219,14 +221,8 @@ function openView(department: Department) {
             <span class="text-caption text-medium-emphasis">
                 Showing {{ paginatedDepartments.length }} of {{ filteredDepartments.length }} departments
             </span>
-            <v-pagination 
-                v-if="totalPages > 1" 
-                v-model="currentPage" 
-                :length="totalPages" 
-                :total-visible="6"
-                density="compact"   
-                size="small" 
-            />
+            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
+                density="compact" size="small" />
         </div>
     </UiTitleCard>
 

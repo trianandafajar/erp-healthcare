@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const slug = route.params.slug as string
 const id = route.params.id as string
 const isCreate = id === 'create'
 
@@ -48,7 +49,7 @@ async function save() {
                 body: { name: form.name, code: form.code || null, description: form.description || null },
             })
             notify('Department created')
-            await navigateTo(`/departments/${res.data.id}`)
+            await navigateTo(`/${slug}/departments/${res.data.id}`)
         } else {
             await $fetch(`/api/departments/${id}`, {
                 method: 'PATCH',
@@ -56,7 +57,7 @@ async function save() {
             })
             notify('Department updated')
             await navigateTo({
-                path: `/departments/${id}`,
+                path: `/${slug}/departments/${id}`,
                 query: { refresh: Date.now().toString() },
             })
         }
@@ -79,7 +80,7 @@ async function save() {
             <v-card-item class="pa-5">
                 <div class="d-flex align-center ga-4">
                     <v-btn icon="mdi-arrow-left" variant="text"
-                        @click="navigateTo(isCreate ? '/departments' : `/departments/${id}`)" />
+                        @click="navigateTo(isCreate ? `/${slug}/departments` : `/${slug}/departments/${id}`)" />
                     <v-avatar size="48" color="primary" variant="tonal">
                         <v-icon icon="mdi-hospital-building" size="24" />
                     </v-avatar>
@@ -143,12 +144,12 @@ async function save() {
             <v-col cols="12" md="4">
                 <v-card variant="flat">
                     <v-card-text class="pa-5">
-                        <v-btn  block color="primary" size="large"
+                        <v-btn block color="primary" size="large"
                             :prepend-icon="isCreate ? 'mdi-plus' : 'mdi-content-save'" :loading="saving" @click="save">
                             {{ isCreate ? 'Create Department' : 'Save Changes' }}
                         </v-btn>
                         <v-btn block variant="tonal" class="mt-2"
-                            @click="navigateTo(isCreate ? '/departments' : `/departments/${id}`)">
+                            @click="navigateTo(isCreate ? `/${slug}/departments` : `/${slug}/departments/${id}`)">
                             Cancel
                         </v-btn>
                     </v-card-text>
