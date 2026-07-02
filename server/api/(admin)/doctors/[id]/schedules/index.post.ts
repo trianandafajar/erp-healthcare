@@ -1,7 +1,8 @@
+import { getTenantContext } from '~~/server/utils/getTenantContext'
 import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
 
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId } = await getTenantContext(event)
     const doctorId = getRouterParam(event, 'id')
 
     if (!doctorId) {
@@ -27,6 +28,7 @@ export default defineEventHandler(async (event) => {
             end_time,
             max_patients: max_patients ?? null,
             is_active: true,
+            tenant_id: tenantId,
         })
         .select()
         .single()
