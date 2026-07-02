@@ -1,69 +1,75 @@
 <template>
-  <Header />
-  <div v-if="pending" class="d-flex justify-center py-16">
-    <v-progress-circular indeterminate color="primary" />
-  </div>
-  <div v-else-if="!industry" class="d-flex justify-center py-16 text-medium-emphasis">
-    Industry not found
-  </div>
-  <template v-else>
-    <section class="relative min-h-screen w-full overflow-hidden bg-[#0a0a0a] flex items-center py-20 md:py-0">
-      <div class="relative z-10 max-w-6xl w-full mx-auto px-6">
-        <div class="grid md:grid-cols-2 gap-12 md:gap-8 items-center">
-          <div class="min-w-0">
-            <h1
-              class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.12] bg-gradient-to-r from-emerald-500 via-green-400 to-[#176D37] bg-clip-text text-transparent break-words">
-              {{ industry.detail?.hero?.title || industry.title }}
-            </h1>
+  <div class="flex min-h-screen flex-col">
+    <Header :dark-hero="!!industry" />
 
-            <p class="mt-6 text-gray-400 text-base md:text-lg leading-relaxed max-w-xl [overflow-wrap:anywhere]">
-              {{ industry.detail?.hero?.description || industry.description }}
-            </p>
+    <main class="flex-1">
+      <div v-if="pending" class="d-flex justify-center items-center py-16 pt-32 md:pt-40">
+        <v-progress-circular indeterminate color="primary" />
+      </div>
+      <div v-else-if="!industry" class="d-flex justify-center items-center py-16 pt-32 md:pt-40 text-medium-emphasis">
+        Industry not found
+      </div>
+      <template v-else>
+        <section class="relative min-h-screen w-full overflow-hidden bg-[#0a0a0a] flex items-center py-20 md:py-0">
+          <div class="relative z-10 max-w-6xl w-full mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 md:gap-8 items-center">
+              <div class="min-w-0">
+                <h1
+                  class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.12] bg-gradient-to-r from-emerald-500 via-green-400 to-[#176D37] bg-clip-text text-transparent break-words">
+                  {{ industry.detail?.hero?.title || industry.title }}
+                </h1>
 
-            <div class="mt-9 flex flex-wrap items-center gap-4">
-              <NuxtLink :to="`${route.path}#faq`" @click.prevent="scrollToFaq"
-                class="inline-flex items-center justify-center rounded-lg bg-[#176D37] px-7 py-3.5 text-sm md:text-base font-bold text-white shadow-lg shadow-[#176D37]/25 transition-colors hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
-                Find Your Solution
-              </NuxtLink>
-              <NuxtLink to="/login"
-                class="inline-flex items-center justify-center rounded-lg bg-[#0f4326] px-7 py-3.5 text-sm md:text-base font-bold text-white transition-colors hover:bg-[#176D37] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
-                Try Free
-              </NuxtLink>
+                <p class="mt-6 text-gray-400 text-base md:text-lg leading-relaxed max-w-xl [overflow-wrap:anywhere]">
+                  {{ industry.detail?.hero?.description || industry.description }}
+                </p>
+
+                <div class="mt-9 flex flex-wrap items-center gap-4">
+                  <NuxtLink :to="`${route.path}#faq`" @click.prevent="scrollToFaq"
+                    class="inline-flex items-center justify-center rounded-lg bg-[#176D37] px-7 py-3.5 text-sm md:text-base font-bold text-white shadow-lg shadow-[#176D37]/25 transition-colors hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
+                    Find Your Solution
+                  </NuxtLink>
+                  <NuxtLink to="/login"
+                    class="inline-flex items-center justify-center rounded-lg bg-[#0f4326] px-7 py-3.5 text-sm md:text-base font-bold text-white transition-colors hover:bg-[#176D37] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]">
+                    Try Free
+                  </NuxtLink>
+                </div>
+              </div>
+              <div class="relative mx-auto w-full max-w-md md:max-w-none min-w-0">
+                <img :src="industry.detail?.hero?.image_url || industry.image_url" :alt="industry.title"
+                  class="relative w-full object-contain rounded-md max-h-[420px]" />
+              </div>
             </div>
-          </div>
-          <div class="relative mx-auto w-full max-w-md md:max-w-none min-w-0">
-            <img :src="industry.detail?.hero?.image_url || industry.image_url" :alt="industry.title"
-              class="relative w-full object-contain rounded-md max-h-[420px]" />
-          </div>
-        </div>
 
-        <div class="mt-32 pt-10 border-t border-white/10">
-          <div class="flex flex-wrap items-center gap-x-12 gap-y-6">
-            <p class="text-sm font-bold text-white shrink-0">Trusted by:</p>
-            <div class="flex-1 overflow-hidden min-w-[200px]">
-              <div class="flex gap-16 items-center animate-scroll" style="animation-duration: 30s;">
-                <img v-for="logo in logos" :key="logo" :src="logo" :alt="'Client logo'"
-                  class="h-7 md:h-9 opacity-70 brightness-0 invert hover:opacity-100 transition-opacity duration-300"
-                  onerror="this.style.display='none'" />
-                <img v-for="logo in logos" :key="logo + '-dup'" :src="logo" :alt="'Client logo'"
-                  class="h-7 md:h-9 opacity-70 brightness-0 invert hover:opacity-100 transition-opacity duration-300"
-                  onerror="this.style.display='none'" />
+            <div class="mt-32 pt-10 border-t border-white/10">
+              <div class="flex flex-wrap items-center gap-x-12 gap-y-6">
+                <p class="text-sm font-bold text-white shrink-0">Trusted by:</p>
+                <div class="flex-1 overflow-hidden min-w-[200px]">
+                  <div class="flex gap-16 items-center animate-scroll" style="animation-duration: 30s;">
+                    <img v-for="logo in logos" :key="logo" :src="logo" :alt="'Client logo'"
+                      class="h-7 md:h-9 opacity-70 brightness-0 invert hover:opacity-100 transition-opacity duration-300"
+                      onerror="this.style.display='none'" />
+                    <img v-for="logo in logos" :key="logo + '-dup'" :src="logo" :alt="'Client logo'"
+                      class="h-7 md:h-9 opacity-70 brightness-0 invert hover:opacity-100 transition-opacity duration-300"
+                      onerror="this.style.display='none'" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+        </section>
+
+        <SectionRenderer :content="industry.detail" />
+
+        <div class="text-center py-8">
+          <NuxtLink to="/" class="text-[#0aa8a7] hover:text-[#16d5d4] font-semibold no-underline">
+            Back to Home
+          </NuxtLink>
         </div>
-      </div>
-    </section>
+      </template>
+    </main>
 
-    <SectionRenderer :content="industry.detail" />
-
-    <div class="text-center py-8">
-      <NuxtLink to="/" class="text-[#0aa8a7] hover:text-[#16d5d4] font-semibold no-underline">
-        Back to Home
-      </NuxtLink>
-    </div>
-  </template>
-  <Footer />
+    <Footer />
+  </div>
 </template>
 
 <script setup>
