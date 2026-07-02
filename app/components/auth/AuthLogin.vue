@@ -68,14 +68,22 @@ async function validate() {
             ?.map((rp: any) => rp.permissions?.name)
             .filter(Boolean) ?? []
 
-        const { data: tenant, error: tenantError } = await supabase
-            .from('tenants')
-            .select('id, slug')
-            .eq('owner_id', user!.id)
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('tenant_id, tenants(slug)')
+            .eq('id', user!.id)
             .single()
 
-        if (tenantError || !tenant) {
+        if (profileError || !profile?.tenant_id) {
             apiError.value = 'Your account is not yet linked to any tenant.'
+            return
+        }
+
+        const tenantId = profile.tenant_id
+        const tenantSlug = (profile as any).tenants?.slug
+
+        if (!tenantSlug) {
+            apiError.value = 'Tenant data is invalid.'
             return
         }
 
@@ -84,8 +92,8 @@ async function validate() {
             user,
             role,
             permissions,
-            tenantId: tenant.id,
-            tenantSlug: tenant.slug,
+            tenantId,
+            tenantSlug,
         })
 
         const redirectMap: Record<string, string> = {
@@ -100,7 +108,7 @@ async function validate() {
         }
 
         const path = redirectMap[role] ?? 'dashboard'
-        await navigateTo(`/${tenant.slug}/${path}`)
+        await navigateTo(`/${tenantSlug}/${path}`)
 
     } catch (err: any) {
         apiError.value = err?.data?.message || err?.message || 'Login failed.'
