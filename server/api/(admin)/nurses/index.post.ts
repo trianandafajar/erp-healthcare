@@ -1,17 +1,17 @@
-export default defineEventHandler(async (event) => {
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
     const {
         id,
         department_id,
-        phone,  
+        phone,
         experience_years,
         is_available
     } = await readBody(event)
 
     if (!id) throw createError({ statusCode: 400, message: 'User ID is required' })
 
-    const admin = supabaseAdmin()
-    const supabase = serverSupabase(event)
-    const { data: { user } } = await supabase.auth.getUser()
+    const { admin, tenantId, user } = await getTenantContext(event)
 
     const { data: hasRole } = await admin
         .from('user_roles')
@@ -31,7 +31,8 @@ export default defineEventHandler(async (event) => {
             department_id,
             phone,
             experience_years,
-            is_available: is_available ?? true
+            is_available: is_available ?? true,
+            tenant_id: tenantId
         })
         .select()
         .single()

@@ -1,10 +1,13 @@
-export default defineEventHandler(async () => {
-  const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+  const { admin, tenantId } = await getTenantContext(event)
 
   const { data: userRoles, error: roleError } = await admin
     .from('user_roles')
-    .select('user_id, roles!inner(name)')
+    .select('user_id, roles!inner(name), profiles!inner(tenant_id)')
     .eq('roles.name', 'nurse')
+    .eq('profiles.tenant_id', tenantId)
     .returns<any[]>()
 
   if (roleError)
