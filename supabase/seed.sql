@@ -4,6 +4,7 @@
 
     INSERT INTO public.roles (name, label)
     VALUES
+    ('superadmin', 'Super Administrator'),
     ('admin', 'Administrator'),
     ('doctor', 'Doctor'),
     ('pharmacy', 'Pharmacist'),
@@ -11,6 +12,14 @@
     ('nurse', 'Nurse'),
     ('patient', 'Patient')
     ON CONFLICT (name) DO NOTHING;
+
+    -- =========================
+    -- Seed Default Tenant
+    -- =========================
+
+    INSERT INTO public.tenants (name, slug)
+    VALUES ('Default', 'default')
+    ON CONFLICT (slug) DO NOTHING;
 
     -- =========================
     -- Seed Permissions
@@ -179,6 +188,22 @@
         perm_name text;
         perm_names text[];
     BEGIN
+
+        -- =====================
+        -- SUPERADMIN (all permissions)
+        -- =====================
+
+        SELECT id INTO v_role_id
+        FROM public.roles
+        WHERE name = 'superadmin';
+
+        FOR v_perm_id IN
+            SELECT id FROM public.permissions
+        LOOP
+            INSERT INTO public.role_permissions(role_id, permission_id)
+            VALUES (v_role_id, v_perm_id)
+            ON CONFLICT DO NOTHING;
+        END LOOP;
 
         -- =====================
         -- ADMIN (all permissions)
