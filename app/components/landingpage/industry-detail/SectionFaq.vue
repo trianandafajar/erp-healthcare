@@ -3,7 +3,7 @@
     <div class="max-w-6xl mx-auto px-6">
       <div class="text-center max-w-3xl mx-auto mb-16">
         <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-          {{ title }} <span class="text-orange-500">{{ titleHighlight }}</span> {{ titleSuffix }}
+          {{ title }} <span class="text-[#176D37]">{{ titleHighlight }}</span> {{ titleSuffix }}
         </h2>
         <p class="mt-5 text-gray-600 text-base md:text-lg leading-relaxed">
           {{ description }}
@@ -15,7 +15,7 @@
           <div v-for="(item, index) in faq" :key="index" :ref="el => faqItemRefs[index] = el">
             <button @click="toggle(index)" class="w-full flex items-center gap-4 px-6 py-6 text-left group"
               :aria-expanded="openIndex === index">
-              <span class="flex h-8 w-8 shrink-0 items-center justify-center text-orange-500">
+              <span class="flex h-8 w-8 shrink-0 items-center justify-center text-[#176D37]">
                 <v-icon :icon="item.icon || 'mdi-help-circle-outline'" size="26" />
               </span>
               <span class="flex-1 text-base md:text-lg font-bold text-gray-900">{{ item.question }}</span>
@@ -30,7 +30,7 @@
         </div>
         <div class="relative flex min-h-[320px] items-center justify-center">
           <img ref="imgEl" :src="currentSrc" :alt="title"
-            class="relative z-10 w-full max-w-lg object-contain select-none pointer-events-none" />
+            class="relative z-10 w-full max-w-lg object-contain select-none rounded-md pointer-events-none" />
         </div>
       </div>
     </div>

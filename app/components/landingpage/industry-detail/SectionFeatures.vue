@@ -47,14 +47,9 @@
               </ul>
             </div>
 
-<a
-            v-if="feature.cta_text"
-            :href="feature.cta_link || '#'"
-            class="mt-auto block text-center text-white font-bold text-sm py-3 rounded-lg transition-opacity
-            hover:opacity-90"
-            :style="{ backgroundColor: primaryColor }"
-            >
-            {{ feature.cta_text }}
+            <a v-if="feature.cta_text" :href="feature.cta_link || '#'" class="mt-auto block text-center text-white font-bold text-sm py-3 rounded-lg transition-opacity
+            hover:opacity-90" :style="{ backgroundColor: primaryColor }">
+              {{ feature.cta_text }}
             </a>
           </div>
         </div>
@@ -90,7 +85,7 @@ const props = defineProps({
   },
   primaryColor: {
     type: String,
-    default: '#0aa8a7',
+    default: '#176D37',
   },
 })
 
