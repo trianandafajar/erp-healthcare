@@ -173,7 +173,11 @@
     ('landingpage.industries.view', 'View Industries', 'landingpage', 'admin'),
     ('landingpage.industries.create', 'Create Industries', 'landingpage', 'admin'),
     ('landingpage.industries.edit', 'Edit Industries', 'landingpage', 'admin'),
-    ('landingpage.industries.delete', 'Delete Industries', 'landingpage', 'admin')
+    ('landingpage.industries.delete', 'Delete Industries', 'landingpage', 'admin'),
+    ('landingpage.logos.view', 'View Logos', 'landingpage', 'admin'),
+    ('landingpage.logos.create', 'Create Logos', 'landingpage', 'admin'),
+    ('landingpage.logos.edit', 'Edit Logos', 'landingpage', 'admin'),
+    ('landingpage.logos.delete', 'Delete Logos', 'landingpage', 'admin')
 
     ON CONFLICT (name) DO NOTHING;
 

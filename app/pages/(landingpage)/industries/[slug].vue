@@ -45,10 +45,10 @@
                 <p class="text-sm font-bold text-white shrink-0">Trusted by:</p>
                 <div class="flex-1 overflow-hidden min-w-[200px]">
                   <div class="flex gap-16 items-center animate-scroll" style="animation-duration: 30s;">
-                    <img v-for="logo in logos" :key="logo" :src="logo" :alt="'Client logo'"
+                    <img v-for="(logo, i) in logos" :key="i" :src="logo.image_url" :alt="logo.title"
                       class="h-7 md:h-9 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300"
                       onerror="this.style.display='none'" />
-                    <img v-for="logo in logos" :key="logo + '-dup'" :src="logo" :alt="'Client logo'"
+                    <img v-for="(logo, i) in logos" :key="'dup-' + i" :src="logo.image_url" :alt="logo.title"
                       class="h-7 md:h-9 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300"
                       onerror="this.style.display='none'" />
                   </div>
@@ -92,14 +92,21 @@ definePageMeta({
   skipTenantCheck: true,
 })
 
-const logos = [
-  '/landingpage/sponsors/calenly.png',
-  '/landingpage/sponsors/contena.png',
-  '/landingpage/sponsors/mentora.png',
-  '/landingpage/sponsors/schedullin.png',
-  '/landingpage/sponsors/stockita.png',
-  '/landingpage/sponsors/invoice.png',
-];
+const fallbackLogos = [
+  { id: '1', title: 'Calendly', image_url: '/landingpage/sponsors/calenly.png' },
+  { id: '2', title: 'Contena', image_url: '/landingpage/sponsors/contena.png' },
+  { id: '3', title: 'Mentora', image_url: '/landingpage/sponsors/mentora.png' },
+  { id: '4', title: 'Schedullin', image_url: '/landingpage/sponsors/schedullin.png' },
+  { id: '5', title: 'Stockita', image_url: '/landingpage/sponsors/stockita.png' },
+  { id: '6', title: 'Invoice', image_url: '/landingpage/sponsors/invoice.png' },
+]
+
+const { data: logoData, error: logoError } = await useFetch('/api/landingpage/logos')
+
+const logos = computed(() => {
+  if (logoError.value || !logoData.value?.logos?.length) return fallbackLogos
+  return logoData.value.logos
+})
 
 function scrollToFaq() {
   const el = document.getElementById('faq')

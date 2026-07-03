@@ -7,6 +7,7 @@ import {
   BuildOutlined,
   CreditCardOutlined,
   HistoryOutlined,
+  PictureOutlined,
 } from '@ant-design/icons-vue';
 import NavGroup from './NavGroup/NavGroup.vue';
 import NavItem from './NavItem/NavItem.vue';
@@ -40,6 +41,7 @@ const sidebarMenu = shallowRef<MenuItem[]>([
 
   { header: 'Landingpage' },
   { title: 'Industries', icon: BuildOutlined, to: `/super-admin/landingpage/industries` },
+  { title: 'Sponsors', icon: PictureOutlined, to: `/super-admin/landingpage/logos` },
 
   { header: 'System' },
   { title: 'Activity Log', icon: HistoryOutlined, to: `/super-admin/activity-log` },
