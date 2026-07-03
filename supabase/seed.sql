@@ -177,7 +177,11 @@
     ('landingpage.logos.view', 'View Logos', 'landingpage', 'admin'),
     ('landingpage.logos.create', 'Create Logos', 'landingpage', 'admin'),
     ('landingpage.logos.edit', 'Edit Logos', 'landingpage', 'admin'),
-    ('landingpage.logos.delete', 'Delete Logos', 'landingpage', 'admin')
+    ('landingpage.logos.delete', 'Delete Logos', 'landingpage', 'admin'),
+    ('landingpage.testimonials.view', 'View Testimonials', 'landingpage', 'admin'),
+    ('landingpage.testimonials.create', 'Create Testimonials', 'landingpage', 'admin'),
+    ('landingpage.testimonials.edit', 'Edit Testimonials', 'landingpage', 'admin'),
+    ('landingpage.testimonials.delete', 'Delete Testimonials', 'landingpage', 'admin')
 
     ON CONFLICT (name) DO NOTHING;
 

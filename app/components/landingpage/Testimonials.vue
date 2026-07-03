@@ -18,9 +18,9 @@
           </div>
           <p class="text-[#176D37] text-sm leading-relaxed mb-6">"{{ testimonial.quote }}"</p>
           <div class="flex items-center gap-3">
-            <div
-              class="w-10 h-10 rounded-full bg-[#176D37]/10 flex items-center justify-center text-sm font-bold text-[#176D37]">
-              {{ testimonial.initials }}
+            <div class="w-10 h-10 rounded-full bg-[#176D37]/10 flex items-center justify-center text-sm font-bold text-[#176D37]">
+              <img v-if="testimonial.image_url" :src="testimonial.image_url" class="w-10 h-10 rounded-full object-cover" onerror="this.style.display='none'" />
+              <span v-else>{{ testimonial.initials }}</span>
             </div>
             <div>
               <div class="text-sm font-bold text-gray-900">{{ testimonial.name }}</div>
@@ -34,13 +34,16 @@
 </template>
 
 <script setup>
-const testimonials = [
+import { computed } from 'vue'
+
+const fallbackTestimonials = [
   {
     quote: "This platform has completely transformed how we manage patient records. The integration between registration, pharmacy, and billing saved us hours of manual work every day.",
     initials: 'DR',
     name: 'Dr. Andi Pratama',
     role: 'Director',
     institution: 'RS Pusat Jakarta',
+    image_url: '/landingpage/testimonials/andri.jpg',
   },
   {
     quote: "The real-time dashboard and reporting features give us unprecedented visibility into our operations. We can now make data-driven decisions that improve patient care.",
@@ -48,6 +51,7 @@ const testimonials = [
     name: 'Siti Nurhaliza',
     role: 'Head of Operations',
     institution: 'Klinik Sehat Keluarga',
+    image_url: '/landingpage/testimonials/siti.jpg',
   },
   {
     quote: "Implementing this ERP was the best decision we made. The pharmacy module alone reduced medication errors by 80% and streamlined our entire supply chain.",
@@ -55,6 +59,14 @@ const testimonials = [
     name: 'Apt. Rahmatullah',
     role: 'Pharmacy Manager',
     institution: 'Apotek Medika Farma',
+    image_url: '/landingpage/testimonials/rahmatullah.jpg',
   },
 ];
+
+const { data, error } = await useFetch('/api/landingpage/testimonials')
+
+const testimonials = computed(() => {
+  if (error.value || !data.value?.testimonials?.length) return fallbackTestimonials
+  return data.value.testimonials
+})
 </script>

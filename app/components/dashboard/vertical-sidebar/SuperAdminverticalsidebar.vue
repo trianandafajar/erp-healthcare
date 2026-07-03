@@ -6,6 +6,7 @@ import {
   TeamOutlined,
   BuildOutlined,
   CreditCardOutlined,
+  CommentOutlined,
   HistoryOutlined,
   PictureOutlined,
 } from '@ant-design/icons-vue';
@@ -39,12 +40,13 @@ const sidebarMenu = shallowRef<MenuItem[]>([
   { title: 'Tenants', icon: TeamOutlined, to: `/super-admin/tenants` },
   { title: 'Subscriptions', icon: CreditCardOutlined, to: `/super-admin/subscriptions` },
 
-  { header: 'Landingpage' },
-  { title: 'Industries', icon: BuildOutlined, to: `/super-admin/landingpage/industries` },
-  { title: 'Sponsors', icon: PictureOutlined, to: `/super-admin/landingpage/logos` },
+   { header: 'Landingpage' },
+   { title: 'Industries', icon: BuildOutlined, to: `/super-admin/landingpage/industries` },
+   { title: 'Sponsors', icon: PictureOutlined, to: `/super-admin/landingpage/logos` },
+   { title: 'Testimonials', icon: CommentOutlined, to: `/super-admin/landingpage/testimonials` },
 
-  { header: 'System' },
-  { title: 'Activity Log', icon: HistoryOutlined, to: `/super-admin/activity-log` },
+   { header: 'System' },
+   { title: 'Activity Log', icon: HistoryOutlined, to: `/super-admin/activity-log` },
 ]);
 </script>
 
