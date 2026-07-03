@@ -18,8 +18,9 @@
 
           <div v-for="(industry, index) in displayIndustries" :key="industry.id" :class="[
             'group relative overflow-hidden rounded-3xl min-h-[340px]',
+            industry.slug ? 'cursor-pointer' : '',
             widthClasses[index]
-          ]">
+          ]" @click="industry.slug && navigateTo('/industries/' + industry.slug)">
             <img :src="industry.image" :alt="industry.title"
               class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-110" />
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" />
@@ -41,7 +42,7 @@
                       {{ industry.description }}
                     </p>
 
-                    <NuxtLink v-if="industry.slug" :to="'/industries/' + industry.slug"
+                    <NuxtLink v-if="industry.slug" :to="'/industries/' + industry.slug" @click.stop
                       class="inline-flex items-center gap-2 text-[#0aa8a7] font-semibold hover:text-[#16d5d4] no-underline">
                       Learn More
 
