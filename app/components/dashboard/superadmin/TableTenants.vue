@@ -3,47 +3,44 @@ import { ref, computed } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import TenantModal from './TenantModal.vue';
 
+interface TenantOwner {
+  id: string
+  email: string
+  full_name: string
+}
+
 interface Tenant {
   id: string
   name: string
   slug: string
-  plan: string
-  status: string
-  owner: string
-  owner_email: string
-  users: number
+  subscription_plan: string
+  subscription_status: string
+  owner_id: string
+  owner: TenantOwner | null
+  total_users: number
   created_at: string
 }
 
-const dummyTenants: Tenant[] = [
-  { id: '1', name: 'Klinik Sehat', slug: 'klinik-sehat', plan: 'Pro', status: 'active', owner: 'Dr. Andi', owner_email: 'andi@kliniksehat.com', users: 45, created_at: '2026-06-15T08:00:00Z' },
-  { id: '2', name: 'RS Harapan', slug: 'rs-harapan', plan: 'Enterprise', status: 'active', owner: 'Dr. Budi', owner_email: 'budi@rsharapan.com', users: 120, created_at: '2026-06-10T10:30:00Z' },
-  { id: '3', name: 'Puskesmas Maju', slug: 'puskesmas-maju', plan: 'Basic', status: 'active', owner: 'Siti Rahmawati', owner_email: 'siti@puskesmasmaju.com', users: 28, created_at: '2026-06-05T14:15:00Z' },
-  { id: '4', name: 'Klinik Medika', slug: 'klinik-medika', plan: 'Free', status: 'active', owner: 'Dr. Cici', owner_email: 'cici@medika.com', users: 12, created_at: '2026-05-28T09:45:00Z' },
-  { id: '5', name: 'RS Bunda', slug: 'rs-bunda', plan: 'Pro', status: 'active', owner: 'Dr. Dewi', owner_email: 'dewi@rsbunda.com', users: 89, created_at: '2026-05-20T11:00:00Z' },
-  { id: '6', name: 'Klinik Husada', slug: 'klinik-husada', plan: 'Basic', status: 'suspended', owner: 'Ahmad Fauzi', owner_email: 'ahmad@husada.com', users: 0, created_at: '2026-05-15T16:20:00Z' },
-  { id: '7', name: 'RS Mata Indah', slug: 'rs-mata-indah', plan: 'Enterprise', status: 'active', owner: 'Dr. Eko', owner_email: 'eko@mataindah.com', users: 67, created_at: '2026-05-10T07:45:00Z' },
-  { id: '8', name: 'Klinik Gigi Cerah', slug: 'klinik-gigi-cerah', plan: 'Free', status: 'active', owner: 'Dr. Fitri', owner_email: 'fitri@gigicerah.com', users: 8, created_at: '2026-04-28T13:30:00Z' },
-  { id: '9', name: 'RS Jiwa Damai', slug: 'rs-jiwa-damai', plan: 'Pro', status: 'active', owner: 'Dr. Gunawan', owner_email: 'gunawan@jiwadamai.com', users: 34, created_at: '2026-04-20T09:00:00Z' },
-  { id: '10', name: 'Puskesmas Sehati', slug: 'puskesmas-sehati', plan: 'Basic', status: 'active', owner: 'Hesti', owner_email: 'hesti@sehati.com', users: 19, created_at: '2026-04-10T15:00:00Z' },
-  { id: '11', name: 'Klinik Bersalin Ibu', slug: 'klinik-bersalin-ibu', plan: 'Pro', status: 'active', owner: 'Dr. Indah', owner_email: 'indah@bersalinibu.com', users: 52, created_at: '2026-03-25T11:15:00Z' },
-  { id: '12', name: 'RS Umum Sentosa', slug: 'rs-umum-sentosa', plan: 'Enterprise', status: 'suspended', owner: 'Dr. Joko', owner_email: 'joko@sentosa.com', users: 0, created_at: '2026-03-15T08:30:00Z' },
-]
+const { data, pending } = await useFetch<Tenant[]>('/api/superadmin/tenants')
+const tenants = computed(() => data.value ?? [])
 
 const search = ref('')
 const planFilter = ref('All')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const planOptions = ['All', 'Free', 'Basic', 'Pro', 'Enterprise']
+const planOptions = ['All', 'free', 'basic', 'pro', 'enterprise']
 
 const filteredTenants = computed(() => {
-  return dummyTenants.filter((t) => {
+  return tenants.value.filter((t) => {
+    const q = search.value.toLowerCase()
     const matchesSearch =
-      t.name.toLowerCase().includes(search.value.toLowerCase()) ||
-      t.slug.toLowerCase().includes(search.value.toLowerCase()) ||
-      t.owner.toLowerCase().includes(search.value.toLowerCase())
-    const matchesPlan = planFilter.value === 'All' || t.plan === planFilter.value
+      !q ||
+      t.name.toLowerCase().includes(q) ||
+      t.slug.toLowerCase().includes(q) ||
+      (t.owner?.full_name ?? '').toLowerCase().includes(q) ||
+      (t.owner?.email ?? '').toLowerCase().includes(q)
+    const matchesPlan = planFilter.value === 'All' || t.subscription_plan === planFilter.value
     return matchesSearch && matchesPlan
   })
 })
@@ -66,6 +63,7 @@ function formatDate(dateStr: string) {
 function getInitials(name: string) {
   return name
     .split(' ')
+    .filter(Boolean)
     .map((n) => n[0])
     .slice(0, 2)
     .join('')
@@ -73,14 +71,18 @@ function getInitials(name: string) {
 }
 
 const planColors: Record<string, string> = {
-  Free: 'grey',
-  Basic: 'primary',
-  Pro: 'warning',
-  Enterprise: 'error',
+  free: 'grey',
+  basic: 'primary',
+  pro: 'warning',
+  enterprise: 'error',
 }
 
 function getPlanColor(plan: string) {
   return planColors[plan] ?? 'secondary'
+}
+
+function getPlanLabel(plan: string) {
+  return plan.charAt(0).toUpperCase() + plan.slice(1)
 }
 
 function onSearch() {
@@ -116,10 +118,10 @@ function notify(msg: string, color = 'success') {
 
 function handleEditSubmit(payload: { plan: string; status: string }) {
   if (!selectedTenant.value) return
-  const tenant = dummyTenants.find((t) => t.id === selectedTenant.value!.id)
+  const tenant = tenants.value.find((t) => t.id === selectedTenant.value!.id)
   if (tenant) {
-    tenant.plan = payload.plan
-    tenant.status = payload.status
+    tenant.subscription_plan = payload.plan
+    tenant.subscription_status = payload.status
   }
   notify(`Subscription updated for ${selectedTenant.value.name}`)
   closeModal()
@@ -137,24 +139,13 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
   </v-card-item>
 
   <UiTitleCard class-name="px-0 pb-0 rounded-md">
-    <template #title>
-      <v-card-item class="pb-2 px-0 pt-0">
-        <div class="d-flex justify-space-between align-center">
-          <div>
-            <v-card-title class="text-h3">Tenants Management</v-card-title>
-            <v-card-subtitle class="mt-1">Manage all registered tenants and their subscriptions</v-card-subtitle>
-          </div>
-        </div>
-      </v-card-item>
-    </template>
-
     <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
       <div class="d-flex align-center ga-3">
         <v-text-field v-model="search" placeholder="Search by name, slug, or owner..." prepend-inner-icon="mdi-magnify"
           variant="outlined" density="compact" hide-details clearable style="max-width: 320px"
           @update:model-value="onSearch" />
         <v-select v-model="planFilter" :items="planOptions" variant="outlined" density="compact" hide-details
-          style="max-width: 160px" />
+          style="max-width: 160px" @update:model-value="onSearch" />
       </div>
     </div>
 
@@ -173,7 +164,12 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
         </tr>
       </thead>
       <tbody>
-        <tr v-if="paginatedTenants.length === 0">
+        <tr v-if="pending">
+          <td colspan="7" class="text-center py-8 text-medium-emphasis">
+            Loading tenants...
+          </td>
+        </tr>
+        <tr v-else-if="paginatedTenants.length === 0">
           <td colspan="7" class="text-center py-8 text-medium-emphasis">
             <v-icon icon="mdi-domain-off" size="32" class="mb-2 d-block mx-auto" />
             No tenants found
@@ -193,20 +189,20 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
             </div>
           </td>
           <td class="py-3">
-            <v-chip :color="getPlanColor(tenant.plan)" variant="tonal" size="small">
-              {{ tenant.plan }}
+            <v-chip :color="getPlanColor(tenant.subscription_plan)" variant="tonal" size="small">
+              {{ getPlanLabel(tenant.subscription_plan) }}
             </v-chip>
           </td>
           <td class="py-3">
-            <v-chip :color="tenant.status === 'active' ? 'success' : 'error'" variant="tonal" size="small">
-              {{ tenant.status === 'active' ? 'Active' : 'Suspended' }}
+            <v-chip :color="tenant.subscription_status === 'active' ? 'success' : 'error'" variant="tonal" size="small">
+              {{ tenant.subscription_status === 'active' ? 'Active' : 'Suspended' }}
             </v-chip>
           </td>
           <td class="py-3">
-            <div class="text-body-2 font-weight-medium">{{ tenant.owner }}</div>
-            <div class="text-caption text-medium-emphasis">{{ tenant.owner_email }}</div>
+            <div class="text-body-2 font-weight-medium">{{ tenant.owner?.full_name ?? '—' }}</div>
+            <div class="text-caption text-medium-emphasis">{{ tenant.owner?.email ?? '—' }}</div>
           </td>
-          <td class="py-3 text-body-2">{{ tenant.users.toLocaleString() }}</td>
+          <td class="py-3 text-body-2">{{ tenant.total_users.toLocaleString() }}</td>
           <td class="py-3 text-body-2 text-medium-emphasis">{{ formatDate(tenant.created_at) }}</td>
           <td class="py-3 text-right" @click.stop>
             <v-btn icon="mdi-eye" variant="text" size="small" color="primary" density="comfortable"

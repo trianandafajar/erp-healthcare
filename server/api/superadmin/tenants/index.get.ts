@@ -16,10 +16,49 @@ export default defineEventHandler(async (event) => {
 
     const { data: tenants, error } = await admin
         .from('tenants')
-        .select('*, owner_id(id, email, full_name)')
+        .select('*')
         .order('created_at', { ascending: false })
 
     if (error) throw createError({ statusCode: 500, message: error.message })
 
-    return tenants
+    const tenantIds = tenants.map((t) => t.id)
+
+    const ownerIds = [...new Set(tenants.map((t) => t.owner_id).filter(Boolean))]
+
+    let profilesMap: Record<string, any> = {}
+    if (ownerIds.length > 0) {
+        const { data: profiles, error: profileError } = await admin
+            .from('profiles')
+            .select('id, email, full_name')
+            .in('id', ownerIds)
+
+        if (profileError) throw createError({ statusCode: 500, message: profileError.message })
+
+        profilesMap = Object.fromEntries(profiles.map((p) => [p.id, p]))
+    }
+
+    let userCountMap: Record<string, number> = {}
+    if (tenantIds.length > 0) {
+        const { data: allProfiles, error: countError } = await admin
+            .from('profiles')
+            .select('tenant_id')
+            .in('tenant_id', tenantIds)
+
+        if (countError) throw createError({ statusCode: 500, message: countError.message })
+
+        userCountMap = allProfiles.reduce((acc: Record<string, number>, p) => {
+            if (p.tenant_id) {
+                acc[p.tenant_id] = (acc[p.tenant_id] ?? 0) + 1
+            }
+            return acc
+        }, {})
+    }
+
+    const tenantsWithDetails = tenants.map((t) => ({
+        ...t,
+        owner: t.owner_id ? profilesMap[t.owner_id] ?? null : null,
+        total_users: userCountMap[t.id] ?? 0,
+    }))
+
+    return tenantsWithDetails
 })
