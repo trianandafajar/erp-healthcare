@@ -68,23 +68,30 @@ async function validate() {
             ?.map((rp: any) => rp.permissions?.name)
             .filter(Boolean) ?? []
 
-        const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('tenant_id, tenants(slug)')
-            .eq('id', user!.id)
-            .single()
+        const isSuperAdmin = role === 'superadmin'
 
-        if (profileError || !profile?.tenant_id) {
-            apiError.value = 'Your account is not yet linked to any tenant.'
-            return
-        }
+        let tenantId: string | null = null
+        let tenantSlug: string | null = null
 
-        const tenantId = profile.tenant_id
-        const tenantSlug = (profile as any).tenants?.slug
+        if (!isSuperAdmin) {
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('tenant_id, tenants(slug)')
+                .eq('id', user!.id)
+                .single()
 
-        if (!tenantSlug) {
-            apiError.value = 'Tenant data is invalid.'
-            return
+            if (profileError || !profile?.tenant_id) {
+                apiError.value = 'Your account is not yet linked to any tenant.'
+                return
+            }
+
+            tenantId = profile.tenant_id
+            tenantSlug = (profile as any).tenants?.slug
+
+            if (!tenantSlug) {
+                apiError.value = 'Tenant data is invalid.'
+                return
+            }
         }
 
         const authStore = useAuthStore()
@@ -97,7 +104,7 @@ async function validate() {
         })
 
         const redirectMap: Record<string, string> = {
-            superadmin: 'superadmin/dashboard',
+            superadmin: 'super-admin/dashboard',
             admin: 'dashboard',
             doctor: 'doctor/dashboard',
             specialist: 'doctor/dashboard',
@@ -108,7 +115,10 @@ async function validate() {
         }
 
         const path = redirectMap[role] ?? 'dashboard'
-        await navigateTo(`/${tenantSlug}/${path}`)
+
+        // Superadmin tidak butuh prefix tenant slug di URL
+        const target = isSuperAdmin ? `/${path}` : `/${tenantSlug}/${path}`
+        await navigateTo(target)
 
     } catch (err: any) {
         apiError.value = err?.data?.message || err?.message || 'Login failed.'
