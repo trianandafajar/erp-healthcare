@@ -37,7 +37,7 @@ useSeoMeta({
 });
 
 definePageMeta({
-  layout: false,
+  layout: 'blank',
   middleware: 'guest'
 })
 </script>

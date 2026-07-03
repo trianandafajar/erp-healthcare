@@ -1,4 +1,6 @@
 export default defineNuxtRouteMiddleware(async (to) => {
+    if (to.meta.skipTenantCheck) return
+
     const slug = to.params.slug as string | undefined
     if (!slug) return
 
