@@ -3,11 +3,9 @@ import { shallowRef } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
 import {
   AppstoreOutlined,
-  CalendarOutlined,
   TeamOutlined,
-  FileTextOutlined,
-  AuditOutlined,
-  ShareAltOutlined,
+  BuildOutlined,
+  CreditCardOutlined,
   HistoryOutlined,
 } from '@ant-design/icons-vue';
 import NavGroup from './NavGroup/NavGroup.vue';
@@ -33,14 +31,18 @@ type MenuItem = {
 
 const customizer = useCustomizerStore();
 const sidebarMenu = shallowRef<MenuItem[]>([
-  {
-    header: 'Dashboard',
-  },
-  {
-    title: 'Dashboard',
-    icon: AppstoreOutlined,
-    to: `/super-admin/dashboard`,
-  }
+  { header: 'Dashboard' },
+  { title: 'Dashboard', icon: AppstoreOutlined, to: `/super-admin/dashboard` },
+
+  { header: 'Management' },
+  { title: 'Tenants', icon: TeamOutlined, to: `/super-admin/tenants` },
+  { title: 'Subscriptions', icon: CreditCardOutlined, to: `/super-admin/subscriptions` },
+
+  { header: 'Landingpage' },
+  { title: 'Industries', icon: BuildOutlined, to: `/super-admin/landingpage/industries` },
+
+  { header: 'System' },
+  { title: 'Activity Log', icon: HistoryOutlined, to: `/super-admin/activity-log` },
 ]);
 </script>
 
