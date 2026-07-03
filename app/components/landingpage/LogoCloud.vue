@@ -14,12 +14,12 @@
 
 <script setup>
 const logos = [
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
+  '/landingpage/sponsors/calenly.png',
+  '/landingpage/sponsors/contena.png',
+  '/landingpage/sponsors/mentora.png',
+  '/landingpage/sponsors/schedullin.png',
+  '/landingpage/sponsors/stockita.png',
+  '/landingpage/sponsors/invoice.png',
 ];
 </script>
 

@@ -46,10 +46,10 @@
                 <div class="flex-1 overflow-hidden min-w-[200px]">
                   <div class="flex gap-16 items-center animate-scroll" style="animation-duration: 30s;">
                     <img v-for="logo in logos" :key="logo" :src="logo" :alt="'Client logo'"
-                      class="h-7 md:h-9 opacity-70 brightness-0 invert hover:opacity-100 transition-opacity duration-300"
+                      class="h-7 md:h-9 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300"
                       onerror="this.style.display='none'" />
                     <img v-for="logo in logos" :key="logo + '-dup'" :src="logo" :alt="'Client logo'"
-                      class="h-7 md:h-9 opacity-70 brightness-0 invert hover:opacity-100 transition-opacity duration-300"
+                      class="h-7 md:h-9 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300"
                       onerror="this.style.display='none'" />
                   </div>
                 </div>
@@ -89,15 +89,16 @@ useSeoMeta({
 
 definePageMeta({
   layout: 'blank',
+  skipTenantCheck: true,
 })
 
 const logos = [
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
-  '/landingpage/logo.png',
+  '/landingpage/sponsors/calenly.png',
+  '/landingpage/sponsors/contena.png',
+  '/landingpage/sponsors/mentora.png',
+  '/landingpage/sponsors/schedullin.png',
+  '/landingpage/sponsors/stockita.png',
+  '/landingpage/sponsors/invoice.png',
 ];
 
 function scrollToFaq() {
