@@ -12,7 +12,7 @@ export default defineEventHandler(async (event: any) => {
     const page = Number(query.page ?? 1)
     const limit = Number(query.limit ?? 20)
 
-    const { admin, tenantId } = await getTenantContext(event)
+    const { admin } = await getTenantContext(event)
 
     let q = admin
         .from('activity_logs')
@@ -28,7 +28,6 @@ export default defineEventHandler(async (event: any) => {
                 email
             )
         `, { count: 'exact' })
-        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
 
     if (module && module !== 'all') {
