@@ -37,6 +37,9 @@ interface StockMovement {
     createdAt: string
 }
 
+const route = useRoute()
+const slug = route.params.slug as string
+
 const { data: prescriptionsData } = await useFetch<Prescription[]>('/api/pharmacy/prescriptions')
 const { data: stocksData } = await useFetch<StockItem[]>('/api/pharmacy/stocks')
 const { data: movementsData } = await useFetch<StockMovement[]>('/api/pharmacy/stock-movements')
@@ -66,7 +69,7 @@ const statCards = computed(() => [
         title: 'Incoming Prescriptions',
         value: summary.value.incomingCount,
         caption: 'Waiting for verification',
-        to: '/pharmacy/prescriptions',
+        to: `/${slug}/pharmacy/prescriptions`,
         icon: 'mdi-prescription',
         color: 'primary',
     },
@@ -74,7 +77,7 @@ const statCards = computed(() => [
         title: 'Verified',
         value: summary.value.verifiedCount,
         caption: 'Ready for dispensing',
-        to: '/pharmacy/prescriptions',
+        to: `/${slug}/pharmacy/prescriptions`,
         icon: 'mdi-check-decagram-outline',
         color: 'success',
     },
@@ -82,7 +85,7 @@ const statCards = computed(() => [
         title: 'Dispensed',
         value: summary.value.dispensedCount,
         caption: 'Medicines already handed over',
-        to: '/pharmacy/prescriptions',
+        to: `/${slug}/pharmacy/prescriptions`,
         icon: 'mdi-medical-bag',
         color: 'info',
     },
@@ -90,7 +93,7 @@ const statCards = computed(() => [
         title: 'Low Stock',
         value: summary.value.lowStockCount,
         caption: 'Items need replenishment',
-        to: '/pharmacy/stock',
+        to: `/${slug}/pharmacy/stock`,
         icon: 'mdi-alert-outline',
         color: 'error',
     },
@@ -98,7 +101,7 @@ const statCards = computed(() => [
         title: 'Incoming Stock',
         value: summary.value.incomingMovementCount,
         caption: 'Purchase or transfer in',
-        to: '/pharmacy/stock-movements',
+        to: `/${slug}/pharmacy/stock-movements`,
         icon: 'mdi-arrow-down-circle-outline',
         color: 'secondary',
     },
@@ -106,7 +109,7 @@ const statCards = computed(() => [
         title: 'Outgoing Stock',
         value: summary.value.outgoingMovementCount,
         caption: 'Dispense or transfer out',
-        to: '/pharmacy/stock-movements',
+        to: `/${slug}/pharmacy/stock-movements`,
         icon: 'mdi-arrow-up-circle-outline',
         color: 'warning',
     },
@@ -144,8 +147,9 @@ function formatDateTime(value: string) {
                 </p>
             </div>
             <div class="d-flex ga-3 flex-wrap">
-                <v-btn color="primary" variant="flat" to="/pharmacy/prescriptions">Review prescriptions</v-btn>
-                <v-btn color="secondary" variant="tonal" to="/pharmacy/stock">Check stock</v-btn>
+                <v-btn color="primary" variant="flat" :to="`/${slug}/pharmacy/prescriptions`">Review
+                    prescriptions</v-btn>
+                <v-btn color="secondary" variant="tonal" :to="`/${slug}/pharmacy/stock`">Check stock</v-btn>
             </div>
         </div>
     </v-card-text>

@@ -13,7 +13,7 @@ export interface menu {
     title?: string
     icon?: object
     to?: string
-    divider?: boolean   
+    divider?: boolean
     chip?: string
     chipColor?: string
     chipVariant?: string
@@ -24,19 +24,20 @@ export interface menu {
     subCaption?: string
 }
 
-const pharmacySidebarItem: menu[] = [
-    { header: 'Dashboard' },
-    { title: 'Dashboard', icon: AppstoreOutlined, to: '/pharmacy/dashboard' },
+export function pharmacySidebarItem(slug: string): menu[] {
+    const base = `/${slug}/pharmacy`
+    return [
+        { header: 'Dashboard' },
+        { title: 'Dashboard', icon: AppstoreOutlined, to: `${base}/dashboard` },
 
-    { header: 'Operations' },
-    { title: 'Incoming Prescriptions', icon: FileTextOutlined, to: '/pharmacy/prescriptions' },
-    { title: 'Verification', icon: CheckCircleOutlined, to: '/pharmacy/verification' },
-    { title: 'Dispensing', icon: MedicineBoxOutlined, to: '/pharmacy/dispensing' },
+        { header: 'Operations' },
+        { title: 'Incoming Prescriptions', icon: FileTextOutlined, to: `${base}/prescriptions` },
+        { title: 'Verification', icon: CheckCircleOutlined, to: `${base}/verification` },
+        { title: 'Dispensing', icon: MedicineBoxOutlined, to: `${base}/dispensing` },
 
-    { header: 'Inventory' },
-    { title: 'Stock', icon: InboxOutlined, to: '/pharmacy/stock' },
-    { title: 'Incoming Stock', icon: DownloadOutlined, to: '/pharmacy/stock-in' },
-    { title: 'Outgoing Stock', icon: UploadOutlined, to: '/pharmacy/stock-out' },
-]
-
-export default pharmacySidebarItem
+        { header: 'Inventory' },
+        { title: 'Stock', icon: InboxOutlined, to: `${base}/stock` },
+        { title: 'Incoming Stock', icon: DownloadOutlined, to: `${base}/stock-in` },
+        { title: 'Outgoing Stock', icon: UploadOutlined, to: `${base}/stock-out` },
+    ]
+}
