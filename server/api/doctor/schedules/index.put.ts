@@ -1,6 +1,7 @@
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: any) => {
   const {
     id,
     day_of_week,
@@ -23,24 +24,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const admin = supabaseAdmin()
-  const supabase = serverSupabase(event)
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw createError({
-      statusCode: 401,
-      message: 'Unauthorized',
-    })
-  }
+  const { admin, tenantId, user } = await getTenantContext(event)
 
   const { data: before, error: beforeError } = await admin
     .from('doctor_schedules')
     .select('*')
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single()
 
   if (beforeError) {
@@ -67,6 +57,7 @@ export default defineEventHandler(async (event) => {
       is_active: is_active ?? true,
     })
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .select()
     .single()
 

@@ -1,24 +1,25 @@
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: any) => {
   const { id } = await readBody(event)
 
   if (!id) throw createError({ statusCode: 400, message: 'schedule ID is required' })
 
-  const admin = supabaseAdmin()
-  const supabase = serverSupabase(event)
-  const { data: { user } } = await supabase.auth.getUser()
+  const { admin, tenantId, user } = await getTenantContext(event)
 
   const { data: before } = await admin
     .from('doctor_schedules')
     .select('*')
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single()
 
   const { error } = await admin
     .from('doctor_schedules')
     .delete()
     .eq('id', id)
+    .eq('tenant_id', tenantId)
 
   if (error) throw createError({ statusCode: 400, message: error.message })
 

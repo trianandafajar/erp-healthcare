@@ -1,5 +1,7 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId } = await getTenantContext(event)
 
     const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -20,6 +22,7 @@ export default defineEventHandler(async (event) => {
         )
     `)
         .eq('is_active', true)
+        .eq('tenant_id', tenantId)
         .order('day_of_week')
         .order('start_time')
 
@@ -31,6 +34,7 @@ export default defineEventHandler(async (event) => {
         .from('appointments')
         .select('doctor_id, appointment_date')
         .in('status', ['waiting', 'in_progress'])
+        .eq('tenant_id', tenantId)
         .gte('appointment_date', today)
 
     const bookedMap: Record<string, number> = {}

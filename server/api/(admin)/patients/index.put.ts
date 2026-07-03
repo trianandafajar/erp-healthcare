@@ -1,22 +1,24 @@
-export default defineEventHandler(async (event) => {
+import { getTenantContext } from '~~/server/utils/getTenantContext'
+
+export default defineEventHandler(async (event: any) => {
   const { id, full_name, date_of_birth, gender, phone, address, blood_type } = await readBody(event)
 
   if (!id) throw createError({ statusCode: 400, message: 'Patient ID is required' })
 
-  const admin = supabaseAdmin()
-  const supabase = serverSupabase(event)
-  const { data: { user } } = await supabase.auth.getUser()
+  const { admin, tenantId, user } = await getTenantContext(event)
 
   const { data: before } = await admin
     .from('patients')
     .select('*')
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single()
 
   const { error } = await admin
     .from('patients')
     .update({ full_name, date_of_birth, gender, phone, address, blood_type })
     .eq('id', id)
+    .eq('tenant_id', tenantId)
 
   if (error) throw createError({ statusCode: 400, message: error.message })
 

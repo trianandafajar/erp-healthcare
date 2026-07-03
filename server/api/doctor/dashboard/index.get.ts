@@ -1,5 +1,7 @@
-export default defineEventHandler(async (event) => {
-    const supabase = await supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+    const { admin: supabase, tenantId } = await getTenantContext(event)
 
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
@@ -22,29 +24,34 @@ export default defineEventHandler(async (event) => {
         supabase
             .from('appointments')
             .select('*', { count: 'exact', head: true })
-            .eq('appointment_date', todayStr),
+            .eq('appointment_date', todayStr)
+            .eq('tenant_id', tenantId),
 
         supabase
             .from('appointments')
             .select('*', { count: 'exact', head: true })
             .eq('appointment_date', todayStr)
-            .eq('status', 'waiting'),
+            .eq('status', 'waiting')
+            .eq('tenant_id', tenantId),
 
         supabase
             .from('appointments')
             .select('*', { count: 'exact', head: true })
             .eq('appointment_date', todayStr)
-            .eq('status', 'in_progress'),
+            .eq('status', 'in_progress')
+            .eq('tenant_id', tenantId),
 
         supabase
             .from('appointments')
             .select('*', { count: 'exact', head: true })
             .eq('appointment_date', todayStr)
-            .eq('status', 'done'),
+            .eq('status', 'done')
+            .eq('tenant_id', tenantId),
 
         supabase
             .from('prescriptions')
             .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', tenantId)
     ])
 
     // =====================================================
@@ -54,6 +61,7 @@ export default defineEventHandler(async (event) => {
     const { data: trendAppointments } = await supabase
         .from('appointments')
         .select('appointment_date')
+        .eq('tenant_id', tenantId)
         .gte('appointment_date', sevenDaysAgoStr)
         .order('appointment_date')
 
@@ -89,6 +97,7 @@ export default defineEventHandler(async (event) => {
         .from('appointments')
         .select('appointment_time')
         .eq('appointment_date', todayStr)
+        .eq('tenant_id', tenantId)
 
     const hourMap: Record<string, number> = {}
 
@@ -129,6 +138,7 @@ export default defineEventHandler(async (event) => {
             )
         `)
         .eq('appointment_date', todayStr)
+        .eq('tenant_id', tenantId)
         .order('appointment_time')
         .limit(5)
 
@@ -153,6 +163,7 @@ export default defineEventHandler(async (event) => {
                 )
             )
         `)
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
         .limit(5)
 
@@ -163,6 +174,7 @@ export default defineEventHandler(async (event) => {
     const { data: medicines } = await supabase
         .from('prescriptions')
         .select('medication_name')
+        .eq('tenant_id', tenantId)
 
     const medicineMap: Record<string, number> = {}
 

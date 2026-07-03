@@ -1,6 +1,7 @@
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: any) => {
   const {
     appointment_id,
     patient_id,
@@ -29,12 +30,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const admin = supabaseAdmin()
-  const supabase = serverSupabase(event)
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser()
+  const { admin, tenantId, user } = await getTenantContext(event)
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -44,6 +40,7 @@ export default defineEventHandler(async (event) => {
     .from('doctors')
     .select('id')
     .eq('id', user.id)
+    .eq('tenant_id', tenantId)
     .single()
 
   if (doctorError || !doctor) {
@@ -56,6 +53,7 @@ export default defineEventHandler(async (event) => {
       appointment_id,
       patient_id,
       doctor_id: doctor.id,
+      tenant_id: tenantId,
 
       blood_pressure,
       temperature,
@@ -100,7 +98,8 @@ export default defineEventHandler(async (event) => {
       dosage: item.dosage,
       frequency: item.frequency,
       duration: item.duration,
-      instructions: item.instructions
+      instructions: item.instructions,
+      tenant_id: tenantId
     }))
 
     const { error: prescriptionError } = await admin
@@ -138,6 +137,7 @@ export default defineEventHandler(async (event) => {
     .from('appointments')
     .update({ status: 'done' })
     .eq('id', appointment_id)
+    .eq('tenant_id', tenantId)
 
   await admin.rpc('log_activity', {
     p_actor_id: user.id,

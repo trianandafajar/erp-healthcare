@@ -1,4 +1,6 @@
-export default defineEventHandler(async (event) => {
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
     const appointmentId = getRouterParam(event, 'id')
 
     if (!appointmentId) {
@@ -8,19 +10,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const admin = supabaseAdmin()
-    const supabase = serverSupabase(event)
-
-    const {
-        data: { user }
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-        throw createError({
-            statusCode: 401,
-            message: 'Unauthorized'
-        })
-    }
+    const { admin, tenantId, user } = await getTenantContext(event)
 
     const { data, error } = await admin
         .from('appointments')
@@ -45,6 +35,7 @@ export default defineEventHandler(async (event) => {
       )
     `)
         .eq('id', appointmentId)
+        .eq('tenant_id', tenantId)
         .single()
 
     if (error) {

@@ -1,15 +1,13 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
-    const supabase = serverSupabase(event)
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) throw createError({ statusCode: 401, message: 'Unauthorized' })
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId, user } = await getTenantContext(event)
 
     const { data: doctor, error: doctorError } = await admin
         .from('doctors')
         .select('id')
         .eq('id', user.id)
+        .eq('tenant_id', tenantId)
         .single()
 
     if (doctorError || !doctor) {
@@ -30,6 +28,7 @@ export default defineEventHandler(async (event) => {
             created_at
         `)
         .eq('doctor_id', doctor.id)
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
         .returns<any[]>()
 

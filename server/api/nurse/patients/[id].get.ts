@@ -1,17 +1,13 @@
-export default defineEventHandler(async (event) => {
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
     const id = getRouterParam(event, 'id')
 
     if (!id) {
         throw createError({ statusCode: 400, message: 'Patient ID is required' })
     }
 
-    const admin = supabaseAdmin()
-    const supabase = serverSupabase(event)
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        throw createError({ statusCode: 401, message: 'Unauthorized' })
-    }
+    const { admin, tenantId, user } = await getTenantContext(event)
 
     const { data: patient, error: patientError } = await admin
         .from('patients')
@@ -34,6 +30,7 @@ export default defineEventHandler(async (event) => {
             )
         `)
         .eq('id', id)
+        .eq('tenant_id', tenantId)
         .single()
 
     if (patientError || !patient) {
@@ -67,6 +64,7 @@ export default defineEventHandler(async (event) => {
             )
         `)
         .eq('patient_id', id)
+        .eq('tenant_id', tenantId)
         .order('appointment_date', { ascending: false })
 
     const { data: medicalRecords } = await admin
@@ -94,6 +92,7 @@ export default defineEventHandler(async (event) => {
             )
         `)
         .eq('patient_id', id)
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
 
     const { data: vitals } = await admin
@@ -137,6 +136,7 @@ export default defineEventHandler(async (event) => {
             )
         `)
         .eq('patient_id', id)
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
 
     const { data: billing } = await admin
@@ -154,6 +154,7 @@ export default defineEventHandler(async (event) => {
             created_at
         `)
         .eq('patient_id', id)
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
 
     const { data: referrals } = await admin
@@ -177,6 +178,7 @@ export default defineEventHandler(async (event) => {
             )
         `)
         .eq('patient_id', id)
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
 
     const totalBilling = (billing ?? []).reduce((sum, b) => sum + Number(b.amount ?? 0), 0)

@@ -1,5 +1,7 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId } = await getTenantContext(event)
 
     const { year } = getQuery(event)
     const targetYear = year ? parseInt(year as string) : new Date().getFullYear()
@@ -10,6 +12,7 @@ export default defineEventHandler(async (event) => {
     const { data, error } = await admin
         .from('appointments')
         .select('appointment_date')
+        .eq('tenant_id', tenantId)
         .gte('appointment_date', startDate)
         .lte('appointment_date', endDate)
 

@@ -1,5 +1,7 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId } = await getTenantContext(event)
     const patientId = getRouterParam(event, 'id')
 
     if (!patientId) {
@@ -29,6 +31,7 @@ export default defineEventHandler(async (event) => {
                 )
             `)
             .eq('patient_id', patientId)
+            .eq('tenant_id', tenantId)
             .returns<any[]>(),
 
         admin
@@ -44,6 +47,7 @@ export default defineEventHandler(async (event) => {
                 prescriptions ( id, medication_name )
             `)
             .eq('patient_id', patientId)
+            .eq('tenant_id', tenantId)
             .returns<any[]>(),
 
         admin
@@ -57,6 +61,7 @@ export default defineEventHandler(async (event) => {
                 departments:to_department_id ( name )
             `)
             .eq('patient_id', patientId)
+            .eq('tenant_id', tenantId)
             .returns<any[]>(),
     ])
 

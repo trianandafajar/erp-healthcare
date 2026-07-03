@@ -15,14 +15,11 @@ function normalizeStatus(status: PrescriptionStatus | undefined): PrescriptionSt
     return 'Pending'
 }
 
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
-    const supabase = serverSupabase(event)
-    const id = getRouterParam(event, 'id')
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId, user } = await getTenantContext(event)
+    const id = getRouterParam(event, 'id')
 
     if (!id) {
         throw createError({
@@ -50,6 +47,7 @@ export default defineEventHandler(async (event) => {
             )
         `)
         .eq('id', id)
+        .eq('tenant_id', tenantId)
         .single()
 
     if (currentError || !current) {
@@ -107,6 +105,7 @@ export default defineEventHandler(async (event) => {
             .from('patients')
             .select('profile_id')
             .eq('id', current.patient_id)
+            .eq('tenant_id', tenantId)
             .single()
         const patientRecipients = patientRow?.profile_id ? [patientRow.profile_id as string] : []
 

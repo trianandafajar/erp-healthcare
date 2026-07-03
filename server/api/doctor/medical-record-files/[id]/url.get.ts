@@ -1,5 +1,7 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId } = await getTenantContext(event)
 
     const id = event.context.params?.id
 
@@ -7,6 +9,7 @@ export default defineEventHandler(async (event) => {
         .from('medical_record_files')
         .select('*')
         .eq('id', id)
+        .eq('tenant_id', tenantId)
         .single()
 
     if (error || !file) {

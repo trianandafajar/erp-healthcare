@@ -1,5 +1,7 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId } = await getTenantContext(event)
 
     const today = new Date().toISOString().split('T')[0]
 
@@ -21,6 +23,7 @@ export default defineEventHandler(async (event) => {
             )
         `)
         .eq('appointment_date', today)
+        .eq('tenant_id', tenantId)
         .in('status', ['waiting', 'in_progress'])
         .order('appointment_time', { ascending: true })
 

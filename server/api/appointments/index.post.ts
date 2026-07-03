@@ -1,19 +1,18 @@
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: any) => {
     const { patient_id, doctor_id, department_id, appointment_date, appointment_time, type, chief_complaint, notes } = await readBody(event)
 
     if (!patient_id || !appointment_date) {
         throw createError({ statusCode: 400, message: 'Patient and date are required' })
     }
 
-    const admin = supabaseAdmin()
-    const supabase = serverSupabase(event)
-    const { data: { user } } = await supabase.auth.getUser()
+    const { admin, tenantId, user } = await getTenantContext(event)
 
     const { data, error } = await admin
         .from('appointments')
-        .insert({ patient_id, doctor_id, department_id, appointment_date, appointment_time, type, chief_complaint, notes })
+        .insert({ patient_id, doctor_id, department_id, appointment_date, appointment_time, type, chief_complaint, notes, tenant_id: tenantId })
         .select()
         .single()
 

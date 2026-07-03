@@ -1,14 +1,7 @@
-export default defineEventHandler(async (event) => {
-  const supabase = serverSupabase(event);
-  const admin = supabaseAdmin();
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+export default defineEventHandler(async (event: any) => {
+  const { admin, tenantId, user } = await getTenantContext(event);
 
   const { data: roleData, error: roleError } = await admin
     .from("user_roles")
@@ -50,6 +43,7 @@ export default defineEventHandler(async (event) => {
             )
         `,
     )
+    .eq('tenant_id', tenantId)
     .order("created_at", { ascending: false })
     .returns<any[]>();
 

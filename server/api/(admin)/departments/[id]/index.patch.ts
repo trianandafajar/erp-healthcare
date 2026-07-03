@@ -17,6 +17,7 @@ export default defineEventHandler(async (event: any) => {
         .from('departments')
         .update(updates)
         .eq('id', departmentId)
+        .eq('tenant_id', tenantId)
         .select()
         .single()
         .returns<any>()

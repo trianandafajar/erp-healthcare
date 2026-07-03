@@ -1,4 +1,6 @@
-export default defineEventHandler(async (event) => {
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
     const {
         medical_record_id,
         patient_id,
@@ -16,7 +18,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const admin = supabaseAdmin()
+    const { admin, tenantId } = await getTenantContext(event)
 
     const today = new Date().toISOString().split('T')[0]
 
@@ -30,6 +32,7 @@ export default defineEventHandler(async (event) => {
             type: 'referral',
             status: 'waiting',
             chief_complaint: reason,
+            tenant_id: tenantId,
         })
         .select()
         .single()
@@ -49,7 +52,8 @@ export default defineEventHandler(async (event) => {
             new_appointment_id: appointment.id,
             reason,
             notes,
-            status: 'pending'
+            status: 'pending',
+            tenant_id: tenantId,
         })
         .select()
         .single()

@@ -1,15 +1,7 @@
-export default defineEventHandler(async (event) => {
-    const admin = supabaseAdmin()
+import { getTenantContext } from "~~/server/utils/getTenantContext"
 
-    const supabase = serverSupabase(event)
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        throw createError({
-            statusCode: 401,
-            message: 'Unauthorized'
-        })
-    }
+export default defineEventHandler(async (event: any) => {
+    const { admin, tenantId, user } = await getTenantContext(event)
 
     const form = await readMultipartFormData(event)
 
@@ -71,7 +63,8 @@ export default defineEventHandler(async (event) => {
             file_type: file.type,
             file_size: file.data.length,
             category,
-            uploaded_by: user.id
+            uploaded_by: user.id,
+            tenant_id: tenantId
         })
         .select()
         .single()

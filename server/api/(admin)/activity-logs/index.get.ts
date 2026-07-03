@@ -1,4 +1,6 @@
-export default defineEventHandler(async (event) => {
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
+export default defineEventHandler(async (event: any) => {
     const query = getQuery(event)
 
     const module = query.module as string | undefined
@@ -10,7 +12,7 @@ export default defineEventHandler(async (event) => {
     const page = Number(query.page ?? 1)
     const limit = Number(query.limit ?? 20)
 
-    const admin = supabaseAdmin()
+    const { admin, tenantId } = await getTenantContext(event)
 
     let q = admin
         .from('activity_logs')
@@ -26,6 +28,7 @@ export default defineEventHandler(async (event) => {
                 email
             )
         `, { count: 'exact' })
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
 
     if (module && module !== 'all') {
