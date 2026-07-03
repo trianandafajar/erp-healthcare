@@ -1,6 +1,5 @@
 import {
     AppstoreOutlined,
-    UserOutlined,
     HistoryOutlined,
     FileSearchOutlined,
     MedicineBoxOutlined,
@@ -26,59 +25,60 @@ export interface menu {
     subCaption?: string;
 }
 
-const patientSidebarItem: menu[] = [
-    {
-        header: 'Dashboard'
-    },
-    {
-        title: 'Dashboard',
-        icon: AppstoreOutlined,
-        to: '/patient/dashboard'
-    },
-    {
-        header: 'My Health'
-    },
-    {
-        title: 'Visit History',
-        icon: HistoryOutlined,
-        to: '/patient/visits'
-    },
-    {
-        title: 'Diagnosis History',
-        icon: FileSearchOutlined,
-        to: '/patient/diagnoses'
-    },
-    {
-        title: 'Prescription History',
-        icon: MedicineBoxOutlined,
-        to: '/patient/prescriptions'
-    },
-    {
-        title: 'Examination Results',
-        icon: FileDoneOutlined,
-        to: '/patient/examination-results'
-    },
-    {
-        header: 'Appointments'
-    },
-    {
-        title: 'Book Appointment',
-        icon: CalendarOutlined,
-        to: '/patient/book-appointment'
-    },
-    {
-        title: 'Doctor Schedules',
-        icon: ScheduleOutlined,
-        to: '/patient/doctor-schedules'
-    },
-    {
-        header: 'Billing'
-    },
-    {
-        title: 'Payments',
-        icon: CreditCardOutlined,
-        to: '/patient/payments'
-    },
-];
-
-export default patientSidebarItem;
+export function patientSidebarItem(slug: string): menu[] {
+    const base = `/${slug}/patient`;
+    return [
+        {
+            header: 'Dashboard'
+        },
+        {
+            title: 'Dashboard',
+            icon: AppstoreOutlined,
+            to: `${base}/dashboard`
+        },
+        {
+            header: 'My Health'
+        },
+        {
+            title: 'Visit History',
+            icon: HistoryOutlined,
+            to: `${base}/visits`
+        },
+        {
+            title: 'Diagnosis History',
+            icon: FileSearchOutlined,
+            to: `${base}/diagnoses`
+        },
+        {
+            title: 'Prescription History',
+            icon: MedicineBoxOutlined,
+            to: `${base}/prescriptions`
+        },
+        {
+            title: 'Examination Results',
+            icon: FileDoneOutlined,
+            to: `${base}/examination-results`
+        },
+        {
+            header: 'Appointments'
+        },
+        {
+            title: 'Book Appointment',
+            icon: CalendarOutlined,
+            to: `${base}/book-appointment`
+        },
+        {
+            title: 'Doctor Schedules',
+            icon: ScheduleOutlined,
+            to: `${base}/doctor-schedules`
+        },
+        {
+            header: 'Billing'
+        },
+        {
+            title: 'Payments',
+            icon: CreditCardOutlined,
+            to: `${base}/payments`
+        },
+    ]
+}

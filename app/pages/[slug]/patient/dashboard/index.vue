@@ -10,6 +10,9 @@ useSeoMeta({
     description: 'Patient dashboard overview',
 })
 
+const route = useRoute()
+const slug = route.params.slug as string
+
 const { profile, summary, visits, prescriptions, payments } = usePatientPortalMock()
 
 const { data: visitsData } = await useFetch<{ visits: any[] }>('/api/patient/visits')
@@ -29,7 +32,7 @@ const summaryCards = computed(() => [
         caption: 'Registered patient identity',
         color: 'primary',
         icon: 'mdi-card-account-details-outline',
-        to: '/patient/profile'
+        to: `/${slug}/patient/profile`
     },
     {
         title: 'Total Visits',
@@ -37,7 +40,7 @@ const summaryCards = computed(() => [
         caption: 'All recorded visits',
         color: 'success',
         icon: 'mdi-clipboard-pulse-outline',
-        to: '/patient/visits'
+        to: `/${slug}/patient/visits`
     },
     {
         title: 'Active Prescriptions',
@@ -45,7 +48,7 @@ const summaryCards = computed(() => [
         caption: 'Current medications to follow',
         color: 'warning',
         icon: 'mdi-pill',
-        to: '/patient/prescriptions'
+        to: `/${slug}/patient/prescriptions`
     },
     {
         title: 'Unpaid Bills',
@@ -54,7 +57,7 @@ const summaryCards = computed(() => [
         caption: 'Pending billing items',
         color: 'error',
         icon: 'mdi-cash-clock',
-        to: '/patient/payments'
+        to: `/${slug}/patient/payments`
     }
 ])
 
@@ -98,7 +101,7 @@ async function goTo(path: string) {
             <p class="text-medium-emphasis mb-0">A quick overview of your health activity, appointments, and billing.
             </p>
         </div>
-        <v-btn color="primary" prepend-icon="mdi-calendar-plus" to="/patient/book-appointment">
+        <v-btn color="primary" prepend-icon="mdi-calendar-plus" :to="`/${slug}/patient/book-appointment`">
             Book Appointment
         </v-btn>
     </div>
@@ -125,28 +128,32 @@ async function goTo(path: string) {
         <v-col cols="12" lg="7">
             <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Upcoming Appointment">
                 <div v-if="upcomingAppointment" class="px-4 py-4 patient-dashboard-panel cursor-pointer"
-                    @click="goTo('/patient/visits')">
-                    <div class="d-flex justify-space-between align-start flex-wrap ga-3">
-                        <div>
-                            <div class="text-h5">{{ upcomingAppointment.doctor }}</div>
-                            <div class="text-body-2 text-medium-emphasis">{{ upcomingAppointment.department }}
+                    @click="goTo(`/${slug}/patient/visits`)">
+                    <v-card elevation="0" border rounded="lg" class="cursor-pointer">
+                        <v-card-text>
+                            <div class="d-flex justify-space-between align-start flex-wrap ga-3">
+                                <div>
+                                    <div class="text-h5">{{ upcomingAppointment.doctor }}</div>
+                                    <div class="text-body-2 text-medium-emphasis">{{ upcomingAppointment.department }}
+                                    </div>
+                                </div>
+                                <v-chip color="primary" variant="tonal">{{ upcomingAppointment.status }}</v-chip>
                             </div>
-                        </div>
-                        <v-chip color="primary" variant="tonal">{{ upcomingAppointment.status }}</v-chip>
-                    </div>
-                    <v-divider class="my-4" />
-                    <v-row>
-                        <v-col cols="12" sm="6">
-                            <div class="text-caption text-medium-emphasis">Visit Date</div>
-                            <div class="text-body-1 font-weight-medium">{{ formatDate(upcomingAppointment.date)
-                                }}</div>
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <div class="text-caption text-medium-emphasis">Complaint</div>
-                            <div class="text-body-1 font-weight-medium">{{ upcomingAppointment.complaint }}
-                            </div>
-                        </v-col>
-                    </v-row>
+                            <v-divider class="my-4" />
+                            <v-row>
+                                <v-col cols="12" sm="6">
+                                    <div class="text-caption text-medium-emphasis">Visit Date</div>
+                                    <div class="text-body-1 font-weight-medium">{{ formatDate(upcomingAppointment.date)
+                                    }}</div>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <div class="text-caption text-medium-emphasis">Complaint</div>
+                                    <div class="text-body-1 font-weight-medium">{{ upcomingAppointment.complaint }}
+                                    </div>
+                                </v-col>
+                            </v-row>
+                        </v-card-text>
+                    </v-card>
                 </div>
                 <div v-else class="px-4 py-8 text-center text-medium-emphasis">
                     No upcoming appointment yet.
@@ -157,7 +164,8 @@ async function goTo(path: string) {
         <v-col cols="12" lg="5">
             <UiTitleCard class-name="px-0 pb-0 rounded-md" title="Recent Medical Activity">
                 <div class="px-4 py-4 d-flex flex-column ga-4">
-                    <v-card elevation="0" border rounded="lg" class="cursor-pointer" @click="goTo('/patient/visits')">
+                    <v-card elevation="0" border rounded="lg" class="cursor-pointer"
+                        @click="goTo(`/${slug}/patient/visits`)">
                         <v-card-text>
                             <div class="text-caption text-medium-emphasis">Latest Visit</div>
                             <div class="text-body-1 font-weight-medium mt-1">
@@ -169,7 +177,7 @@ async function goTo(path: string) {
                     </v-card>
 
                     <v-card elevation="0" border rounded="lg" class="cursor-pointer"
-                        @click="goTo('/patient/prescriptions')">
+                        @click="goTo(`/${slug}/patient/prescriptions`)">
                         <v-card-text>
                             <div class="text-caption text-medium-emphasis">Recent Prescription</div>
                             <div class="text-body-1 font-weight-medium mt-1">
@@ -181,7 +189,8 @@ async function goTo(path: string) {
                         </v-card-text>
                     </v-card>
 
-                    <v-card elevation="0" border rounded="lg" class="cursor-pointer" @click="goTo('/patient/payments')">
+                    <v-card elevation="0" border rounded="lg" class="cursor-pointer"
+                        @click="goTo(`/${slug}/patient/payments`)">
                         <v-card-text>
                             <div class="text-caption text-medium-emphasis">Outstanding Bills</div>
                             <div class="text-body-1 font-weight-medium mt-1">{{ pendingPayments.length }} invoice(s)
