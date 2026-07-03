@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
-import receptionistSidebarItem from './receptionistSidebarItem'
+import { receptionistSidebarItem } from './receptionistSidebarItem'
 import NavGroup from './NavGroup/NavGroup.vue';
 import NavItem from './NavItem/NavItem.vue';
 import NavCollapse from './NavCollapse/NavCollapse.vue';
 import Logo from '../logo/LogoDark.vue';
 
 const customizer = useCustomizerStore();
-const sidebarMenu = shallowRef(receptionistSidebarItem)
+const route = useRoute();
+const sidebarMenu = computed(() => {
+    const slug = route.params.slug as string;
+    if (!slug) return [];
+    return receptionistSidebarItem(slug);
+});
 </script>
 
 <template>

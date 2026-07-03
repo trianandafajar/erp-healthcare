@@ -21,6 +21,9 @@ interface AppointmentRow {
     department: { id: string; name: string } | null
 }
 
+const route = useRoute()
+const slug = route.params.slug as string
+
 const today = new Date().toISOString().slice(0, 10)
 
 const { data: appointmentsData } = await useFetch<{ appointments: AppointmentRow[] }>('/api/appointments')
@@ -49,7 +52,7 @@ const statCards = computed(() => [
         title: 'Today Registrations',
         value: summary.value.registeredToday,
         caption: 'New patients created',
-        to: '/receptionist/patients/register',
+        to: `/${slug}/receptionist/patients/register`,
         icon: 'mdi-account-plus-outline',
         color: 'primary',
     },
@@ -57,7 +60,7 @@ const statCards = computed(() => [
         title: 'Appointments',
         value: summary.value.appointmentsToday,
         caption: 'Scheduled visits today',
-        to: '/receptionist/appointments',
+        to: `/${slug}/receptionist/appointments`,
         icon: 'mdi-calendar-clock-outline',
         color: 'secondary',
     },
@@ -65,7 +68,7 @@ const statCards = computed(() => [
         title: 'Check-in',
         value: summary.value.checkedIn,
         caption: 'Patients already arrived',
-        to: '/receptionist/check-in',
+        to: `/${slug}/receptionist/check-in`,
         icon: 'mdi-clipboard-check-outline',
         color: 'info',
     },
@@ -73,7 +76,7 @@ const statCards = computed(() => [
         title: 'Active Queue',
         value: summary.value.activeQueue,
         caption: 'Waiting or in progress',
-        to: '/receptionist/queue',
+        to: `/${slug}/receptionist/queue`,
         icon: 'mdi-format-list-numbered',
         color: 'warning',
     },
@@ -81,7 +84,7 @@ const statCards = computed(() => [
         title: 'Available Doctors',
         value: summary.value.doctorsAvailable,
         caption: 'Schedules with open slots',
-        to: '/receptionist/doctor-schedules',
+        to: `/${slug}/receptionist/doctor-schedules`,
         icon: 'mdi-doctor',
         color: 'primary',
     },
@@ -89,7 +92,7 @@ const statCards = computed(() => [
         title: 'Completed',
         value: summary.value.completed,
         caption: 'Completed visits today',
-        to: '/receptionist/appointments',
+        to: `/${slug}/receptionist/appointments`,
         icon: 'mdi-check-circle-outline',
         color: 'success',
     },
@@ -130,8 +133,8 @@ const typeLabels: Record<string, string> = {
                 </p>
             </div>
             <div class="d-flex ga-3 flex-wrap">
-                <v-btn color="primary" variant="flat" to="/receptionist/check-in">Check-in patient</v-btn>
-                <v-btn color="secondary" variant="tonal" to="/receptionist/queue/print">Print queue</v-btn>
+                <v-btn color="primary" variant="flat" :to="`/${slug}/receptionist/check-in`">Check-in patient</v-btn>
+                <v-btn color="secondary" variant="tonal" :to="`/${slug}/receptionist/queue/print`">Print queue</v-btn>
             </div>
         </div>
     </v-card-text>

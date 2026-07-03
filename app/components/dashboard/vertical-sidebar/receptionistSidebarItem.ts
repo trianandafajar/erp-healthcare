@@ -25,62 +25,63 @@ export interface menu {
     subCaption?: string
 }
 
-const receptionistSidebarItem: menu[] = [
-    {
-        header: 'Dashboard',
-    },
-    {
-        title: 'Dashboard',
-        icon: AppstoreOutlined,
-        to: '/receptionist/dashboard',
-    },
-    {
-        header: 'Patient Services',
-    },
-    {
-        title: 'Patient Registration',
-        icon: UserAddOutlined,
-        to: '/receptionist/patients/register',
-    },
-    {
-        title: 'Appointment',
-        icon: CalendarOutlined,
-        to: '/receptionist/appointments',
-    },
-    {
-        title: 'Patient Check-in',
-        icon: FileDoneOutlined,
-        to: '/receptionist/check-in',
-    },
-    {
-        header: 'Queue',
-    },
-    {
-        title: 'Patient Queue',
-        icon: TeamOutlined,
-        to: '/receptionist/queue',
-    },
-    {
-        title: 'Print Queue Number',
-        icon: FileTextOutlined,
-        to: '/receptionist/queue/print',
-    },
-    {
-        header: 'Billing',
-    },
-    {
-        title: 'Billing',
-        icon: CreditCardOutlined,
-        to: '/receptionist/billing',
-    },
-    {
-        header: 'Doctor Schedule',
-    },
-    {
-        title: 'Doctor Schedules',
-        icon: ScheduleOutlined,
-        to: '/receptionist/doctor-schedules',
-    },
-]
-
-export default receptionistSidebarItem
+export function receptionistSidebarItem(slug: string): menu[] {
+    const base = `/${slug}/receptionist`
+    return [
+        {
+            header: 'Dashboard',
+        },
+        {
+            title: 'Dashboard',
+            icon: AppstoreOutlined,
+            to: `${base}/dashboard`,
+        },
+        {
+            header: 'Patient Services',
+        },
+        {
+            title: 'Patient Registration',
+            icon: UserAddOutlined,
+            to: `${base}/patients/register`,
+        },
+        {
+            title: 'Appointment',
+            icon: CalendarOutlined,
+            to: `${base}/appointments`,
+        },
+        {
+            title: 'Patient Check-in',
+            icon: FileDoneOutlined,
+            to: `${base}/check-in`,
+        },
+        {
+            header: 'Queue',
+        },
+        {
+            title: 'Patient Queue',
+            icon: TeamOutlined,
+            to: `${base}/queue`,
+        },
+        {
+            title: 'Print Queue Number',
+            icon: FileTextOutlined,
+            to: `${base}/queue/print`,
+        },
+        {
+            header: 'Billing',
+        },
+        {
+            title: 'Billing',
+            icon: CreditCardOutlined,
+            to: `${base}/billing`,
+        },
+        {
+            header: 'Doctor Schedule',
+        },
+        {
+            title: 'Doctor Schedules',
+            icon: ScheduleOutlined,
+            to: `${base}/doctor-schedules`,
+        },
+    ]
+}
