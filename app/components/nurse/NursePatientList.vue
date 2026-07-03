@@ -18,6 +18,8 @@ type NursePatient = {
     updated_at: string
 }
 
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
 const search = ref('')
 const genderFilter = ref('all')
 const currentPage = ref(1)
@@ -88,7 +90,7 @@ function onGenderChange() {
 }
 
 function openView(patient: NursePatient) {
-    navigateTo(`/nurse/patients/${patient.id}`)
+    navigateTo(`/${slug.value}/nurse/patients/${patient.id}`)
 }
 </script>
 
@@ -197,14 +199,8 @@ function openView(patient: NursePatient) {
             <span class="text-caption text-medium-emphasis">
                 Showing {{ paginatedPatients.length }} of {{ filteredPatients.length }} patients
             </span>
-            <v-pagination 
-                v-if="totalPages > 1" 
-                v-model="currentPage" 
-                :length="totalPages" 
-                density="compact"
-                :total-visible="6"
-                size="small"
-            />
+            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
+                :total-visible="6" size="small" />
         </div>
     </v-card>
 </template>

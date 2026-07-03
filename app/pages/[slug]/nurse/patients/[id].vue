@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const slug = route.params.slug as string
 const id = route.params.id as string
 
 const { data, pending } = await useFetch(`/api/nurse/patients/${id}`)
@@ -112,7 +113,7 @@ function referralStatusColor(status: string) {
             <v-card-item class="pa-5">
                 <div class="d-flex align-center justify-space-between flex-wrap ga-4">
                     <div class="d-flex align-center ga-4">
-                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo('/nurse/patients')" />
+                        <v-btn icon="mdi-arrow-left" variant="text" @click="navigateTo(`/${slug}/nurse/patients`)" />
                         <v-avatar size="56" color="primary" variant="tonal">
                             <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" cover />
                             <span v-else class="text-h6 font-weight-bold">

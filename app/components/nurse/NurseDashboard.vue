@@ -69,6 +69,9 @@ type UpdateItem = {
     time: string
 }
 
+const route = useRoute()
+const slug = route.params.slug as string
+
 const { data: patientData, pending: patientPending, refresh: refreshPatients } = useLazyFetch<{ patients: NursePatient[] }>('/api/nurse/patients')
 const { data: vitalData, pending: vitalPending, refresh: refreshVitals } = useLazyFetch<{ vitals: NurseVitalRecord[] }>('/api/nurse/vitals')
 const { data: noteData, pending: notePending, refresh: refreshNotes } = useLazyFetch<{ notes: NurseCareNote[] }>('/api/nurse/care-notes')
@@ -162,56 +165,56 @@ const summaryCards = computed<DashboardSummaryCard[]>(() => [
         title: 'Patients',
         value: patientCount.value.toString(),
         caption: 'Active patients under care',
-        to: '/nurse/patients',
+        to: `/${slug}/nurse/patients`,
         color: 'primary',
     },
     {
         title: 'Vital Signs',
         value: vitalCount.value.toString(),
         caption: 'Live vital sign records',
-        to: '/nurse/vitals',
+        to: `/${slug}/nurse/vitals`,
         color: 'error',
     },
     {
         title: 'Care Notes',
         value: noteCount.value.toString(),
         caption: 'Progress notes and observations',
-        to: '/nurse/care-notes',
+        to: `/${slug}/nurse/care-notes`,
         color: 'secondary',
     },
     {
         title: 'Procedure Schedule',
         value: procedureCount.value.toString(),
         caption: 'Planned and ongoing procedures',
-        to: '/nurse/procedures',
+        to: `/${slug}/nurse/procedures`,
         color: 'info',
     },
     {
         title: 'Patient Monitoring',
         value: statusSummary.value.Critical.toString(),
         caption: `${statusSummary.value.Watch} need closer observation`,
-        to: '/nurse/monitoring',
+        to: `/${slug}/nurse/monitoring`,
         color: 'warning',
     },
     {
         title: 'Stable Patients',
         value: statusSummary.value.Stable.toString(),
         caption: 'Patients currently stable',
-        to: '/nurse/monitoring',
+        to: `/${slug}/nurse/monitoring`,
         color: 'success',
     },
     {
         title: 'Observation',
         value: statusSummary.value.Watch.toString(),
         caption: 'Patients needing close observation',
-        to: '/nurse/monitoring',
+        to: `/${slug}/nurse/monitoring`,
         color: 'warning',
     },
     {
         title: 'Critical',
         value: statusSummary.value.Critical.toString(),
         caption: 'Patients needing immediate attention',
-        to: '/nurse/monitoring',
+        to: `/${slug}/nurse/monitoring`,
         color: 'error',
     },
 ])
@@ -278,19 +281,19 @@ function subscribeRealtime() {
 
     realtimeChannel = supabase.channel('nurse-dashboard-live')
 
-    ;['patients', 'nurse_vital_signs', 'nurse_care_notes', 'nurse_procedures'].forEach((table) => {
-        ;['INSERT', 'UPDATE', 'DELETE'].forEach((event) => {
-            realtimeChannel?.on(
-                'postgres_changes',
-                {
-                    event,
-                    schema: 'public',
-                    table,
-                },
-                scheduleRefresh,
-            )
+        ;['patients', 'nurse_vital_signs', 'nurse_care_notes', 'nurse_procedures'].forEach((table) => {
+            ;['INSERT', 'UPDATE', 'DELETE'].forEach((event) => {
+                realtimeChannel?.on(
+                    'postgres_changes',
+                    {
+                        event,
+                        schema: 'public',
+                        table,
+                    },
+                    scheduleRefresh,
+                )
+            })
         })
-    })
 
     realtimeChannel?.subscribe((status) => {
         if (status === 'SUBSCRIBED') {

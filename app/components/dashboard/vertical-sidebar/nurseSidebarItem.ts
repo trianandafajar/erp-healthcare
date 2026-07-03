@@ -23,43 +23,44 @@ export interface menu {
     subCaption?: string
 }
 
-const nurseSidebarItem: menu[] = [
-    {
-        header: 'Dashboard',
-    },
-    {
-        title: 'Dashboard',
-        icon: AppstoreOutlined,
-        to: '/nurse/dashboard',
-    },
-    {
-        title: 'Monitoring',
-        icon: SolutionOutlined,
-        to: '/nurse/monitoring',
-    },
-    {
-        header: 'Nurse Care',
-    },
-    {
-        title: 'Patients',
-        icon: TeamOutlined,
-        to: '/nurse/patients',
-    },
-    {
-        title: 'Vital Input',
-        icon: HeartOutlined,
-        to: '/nurse/vitals',
-    },
-    {
-        title: 'Care Notes',
-        icon: FormOutlined,
-        to: '/nurse/care-notes',
-    },
-    {
-        title: 'Procedure Schedule',
-        icon: CalendarOutlined,
-        to: '/nurse/procedures',
-    },
-]
-
-export default nurseSidebarItem
+export function nurseSidebarItem(slug: string): menu[] {
+    const base = `/${slug}`
+    return [
+        {
+            header: 'Dashboard',
+        },
+        {
+            title: 'Dashboard',
+            icon: AppstoreOutlined,
+            to: `${base}/nurse/dashboard`,
+        },
+        {
+            title: 'Monitoring',
+            icon: SolutionOutlined,
+            to: `${base}/nurse/monitoring`,
+        },
+        {
+            header: 'Nurse Care',
+        },
+        {
+            title: 'Patients',
+            icon: TeamOutlined,
+            to: `${base}/nurse/patients`,
+        },
+        {
+            title: 'Vital Input',
+            icon: HeartOutlined,
+            to: `${base}/nurse/vitals`,
+        },
+        {
+            title: 'Care Notes',
+            icon: FormOutlined,
+            to: `${base}/nurse/care-notes`,
+        },
+        {
+            title: 'Procedure Schedule',
+            icon: CalendarOutlined,
+            to: `${base}/nurse/procedures`,
+        },
+    ]
+}
