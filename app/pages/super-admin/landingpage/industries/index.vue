@@ -2,7 +2,7 @@
 import TableIndustries from '~/components/dashboard/landingpage/TableIndustries.vue'
 
 definePageMeta({
-    layout: 'default',
+    layout: 'superadmin',
     middleware: ['auth', 'permission'],
     permissions: ['landingpage.industries.view'],
 })

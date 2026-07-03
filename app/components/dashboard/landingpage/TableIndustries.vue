@@ -88,10 +88,6 @@ function openDelete(industry: Industry) {
     dialog.value = true
 }
 
-function openPreview(slug: string) {
-    window.open('/industries/' + slug, '_blank')
-}
-
 function closeModal() {
     dialog.value = false
     selectedIndustry.value = null
@@ -227,15 +223,12 @@ async function handleSubmit(payload: any) {
                             icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
                             density="comfortable" title="Edit" />
                         <v-btn v-if="can('landingpage.industries.edit')"
-                            @click="navigateTo('/landingpage/industries/' + industry.id + '/content')"
+                            @click="navigateTo('/super-admin/landingpage/industries/' + industry.id + '/content')"
                             icon="mdi-file-document-edit-outline" variant="text" size="small" color="info"
                             density="comfortable" title="Edit Content" />
-                        <v-btn v-if="industry.slug" @click="openPreview(industry.slug)"
-                            icon="mdi-eye-outline" variant="text" size="small" color="primary"
-                            density="comfortable" title="Preview" />
                         <v-btn v-if="can('landingpage.industries.delete')" @click="openDelete(industry)"
-                            icon="mdi-delete-outline" variant="text" size="small" color="error"
-                            density="comfortable" title="Delete" />
+                            icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
+                            title="Delete" />
                     </td>
                 </tr>
             </tbody>

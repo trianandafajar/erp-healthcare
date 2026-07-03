@@ -50,9 +50,6 @@ export function getSidebarItems(slug: string): menu[] {
     { title: 'Roles', icon: SafetyCertificateOutlined, to: `${base}/roles` },
     { title: 'Permissions', icon: KeyOutlined, to: `${base}/permissions` },
 
-    { header: 'Landing Page' },
-    { title: 'Industries', icon: BuildOutlined, to: `${base}/landingpage/industries` },
-
     { header: 'Log' },
     { title: 'Log Activity', icon: HistoryOutlined, to: `${base}/log-activity` },
   ]

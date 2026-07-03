@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import ContentEditor from '~/components/dashboard/landingpage/ContentEditor.vue'
 
 definePageMeta({
-    layout: 'default',
+    layout: 'superadmin',
     middleware: ['auth', 'permission'],
     permissions: ['landingpage.industries.edit'],
 })
@@ -47,7 +47,7 @@ async function handleSave(content: any) {
             body: { content }
         })
         notify('Content saved successfully')
-        await navigateTo('/landingpage/industries')
+        await navigateTo('/super-admin/landingpage/industries')
     } catch (e: any) {
         notify(e?.data?.message ?? 'Something went wrong', 'error')
     } finally {
@@ -56,7 +56,7 @@ async function handleSave(content: any) {
 }
 
 function handleCancel() {
-    navigateTo('/landingpage/industries')
+    navigateTo('/super-admin/landingpage/industries')
 }
 </script>
 
