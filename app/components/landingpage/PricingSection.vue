@@ -32,7 +32,7 @@
             'relative rounded-2xl border p-6 lg:p-8 flex flex-col transition-all duration-300 hover:-translate-y-1',
             plan.is_recommended
               ? 'border-[#176D37] bg-white shadow-xl shadow-[#176D37]/10 ring-2 ring-[#176D37]'
-              : 'border-[#176D37] bg-white hover:shadow-lg hover:border-gray-300'
+              : 'border-[#176D37] bg-white hover:shadow-lg ring-1 ring-[#176D37] hover:border-gray-300'
           ]"
         >
           <div v-if="plan.is_recommended" class="absolute -top-3.5 left-1/2 -translate-x-1/2">
