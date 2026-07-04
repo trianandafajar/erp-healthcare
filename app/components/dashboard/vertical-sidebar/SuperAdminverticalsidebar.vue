@@ -7,6 +7,7 @@ import {
   BuildOutlined,
   CreditCardOutlined,
   CommentOutlined,
+  DollarOutlined,
   HistoryOutlined,
   PictureOutlined,
 } from '@ant-design/icons-vue';
@@ -44,6 +45,7 @@ const sidebarMenu = shallowRef<MenuItem[]>([
    { title: 'Industries', icon: BuildOutlined, to: `/super-admin/landingpage/industries` },
    { title: 'Sponsors', icon: PictureOutlined, to: `/super-admin/landingpage/logos` },
    { title: 'Testimonials', icon: CommentOutlined, to: `/super-admin/landingpage/testimonials` },
+   { title: 'Pricing', icon: DollarOutlined, to: `/super-admin/landingpage/pricing` },
 
    { header: 'System' },
    { title: 'Activity Log', icon: HistoryOutlined, to: `/super-admin/activity-log` },

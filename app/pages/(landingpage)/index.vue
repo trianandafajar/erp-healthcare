@@ -7,6 +7,7 @@
   <IndustryCards />
   <Capabilities />
   <Testimonials />
+  <PricingSection />
   <Cta />
   <Footer />
 </template>
@@ -22,6 +23,7 @@ import FeaturesTabs from "~/components/landingpage/FeaturesTabs.vue"
 import IndustryCards from "~/components/landingpage/IndustryCards.vue"
 import Capabilities from "~/components/landingpage/Capabilities.vue"
 import Testimonials from "~/components/landingpage/Testimonials.vue"
+import PricingSection from "~/components/landingpage/PricingSection.vue"
 import Cta from "~/components/landingpage/Cta.vue"
 
 const { data: homePage } = await useAsyncData('home', () =>

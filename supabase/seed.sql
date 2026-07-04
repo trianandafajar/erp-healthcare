@@ -181,7 +181,11 @@
     ('landingpage.testimonials.view', 'View Testimonials', 'landingpage', 'admin'),
     ('landingpage.testimonials.create', 'Create Testimonials', 'landingpage', 'admin'),
     ('landingpage.testimonials.edit', 'Edit Testimonials', 'landingpage', 'admin'),
-    ('landingpage.testimonials.delete', 'Delete Testimonials', 'landingpage', 'admin')
+    ('landingpage.testimonials.delete', 'Delete Testimonials', 'landingpage', 'admin'),
+    ('landingpage.pricing.view', 'View Pricing Plans', 'landingpage', 'admin'),
+    ('landingpage.pricing.create', 'Create Pricing Plans', 'landingpage', 'admin'),
+    ('landingpage.pricing.edit', 'Edit Pricing Plans', 'landingpage', 'admin'),
+    ('landingpage.pricing.delete', 'Delete Pricing Plans', 'landingpage', 'admin')
 
     ON CONFLICT (name) DO NOTHING;
 
