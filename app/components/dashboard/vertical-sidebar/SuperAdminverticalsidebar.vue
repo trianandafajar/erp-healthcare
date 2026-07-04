@@ -4,6 +4,7 @@ import { useCustomizerStore } from '../../../stores/customizer';
 import {
   AppstoreOutlined,
   TeamOutlined,
+  UserOutlined,
   BuildOutlined,
   CreditCardOutlined,
   CommentOutlined,
@@ -39,6 +40,7 @@ const sidebarMenu = shallowRef<MenuItem[]>([
 
   { header: 'Management' },
   { title: 'Tenants', icon: TeamOutlined, to: `/super-admin/tenants` },
+  { title: 'Users', icon: UserOutlined, to: `/super-admin/users-management` },
   { title: 'Subscriptions', icon: CreditCardOutlined, to: `/super-admin/subscriptions` },
 
    { header: 'Landingpage' },

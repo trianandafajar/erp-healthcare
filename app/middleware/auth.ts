@@ -12,6 +12,7 @@ function getAllowedRolesForPath(path: string): string[] | null {
     if (path.startsWith('/pharmacy/')) return ['pharmacy']
     if (path.startsWith('/receptionist/')) return ['receptionist']
     if (path.startsWith('/patient/')) return ['patient']
+    if (path.startsWith('/super-admin/')) return ['superadmin']
     return null
 }
 

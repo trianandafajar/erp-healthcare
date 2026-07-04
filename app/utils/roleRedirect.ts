@@ -1,5 +1,6 @@
 export const DASHBOARD_BY_ROLE: Record<string, string> = {
     admin: '/dashboard',
+    superadmin: '/super-admin/dashboard',
     doctor: '/doctor/dashboard',
     specialist: '/doctor/dashboard',
     pharmacy: '/pharmacy/dashboard',
