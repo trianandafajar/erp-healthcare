@@ -30,7 +30,7 @@ const stats = computed(() => [
     color: 'success',
     icon: null,
     text: 'Across all tenants',
-    to: '/super-admin/users',
+    to: '/super-admin/users-management',
   },
   {
     name: 'Active Subscriptions',

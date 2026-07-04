@@ -140,15 +140,15 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
 
   <UiTitleCard class-name="px-0 pb-0 rounded-md">
     <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
-      <div class="d-flex align-center ga-3">
-        <v-text-field v-model="search" placeholder="Search by name, slug, or owner..." prepend-inner-icon="mdi-magnify"
-          variant="outlined" density="compact" hide-details clearable style="max-width: 320px"
-          @update:model-value="onSearch" />
+      <v-text-field v-model="search" placeholder="Search by name, slug, or owner..." prepend-inner-icon="mdi-magnify"
+        variant="outlined" density="compact" hide-details clearable class="flex-shrink-0" style="max-width: 280px"
+        @update:model-value="onSearch" />
+
+      <div class="d-flex align-center ga-2">
         <v-select v-model="planFilter" :items="planOptions" variant="outlined" density="compact" hide-details
-          style="max-width: 160px" @update:model-value="onSearch" />
+          class="flex-shrink-0" style="width: 160px" @update:model-value="onSearch" />
       </div>
     </div>
-
     <v-divider />
 
     <v-table class="bordered-table" hover density="comfortable">
