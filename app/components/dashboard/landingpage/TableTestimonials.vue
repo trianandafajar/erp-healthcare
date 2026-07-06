@@ -22,7 +22,7 @@ const search = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending, refresh } = await useFetch<{ testimonials: Testimonial[] }>('/api/admin/landingpage/testimonials')
+const { data, pending, refresh } = await useFetch<{ testimonials: Testimonial[] }>('/api/superadmin/landingpage/testimonials')
 
 const testimonials = computed(() => data.value?.testimonials ?? [])
 
@@ -100,7 +100,7 @@ async function handleSubmit(payload: any) {
     loading.value = true
     try {
         if (modalMode.value === 'add') {
-            await $fetch('/api/admin/landingpage/testimonials', {
+            await $fetch('/api/superadmin/landingpage/testimonials', {
                 method: 'POST',
                 body: {
                     name: payload.name,
@@ -114,7 +114,7 @@ async function handleSubmit(payload: any) {
             })
             notify('Testimonial created successfully')
         } else if (modalMode.value === 'edit') {
-            await $fetch(`/api/admin/landingpage/testimonials/${payload.id}`, {
+            await $fetch(`/api/superadmin/landingpage/testimonials/${payload.id}`, {
                 method: 'PATCH',
                 body: {
                     name: payload.name,
@@ -128,7 +128,7 @@ async function handleSubmit(payload: any) {
             })
             notify('Testimonial updated successfully')
         } else if (modalMode.value === 'delete') {
-            await $fetch(`/api/admin/landingpage/testimonials/${payload.id}`, {
+            await $fetch(`/api/superadmin/landingpage/testimonials/${payload.id}`, {
                 method: 'DELETE',
             })
             notify('Testimonial deleted successfully')

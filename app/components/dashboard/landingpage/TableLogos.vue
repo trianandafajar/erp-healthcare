@@ -18,7 +18,7 @@ const search = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending, refresh } = await useFetch<{ logos: Logo[] }>('/api/admin/landingpage/logos')
+const { data, pending, refresh } = await useFetch<{ logos: Logo[] }>('/api/superadmin/landingpage/logos')
 
 const logos = computed(() => data.value?.logos ?? [])
 
@@ -91,7 +91,7 @@ async function handleSubmit(payload: any) {
     loading.value = true
     try {
         if (modalMode.value === 'add') {
-            await $fetch('/api/admin/landingpage/logos', {
+            await $fetch('/api/superadmin/landingpage/logos', {
                 method: 'POST',
                 body: {
                     title: payload.title,
@@ -101,7 +101,7 @@ async function handleSubmit(payload: any) {
             })
             notify('Logo created successfully')
         } else if (modalMode.value === 'edit') {
-            await $fetch(`/api/admin/landingpage/logos/${payload.id}`, {
+            await $fetch(`/api/superadmin/landingpage/logos/${payload.id}`, {
                 method: 'PATCH',
                 body: {
                     title: payload.title,
@@ -111,7 +111,7 @@ async function handleSubmit(payload: any) {
             })
             notify('Logo updated successfully')
         } else if (modalMode.value === 'delete') {
-            await $fetch(`/api/admin/landingpage/logos/${payload.id}`, {
+            await $fetch(`/api/superadmin/landingpage/logos/${payload.id}`, {
                 method: 'DELETE',
             })
             notify('Logo deleted successfully')
