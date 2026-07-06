@@ -20,6 +20,7 @@ type CurrentProfileResponse = {
         slug: string
         subscription_plan: string
         subscription_status: string
+        brand_color?: string
     } | null
 }
 

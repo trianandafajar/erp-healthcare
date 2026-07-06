@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     if (!tenantId) throw createError({ statusCode: 400, message: 'Tenant ID is required' })
 
     const body = await readBody(event)
-    const { subscription_status, subscription_plan, name, slug } = body
+    const { subscription_status, subscription_plan, name, slug, brand_color } = body
 
     const validStatuses = ['active', 'suspended', 'trial', 'inactive']
     if (subscription_status && !validStatuses.includes(subscription_status)) {
@@ -31,6 +31,12 @@ export default defineEventHandler(async (event) => {
     if (subscription_plan !== undefined) updatePayload.subscription_plan = subscription_plan
     if (name !== undefined) updatePayload.name = name
     if (slug !== undefined) updatePayload.slug = slug
+    if (brand_color !== undefined) {
+        if (!/^#[0-9a-fA-F]{6}$/.test(brand_color)) {
+            throw createError({ statusCode: 400, message: 'Invalid color format. Use hex (e.g. #176D37)' })
+        }
+        updatePayload.brand_color = brand_color
+    }
 
     if (Object.keys(updatePayload).length === 0) {
         throw createError({ statusCode: 400, message: 'No fields to update' })

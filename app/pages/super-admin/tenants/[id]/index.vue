@@ -56,6 +56,36 @@ function getRoleColor(role: string) {
     return roleColors[role] ?? 'secondary'
 }
 
+const brandColorInput = ref(tenant.value?.brand_color || '#176D37')
+const savingBrand = ref(false)
+
+watch(() => tenant.value?.brand_color, (c) => {
+    if (c) brandColorInput.value = c
+})
+
+const previewColor = computed(() => {
+    return /^#[0-9a-fA-F]{6}$/.test(brandColorInput.value) ? brandColorInput.value : '#176D37'
+})
+
+const savedColor = computed(() => tenant.value?.brand_color || '#176D37')
+
+async function saveBrandColor() {
+    if (!/^#[0-9a-fA-F]{6}$/.test(brandColorInput.value)) return
+    savingBrand.value = true
+    try {
+        await $fetch(`/api/superadmin/tenants/${tenantId}`, {
+            method: 'PUT',
+            body: { brand_color: brandColorInput.value },
+        })
+        await refreshNuxtData()
+        notify('Brand color updated')
+    } catch (e: any) {
+        notify(e?.data?.message || 'Failed to update', 'error')
+    } finally {
+        savingBrand.value = false
+    }
+}
+
 const statusColors: Record<string, string> = {
     waiting: 'warning', in_progress: 'info', done: 'success', cancelled: 'error',
 }
@@ -118,7 +148,7 @@ async function toggleSuspend() {
         </div>
 
         <v-row>
-            <v-col cols="12" md="7">
+            <v-col cols="12" md="5">
                 <v-card elevation="0" class="rounded-md h-100">
                     <v-card-item>
                         <v-card-title class="text-h6 font-weight-bold">Tenant Information</v-card-title>
@@ -150,8 +180,7 @@ async function toggleSuspend() {
                             </v-col>
                             <v-col cols="12" sm="6" class="mt-3">
                                 <div class="text-caption text-medium-emphasis">Owner Status</div>
-                                <v-chip
-                                    :color="tenant?.owner?.status === 'active' ? 'success' : 'error'"
+                                <v-chip :color="tenant?.owner?.status === 'active' ? 'success' : 'error'"
                                     variant="tonal" size="x-small">
                                     {{ tenant?.owner?.status ?? '-' }}
                                 </v-chip>
@@ -167,7 +196,7 @@ async function toggleSuspend() {
                 </v-card>
             </v-col>
 
-            <v-col cols="12" md="5">
+            <v-col cols="12" md="4">
                 <v-card elevation="0" class="rounded-md h-100">
                     <v-card-item>
                         <v-card-title class="text-h6 font-weight-bold">Subscription</v-card-title>
@@ -182,8 +211,7 @@ async function toggleSuspend() {
                         </div>
                         <div class="d-flex align-center justify-space-between mb-3">
                             <span class="text-caption text-medium-emphasis">Status</span>
-                            <v-chip
-                                :color="tenant?.subscription_status === 'active' ? 'success' : 'error'"
+                            <v-chip :color="tenant?.subscription_status === 'active' ? 'success' : 'error'"
                                 variant="tonal" size="small">
                                 {{ tenant?.subscription_status === 'active' ? 'Active' : 'Suspended' }}
                             </v-chip>
@@ -204,6 +232,55 @@ async function toggleSuspend() {
                     </v-card-text>
                 </v-card>
             </v-col>
+
+            <v-col cols="12" md="3">
+                <v-card elevation="0" class="rounded-md h-100">
+                    <v-card-item>
+                        <v-card-title class="text-h6 font-weight-bold d-flex align-center gap-2">
+                            <v-icon icon="mdi-palette" size="20" color="primary" />
+                            Branding
+                        </v-card-title>
+                        <v-card-subtitle>Customize primary color</v-card-subtitle>
+                    </v-card-item>
+                    <v-divider />
+                    <v-card-text>
+                        <div class="d-flex flex-column align-center py-2">
+                            <div class="d-flex align-center ga-4 mb-4">
+                                <div class="rounded-lg border d-flex align-center justify-center"
+                                    :style="{ backgroundColor: previewColor, width: '64px', height: '64px', borderRadius: '12px', border: '2px solid #e0e0e0' }">
+                                </div>
+                                <div>
+                                    <div class="text-body-2 font-weight-medium">Preview</div>
+                                    <div class="text-caption text-medium-emphasis mt-1" style="font-family: monospace;">
+                                        {{ previewColor }}</div>
+                                    <v-chip v-if="previewColor === '#176D37'" size="x-small" color="grey"
+                                        variant="tonal" class="mt-1">Default</v-chip>
+                                </div>
+                            </div>
+                            <div class="d-flex align-center ga-2 w-100 mb-3">
+                                <input type="color" v-model="brandColorInput"
+                                    style="width: 44px; height: 44px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; padding: 2px; background: none;" />
+                                <v-text-field v-model="brandColorInput" variant="outlined" density="compact"
+                                    hide-details placeholder="#176D37" class="flex-grow-1" />
+                            </div>
+                            <div class="d-flex ga-2 w-100">
+                                <v-btn variant="tonal" color="grey" size="small" @click="brandColorInput = '#176D37'"
+                                    :style="brandColorInput === '#176D37' ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                                    :disabled="brandColorInput === '#176D37'">
+                                    Reset
+                                </v-btn>
+                                <v-btn variant="flat" color="primary" size="small" :loading="savingBrand"
+                                    :style="savingBrand || brandColorInput === savedColor ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                                    @click="saveBrandColor" class="flex-grow-1"
+                                    :disabled="!/^#[0-9a-fA-F]{6}$/.test(brandColorInput) || brandColorInput === savedColor || savingBrand">
+                                    <v-icon start icon="mdi-content-save" size="16" />
+                                    Save
+                                </v-btn>
+                            </div>
+                        </div>
+                    </v-card-text>
+                </v-card>
+            </v-col>
         </v-row>
 
         <v-row class="mt-2">
@@ -213,7 +290,7 @@ async function toggleSuspend() {
                 { label: 'Nurses', value: tenant?.stats?.nurses, color: 'info', icon: 'mdi-account-heart' },
                 { label: 'Patients', value: tenant?.stats?.patients, color: 'success', icon: 'mdi-account-injury' },
                 { label: 'Appointments', value: tenant?.stats?.appointments, color: 'secondary', icon: 'mdi-calendar-check' },
-                { label: 'Med. Records', value: tenant?.stats?.medical_records, color: 'error', icon: 'mdi-folder-account'},
+                { label: 'Med. Records', value: tenant?.stats?.medical_records, color: 'error', icon: 'mdi-folder-account' },
             ]" :key="stat.label">
                 <v-card elevation="0" class="rounded-md text-center pa-3">
                     <v-icon :icon="stat.icon" :color="stat.color" size="24" class="mb-1" />
@@ -265,7 +342,8 @@ async function toggleSuspend() {
                             <tr v-else v-for="appt in tenant.recent_appointments" :key="appt.id">
                                 <td class="py-2">
                                     <div class="text-body-2 font-weight-medium">{{ appt.patient_name }}</div>
-                                    <div class="text-caption text-medium-emphasis">{{ appt.medical_record_number }}</div>
+                                    <div class="text-caption text-medium-emphasis">{{ appt.medical_record_number }}
+                                    </div>
                                 </td>
                                 <td class="py-2 text-body-2 text-medium-emphasis">{{ appt.doctor_name }}</td>
                                 <td class="py-2 text-body-2 text-medium-emphasis">{{ formatDate(appt.date) }}</td>

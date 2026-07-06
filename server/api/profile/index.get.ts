@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
   if (profile?.tenant_id) {
     const { data: tenantData } = await supabase
       .from('tenants')
-      .select('id, name, slug, subscription_plan, subscription_status')
+      .select('id, name, slug, subscription_plan, subscription_status, brand_color')
       .eq('id', profile.tenant_id)
       .single()
     tenant = tenantData

@@ -118,6 +118,7 @@ export default defineEventHandler(async (event) => {
         slug: tenant.slug,
         subscription_plan: tenant.subscription_plan,
         subscription_status: tenant.subscription_status,
+        brand_color: tenant.brand_color,
         created_at: tenant.created_at,
 
         // Owner

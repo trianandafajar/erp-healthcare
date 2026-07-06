@@ -2,6 +2,8 @@
 import FooterPanel from '~/components/dashboard/footer/FooterPanel.vue'
 import VerticalHeaderVue from '~/components/dashboard/vertical-header/VerticalHeader.vue'
 import PharmacyVerticalSidebar from '~/components/dashboard/vertical-sidebar/PharmacyVerticalSidebar.vue'
+import { useTenantTheme } from '~/composables/useTenantTheme'
+useTenantTheme()
 </script>
 
 <template>

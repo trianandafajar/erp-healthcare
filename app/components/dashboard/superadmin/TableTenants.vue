@@ -18,7 +18,10 @@ interface Tenant {
   owner_id: string
   owner: TenantOwner | null
   total_users: number
+  brand_color: string | null
   created_at: string
+  plan: string
+  status: string
 }
 
 const { data, pending } = await useFetch<Tenant[]>('/api/superadmin/tenants')
@@ -77,11 +80,13 @@ const planColors: Record<string, string> = {
   enterprise: 'error',
 }
 
-function getPlanColor(plan: string) {
+function getPlanColor(plan?: string | null) {
+  if (!plan) return 'grey'
   return planColors[plan] ?? 'secondary'
 }
 
-function getPlanLabel(plan: string) {
+function getPlanLabel(plan?: string | null) {
+  if (!plan) return 'Free'
   return plan.charAt(0).toUpperCase() + plan.slice(1)
 }
 
@@ -97,7 +102,11 @@ const dialog = ref(false)
 const selectedTenant = ref<Tenant | null>(null)
 
 function openEdit(tenant: Tenant) {
-  selectedTenant.value = tenant
+  selectedTenant.value = {
+    ...tenant,
+    plan: tenant.subscription_plan,
+    status: tenant.subscription_status,
+  }
   dialog.value = true
 }
 
@@ -202,7 +211,7 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
             <div class="text-body-2 font-weight-medium">{{ tenant.owner?.full_name ?? '—' }}</div>
             <div class="text-caption text-medium-emphasis">{{ tenant.owner?.email ?? '—' }}</div>
           </td>
-          <td class="py-3 text-body-2">{{ tenant.total_users.toLocaleString() }}</td>
+          <td class="py-3 text-body-2">{{ (tenant.total_users ?? 0).toLocaleString() }}</td>
           <td class="py-3 text-body-2 text-medium-emphasis">{{ formatDate(tenant.created_at) }}</td>
           <td class="py-3 text-right" @click.stop>
             <v-btn icon="mdi-eye" variant="text" size="small" color="primary" density="comfortable"

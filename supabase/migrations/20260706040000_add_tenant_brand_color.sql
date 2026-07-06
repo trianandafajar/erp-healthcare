@@ -1,0 +1,2 @@
+ALTER TABLE public.tenants
+ADD COLUMN IF NOT EXISTS brand_color text NOT NULL DEFAULT '#176D37';
