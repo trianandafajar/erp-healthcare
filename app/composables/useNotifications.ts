@@ -192,6 +192,15 @@ const NOTIFICATION_CATALOG: Record<string, NotificationCatalogEntry> = {
       pharmacy: '/pharmacy/stock',
     },
   },
+  contact_inquiry: {
+    level: 'info',
+    icon: 'mdi-email-fast-outline',
+    color: 'info',
+    audienceRoles: ['superadmin'],
+    routes: {
+      superadmin: '/super-admin/contact-inquiries',
+    },
+  },
 }
 
 const DEFAULT_NOTIFICATION_CATALOG: NotificationCatalogEntry = {

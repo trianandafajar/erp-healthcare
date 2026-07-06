@@ -198,6 +198,40 @@ const faqCategories = [
 const selectedCategory = ref(faqCategories[0]?.title ?? '')
 const openIndex = ref<number | null>(null)
 
+const contactInfo = [
+    { icon: 'mdi-email-outline', label: 'Email', value: 'support@healthdata-erp.com', color: '#176D37' },
+    { icon: 'mdi-phone-outline', label: 'Phone', value: '+62 24 1234 5678', color: '#176D37' },
+    { icon: 'mdi-map-marker-outline', label: 'Address', value: 'Semarang, Indonesia', color: '#176D37' },
+    { icon: 'mdi-clock-outline', label: 'Working Hours', value: 'Mon–Fri, 08:00–17:00', color: '#176D37' },
+]
+
+const contactForm = ref({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+})
+
+const isSubmitting = ref(false)
+const isSubmitted = ref(false)
+
+async function handleSubmit() {
+    if (!contactForm.value.name || !contactForm.value.email || !contactForm.value.message) return
+    isSubmitting.value = true
+    try {
+        await $fetch('/api/contact/send', {
+            method: 'POST',
+            body: { ...contactForm.value },
+        })
+        isSubmitted.value = true
+        contactForm.value = { name: '', email: '', subject: '', message: '' }
+        setTimeout(() => { isSubmitted.value = false }, 4000)
+    } catch {
+    } finally {
+        isSubmitting.value = false
+    }
+}
+
 const filteredFaqs = computed(() => {
     const cat = faqCategories.find(c => c.title === selectedCategory.value)
     return cat?.items ?? []
@@ -491,12 +525,108 @@ function toggleItem(index: number) {
             <template v-else-if="activePage === 'contact'">
                 <div class="mb-8">
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Contact Us</h1>
-                    <p class="mt-2 text-gray-500">We'd love to hear from you.</p>
+                    <p class="mt-2 text-gray-500">We'd love to hear from you. Get in touch with our team.</p>
                 </div>
 
-                <div class="text-center py-16 bg-white border border-gray-200 rounded-md">
-                    <v-icon icon="mdi-hammer-wrench" size="48" class="mb-4 text-gray-300" />
-                    <div class="text-lg text-gray-500">This section is coming soon.</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div v-for="item in contactInfo" :key="item.label"
+                        class="flex items-center gap-3 p-6 bg-white border border-gray-200 rounded-md">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                            :style="{ backgroundColor: item.color + '1a' }">
+                            <v-icon :icon="item.icon" size="20" :color="item.color" />
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500">{{ item.label }}</div>
+                            <div class="text-sm font-bold text-gray-900">{{ item.value }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-5 gap-6">
+                    <div class="md:col-span-3 bg-white border border-gray-200 rounded-md p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-5">Send us a message</h2>
+
+                        <div v-if="isSubmitted"
+                            class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 flex items-start gap-3">
+                            <v-icon icon="mdi-check-circle" size="22" color="#16a34a" />
+                            <div>
+                                <p class="text-sm font-medium text-green-800">Message sent successfully!</p>
+                                <p class="text-xs text-green-600 mt-0.5">We'll get back to you within 24 hours.</p>
+                            </div>
+                        </div>
+
+                        <form @submit.prevent="handleSubmit" class="space-y-5">
+                            <div class="grid sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+                                    <input v-model="contactForm.name" type="text" required
+                                        class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#176D37]/30 focus:border-[#176D37] transition-colors"
+                                        placeholder="Your name" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+                                    <input v-model="contactForm.email" type="email" required
+                                        class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#176D37]/30 focus:border-[#176D37] transition-colors"
+                                        placeholder="you@example.com" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Subject</label>
+                                <input v-model="contactForm.subject" type="text"
+                                    class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#176D37]/30 focus:border-[#176D37] transition-colors"
+                                    placeholder="How can we help?" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
+                                <textarea v-model="contactForm.message" required rows="5"
+                                    class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#176D37]/30 focus:border-[#176D37] transition-colors resize-none"
+                                    placeholder="Tell us more about your inquiry..."></textarea>
+                            </div>
+                            <v-btn class="px-6" variant="flat" color="primary" size="large" density="comfortable"
+                                :disabled="isSubmitting || !contactForm.name || !contactForm.email || !contactForm.message"
+                                :style="isSubmitting && !contactForm.name || !contactForm.email || !contactForm.message ? 'cursor: not-allowed; pointer-events: auto;' : ''">
+                                <v-icon v-if="isSubmitting" icon="mdi-loading" size="18" class="animate-spin" />
+                                <v-icon v-else icon="mdi-send-outline" size="18" />
+                                {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+                            </v-btn>
+                        </form>
+                    </div>
+
+                    <div class="md:col-span-2 bg-white border border-gray-200 rounded-md p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-5">Contact Information</h2>
+                        <div class="space-y-5">
+                            <div v-for="item in contactInfo" :key="item.label" class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                                    :style="{ backgroundColor: item.color + '1a' }">
+                                    <v-icon :icon="item.icon" size="18" :color="item.color" />
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500">{{ item.label }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ item.value }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-5 border-gray-200" />
+
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Follow Us</h3>
+                            <div class="flex gap-3">
+                                <a href="#"
+                                    class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 hover:bg-[#176D37]/10 text-gray-500 hover:text-[#176D37] transition-all duration-200">
+                                    <v-icon icon="mdi-linkedin" size="18" />
+                                </a>
+                                <a href="#"
+                                    class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 hover:bg-[#176D37]/10 text-gray-500 hover:text-[#176D37] transition-all duration-200">
+                                    <v-icon icon="mdi-twitter" size="18" />
+                                </a>
+                                <a href="#"
+                                    class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 hover:bg-[#176D37]/10 text-gray-500 hover:text-[#176D37] transition-all duration-200">
+                                    <v-icon icon="mdi-github" size="18" />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </template>
         </div>
