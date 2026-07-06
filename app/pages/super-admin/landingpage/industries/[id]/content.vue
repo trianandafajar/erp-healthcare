@@ -15,7 +15,7 @@ useSeoMeta({
 const route = useRoute()
 const id = route.params.id as string
 
-const { data: industry, pending } = await useFetch<{ industry: any }>(`/api/admin/landingpage/industries`, {
+const { data: industry, pending } = await useFetch<{ industry: any }>(`/api/superadmin/landingpage/industries`, {
     key: `industry-${id}`,
 })
 
@@ -25,7 +25,7 @@ const industryData = computed(() => {
 })
 
 const { data: detailContent, pending: detailPending } = await useFetch<any>(
-    `/api/admin/landingpage/industries/${id}/detail`
+    `/api/superadmin/landingpage/industries/${id}/detail`
 )
 
 const snackbar = ref(false)
@@ -42,7 +42,7 @@ function notify(msg: string, color = 'success') {
 async function handleSave(content: any) {
     loading.value = true
     try {
-        await $fetch(`/api/admin/landingpage/industries/${id}/detail`, {
+        await $fetch(`/api/superadmin/landingpage/industries/${id}/detail`, {
             method: 'PUT',
             body: { content }
         })

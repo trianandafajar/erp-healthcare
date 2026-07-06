@@ -24,7 +24,7 @@ const search = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending } = await useFetch<{ industries: Industry[] }>('/api/admin/landingpage/industries')
+const { data, pending } = await useFetch<{ industries: Industry[] }>('/api/superadmin/landingpage/industries')
 
 const industries = computed(() => data.value?.industries ?? [])
 
@@ -97,7 +97,7 @@ async function handleSubmit(payload: any) {
     loading.value = true
     try {
         if (modalMode.value === 'add') {
-            await $fetch('/api/admin/landingpage/industries', {
+            await $fetch('/api/superadmin/landingpage/industries', {
                 method: 'POST',
                 body: {
                     title: payload.title,
@@ -109,7 +109,7 @@ async function handleSubmit(payload: any) {
             })
             notify('Industry created successfully')
         } else if (modalMode.value === 'edit') {
-            await $fetch(`/api/admin/landingpage/industries/${payload.id}`, {
+            await $fetch(`/api/superadmin/landingpage/industries/${payload.id}`, {
                 method: 'PATCH',
                 body: {
                     title: payload.title,
@@ -121,7 +121,7 @@ async function handleSubmit(payload: any) {
             })
             notify('Industry updated successfully')
         } else if (modalMode.value === 'delete') {
-            await $fetch(`/api/admin/landingpage/industries/${payload.id}`, {
+            await $fetch(`/api/superadmin/landingpage/industries/${payload.id}`, {
                 method: 'DELETE',
             })
             notify('Industry deleted successfully')
