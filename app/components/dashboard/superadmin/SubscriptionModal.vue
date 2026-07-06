@@ -174,7 +174,6 @@ function onSubmit() {
               variant="outlined"
               density="compact"
               hide-details
-              return-object
             />
             <v-text-field v-else :model-value="subscription?.tenant_name" variant="outlined"
               density="compact" hide-details disabled />

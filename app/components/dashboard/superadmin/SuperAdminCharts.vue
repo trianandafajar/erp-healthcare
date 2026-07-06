@@ -10,12 +10,29 @@ const dummyTenantGrowth = {
   total: 30,
 }
 
-const dummySubscriptions = {
-  Free: 5,
-  Basic: 4,
-  Pro: 2,
-  Enterprise: 1,
+const subscriptions = ref<{ plan: string }[]>([])
+
+async function fetchSubscriptions() {
+  try {
+    const data = await $fetch<{ plan: string }[]>('/api/superadmin/subscriptions')
+    subscriptions.value = data ?? []
+  } catch {
+    subscriptions.value = []
+  }
 }
+
+const subscriptionDistribution = computed(() => {
+  const counts: Record<string, number> = { Free: 0, Basic: 0, Pro: 0, Enterprise: 0 }
+  for (const s of subscriptions.value) {
+    const plan = s.plan
+    counts[plan] = (counts[plan] ?? 0) + 1
+  }
+  return counts
+})
+
+onMounted(() => {
+  fetchSubscriptions()
+})
 
 const tenantSeries = computed(() => [
   {
@@ -55,8 +72,8 @@ const tenantGrowthOptions = computed(() => ({
   },
 }))
 
-const subscriptionLabels = computed(() => Object.keys(dummySubscriptions))
-const subscriptionSeries = computed(() => Object.values(dummySubscriptions))
+const subscriptionLabels = computed(() => Object.keys(subscriptionDistribution.value))
+const subscriptionSeries = computed(() => Object.values(subscriptionDistribution.value))
 
 const planColors = ['#52c41a', '#1677ff', '#722ed1', '#f5222d']
 
