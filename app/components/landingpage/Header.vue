@@ -75,9 +75,9 @@ const isLight = computed(() => props.darkHero && !scrolled.value);
 
 const menuItems = [
   { name: "Home", url: "/" },
-  { name: "Features", url: "#features" },
-  { name: "Industries", url: "#industries" },
-  { name: "Testimonials", url: "#testimonials" },
+  { name: "Features", url: "/#features" },
+  { name: "Industries", url: "/#industries" },
+  { name: "Testimonials", url: "/#testimonials" },
 ];
 
 let scrollHandler;
