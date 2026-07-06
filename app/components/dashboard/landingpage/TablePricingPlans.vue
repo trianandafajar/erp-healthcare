@@ -26,7 +26,7 @@ const search = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending, refresh } = await useFetch<{ plans: PricingPlan[] }>('/api/admin/landingpage/pricing')
+const { data, pending, refresh } = await useFetch<{ plans: PricingPlan[] }>('/api/superadmin/landingpage/pricing')
 
 const plans = computed(() => data.value?.plans ?? [])
 
@@ -89,7 +89,7 @@ async function handleSubmit(payload: any) {
     loading.value = true
     try {
         if (modalMode.value === 'add') {
-            await $fetch('/api/admin/landingpage/pricing', {
+            await $fetch('/api/superadmin/landingpage/pricing', {
                 method: 'POST',
                 body: {
                     title: payload.title,
@@ -107,7 +107,7 @@ async function handleSubmit(payload: any) {
             })
             notify('Pricing plan created successfully')
         } else if (modalMode.value === 'edit') {
-            await $fetch(`/api/admin/landingpage/pricing/${payload.id}`, {
+            await $fetch(`/api/superadmin/landingpage/pricing/${payload.id}`, {
                 method: 'PATCH',
                 body: {
                     title: payload.title,
@@ -126,7 +126,7 @@ async function handleSubmit(payload: any) {
             })
             notify('Pricing plan updated successfully')
         } else if (modalMode.value === 'delete') {
-            await $fetch(`/api/admin/landingpage/pricing/${payload.id}`, {
+            await $fetch(`/api/superadmin/landingpage/pricing/${payload.id}`, {
                 method: 'DELETE',
             })
             notify('Pricing plan deleted successfully')
