@@ -59,12 +59,6 @@
         </section>
 
         <SectionRenderer :content="industry.detail" />
-
-        <div class="text-center py-8">
-          <NuxtLink to="/" class="text-[#0aa8a7] hover:text-[#16d5d4] font-semibold no-underline">
-            Back to Home
-          </NuxtLink>
-        </div>
       </template>
     </main>
 
