@@ -42,6 +42,7 @@ export default defineEventHandler(async (event) => {
   const roles = userRoles?.map((r: any) => r.roles).filter(Boolean) ?? []
 
   let tenant = null
+  let subscription = null
   if (profile?.tenant_id) {
     const { data: tenantData } = await supabase
       .from('tenants')
@@ -49,6 +50,13 @@ export default defineEventHandler(async (event) => {
       .eq('id', profile.tenant_id)
       .single()
     tenant = tenantData
+
+    const { data: subData } = await supabase
+      .from('tenant_subscriptions')
+      .select('plan, status, billing_cycle, amount, currency, next_billing, trial_ends, start_date, stripe_customer_id')
+      .eq('tenant_id', profile.tenant_id)
+      .maybeSingle()
+    subscription = subData
   }
 
   return {
@@ -59,5 +67,6 @@ export default defineEventHandler(async (event) => {
     profile,
     roles,
     tenant,
+    subscription,
   }
 })

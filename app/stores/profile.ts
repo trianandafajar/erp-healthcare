@@ -22,6 +22,17 @@ type CurrentProfileResponse = {
         subscription_status: string
         brand_color?: string
     } | null
+    subscription?: {
+        plan: string
+        status: string
+        billing_cycle: string
+        amount: number
+        currency: string
+        next_billing: string | null
+        trial_ends: string | null
+        start_date: string | null
+        stripe_customer_id: string | null
+    } | null
 }
 
 export const useProfileStore = defineStore('profile', () => {

@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-    const { email, password, full_name, tenant_name } = await readBody(event)
+    const { email, password, full_name, tenant_name, pricing_plan_id } = await readBody(event)
 
     if (!email || !password || !full_name || !tenant_name) {
         throw createError({
@@ -33,5 +33,15 @@ export default defineEventHandler(async (event) => {
 
     if (error) throw createError({ statusCode: 401, message: error.message })
 
-    return { user: data.user }
+    const { data: profile } = await admin
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', data.user.id)
+        .single()
+
+    return {
+        user: data.user,
+        tenant_id: profile?.tenant_id || null,
+        pricing_plan_id: pricing_plan_id || null,
+    }
 })

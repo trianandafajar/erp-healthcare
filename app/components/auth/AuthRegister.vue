@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
+const route = useRoute()
+
 const firstname = ref('')
 const lastname = ref('')
 const email = ref('')
@@ -13,9 +15,41 @@ const loading = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
+const pricingPlanId = (route.query.plan as string) || null
+const billing = (route.query.billing as string) || 'monthly'
+
 const firstRules = [(v: string) => !!v || 'First name is required']
 const lastRules = [(v: string) => !!v || 'Last name is required']
 const tenantRules = [(v: string) => !!v || 'The name of the clinic or hospital must be filled in.']
+
+async function redirectToCheckout(tenantId: string, planId: string) {
+    try {
+        const { plans } = await $fetch('/api/landingpage/pricing')
+        const plan = plans?.find((p: any) => p.id === planId)
+        if (!plan) throw new Error('Plan not found')
+
+        const p = plan as any
+        const priceId = billing === 'yearly' && p.stripe_price_id_yearly
+            ? p.stripe_price_id_yearly
+            : p.stripe_price_id
+
+        if (!priceId) throw new Error('No Stripe price configured for this plan')
+
+        const { url } = await $fetch('/api/stripe/create-checkout', {
+            method: 'POST',
+            body: {
+                price_id: priceId,
+                tenant_id: tenantId,
+            },
+        })
+
+        if (url) {
+            window.location.href = url
+        }
+    } catch (err: any) {
+        errorMsg.value = err?.data?.message || err.message || 'Failed to start payment'
+    }
+}
 
 async function register() {
     if (password.value !== confirmPassword.value) {
@@ -27,17 +61,22 @@ async function register() {
     errorMsg.value = ''
 
     try {
-        await $fetch('/api/auth/register', {
+        const data: any = await $fetch('/api/auth/register', {
             method: 'POST',
             body: {
                 email: email.value,
                 password: password.value,
                 full_name: `${firstname.value} ${lastname.value}`,
                 tenant_name: tenantName.value,
+                pricing_plan_id: pricingPlanId,
             },
         })
 
-        await navigateTo('/login')
+        if (pricingPlanId && data?.tenant_id) {
+            await redirectToCheckout(data.tenant_id, pricingPlanId)
+        } else {
+            await navigateTo('/login')
+        }
     } catch (err: any) {
         errorMsg.value = err.data?.message || 'Register gagal'
     } finally {

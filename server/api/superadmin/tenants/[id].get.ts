@@ -35,6 +35,13 @@ export default defineEventHandler(async (event) => {
         .eq('id', tenant.owner_id)
         .single()
 
+    // Subscription details
+    const { data: subscription } = await admin
+        .from('tenant_subscriptions')
+        .select('plan, status, billing_cycle, amount, currency, next_billing, trial_ends, start_date, stripe_customer_id, stripe_subscription_id, stripe_price_id')
+        .eq('tenant_id', tenantId)
+        .maybeSingle()
+
     // All stats in parallel
     const [
         { count: userCount },
@@ -163,5 +170,8 @@ export default defineEventHandler(async (event) => {
             doctor_name: a.doctors?.profiles?.full_name ?? '-',
             department_name: a.departments?.name ?? '-',
         })),
+
+        // Subscription
+        subscription: subscription ?? null,
     }
 })

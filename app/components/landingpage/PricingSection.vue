@@ -72,7 +72,7 @@
           </ul>
 
           <NuxtLink
-            :to="plan.button_link"
+            :to="plan.id && plan.button_link === '/register' ? `/register?plan=${plan.id}&billing=${billing}` : plan.button_link"
             :class="[
               'w-full text-center py-3 rounded-xl text-sm font-semibold transition-all duration-200',
               plan.is_recommended

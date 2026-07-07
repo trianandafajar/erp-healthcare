@@ -216,6 +216,19 @@ async function toggleSuspend() {
                                 {{ tenant?.subscription_status === 'active' ? 'Active' : 'Suspended' }}
                             </v-chip>
                         </div>
+                        <hr class="my-2" style="border-color: #e0e0e0;" />
+                        <div class="d-flex align-center justify-space-between mb-2">
+                            <span class="text-caption text-medium-emphasis">Next Billing</span>
+                            <span class="text-body-2 font-weight-medium">{{ formatDate(tenant?.subscription?.next_billing) }}</span>
+                        </div>
+                        <div class="d-flex align-center justify-space-between mb-2">
+                            <span class="text-caption text-medium-emphasis">Trial Ends</span>
+                            <span class="text-body-2 font-weight-medium">{{ formatDate(tenant?.subscription?.trial_ends) }}</span>
+                        </div>
+                        <div class="d-flex align-center justify-space-between mb-2">
+                            <span class="text-caption text-medium-emphasis">Start Date</span>
+                            <span class="text-body-2 font-weight-medium">{{ formatDate(tenant?.subscription?.start_date) }}</span>
+                        </div>
                         <v-divider class="mb-3" />
                         <div class="d-flex align-center justify-space-between mb-2">
                             <span class="text-caption text-medium-emphasis">Total Revenue</span>
