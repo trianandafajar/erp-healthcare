@@ -43,8 +43,8 @@
             <div class="mt-32 pt-10 border-t border-white/10">
               <div class="flex flex-wrap items-center gap-x-12 gap-y-6">
                 <p class="text-sm font-bold text-white shrink-0">Trusted by:</p>
-                <div class="flex-1 overflow-hidden min-w-[200px]">
-                  <div class="flex gap-16 items-center animate-scroll" style="animation-duration: 30s;">
+                <div ref="marqueeViewport" class="flex-1 overflow-hidden min-w-[200px]">
+                  <div ref="marqueeTrack" class="flex gap-16 items-center w-fit will-change-transform">
                     <img v-for="(logo, i) in logos" :key="i" :src="logo.image_url" :alt="logo.title"
                       class="h-7 md:h-9 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300"
                       onerror="this.style.display='none'" />
@@ -67,9 +67,11 @@
 </template>
 
 <script setup>
+import { animate, utils } from 'animejs'
 import SectionRenderer from '~/components/landingpage/industry-detail/SectionRenderer.vue'
 import Header from '~/components/landingpage/Header.vue'
 import Footer from '~/components/landingpage/Footer.vue'
+
 const route = useRoute()
 const slug = route.params.slug
 
@@ -110,27 +112,67 @@ function scrollToFaq() {
     navigateTo(`${route.path}#faq`)
   }
 }
+
+const marqueeViewport = ref(null)
+const marqueeTrack = ref(null)
+
+const PIXELS_PER_SECOND = 40
+let marqueeAnimation = null
+let resizeObserver = null
+
+function buildMarquee() {
+  marqueeAnimation?.pause()
+
+  const track = marqueeTrack.value
+  if (!track) return
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (prefersReducedMotion) return
+
+  const images = track.querySelectorAll('img')
+  const setLength = logos.value.length
+  const firstImg = images[0]
+  const firstDupImg = images[setLength]
+  if (!firstImg || !firstDupImg) return
+
+  utils.set(track, { translateX: 0 })
+  const singleSetWidth = firstDupImg.getBoundingClientRect().left - firstImg.getBoundingClientRect().left
+  if (!singleSetWidth) return
+
+  marqueeAnimation = animate(track, {
+    translateX: -singleSetWidth,
+    duration: (singleSetWidth / PIXELS_PER_SECOND) * 1000,
+    ease: 'linear',
+    loop: true,
+    alternate: false,
+  })
+}
+
+function waitForImages(container) {
+  const images = Array.from(container.querySelectorAll('img'))
+  return Promise.all(
+    images.map((img) =>
+      img.complete
+        ? Promise.resolve()
+        : new Promise((resolve) => {
+          img.addEventListener('load', resolve, { once: true })
+          img.addEventListener('error', resolve, { once: true })
+        })
+    )
+  )
+}
+
+onMounted(async () => {
+  await nextTick()
+  if (marqueeTrack.value) await waitForImages(marqueeTrack.value)
+  buildMarquee()
+
+  resizeObserver = new ResizeObserver(() => buildMarquee())
+  if (marqueeViewport.value) resizeObserver.observe(marqueeViewport.value)
+})
+
+onBeforeUnmount(() => {
+  marqueeAnimation?.pause()
+  resizeObserver?.disconnect()
+})
 </script>
-
-<style scoped>
-@keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-scroll {
-  animation: scroll 30s linear infinite;
-  width: fit-content;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-scroll {
-    animation: none;
-  }
-}
-</style>
