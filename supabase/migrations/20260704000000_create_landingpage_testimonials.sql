@@ -28,6 +28,6 @@ create policy "Public can view active testimonials"
     using (is_active = true);
 
 insert into public.landingpage_testimonials (name, role, institution, quote, rating, image_url, sort_order) values
-    ('Dr. Andi Pratama', 'Director', 'RS Pusat Jakarta', 'This platform has completely transformed how we manage patient records. The integration between registration, pharmacy, and billing saved us hours of manual work every day.', 5, '/landingpage/testimonials/andri.jpg', 1),
-    ('Siti Nurhaliza', 'Head of Operations', 'Klinik Sehat Keluarga', 'The real-time dashboard and reporting features give us unprecedented visibility into our operations. We can now make data-driven decisions that improve patient care.', 5, '/landingpage/testimonials/siti.jpg', 2),
-    ('Apt. Rahmatullah', 'Pharmacy Manager', 'Apotek Medika Farma', 'Implementing this ERP was the best decision we made. The pharmacy module alone reduced medication errors by 80% and streamlined our entire supply chain.', 4, '/landingpage/testimonials/rahmatullah.jpg', 3);
+    ('Dr. Andi Pratama', 'Director', 'RS Pusat Jakarta', 'This platform has completely transformed how we manage patient records. The integration between registration, pharmacy, and billing saved us hours of manual work every day.', 5, '/landingpage/testimonials/andri.png', 1),
+    ('Siti Nurhaliza', 'Head of Operations', 'Klinik Sehat Keluarga', 'The real-time dashboard and reporting features give us unprecedented visibility into our operations. We can now make data-driven decisions that improve patient care.', 5, '/landingpage/testimonials/siti.png', 2),
+    ('Apt. Rahmatullah', 'Pharmacy Manager', 'Apotek Medika Farma', 'Implementing this ERP was the best decision we made. The pharmacy module alone reduced medication errors by 80% and streamlined our entire supply chain.', 4, '/landingpage/testimonials/rahmatullah.png', 3);

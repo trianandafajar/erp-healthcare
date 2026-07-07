@@ -43,7 +43,7 @@ const fallbackTestimonials = [
     name: 'Dr. Andi Pratama',
     role: 'Director',
     institution: 'RS Pusat Jakarta',
-    image_url: '/landingpage/testimonials/andri.jpg',
+    image_url: '/landingpage/testimonials/andri.png',
   },
   {
     quote: "The real-time dashboard and reporting features give us unprecedented visibility into our operations. We can now make data-driven decisions that improve patient care.",
@@ -51,7 +51,7 @@ const fallbackTestimonials = [
     name: 'Siti Nurhaliza',
     role: 'Head of Operations',
     institution: 'Klinik Sehat Keluarga',
-    image_url: '/landingpage/testimonials/siti.jpg',
+    image_url: '/landingpage/testimonials/siti.png',
   },
   {
     quote: "Implementing this ERP was the best decision we made. The pharmacy module alone reduced medication errors by 80% and streamlined our entire supply chain.",
@@ -59,7 +59,7 @@ const fallbackTestimonials = [
     name: 'Apt. Rahmatullah',
     role: 'Pharmacy Manager',
     institution: 'Apotek Medika Farma',
-    image_url: '/landingpage/testimonials/rahmatullah.jpg',
+    image_url: '/landingpage/testimonials/rahmatullah.png',
   },
 ];
 
