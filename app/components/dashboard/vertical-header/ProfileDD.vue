@@ -6,6 +6,8 @@ import {
   QuestionCircleOutlined,
   WalletOutlined,
 } from '@ant-design/icons-vue'
+import { useAuthStore } from '@/stores/auth'
+import { useProfileStore } from '@/stores/profile'
 
 const dialog = ref(false)
 const isLoggingOut = ref(false)

@@ -8,6 +8,7 @@ const light: ThemeDefinition = {
     },
     colors: {
         primary: '#176D37',
+        'on-primary': '#FFFFFF',
         secondary: '#8c8c8c',
         info: '#13c2c2',
         success: '#52c41a',
