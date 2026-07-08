@@ -1,4 +1,5 @@
 import { getDashboardPath } from '~/utils/roleRedirect'
+import { useAuthStore } from '~/stores/auth'
 
 function getAllowedRolesForPath(path: string): string[] | null {
     if (path === '/login' || path === '/403') return null
@@ -29,5 +30,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     if (role && allowedRoles.includes(role)) return
 
-    return navigateTo(getDashboardPath(role), { replace: true })
+    const authStore = useAuthStore()
+    return navigateTo(getDashboardPath(role, authStore.tenantSlug), { replace: true })
 })
