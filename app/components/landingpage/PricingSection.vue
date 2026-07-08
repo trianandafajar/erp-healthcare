@@ -63,11 +63,16 @@
           </div>
 
           <ul class="space-y-3 mb-8 flex-1">
-            <li v-for="(feature, fi) in plan.features" :key="fi" class="flex items-start gap-3 text-sm text-gray-600">
+            <li v-for="(feature, fi) in plan.features.slice(0, 4)" :key="fi" class="flex items-start gap-3 text-sm text-gray-600">
               <svg class="w-5 h-5 text-[#176D37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
               </svg>
               {{ feature }}
+            </li>
+            <li v-if="plan.features.length > 4" class="text-center pt-2">
+              <button class="text-sm text-[#089695] font-medium hover:underline" @click="openFeatureModal(plan)">
+                View All ({{ plan.features.length }} features)
+              </button>
             </li>
           </ul>
 
@@ -85,6 +90,27 @@
         </div>
       </div>
     </div>
+
+    <v-dialog v-model="showFeatureModal" max-width="480" class="landingpage-modal">
+      <v-card v-if="selectedPlan" class="rounded-2xl">
+        <v-card-title class="text-h6 font-bold px-6 pt-6">{{ selectedPlan.title }} Features</v-card-title>
+        <v-card-text class="px-6 pb-6">
+          <ul class="space-y-3">
+            <li v-for="(feat, i) in selectedPlan.features" :key="i"
+              class="flex items-start gap-3 text-sm text-gray-600">
+              <svg class="w-5 h-5 text-[#176D37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              {{ feat }}
+            </li>
+          </ul>
+        </v-card-text>
+        <v-card-actions class="px-6 pb-6">
+          <v-spacer />
+          <v-btn variant="tonal" @click="showFeatureModal = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </section>
 </template>
 
@@ -92,6 +118,14 @@
 import { ref, computed } from 'vue'
 
 const billing = ref('monthly')
+
+const showFeatureModal = ref(false)
+const selectedPlan = ref<any>(null)
+
+function openFeatureModal(plan: any) {
+  selectedPlan.value = plan
+  showFeatureModal.value = true
+}
 
 const { data: pricingData, error: pricingError } = await useFetch('/api/landingpage/pricing')
 
