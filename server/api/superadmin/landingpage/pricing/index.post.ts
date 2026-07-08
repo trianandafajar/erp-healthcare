@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
-    const { title, subtitle, price, yearly_price, currency, features, button_label, button_link, is_recommended, badge_text, sort_order } = body
+    const { title, subtitle, price, yearly_price, currency, button_label, button_link, is_recommended, badge_text, sort_order } = body
 
     const product = await stripe.products.create({
         name: title || '',
@@ -25,7 +25,9 @@ export default defineEventHandler(async (event) => {
         yearlyPriceId = yearlyPrice.id
     }
 
-    const { data, error } = await supabaseAdmin()
+    const admin = supabaseAdmin()
+
+    const { data, error: insertError } = await admin
         .from('pricing_plans')
         .insert({
             title: title || '',
@@ -33,7 +35,6 @@ export default defineEventHandler(async (event) => {
             price: price ?? 0,
             yearly_price: yearly_price ?? null,
             currency: currency || 'USD',
-            features: features ?? [],
             button_label: button_label || 'Get Started',
             button_link: button_link || '/contact',
             is_recommended: is_recommended ?? false,
@@ -46,9 +47,34 @@ export default defineEventHandler(async (event) => {
         .select()
         .single()
 
-    if (error) {
+    if (insertError) {
         await stripe.products.update(product.id, { active: false })
-        throw createError({ statusCode: 500, message: error.message })
+        throw createError({ statusCode: 500, message: insertError.message })
     }
+
+    const planKey = (title ?? '').toLowerCase().replace(/\s+/g, '_')
+
+    const { data: existingKeys } = await admin
+        .from('plan_features')
+        .select('feature_key, feature_label, feature_category, sort_order, limit_value')
+        .eq('plan', 'enterprise')
+
+    if (existingKeys?.length) {
+        const featureRows = existingKeys.map((f: any) => ({
+            plan: planKey,
+            feature_key: f.feature_key,
+            feature_label: f.feature_label,
+            feature_category: f.feature_category,
+            is_available: false,
+            limit_value: f.feature_category === 'limit' ? (f.limit_value ?? 0) : null,
+            sort_order: f.sort_order ?? 0,
+        }))
+
+        const { error: featuresError } = await admin.from('plan_features').insert(featureRows)
+        if (featuresError) {
+            throw createError({ statusCode: 500, message: featuresError.message })
+        }
+    }
+
     return { plan: data }
 })

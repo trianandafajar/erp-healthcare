@@ -22,6 +22,25 @@ const planColors: Record<string, string> = {
     enterprise: 'purple',
 }
 
+const showAddDialog = ref(false)
+const newFeature = ref({
+    feature_key: '',
+    feature_label: '',
+    feature_category: 'feature',
+    sort_order: 0,
+    limit_value: null as number | null,
+})
+
+async function addFeature() {
+    await $fetch('/api/superadmin/plan-features', {
+        method: 'POST',
+        body: { ...newFeature.value },
+    })
+    showAddDialog.value = false
+    newFeature.value = { feature_key: '', feature_label: '', feature_category: 'feature', sort_order: 0, limit_value: null }
+    refresh()
+}
+
 async function toggleAvailability(item: any) {
     await $fetch(`/api/superadmin/plan-features/${item.id}`, {
         method: 'PATCH',
@@ -38,6 +57,15 @@ async function updateLimit(item: any) {
     await $fetch(`/api/superadmin/plan-features/${item.id}`, {
         method: 'PATCH',
         body: { limit_value: num },
+    })
+    refresh()
+}
+
+async function deleteFeature(item: any) {
+    const ok = confirm(`Delete "${item.feature_label}" from ALL plans?`)
+    if (!ok) return
+    await $fetch(`/api/superadmin/plan-features/${item.id}`, {
+        method: 'DELETE',
     })
     refresh()
 }
@@ -60,6 +88,9 @@ async function updateLimit(item: any) {
                     {{ p }}
                 </v-btn>
                 <v-spacer />
+                <v-btn color="success" variant="tonal" prepend-icon="mdi-plus" @click="showAddDialog = true">
+                    Add Feature
+                </v-btn>
                 <v-btn color="primary" variant="tonal" prepend-icon="mdi-refresh" @click="refresh()">
                     Refresh
                 </v-btn>
@@ -75,6 +106,7 @@ async function updateLimit(item: any) {
                         <th class="text-left text-caption font-weight-bold text-uppercase">Label</th>
                         <th class="text-center text-caption font-weight-bold text-uppercase">Available</th>
                         <th class="text-center text-caption font-weight-bold text-uppercase">Limit</th>
+                        <th class="text-center text-caption font-weight-bold text-uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,9 +129,38 @@ async function updateLimit(item: any) {
                             </v-btn>
                             <span v-else class="text-caption text-medium-emphasis">—</span>
                         </td>
+                        <td class="text-center">
+                            <v-btn icon size="x-small" color="error" variant="text" @click="deleteFeature(item)">
+                                <v-icon>mdi-delete</v-icon>
+                            </v-btn>
+                        </td>
                     </tr>
                 </tbody>
             </v-table>
         </v-card-text>
     </v-card>
+
+    <v-dialog v-model="showAddDialog" max-width="500">
+        <v-card>
+            <v-card-title class="text-h6">Add New Feature</v-card-title>
+            <v-card-text>
+                <v-text-field v-model="newFeature.feature_key" label="Feature Key" hint="e.g. lab_integration"
+                    persistent-hint density="comfortable" class="mb-3" />
+                <v-text-field v-model="newFeature.feature_label" label="Feature Label"
+                    hint="e.g. Lab Integration" persistent-hint density="comfortable" class="mb-3" />
+                <v-select v-model="newFeature.feature_category" :items="['feature', 'limit', 'role']"
+                    label="Category" density="comfortable" class="mb-3" />
+                <v-text-field v-model.number="newFeature.sort_order" label="Sort Order" type="number"
+                    density="comfortable" class="mb-3" />
+                <v-text-field v-if="newFeature.feature_category === 'limit'"
+                    v-model.number="newFeature.limit_value" label="Limit Value (-1 = unlimited)" type="number"
+                    density="comfortable" />
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn variant="text" @click="showAddDialog = false">Cancel</v-btn>
+                <v-btn color="primary" variant="flat" @click="addFeature">Add</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>

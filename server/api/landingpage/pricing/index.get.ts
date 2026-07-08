@@ -4,7 +4,7 @@ export default defineEventHandler(async () => {
     const [pricingRes, featuresRes] = await Promise.all([
         supabase
             .from('pricing_plans')
-            .select('id, title, subtitle, price, yearly_price, currency, features, button_label, button_link, is_recommended, badge_text, sort_order, stripe_price_id, stripe_price_id_yearly')
+            .select('id, title, subtitle, price, yearly_price, currency, button_label, button_link, is_recommended, badge_text, sort_order, stripe_price_id, stripe_price_id_yearly')
             .eq('is_active', true)
             .order('sort_order', { ascending: true }),
         supabase
@@ -29,7 +29,7 @@ export default defineEventHandler(async () => {
         const dynamicFeatures = groupedFeatures[planKey]
         return {
             ...plan,
-            features: dynamicFeatures?.length ? dynamicFeatures : (plan.features ?? []),
+            features: dynamicFeatures?.length ? dynamicFeatures : [],
         }
     })
 
