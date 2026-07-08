@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
 const checkbox = ref(false)
 const showPassword = ref(false)
@@ -137,13 +138,13 @@ async function validate() {
     <v-form @submit.prevent="validate" class="mt-7 loginForm">
         <div class="mb-6">
             <v-label>Email Address</v-label>
-            <v-text-field aria-label="email address" v-model="email" :rules="emailRules" class="mt-2" required
+            <v-text-field aria-label="email address" placeholder="youremail@example.com" v-model="email" :rules="emailRules" class="mt-2" required
                 hide-details="auto" variant="outlined" color="primary"></v-text-field>
         </div>
 
         <div>
             <v-label>Password</v-label>
-            <v-text-field aria-label="password" v-model="password" :rules="passwordRules" required variant="outlined"
+            <v-text-field aria-label="password" v-model="password" placeholder="Enter your password" :rules="passwordRules" required variant="outlined"
                 color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
                     <span @click="showPassword = !showPassword"

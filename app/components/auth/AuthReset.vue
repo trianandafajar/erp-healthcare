@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
 definePageMeta({
@@ -46,14 +46,41 @@ onMounted(async () => {
 
 const passwordRules = [
     (v: string) => !!v || 'Password is required',
-    (v: string) => v.length >= 8 || 'Password must be at least 8 characters',
+    (v: string) => v.length >= 8 || 'Minimum 8 characters',
     (v: string) => v === v.trim() || 'Password cannot start or end with spaces',
+    (v: string) => /[A-Z]/.test(v) || 'Must contain at least 1 uppercase letter',
+    (v: string) => /[0-9]/.test(v) || 'Must contain at least 1 number',
+    (v: string) => /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]/;]/.test(v) || 'Must contain at least 1 special character (@ # $ etc.)',
 ]
 
 const confirmRules = [
     (v: string) => !!v || 'Confirm password is required',
     (v: string) => v === password.value || 'Passwords do not match',
 ]
+
+const passwordScore = computed(() => {
+    const v = password.value
+    if (!v) return 0
+
+    let score = 0
+    if (v.length >= 8) score++
+    if (v.length >= 12) score++
+    if (/[A-Z]/.test(v)) score++
+    if (/[a-z]/.test(v)) score++
+    if (/[0-9]/.test(v)) score++
+    if (/[!@#$%^&*(),.?":{}|<>_\-+=~`[\]/;]/.test(v)) score++
+
+    return score
+})
+
+const passwordStrength = computed(() => {
+    const score = passwordScore.value
+
+    if (!password.value) return { label: '', color: '', percent: 0 }
+    if (score <= 2) return { label: 'Weak', color: 'error', percent: 33 }
+    if (score <= 4) return { label: 'Medium', color: 'warning', percent: 66 }
+    return { label: 'Strong', color: 'success', percent: 100 }
+})
 
 async function validate() {
     if (password.value !== confirmPassword.value) {
@@ -89,33 +116,29 @@ async function validate() {
         <NuxtLink to="/login" class="text-primary text-decoration-none">Back to Login</NuxtLink>
     </div>
 
-    <!-- Checking token -->
     <div v-if="tokenChecking" class="mt-7 text-center">
         <v-progress-circular indeterminate color="primary" />
         <p class="mt-3 text-medium-emphasis">Validating reset link...</p>
     </div>
-
-    <!-- Token invalid -->
     <div v-else-if="tokenError" class="mt-7">
         <v-alert color="error" variant="tonal">{{ tokenError }}</v-alert>
         <v-btn to="/forgot-password" color="primary" variant="tonal" block class="mt-4">
             Request New Reset Link
         </v-btn>
     </div>
-
-    <!-- Success -->
     <div v-else-if="isSuccess" class="mt-7">
         <v-alert color="success" variant="tonal">
             Password reset successful! Redirecting to login...
         </v-alert>
     </div>
 
-    <!-- Form -->
+    <!-- form -->
     <v-form v-else @submit.prevent="validate" class="mt-7 loginForm">
         <div class="mb-6">
             <v-label>New Password</v-label>
-            <v-text-field v-model="password" :rules="passwordRules" required variant="outlined" color="primary"
-                hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2">
+            <v-text-field v-model="password" placeholder="Enter your new password" :rules="passwordRules" required
+                variant="outlined" color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'"
+                class="mt-2">
                 <template v-slot:append-inner>
                     <v-btn color="secondary" icon rounded variant="text" @click="showPassword = !showPassword">
                         <EyeInvisibleOutlined v-if="!showPassword"
@@ -124,12 +147,21 @@ async function validate() {
                     </v-btn>
                 </template>
             </v-text-field>
+
+            <div v-if="password" class="mt-2">
+                <v-progress-linear :model-value="passwordStrength.percent" :color="passwordStrength.color" height="6"
+                    rounded></v-progress-linear>
+                <span class="text-caption font-weight-medium" :class="`text-${passwordStrength.color}`">
+                    {{ passwordStrength.label }}
+                </span>
+            </div>
         </div>
 
         <div class="mb-6">
             <v-label>Confirm Password</v-label>
-            <v-text-field v-model="confirmPassword" :rules="confirmRules" required variant="outlined" color="primary"
-                hide-details="auto" :type="showConfirmPassword ? 'text' : 'password'" class="mt-2">
+            <v-text-field v-model="confirmPassword" placeholder="Confirm your new password" :rules="confirmRules"
+                required variant="outlined" color="primary" hide-details="auto"
+                :type="showConfirmPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
                     <v-btn color="secondary" icon rounded variant="text"
                         @click="showConfirmPassword = !showConfirmPassword">
