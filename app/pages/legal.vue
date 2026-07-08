@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, reactive, computed, nextTick, onMounted } from 'vue'
+import { animate } from 'animejs'
 import Header from '~/components/landingpage/Header.vue'
 import Footer from '~/components/landingpage/Footer.vue'
 
@@ -118,10 +120,7 @@ const privacySections: Record<string, { icon: string; color: string; title: stri
 }
 
 const openPanel = ref<number | null>(0)
-
-function togglePanel(index: number) {
-    openPanel.value = openPanel.value === index ? null : index
-}
+const termAnswerRefs = reactive<any[]>([])
 
 const terms = [
     { title: 'Acceptance of terms', icon: 'mdi-file-sign', color: '#176D37', body: `By accessing the HealthData ERP Healthcare ERP platform, you agree to be bound by these Terms of Service. If you do not agree, you may not use the platform.\n\nThese terms apply to all users including administrators, doctors, nurses, pharmacists, and any staff granted access by your organization.` },
@@ -197,6 +196,7 @@ const faqCategories = [
 
 const selectedCategory = ref(faqCategories[0]?.title ?? '')
 const openIndex = ref<number | null>(null)
+const helpAnswerRefs = reactive<any[]>([])
 
 const contactInfo = [
     { icon: 'mdi-email-outline', label: 'Email', value: 'support@healthdata-erp.com', color: '#176D37' },
@@ -237,9 +237,109 @@ const filteredFaqs = computed(() => {
     return cat?.items ?? []
 })
 
-function toggleItem(index: number) {
-    openIndex.value = openIndex.value === index ? null : index
+function animateOpen(el: HTMLElement | null) {
+    if (!el) return
+    el.getAnimations?.().forEach((a) => a.cancel())
+
+    el.style.display = 'block'
+    el.style.overflow = 'hidden'
+
+    const targetHeight = el.scrollHeight
+
+    el.style.height = '0px'
+    el.style.opacity = '0'
+
+    void el.offsetHeight
+
+    animate(el, {
+        height: [0, targetHeight],
+        opacity: [0, 1],
+        duration: 300,
+        ease: 'outCubic',
+        onComplete: () => {
+            el.style.height = 'auto'
+            el.style.overflow = 'visible'
+        },
+    })
 }
+function animateClose(el: HTMLElement | null, done?: () => void) {
+    if (!el) { done?.(); return }
+    const startHeight = el.scrollHeight
+    el.style.overflow = 'hidden'
+    el.style.height = startHeight + 'px'
+    animate(el, {
+        height: [startHeight, 0],
+        opacity: [1, 0],
+        duration: 250,
+        ease: 'inCubic',
+        onComplete: () => {
+            el.style.display = 'none'
+            done?.()
+        },
+    })
+}
+
+function togglePanel(index: number) {
+    const newIndex = openPanel.value === index ? null : index
+    const prevEl = openPanel.value !== null ? termAnswerRefs[openPanel.value] : null
+
+    if (prevEl) {
+        animateClose(prevEl, () => {
+            openPanel.value = newIndex
+            if (newIndex !== null) {
+                nextTick(() => animateOpen(termAnswerRefs[newIndex]))
+            }
+        })
+    } else {
+        openPanel.value = newIndex
+        if (newIndex !== null) {
+            nextTick(() => animateOpen(termAnswerRefs[newIndex]))
+        }
+    }
+}
+
+function toggleItem(index: number) {
+    const newIndex = openIndex.value === index ? null : index
+    const prevEl = openIndex.value !== null ? helpAnswerRefs[openIndex.value] : null
+
+    if (prevEl) {
+        animateClose(prevEl, () => {
+            openIndex.value = newIndex
+            if (newIndex !== null) {
+                nextTick(() => animateOpen(helpAnswerRefs[newIndex]))
+            }
+        })
+    } else {
+        openIndex.value = newIndex
+        if (newIndex !== null) {
+            nextTick(() => animateOpen(helpAnswerRefs[newIndex]))
+        }
+    }
+}
+
+function selectCategory(catTitle: string) {
+    const prevEl = openIndex.value !== null ? helpAnswerRefs[openIndex.value] : null
+    if (prevEl) {
+        animateClose(prevEl, () => {
+            selectedCategory.value = catTitle
+            openIndex.value = null
+        })
+    } else {
+        selectedCategory.value = catTitle
+        openIndex.value = null
+    }
+}
+
+onMounted(() => {
+    nextTick(() => {
+        const el = termAnswerRefs[0]
+        if (el) {
+            el.style.display = 'block'
+            el.style.height = 'auto'
+            el.style.opacity = '1'
+        }
+    })
+})
 </script>
 
 <template>
@@ -450,14 +550,11 @@ function toggleItem(index: number) {
                                     :class="{ 'rotate-180': openPanel === i }" />
                             </button>
 
-                            <Transition enter-active-class="transition-all duration-300"
-                                leave-active-class="transition-all duration-300">
-                                <div v-show="openPanel === i" class="px-5 pb-5">
-                                    <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                                        {{ term.body }}
-                                    </div>
+                            <div :ref="el => termAnswerRefs[i] = el" style="display:none" class="px-5 pb-5">
+                                <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                                    {{ term.body }}
                                 </div>
-                            </Transition>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -476,8 +573,7 @@ function toggleItem(index: number) {
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-white border border-gray-200 rounded-md p-6">
                         <div class="space-y-2">
-                            <button v-for="cat in faqCategories" :key="cat.title"
-                                @click="selectedCategory = cat.title; openIndex = null"
+                            <button v-for="cat in faqCategories" :key="cat.title" @click="selectCategory(cat.title)"
                                 class="relative flex items-center w-full px-4 py-3 rounded-lg text-left transition-all duration-300"
                                 :class="selectedCategory === cat.title
                                     ? 'bg-[#176D37]/10 text-[#176D37] font-medium'
@@ -508,17 +604,13 @@ function toggleItem(index: number) {
                                     :class="{ 'rotate-180': openIndex === i }" />
                             </button>
 
-                            <Transition enter-active-class="transition-all duration-300"
-                                leave-active-class="transition-all duration-300">
-                                <div v-show="openIndex === i" class="px-5 pb-5">
-                                    <p class="text-sm text-gray-600 leading-relaxed">
-                                        {{ item.answer }}
-                                    </p>
-                                </div>
-                            </Transition>
+                            <div :ref="el => helpAnswerRefs[i] = el" style="display:none" class="px-5 pb-5">
+                                <p class="text-sm text-gray-600 leading-relaxed">
+                                    {{ item.answer }}
+                                </p>
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </template>
 
