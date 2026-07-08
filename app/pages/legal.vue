@@ -555,38 +555,41 @@ function toggleItem(index: number) {
                             </div>
                         </div>
 
-                        <form @submit.prevent="handleSubmit" class="space-y-5">
+                        <form @submit.prevent="handleSubmit" class="contactForm space-y-5">
                             <div class="grid sm:grid-cols-2 gap-5">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
-                                    <input v-model="contactForm.name" type="text" required
-                                        class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#176D37]/30 focus:border-[#176D37] transition-colors"
-                                        placeholder="Your name" />
+                                    <v-label>Full Name</v-label>
+                                    <v-text-field v-model="contactForm.name" placeholder="Your name" required
+                                        hide-details="auto" variant="outlined" color="primary" class="mt-2">
+                                    </v-text-field>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
-                                    <input v-model="contactForm.email" type="email" required
-                                        class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#176D37]/30 focus:border-[#176D37] transition-colors"
-                                        placeholder="you@example.com" />
+                                    <v-label>Email Address</v-label>
+                                    <v-text-field v-model="contactForm.email" type="email" placeholder="you@example.com"
+                                        required hide-details="auto" variant="outlined" color="primary" class="mt-2">
+                                    </v-text-field>
                                 </div>
                             </div>
+
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Subject</label>
-                                <input v-model="contactForm.subject" type="text"
-                                    class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#176D37]/30 focus:border-[#176D37] transition-colors"
-                                    placeholder="How can we help?" />
+                                <v-label>Subject</v-label>
+                                <v-text-field v-model="contactForm.subject" placeholder="How can we help?"
+                                    hide-details="auto" variant="outlined" color="primary" class="mt-2">
+                                </v-text-field>
                             </div>
+
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
-                                <textarea v-model="contactForm.message" required rows="5"
-                                    class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#176D37]/30 focus:border-[#176D37] transition-colors resize-none"
-                                    placeholder="Tell us more about your inquiry..."></textarea>
+                                <v-label>Message</v-label>
+                                <v-textarea v-model="contactForm.message"
+                                    placeholder="Tell us more about your inquiry..." required rows="5"
+                                    hide-details="auto" variant="outlined" color="primary" class="mt-2">
+                                </v-textarea>
                             </div>
-                            <v-btn class="px-6" variant="flat" color="primary" size="large" density="comfortable"
-                                :disabled="isSubmitting || !contactForm.name || !contactForm.email || !contactForm.message"
-                                :style="isSubmitting && !contactForm.name || !contactForm.email || !contactForm.message ? 'cursor: not-allowed; pointer-events: auto;' : ''">
-                                <v-icon v-if="isSubmitting" icon="mdi-loading" size="18" class="animate-spin" />
-                                <v-icon v-else icon="mdi-send-outline" size="18" />
+
+                            <v-btn color="primary" :loading="isSubmitting" block class="mt-2" variant="flat"
+                                size="large" :disabled="!contactForm.name || !contactForm.email || !contactForm.message"
+                                type="submit">
+                                <v-icon v-if="!isSubmitting" icon="mdi-send-outline" size="18" class="mr-2" />
                                 {{ isSubmitting ? 'Sending...' : 'Send Message' }}
                             </v-btn>
                         </form>
@@ -634,3 +637,15 @@ function toggleItem(index: number) {
 
     <Footer />
 </template>
+
+<style lang="scss">
+.contactForm {
+    .v-field__input {
+        padding-left: 14px;
+    }
+
+    .v-field__outline {
+        --v-field-border-width: 1px;
+    }
+}
+</style>
