@@ -3,8 +3,9 @@ import PharmacyStockMovement from '~/components/pharmacy/PharmacyStockMovement.v
 
 definePageMeta({
     layout: 'pharmacy',
-    middleware: ['auth', 'role', 'permission'],
+    middleware: ['auth', 'role', 'permission', 'plan'],
     role: 'pharmacy',
+    requiredFeature: 'pharmacy_module',
     permissions: ['stock-in.view'],
 })
 

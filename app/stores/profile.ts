@@ -88,6 +88,8 @@ export const useProfileStore = defineStore('profile', () => {
     const profile = computed(() => data.value?.profile ?? null)
     const roles = computed(() => data.value?.roles ?? [])
     const user = computed(() => data.value?.user ?? null)
+    const subscription = computed(() => data.value?.subscription ?? null)
+    const tenant = computed(() => data.value?.tenant ?? null)
 
     return {
         data,
@@ -97,6 +99,8 @@ export const useProfileStore = defineStore('profile', () => {
         profile,
         roles,
         user,
+        subscription,
+        tenant,
         fetchProfile,
         refreshProfile,
         clearProfile,

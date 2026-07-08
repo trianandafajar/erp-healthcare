@@ -25,6 +25,8 @@ type StockRow = {
     updated_at: string | null
 }
 
+import { requirePlanFeature } from "~~/server/utils/planGuard"
+
 function mapRow(row: StockRow): StockItem {
     return {
         id: row.id,
@@ -41,6 +43,7 @@ function mapRow(row: StockRow): StockItem {
 }
 
 export default defineEventHandler(async (event) => {
+    requirePlanFeature(event, 'pharmacy_module')
     const payload = await readBody<StockPayload>(event)
 
     if (!payload?.medicineName?.trim() || !payload?.dosage?.trim() || !payload?.supplier?.trim() || !payload?.batchNumber?.trim()) {

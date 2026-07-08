@@ -88,77 +88,60 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 
 const billing = ref('monthly')
 
+const { data: pricingData, error: pricingError } = await useFetch('/api/landingpage/pricing')
+
 const fallbackPlans = [
   {
-    title: 'Starter',
-    subtitle: 'Best for small clinics getting started',
-    price: 29,
-    yearly_price: 299,
+    title: 'Starter', subtitle: 'Best for small clinics getting started',
+    price: 29, yearly_price: 299,
     features: ['Up to 5 users', 'Basic patient registration', 'Medical records management', 'Email support'],
-    button_label: 'Start Free Trial',
-    button_link: '/register',
-    is_recommended: false,
-    badge_text: '',
+    button_label: 'Start Free Trial', button_link: '/register',
+    is_recommended: false, badge_text: '',
   },
   {
-    title: 'Basic',
-    subtitle: 'Perfect for growing practices',
-    price: 59,
-    yearly_price: 599,
+    title: 'Basic', subtitle: 'Perfect for growing practices',
+    price: 59, yearly_price: 599,
     features: ['Up to 15 users', 'Everything in Starter', 'Pharmacy integration', 'Appointment scheduling', 'Billing & invoicing', 'Priority email support'],
-    button_label: 'Get Started',
-    button_link: '/register',
-    is_recommended: false,
-    badge_text: '',
+    button_label: 'Get Started', button_link: '/register',
+    is_recommended: false, badge_text: '',
   },
   {
-    title: 'Professional',
-    subtitle: 'For established healthcare providers',
-    price: 99,
-    yearly_price: 999,
+    title: 'Professional', subtitle: 'For established healthcare providers',
+    price: 99, yearly_price: 999,
     features: ['Unlimited users', 'Everything in Basic', 'Advanced analytics dashboard', 'Multi-branch management', 'Lab integration', 'API access', 'Phone & chat support'],
-    button_label: 'Get Started',
-    button_link: '/register',
-    is_recommended: true,
-    badge_text: 'Most Popular',
+    button_label: 'Get Started', button_link: '/register',
+    is_recommended: true, badge_text: 'Most Popular',
   },
   {
-    title: 'Enterprise',
-    subtitle: 'For large hospital networks',
-    price: 199,
-    yearly_price: 1999,
+    title: 'Enterprise', subtitle: 'For large hospital networks',
+    price: 199, yearly_price: 1999,
     features: ['Unlimited everything', 'All Professional features', 'Custom integrations', 'Dedicated account manager', 'On-premise option', '24/7 priority support', 'SLA guarantee'],
-    button_label: 'Contact Sales',
-    button_link: '/contact',
-    is_recommended: false,
-    badge_text: '',
+    button_label: 'Contact Sales', button_link: '/contact',
+    is_recommended: false, badge_text: '',
   },
 ]
 
-const { data, error } = await useFetch('/api/landingpage/pricing')
+const plans = computed(() =>
+  pricingError.value || !pricingData.value?.plans?.length ? fallbackPlans : pricingData.value.plans
+)
 
-const plans = computed(() => {
-  if (error.value || !data.value?.plans?.length) return fallbackPlans
-  return data.value.plans
-})
-
-function formatNumber(n) {
+function formatNumber(n: number) {
   return Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
-function displayPrice(plan) {
+function displayPrice(plan :any) {
   if (billing.value === 'yearly' && plan.yearly_price) {
     return formatNumber(plan.yearly_price / 12)
   }
   return formatNumber(plan.price)
 }
 
-function savingsPercent(plan) {
+function savingsPercent(plan: any) {
   if (!plan.yearly_price || !plan.price) return 0
   const monthlyTotal = plan.price * 12
   return Math.round((1 - plan.yearly_price / monthlyTotal) * 100)

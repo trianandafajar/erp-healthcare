@@ -1,8 +1,9 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'nurse',
-    middleware: ['auth', 'permission'],
+    middleware: ['auth', 'permission', 'plan'],
     permissions: ['patient.view'],
+    requiredFeature: 'nurse_module',
 })
 
 const route = useRoute()

@@ -3,8 +3,9 @@ import PharmacyVerification from '~/components/pharmacy/PharmacyVerification.vue
 
 definePageMeta({
     layout: 'pharmacy',
-    middleware: ['auth', 'role', 'permission'],
+    middleware: ['auth', 'role', 'permission', 'plan'],
     role: 'pharmacy',
+    requiredFeature: 'pharmacy_module',
     permissions: ['verification.view'],
 })
 

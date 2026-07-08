@@ -1,4 +1,7 @@
+import { requirePlanFeature } from "~~/server/utils/planGuard"
+
 export default defineEventHandler(async (event) => {
+    requirePlanFeature(event, 'pharmacy_module')
     const id = getRouterParam(event, 'id')
 
     if (!id) {

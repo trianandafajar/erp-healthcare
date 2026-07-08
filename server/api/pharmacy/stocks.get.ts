@@ -1,4 +1,5 @@
 import type { StockItem } from '~/types/pharmacy'
+import { requirePlanFeature } from "~~/server/utils/planGuard"
 
 type StockRow = {
     id: string
@@ -14,7 +15,8 @@ type StockRow = {
     updated_at: string | null
 }
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+    requirePlanFeature(event, 'pharmacy_module')
     const admin = supabaseAdmin()
 
     const { data, error } = await admin

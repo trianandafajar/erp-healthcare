@@ -1,8 +1,9 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['auth', 'permission', 'plan'],
     permissions: ['report.view'],
+    requiredFeature: 'reports',
 })
 
 const now = new Date()

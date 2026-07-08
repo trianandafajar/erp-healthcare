@@ -3,8 +3,9 @@ import PharmacyDispensing from '~/components/pharmacy/PharmacyDispensing.vue'
 
 definePageMeta({
     layout: 'pharmacy',
-    middleware: ['auth', 'role', 'permission'],
+    middleware: ['auth', 'role', 'permission', 'plan'],
     role: 'pharmacy',
+    requiredFeature: 'pharmacy_module',
     permissions: ['dispensing.view'],
 })
 useSeoMeta({

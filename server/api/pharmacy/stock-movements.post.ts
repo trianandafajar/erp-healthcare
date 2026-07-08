@@ -11,7 +11,10 @@ type MovementPayload = {
     reason?: string
 }
 
+import { requirePlanFeature } from "~~/server/utils/planGuard"
+
 export default defineEventHandler(async (event) => {
+    requirePlanFeature(event, 'pharmacy_module')
     const payload = await readBody<MovementPayload>(event)
 
     if (!payload?.type || !payload?.medicineName?.trim() || !payload?.dosage?.trim() || !payload?.quantity) {

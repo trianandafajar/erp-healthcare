@@ -4,6 +4,8 @@ export const useAuthStore = defineStore('auth', () => {
     const permissions = ref<string[]>([])
     const tenantId = ref<string | null>(null)
     const tenantSlug = ref<string | null>(null)
+    const subscriptionPlan = ref<string>('starter')
+    const subscriptionStatus = ref<string | null>(null)
 
     function setUser(payload: {
         user: any
@@ -11,12 +13,16 @@ export const useAuthStore = defineStore('auth', () => {
         permissions: string[]
         tenantId?: string | null
         tenantSlug?: string | null
+        subscriptionPlan?: string
+        subscriptionStatus?: string | null
     }) {
         user.value = payload.user
         role.value = payload.role
         permissions.value = payload.permissions
         tenantId.value = payload.tenantId ?? null
         tenantSlug.value = payload.tenantSlug ?? null
+        subscriptionPlan.value = payload.subscriptionPlan ?? 'starter'
+        subscriptionStatus.value = payload.subscriptionStatus ?? null
     }
 
     function hasPermission(permission: string): boolean {
@@ -33,12 +39,14 @@ export const useAuthStore = defineStore('auth', () => {
         permissions.value = []
         tenantId.value = null
         tenantSlug.value = null
+        subscriptionPlan.value = 'starter'
+        subscriptionStatus.value = null
     }
 
     const isAuthenticated = computed(() => !!user.value)
 
     return {
-        user, role, permissions, tenantId, tenantSlug, isAuthenticated,
+        user, role, permissions, tenantId, tenantSlug, subscriptionPlan, subscriptionStatus, isAuthenticated,
         setUser, hasPermission, hasAnyPermission, clearUser
     }
 })

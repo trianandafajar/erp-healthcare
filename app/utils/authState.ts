@@ -78,6 +78,8 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
       permissions,
       tenantId,
       tenantSlug,
+      subscriptionPlan: currentProfile.subscription?.plan ?? 'starter',
+      subscriptionStatus: currentProfile.subscription?.status ?? null,
     })
 
     return {

@@ -10,7 +10,10 @@ type MovementPayload = {
     reason?: string
 }
 
+import { requirePlanFeature } from "~~/server/utils/planGuard"
+
 export default defineEventHandler(async (event) => {
+    requirePlanFeature(event, 'pharmacy_module')
     const id = getRouterParam(event, 'id')
     const payload = await readBody<MovementPayload>(event)
 

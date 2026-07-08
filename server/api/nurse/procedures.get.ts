@@ -1,4 +1,7 @@
+import { requirePlanFeature } from "~~/server/utils/planGuard"
+
 export default defineEventHandler(async (event) => {
+    requirePlanFeature(event, 'nurse_module')
     const supabase = serverSupabase(event)
     const admin = supabaseAdmin()
 

@@ -1,4 +1,7 @@
+import { requirePlanFeature } from "~~/server/utils/planGuard"
+
 export default defineEventHandler(async (event) => {
+    requirePlanFeature(event, 'billing')
     const admin = supabaseAdmin()
     const body = await readBody(event)
 

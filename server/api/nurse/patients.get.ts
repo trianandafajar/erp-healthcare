@@ -1,6 +1,8 @@
 import { getTenantContext } from "~~/server/utils/getTenantContext"
+import { requirePlanFeature } from "~~/server/utils/planGuard"
 
 export default defineEventHandler(async (event: any) => {
+  requirePlanFeature(event, 'nurse_module')
   const { admin, tenantId, user } = await getTenantContext(event);
 
   const { data: roleData, error: roleError } = await admin

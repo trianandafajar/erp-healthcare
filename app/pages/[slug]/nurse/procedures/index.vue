@@ -3,8 +3,9 @@ import NurseProcedureSchedule from '~/components/nurse/NurseProcedureSchedule.vu
 
 definePageMeta({
     layout: 'nurse',
-    middleware: ['auth', 'role', 'permission'],
+    middleware: ['auth', 'role', 'permission', 'plan'],
     role: 'nurse',
+    requiredFeature: 'nurse_module',
     permissions: ['procedures.view'],
 })
 

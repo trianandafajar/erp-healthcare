@@ -50,6 +50,7 @@ const sidebarMenu = shallowRef<MenuItem[]>([
    { title: 'Sponsors', icon: PictureOutlined, to: `/super-admin/landingpage/logos` },
    { title: 'Testimonials', icon: CommentOutlined, to: `/super-admin/landingpage/testimonials` },
    { title: 'Pricing', icon: DollarOutlined, to: `/super-admin/landingpage/pricing` },
+   { title: 'Plan Features', icon: DollarOutlined, to: `/super-admin/plan-features` },
 
    { header: 'System' },
    { title: 'Call Bookings', icon: CalendarOutlined, to: `/super-admin/call-bookings` },

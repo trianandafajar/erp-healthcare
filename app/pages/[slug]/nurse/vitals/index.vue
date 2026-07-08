@@ -3,8 +3,9 @@ import NurseVitalSigns from '~/components/nurse/NurseVitalSigns.vue'
 
 definePageMeta({
     layout: 'nurse',
-    middleware: ['auth', 'role', 'permission'],
+    middleware: ['auth', 'role', 'permission', 'plan'],
     role: 'nurse',
+    requiredFeature: 'nurse_module',
     permissions: ['vitals.view'],
 })
 

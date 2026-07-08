@@ -35,8 +35,10 @@ function normalizeStatus(status: string | null | undefined): PrescriptionStatus 
 }
 
 import { getTenantContext } from "~~/server/utils/getTenantContext"
+import { requirePlanFeature } from "~~/server/utils/planGuard"
 
 export default defineEventHandler(async (event: any) => {
+    requirePlanFeature(event, 'pharmacy_module')
     const { admin, tenantId } = await getTenantContext(event)
 
     const { data, error } = await admin

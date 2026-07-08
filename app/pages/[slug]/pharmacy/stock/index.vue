@@ -3,8 +3,9 @@ import PharmacyStock from '~/components/pharmacy/PharmacyStock.vue'
 
 definePageMeta({
     layout: 'pharmacy',
-    middleware: ['auth', 'role', 'permission'],
+    middleware: ['auth', 'role', 'permission', 'plan'],
     role: 'pharmacy',
+    requiredFeature: 'pharmacy_module',
     permissions: ['stock.view'],
 })
 
