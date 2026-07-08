@@ -11,11 +11,11 @@
       </div>
       <template v-else>
         <section class="relative min-h-screen w-full overflow-hidden bg-[#0a0a0a] flex items-center py-20 md:py-0">
-          <div class="relative z-10 max-w-6xl w-full mx-auto px-6">
+          <div class="relative z-10 max-w-7xl w-full mx-auto px-6">
             <div class="grid md:grid-cols-2 gap-12 md:gap-8 items-center">
               <div class="min-w-0">
                 <h1
-                  class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.12] bg-gradient-to-r from-emerald-500 via-green-400 to-[#176D37] bg-clip-text text-transparent break-words">
+                  class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.25] pb-2 bg-gradient-to-r from-emerald-500 via-green-400 to-[#176D37] bg-clip-text text-transparent break-words">
                   {{ industry.detail?.hero?.title || industry.title }}
                 </h1>
 

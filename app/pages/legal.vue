@@ -246,7 +246,7 @@ function toggleItem(index: number) {
     <Header always-shadow />
 
     <div class="min-h-screen bg-gray-50 pt-16 md:pt-[72px]">
-        <div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
+        <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
             <!-- navigation -->
             <div class="flex flex-wrap gap-2 mb-8 md:mb-10">
                 <button v-for="tab in tabs" :key="tab.value"

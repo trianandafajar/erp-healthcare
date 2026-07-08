@@ -1,6 +1,6 @@
 <template>
   <section class="relative py-16 md:py-24 bg-white overflow-hidden">
-    <div class="max-w-6xl mx-auto px-6">
+    <div class="max-w-7xl mx-auto px-6">
       <div class="text-center max-w-3xl mx-auto mb-12">
         <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
           {{ title }} <span :style="{ color: primaryColor }">{{ titleHighlight }}</span> {{ titleSuffix }}
