@@ -71,7 +71,7 @@ const tabs = [
 
 const features = {
   registration: {
-    image: '/landingpage/service-slide-1.png',
+    image: '/landingpage/features/25.png',
     items: [
       { icon: 'mdi-lightning-bolt', title: 'Fast check-in', description: 'Reduce wait times with digital self-service kiosks and online pre-registration.' },
       { icon: 'mdi-database', title: 'Unified patient database', description: 'All patient data in one place — demographics, insurance, and medical history.' },
@@ -79,7 +79,7 @@ const features = {
     ],
   },
   medical: {
-    image: '/landingpage/service-slide-2.png',
+    image: '/landingpage/features/26.png',
     items: [
       { icon: 'mdi-file-document', title: 'Digital health records', description: 'Secure, accessible patient records with version history and audit trails.' },
       { icon: 'mdi-stethoscope', title: 'Diagnosis & treatment plans', description: 'Integrated SOAP notes, ICD-10 coding, and care plan management.' },
@@ -87,7 +87,7 @@ const features = {
     ],
   },
   pharmacy: {
-    image: '/landingpage/service-slide-3.png',
+    image: '/landingpage/features/27.png',
     items: [
       { icon: 'mdi-prescription', title: 'E-prescriptions', description: 'Digital prescriptions sent directly to the pharmacy with dosage validation.' },
       { icon: 'mdi-package-variant', title: 'Inventory tracking', description: 'Real-time stock monitoring with automatic reorder alerts and expiry tracking.' },
@@ -95,7 +95,7 @@ const features = {
     ],
   },
   billing: {
-    image: '/landingpage/service-slide-1.png',
+    image: '/landingpage/features/28.png',
     items: [
       { icon: 'mdi-file-check', title: 'Automated invoicing', description: 'Generate invoices automatically from consultations, procedures, and medications.' },
       { icon: 'mdi-shield-check', title: 'Insurance claims', description: 'Submit and track insurance claims with BPJS/private insurance integration.' },
