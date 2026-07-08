@@ -15,10 +15,10 @@
               class="inline-flex items-center px-7 py-3.5 text-sm font-bold text-gray-900 bg-white rounded-full hover:bg-gray-100 transition-all hover:shadow-xl">
               Get Free Demo
             </NuxtLink>
-            <a href="#features"
+            <NuxtLink to="/schedule-call"
               class="inline-flex items-center px-7 py-3.5 text-sm font-bold text-white border border-[#176D37] rounded-full hover:bg-white/10 transition-all">
               Schedule a Call
-            </a>
+            </NuxtLink>
           </div>
         </div>
       </div>

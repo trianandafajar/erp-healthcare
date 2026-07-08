@@ -12,6 +12,7 @@ import {
   HistoryOutlined,
   PictureOutlined,
   MailOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons-vue';
 import NavGroup from './NavGroup/NavGroup.vue';
 import NavItem from './NavItem/NavItem.vue';
@@ -51,6 +52,7 @@ const sidebarMenu = shallowRef<MenuItem[]>([
    { title: 'Pricing', icon: DollarOutlined, to: `/super-admin/landingpage/pricing` },
 
    { header: 'System' },
+   { title: 'Call Bookings', icon: CalendarOutlined, to: `/super-admin/call-bookings` },
    { title: 'Contact Inquiries', icon: MailOutlined, to: `/super-admin/contact-inquiries` },
    { title: 'Activity Log', icon: HistoryOutlined, to: `/super-admin/activity-log` },
 ]);
