@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
 const route = useRoute()
@@ -20,7 +20,44 @@ const billing = (route.query.billing as string) || 'monthly'
 
 const firstRules = [(v: string) => !!v || 'First name is required']
 const lastRules = [(v: string) => !!v || 'Last name is required']
-const tenantRules = [(v: string) => !!v || 'The name of the clinic or hospital must be filled in.']
+const tenantRules = [(v: string) => !!v || 'Clinic or hospital name is required']
+
+const passwordRules = [
+    (v: string) => !!v || 'Password is required',
+    (v: string) => v.length >= 8 || 'Minimum 8 characters',
+    (v: string) => /[A-Z]/.test(v) || 'Must contain at least 1 uppercase letter',
+    (v: string) => /[0-9]/.test(v) || 'Must contain at least 1 number',
+    (v: string) => /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]/;]/.test(v) || 'Must contain at least 1 special character (@ # $ etc.)',
+]
+
+const confirmPasswordRules = [
+    (v: string) => !!v || 'Please confirm your password',
+    (v: string) => v === password.value || 'Passwords do not match',
+]
+
+const passwordScore = computed(() => {
+    const v = password.value
+    if (!v) return 0
+
+    let score = 0
+    if (v.length >= 8) score++
+    if (v.length >= 12) score++
+    if (/[A-Z]/.test(v)) score++
+    if (/[a-z]/.test(v)) score++
+    if (/[0-9]/.test(v)) score++
+    if (/[!@#$%^&*(),.?":{}|<>_\-+=~`[\]/;]/.test(v)) score++
+
+    return score
+})
+
+const passwordStrength = computed(() => {
+    const score = passwordScore.value
+
+    if (!password.value) return { label: '', color: '', percent: 0 }
+    if (score <= 2) return { label: 'Weak', color: 'error', percent: 33 }
+    if (score <= 4) return { label: 'Medium', color: 'warning', percent: 66 }
+    return { label: 'Strong', color: 'success', percent: 100 }
+})
 
 async function redirectToCheckout(tenantId: string, planId: string) {
     try {
@@ -53,7 +90,7 @@ async function redirectToCheckout(tenantId: string, planId: string) {
 
 async function register() {
     if (password.value !== confirmPassword.value) {
-        errorMsg.value = 'Password tidak sama'
+        errorMsg.value = 'Passwords do not match'
         return
     }
 
@@ -78,7 +115,7 @@ async function register() {
             await navigateTo('/login')
         }
     } catch (err: any) {
-        errorMsg.value = err.data?.message || 'Register gagal'
+        errorMsg.value = err.data?.message || 'Registration failed'
     } finally {
         loading.value = false
     }
@@ -119,8 +156,8 @@ async function register() {
 
         <div class="mb-6">
             <v-label>Password</v-label>
-            <v-text-field v-model="password" placeholder="*****" required variant="outlined" color="primary"
-                hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2">
+            <v-text-field v-model="password" :rules="passwordRules" placeholder="*****" required variant="outlined"
+                color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
                     <v-btn color="secondary" icon rounded variant="text" @click="showPassword = !showPassword">
                         <EyeInvisibleOutlined v-if="!showPassword" />
@@ -128,12 +165,21 @@ async function register() {
                     </v-btn>
                 </template>
             </v-text-field>
+
+            <div v-if="password" class="mt-2">
+                <v-progress-linear :model-value="passwordStrength.percent" :color="passwordStrength.color" height="6"
+                    rounded></v-progress-linear>
+                <span class="text-caption font-weight-medium" :class="`text-${passwordStrength.color}`">
+                    {{ passwordStrength.label }}
+                </span>
+            </div>
         </div>
 
         <div class="mb-6">
             <v-label>Confirm Password</v-label>
-            <v-text-field v-model="confirmPassword" placeholder="*****" required variant="outlined" color="primary"
-                hide-details="auto" :type="showConfirmPassword ? 'text' : 'password'" class="mt-2">
+            <v-text-field v-model="confirmPassword" :rules="confirmPasswordRules" placeholder="*****" required
+                variant="outlined" color="primary" hide-details="auto" :type="showConfirmPassword ? 'text' : 'password'"
+                class="mt-2">
                 <template v-slot:append-inner>
                     <v-btn color="secondary" icon rounded variant="text"
                         @click="showConfirmPassword = !showConfirmPassword">
