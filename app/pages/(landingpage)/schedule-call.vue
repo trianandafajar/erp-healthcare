@@ -1,17 +1,19 @@
 <template>
   <div class="schedule-page">
-    <Header />
-    <section class="py-16 md:py-24">
-      <div class="container mx-auto px-4">
+    <Header always-shadow/>
+    <section class="py-16 md:py-32">
+      <div class="container mx-auto px-4 pt-12">
         <div class="text-center max-w-2xl mx-auto mb-12">
           <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Schedule a Call</h1>
-          <p class="mt-3 text-gray-500 leading-relaxed">Pick a date and time that works best for you. We'll get back to
+          <p class="mt-3 text-gray-500 leading-relaxed">Pick a date that works best for you. We'll get back to
             you shortly.</p>
         </div>
 
         <div v-if="submitted" class="max-w-lg mx-auto text-center py-16">
-          <div class="text-5xl mb-4">🎉</div>
-          <h2 class="text-2xl font-bold text-gray-900">You're All Set!</h2>
+          <div class="w-16 h-16 rounded-full bg-[#176D37]/10 flex items-center justify-center mx-auto mb-5">
+            <v-icon icon="mdi-check-circle-outline" size="36" color="#176D37" />
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900">Booking Confirmed</h2>
           <p class="mt-3 text-gray-500">We've received your booking request for <strong>{{ formattedBooking }}</strong>.
             Our team will confirm via email shortly.</p>
           <NuxtLink to="/"
@@ -20,105 +22,102 @@
           </NuxtLink>
         </div>
 
-        <div v-else class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div class="lg:col-span-3">
-            <div class="bg-white rounded-2xl border border-gray-200 p-6">
-              <div class="schedule-calendar-shell">
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-lg font-semibold text-gray-900">Select a Date</h3>
-                  <div class="flex items-center gap-2">
-                    <button @click="calendarApi?.prev()"
-                      class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button @click="calendarApi?.next()"
-                      class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    <span class="text-sm font-semibold text-gray-700 w-32 text-center">{{ calendarTitle }}</span>
-                  </div>
-                </div>
-                <FullCalendar ref="calendarRef" :options="calendarOptions" />
-              </div>
-            </div>
-          </div>
-
-          <div class="lg:col-span-2">
-            <div v-if="!selectedDate" class="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-              <div class="text-gray-400 text-4xl mb-3">
-                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <p class="text-gray-500">Select a date from the calendar to see available time slots.</p>
-            </div>
-
-            <div v-else class="bg-white rounded-2xl border border-gray-200 p-6">
-              <div class="mb-6">
-                <div class="text-sm text-gray-500 uppercase tracking-wide font-medium">Selected Date</div>
-                <div class="text-xl font-bold text-gray-900 mt-1">{{ formattedSelectedDate }}</div>
-              </div>
-
-              <div>
-                <div class="text-sm text-gray-500 uppercase tracking-wide font-medium mb-3">Available Times</div>
-                <div class="grid grid-cols-2 gap-2">
-                  <button v-for="slot in timeSlots" :key="slot"
-                    @click="selectedTime = slot"
-                    :class="[
-                      'px-4 py-2.5 text-sm font-medium rounded-lg border transition-all',
-                      selectedTime === slot
-                        ? 'bg-[#176D37] text-white border-[#176D37]'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-[#176D37] hover:text-[#176D37]'
-                    ]">
-                    {{ slot }}
+        <div v-else class="max-w-4xl mx-auto">
+          <div class="bg-white rounded-2xl border border-gray-200 p-6">
+            <div class="schedule-calendar-shell">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Select a Date</h3>
+                <div class="flex items-center gap-2">
+                  <button @click="calendarApi?.prev()"
+                    class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600">
+                    <v-icon icon="mdi-chevron-left" size="20" />
                   </button>
+                  <button @click="calendarApi?.next()"
+                    class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600">
+                    <v-icon icon="mdi-chevron-right" size="20" />
+                  </button>
+                  <span class="text-sm font-semibold text-gray-700 w-32 text-center">{{ calendarTitle }}</span>
                 </div>
               </div>
-
-              <div v-if="selectedTime" class="mt-8 pt-6 border-t border-gray-100">
-                <form @submit.prevent="submitBooking">
-                  <div class="space-y-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                      <input v-model="form.name" type="text" required
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
-                        placeholder="Your name" />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                      <input v-model="form.email" type="email" required
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
-                        placeholder="your@email.com" />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                      <input v-model="form.phone" type="tel"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
-                        placeholder="+62 xxx" />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                      <textarea v-model="form.message" rows="3"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
-                        placeholder="Tell us about your needs"></textarea>
-                    </div>
-                  </div>
-                  <button type="submit" :disabled="submitting"
-                    class="mt-6 w-full px-6 py-3 text-sm font-bold text-white bg-[#176D37] rounded-full hover:bg-[#176D37]/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                    {{ submitting ? 'Submitting...' : 'Confirm Booking' }}
-                  </button>
-                </form>
-              </div>
+              <FullCalendar ref="calendarRef" :options="calendarOptions" />
             </div>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Booking Modal -->
+    <v-dialog v-model="showModal" max-width="520" scrollable>
+      <v-card rounded="lg">
+        <v-card-title class="d-flex align-center justify-space-between py-4 px-6">
+          <div>
+            <div class="text-xs text-gray-500 uppercase tracking-wide font-medium">Selected Date</div>
+            <div class="text-base font-bold text-gray-900">{{ formattedSelectedDate }}</div>
+          </div>
+          <v-btn icon variant="text" size="small" @click="closeModal">
+            <v-icon icon="mdi-close" size="20" />
+          </v-btn>
+        </v-card-title>
+
+        <v-divider />
+
+        <v-card-text class="px-6 py-5">
+          <div class="mb-6">
+            <div class="text-sm text-gray-500 uppercase tracking-wide font-medium mb-3">Available Times</div>
+            <div v-if="timeSlots.length === 0" class="text-sm text-gray-400 py-4 text-center">
+              No available time slots for this date.
+            </div>
+            <div v-else class="grid grid-cols-3 gap-2">
+              <button v-for="slot in timeSlots" :key="slot" type="button" @click="selectedTime = slot" :class="[
+                'px-3 py-2 text-sm font-medium rounded-lg border transition-all',
+                selectedTime === slot
+                  ? 'bg-[#176D37] text-white border-[#176D37]'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-[#176D37] hover:text-[#176D37]'
+              ]">
+                {{ slot }}
+              </button>
+            </div>
+          </div>
+
+          <Transition enter-active-class="transition-all duration-300" leave-active-class="transition-all duration-200">
+            <form v-if="selectedTime" @submit.prevent="submitBooking" class="pt-5 border-t border-gray-100">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                  <input v-model="form.name" type="text" required
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
+                    placeholder="Your name" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input v-model="form.email" type="email" required
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
+                    placeholder="your@email.com" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input v-model="form.phone" type="tel"
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
+                    placeholder="+62 xxx" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                  <textarea v-model="form.message" rows="3"
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
+                    placeholder="Tell us about your needs"></textarea>
+                </div>
+              </div>
+              <button type="submit" :disabled="submitting"
+                class="mt-6 w-full px-6 py-3 text-sm font-bold text-white bg-[#176D37] rounded-md hover:bg-[#176D37]/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                <v-icon v-if="submitting" icon="mdi-loading" size="18" class="animate-spin" />
+                {{ submitting ? 'Submitting...' : 'Confirm Booking' }}
+              </button>
+            </form>
+          </Transition>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
     <Footer />
   </div>
 </template>
@@ -140,6 +139,7 @@ const selectedDate = ref<string | null>(null)
 const selectedTime = ref<string | null>(null)
 const submitting = ref(false)
 const submitted = ref(false)
+const showModal = ref(false)
 
 const form = reactive({
   name: '',
@@ -194,6 +194,12 @@ function handleDateClick(info: { dateStr: string; date: Date }) {
 
   selectedDate.value = info.dateStr
   selectedTime.value = null
+  showModal.value = true
+}
+
+function closeModal() {
+  showModal.value = false
+  selectedTime.value = null
 }
 
 function handleDatesSet(info: { view: { title: string } }) {
@@ -217,10 +223,6 @@ const calendarOptions = computed(() => ({
   },
 }))
 
-watch(selectedDate, () => {
-  selectedTime.value = null
-})
-
 async function submitBooking() {
   if (!selectedDate.value || !selectedTime.value || !form.name || !form.email) return
   submitting.value = true
@@ -237,6 +239,7 @@ async function submitBooking() {
         booking_time: selectedTime.value,
       },
     })
+    showModal.value = false
     submitted.value = true
   } catch (e) {
     console.error('Booking failed:', e)
@@ -263,18 +266,18 @@ async function submitBooking() {
 
 .schedule-calendar-shell :deep(.fc .fc-daygrid-day-frame) {
   cursor: pointer;
-  min-height: 70px;
+  min-height: 90px;
 }
 
 .schedule-calendar-shell :deep(.fc .fc-daygrid-day-number) {
-  padding: 6px 8px;
-  font-size: 0.85rem;
+  padding: 8px 10px;
+  font-size: 0.9rem;
   font-weight: 500;
   color: #374151;
 }
 
 .schedule-calendar-shell :deep(.fc .fc-col-header-cell-cushion) {
-  padding: 10px 0;
+  padding: 12px 0;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -285,8 +288,8 @@ async function submitBooking() {
 .schedule-calendar-shell :deep(.fc .fc-day-today .fc-daygrid-day-number) {
   background: rgba(23, 109, 55, 0.1);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
