@@ -1,4 +1,5 @@
 import { getTenantContext } from "~~/server/utils/getTenantContext"
+import { requirePlanLimit } from "~~/server/utils/planGuard"
 
 export default defineEventHandler(async (event: any) => {
     const { admin, user, tenantId } = await getTenantContext(event)
@@ -6,6 +7,13 @@ export default defineEventHandler(async (event: any) => {
     const { name, code, description } = await readBody(event)
 
     if (!name) throw createError({ statusCode: 400, message: 'Name is required' })
+
+    const { count } = await admin
+        .from('departments')
+        .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', tenantId)
+
+    await requirePlanLimit(event, 'max_departments', count ?? 0)
 
     const { data, error } = await admin
         .from('departments')
