@@ -131,126 +131,136 @@ async function submitPasswordChange() {
     <v-row>
         <!-- Left: Avatar card -->
         <v-col cols="12" md="4">
-            <v-card rounded="md" class="text-center pa-6">
-                <div class="d-flex justify-center mb-4">
-                    <v-hover v-slot="{ isHovering, props: hoverProps }">
-                        <v-avatar v-bind="hoverProps" size="96" :color="profile?.avatar_url ? undefined : 'primary'"
-                            variant="tonal" style="cursor: pointer; position: relative" @click="triggerAvatarUpload">
-                            <v-img v-if="profile?.avatar_url" :src="avatarUrl" cover />
-                            <span v-else class="text-h5 font-weight-bold">
-                                {{ getInitials(profile?.full_name ?? '') }}
-                            </span> 
+            <v-card rounded="md" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
+                <v-card elevation="0" class="text-center pa-6">
+                    <div class="d-flex justify-center mb-4">
+                        <v-hover v-slot="{ isHovering, props: hoverProps }">
+                            <v-avatar v-bind="hoverProps" size="96" :color="profile?.avatar_url ? undefined : 'primary'"
+                                variant="tonal" style="cursor: pointer; position: relative"
+                                @click="triggerAvatarUpload">
+                                <v-img v-if="profile?.avatar_url" :src="avatarUrl" cover />
+                                <span v-else class="text-h5 font-weight-bold">
+                                    {{ getInitials(profile?.full_name ?? '') }}
+                                </span>
 
-                            <v-overlay :model-value="isHovering || isUploadingAvatar" contained
-                                class="align-center justify-center">
-                                <v-progress-circular v-if="isUploadingAvatar" indeterminate size="24" color="white" />
-                                <v-icon v-else icon="mdi-camera" color="white" size="28" />
-                            </v-overlay>
-                        </v-avatar>
-                    </v-hover>
-                </div>
+                                <v-overlay :model-value="isHovering || isUploadingAvatar" contained
+                                    class="align-center justify-center">
+                                    <v-progress-circular v-if="isUploadingAvatar" indeterminate size="24"
+                                        color="white" />
+                                    <v-icon v-else icon="mdi-camera" color="white" size="28" />
+                                </v-overlay>
+                            </v-avatar>
+                        </v-hover>
+                    </div>
 
-                <p class="text-h6 font-weight-medium mb-1">{{ profile?.full_name ?? '-' }}</p>
-                <p class="text-caption text-medium-emphasis mb-3">{{ profile?.email }}</p>
+                    <p class="text-h6 font-weight-medium mb-1">{{ profile?.full_name ?? '-' }}</p>
+                    <p class="text-caption text-medium-emphasis mb-3">{{ profile?.email }}</p>
 
-                <div class="d-flex justify-center flex-wrap ga-1 mb-2">
-                    <v-chip size="small" :color="profile?.status === 'active' ? 'success' : 'secondary'"
-                        variant="tonal">
-                        {{ profile?.status ?? 'inactive' }}
-                    </v-chip>
-                    <v-chip v-for="role in roles" :key="role.id" size="small" variant="outlined">
-                        {{ role.label }}
-                    </v-chip>
-                </div>
+                    <div class="d-flex justify-center flex-wrap ga-1 mb-2">
+                        <v-chip size="small" :color="profile?.status === 'active' ? 'success' : 'secondary'"
+                            variant="tonal">
+                            {{ profile?.status ?? 'inactive' }}
+                        </v-chip>
+                        <v-chip v-for="role in roles" :key="role.id" size="small" variant="outlined">
+                            {{ role.label }}
+                        </v-chip>
+                    </div>
 
-                <p class="text-caption text-medium-emphasis mt-2">Click photo to change</p>
+                    <p class="text-caption text-medium-emphasis mt-2">Click photo to change</p>
+                </v-card>
             </v-card>
         </v-col>
 
         <!-- Right: Forms -->
         <v-col cols="12" md="8">
             <!-- Profile info -->
-            <v-card rounded="md" class="mb-4">
-                <v-card-item>
-                    <v-card-title class="text-subtitle-1 font-weight-medium">
-                        <UserOutlined class="mr-2" style="font-size: 14px" />
-                        Profile Information
-                    </v-card-title>
-                </v-card-item>
+            <v-card rounded="md" class="mb-4" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
+                <v-card elevation="0">
+                    <v-card-item>
+                        <v-card-title class="text-subtitle-1 font-weight-medium">
+                            <UserOutlined class="mr-2" style="font-size: 14px" />
+                            Profile Information
+                        </v-card-title>
+                    </v-card-item>
 
-                <v-divider />
+                    <v-divider />
 
-                <div class="pa-4">
-                    <v-alert v-if="saveSuccess" type="success" variant="tonal" density="compact" class="mb-4">
-                        Profile updated successfully
-                    </v-alert>
+                    <div class="pa-4">
+                        <v-alert v-if="saveSuccess" type="success" variant="tonal" density="compact" class="mb-4">
+                            Profile updated successfully
+                        </v-alert>
 
-                    <v-text-field v-model="form.full_name" label="Full Name" variant="outlined" density="comfortable"
-                        hide-details="auto" class="mb-3" />
+                        <v-text-field v-model="form.full_name" label="Full Name" variant="outlined"
+                            density="comfortable" hide-details="auto" class="mb-3" />
 
-                    <v-text-field :model-value="profile?.email" label="Email" variant="outlined" density="comfortable"
-                        hide-details="auto" readonly :prepend-inner-icon="MailOutlined">
-                        <template #append-inner>
-                            <v-chip size="x-small" variant="tonal" color="secondary">Read only</v-chip>
-                        </template>
-                    </v-text-field>
-                </div>
+                        <v-text-field :model-value="profile?.email" label="Email" variant="outlined"
+                            density="comfortable" hide-details="auto" readonly :prepend-inner-icon="MailOutlined">
+                            <template #append-inner>
+                                <v-chip size="x-small" variant="tonal" color="secondary">Read only</v-chip>
+                            </template>
+                        </v-text-field>
+                    </div>
 
-                <v-divider />
-                <div class="pa-4 d-flex justify-end">
-                    <v-btn variant="flat" color="primary" :loading="isSaving" @click="saveProfile">
-                        <SaveOutlined class="v-icon--start" /> Save changes
-                    </v-btn>
-                </div>
+                    <v-divider />
+                    <div class="pa-4 d-flex justify-end">
+                        <v-btn variant="flat" color="primary" :loading="isSaving" @click="saveProfile">
+                            <SaveOutlined class="v-icon--start" /> Save changes
+                        </v-btn>
+                    </div>
+                </v-card>
             </v-card>
 
             <!-- Change password -->
-            <v-card rounded="md">
-                <div class="d-flex align-center justify-space-between pa-4" style="cursor: pointer"
-                    @click="togglePasswordPanel">
-                    <div class="d-flex align-center ga-2">
-                        <LockOutlined style="font-size: 16px" />
-                        <span class="text-subtitle-1 font-weight-medium">Change Password</span>
-                    </div>
-                    <v-icon :icon="showPasswordPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="18" />
-                </div>
-
-                <v-expand-transition>
-                    <div v-if="showPasswordPanel">
-                        <v-divider />
-
-                        <div class="pa-4">
-                            <v-alert v-if="passwordError" type="error" variant="tonal" density="compact" class="mb-3">
-                                {{ passwordError }}
-                            </v-alert>
-                            <v-alert v-if="passwordSuccess" type="success" variant="tonal" density="compact"
-                                class="mb-3">
-                                Password changed successfully
-                            </v-alert>
-
-                            <v-text-field v-model="passwordForm.currentPassword" label="Current Password"
-                                type="password" variant="outlined" density="comfortable" class="mb-2" />
-                            <v-row dense>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field v-model="passwordForm.newPassword" label="New Password"
-                                        type="password" variant="outlined" density="comfortable" />
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field v-model="passwordForm.confirmPassword" label="Confirm New Password"
-                                        type="password" variant="outlined" density="comfortable" />
-                                </v-col>
-                            </v-row>
+            <v-card rounded="md" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
+                <v-card elevation="0">
+                    <div class="d-flex align-center justify-space-between pa-4" style="cursor: pointer"
+                        @click="togglePasswordPanel">
+                        <div class="d-flex align-center ga-2">
+                            <LockOutlined style="font-size: 16px" />
+                            <span class="text-subtitle-1 font-weight-medium">Change Password</span>
                         </div>
-
-                        <v-divider />
-                        <div class="pa-4 d-flex justify-end">
-                            <v-btn variant="flat" color="primary" :loading="isChangingPassword"
-                                @click="submitPasswordChange">
-                                <SaveOutlined class="v-icon--start" /> Update Password
-                            </v-btn>
-                        </div>
+                        <v-icon :icon="showPasswordPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="18" />
                     </div>
-                </v-expand-transition>
+
+                    <v-expand-transition>
+                        <div v-if="showPasswordPanel">
+                            <v-divider />
+
+                            <div class="pa-4">
+                                <v-alert v-if="passwordError" type="error" variant="tonal" density="compact"
+                                    class="mb-3">
+                                    {{ passwordError }}
+                                </v-alert>
+                                <v-alert v-if="passwordSuccess" type="success" variant="tonal" density="compact"
+                                    class="mb-3">
+                                    Password changed successfully
+                                </v-alert>
+
+                                <v-text-field v-model="passwordForm.currentPassword" label="Current Password"
+                                    type="password" variant="outlined" density="comfortable" class="mb-2" />
+                                <v-row dense>
+                                    <v-col cols="12" sm="6">
+                                        <v-text-field v-model="passwordForm.newPassword" label="New Password"
+                                            type="password" variant="outlined" density="comfortable" />
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <v-text-field v-model="passwordForm.confirmPassword"
+                                            label="Confirm New Password" type="password" variant="outlined"
+                                            density="comfortable" />
+                                    </v-col>
+                                </v-row>
+                            </div>
+
+                            <v-divider />
+                            <div class="pa-4 d-flex justify-end">
+                                <v-btn variant="flat" color="primary" :loading="isChangingPassword"
+                                    @click="submitPasswordChange">
+                                    <SaveOutlined class="v-icon--start" /> Update Password
+                                </v-btn>
+                            </div>
+                        </div>
+                    </v-expand-transition>
+                </v-card>
             </v-card>
         </v-col>
     </v-row>
