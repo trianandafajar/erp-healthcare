@@ -18,7 +18,7 @@ const props = defineProps<{
 }>()
 
 const isSuperAdmin = computed(() =>
-  (props.roles ?? []).some(role => role.id === 'superadmin')
+  (props.roles ?? []).some(role => role.label === 'Super Administrator')
 )
 
 const emit = defineEmits<{
