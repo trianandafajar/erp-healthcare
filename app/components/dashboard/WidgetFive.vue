@@ -2,6 +2,9 @@
 import { computed } from 'vue'
 import { RiseOutlined, FallOutlined } from '@ant-design/icons-vue';
 
+const route = useRoute();
+const slug = route.params.slug as string;
+
 const { data } = await useFetch<{
     profiles: any[],
     stats: { patients: number, doctors: number, nurses: number, departments: number }
@@ -46,7 +49,7 @@ const fivecards = computed(() => [
         color: isGrowth.value ? 'primary' : 'error',
         icon: isGrowth.value ? RiseOutlined : FallOutlined,
         text: thisMonthUsers.value.toLocaleString() + ' new users this month',
-        to: '/users-management'
+        to: `/${slug}/users-management`
     },
     {
         name: 'Total Patients',
@@ -55,7 +58,7 @@ const fivecards = computed(() => [
         color: 'success',
         icon: null,
         text: 'Registered & walk-in',
-        to: '/patients'
+        to: `/${slug}/patients`
     },
     {
         name: 'Total Doctors',
@@ -64,7 +67,7 @@ const fivecards = computed(() => [
         color: 'warning',
         icon: null,
         text: 'Active doctor profiles',
-        to: '/doctors'
+        to: `/${slug}/doctors`
     },
     {
         name: 'Total Nurses',
@@ -73,16 +76,16 @@ const fivecards = computed(() => [
         color: 'secondary',
         icon: null,
         text: 'Active nurse profiles',
-        to: '/nurses'
+        to: `/${slug}/nurses`
     },
     {
-        name: 'Total Departments',
+        name: 'Departments',
         earn: stats.value.departments.toLocaleString(),
         percent: null,
         color: 'info',
         icon: null,
         text: 'Poli / departments',
-        to: '/departments'
+        to: `/${slug}/departments`
     }
 ]);
 </script>
