@@ -20,6 +20,9 @@ function isValidHex(hex: string) {
     return /^#[0-9a-fA-F]{6}$/.test(hex)
 }
 
+const DEFAULT_PRIMARY = '#176D37'
+const DEFAULT_ON_PRIMARY = '#FFFFFF'
+
 export function useTenantTheme() {
     const theme = useTheme()
     const profileStore = useProfileStore()
@@ -34,8 +37,19 @@ export function useTenantTheme() {
         }
     }
 
+    function resetTheme() {
+        if (theme.themes.value?.light?.colors) {
+            theme.themes.value.light.colors.primary = DEFAULT_PRIMARY
+            theme.themes.value.light.colors['on-primary'] = DEFAULT_ON_PRIMARY
+        }
+    }
+
     watch(brandColor, (color) => {
-        if (color) applyColor(color)
+        if (color) {
+            applyColor(color)
+        } else {
+            resetTheme()
+        }
     }, { immediate: true })
 
     return { applyColor, brandColor }
