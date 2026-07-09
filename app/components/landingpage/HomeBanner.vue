@@ -4,7 +4,7 @@
     <div class="absolute top-0 right-0 h-full opacity-[0.04]"
       style="background-image: radial-gradient(circle at 25% 25%, #176D37 0%, transparent 70%)" />
 
-    <div class="container mx-auto relative z-10">
+    <div class="container mx-auto relative z-10 py-8">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div class="text-center lg:!text-left">
           <div
@@ -29,31 +29,6 @@
               class="inline-flex items-center px-7 py-3.5 text-sm font-bold text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 transition-all">
               Learn More
             </a>
-          </div>
-          <div class="mt-8 flex items-center gap-6 justify-center lg:!justify-start text-sm text-gray-400">
-            <span class="flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-[#176D37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              No credit card
-            </span>
-            <span class="flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-[#176D37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              HIPAA Compliant
-            </span>
-            <span class="flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-[#176D37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              99.9% Uptime
-            </span>
           </div>
         </div>
 

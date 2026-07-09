@@ -1,6 +1,6 @@
 <template>
   <section class="border-y border-border bg-[#edf6f5]">
-    <div class="container mx-auto">
+    <div class="container pt-8 mx-auto">
       <div class="grid grid-cols-2 md:grid-cols-4">
         <div v-for="stat in stats" :key="stat.label" class="px-6 py-10 text-center md:text-left">
           <div class="font-primary text-3xl font-bold tabular-nums tracking-tight text-dark md:text-[2.75rem]">
@@ -12,7 +12,7 @@
         </div>
       </div>
 
-      <div class="flex flex-col items-center justify-between gap-4 py-12 text-xs text-text/60 md:flex-row">
+      <div class="flex flex-col items-center justify-between gap-4 py-8 text-xs text-text/60 md:flex-row">
         <p>Trusted by hospitals, clinics, and laboratories worldwide.</p>
         <div class="flex items-center gap-6">
           <span class="font-semibold text-dark">Best Healthcare ERP</span>
