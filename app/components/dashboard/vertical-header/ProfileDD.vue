@@ -17,6 +17,10 @@ const props = defineProps<{
   roles?: { id: string; label: string }[]
 }>()
 
+const isSuperAdmin = computed(() =>
+  (props.roles ?? []).some(role => role.id === 'superadmin')
+)
+
 const emit = defineEmits<{
   'open-profile': [mode: 'view' | 'edit']
 }>()
@@ -56,7 +60,7 @@ async function confirmLogout() {
         </span>
       </v-avatar>
       <div>
-        <h6 class="text-h6 mb-0">{{ profile?.full_name ?? '-' }}</h6>
+        <h6 class="text-body-2 mb-0">{{ profile?.full_name ?? '-' }}</h6>
         <p class="text-caption mb-0">{{(roles ?? []).map(r => r.label).join(', ')}}</p>
       </div>
       <div class="ml-auto">
@@ -73,21 +77,21 @@ async function confirmLogout() {
         <template v-slot:prepend>
           <EditOutlined :style="{ fontSize: '14px' }" class="mr-4" />
         </template>
-        <v-list-item-title class="text-h6">Edit Profile</v-list-item-title>
+        <v-list-item-title class="text-h6text-body-2">Edit Profile</v-list-item-title>
       </v-list-item>
 
-      <v-list-item color="primary" rounded="0">
+      <v-list-item color="primary" rounded="0" v-if="!isSuperAdmin">
         <template v-slot:prepend>
           <WalletOutlined :style="{ fontSize: '14px' }" class="mr-4" />
         </template>
-        <v-list-item-title class="text-h6">Billing</v-list-item-title>
+        <v-list-item-title class="text-body-2">Billing</v-list-item-title>
       </v-list-item>
 
       <v-list-item to="/legal?page=help" color="primary" rounded="0">
         <template v-slot:prepend>
           <QuestionCircleOutlined :style="{ fontSize: '14px' }" class="mr-4" />
         </template>
-        <v-list-item-title class="text-h6">Support</v-list-item-title>
+        <v-list-item-title class="text-body-2">Support</v-list-item-title>
       </v-list-item>
 
       <v-divider color="error" />
@@ -96,7 +100,7 @@ async function confirmLogout() {
         <template v-slot:prepend>
           <LogoutOutlined :style="{ fontSize: '14px', color: 'rgb(var(--v-theme-error))' }" class="mr-4" />
         </template>
-        <v-list-item-title class="text-h6 text-error">Logout</v-list-item-title>
+        <v-list-item-title class="text-body-2 text-error">Logout</v-list-item-title>
       </v-list-item>
     </v-list>
   </div>
