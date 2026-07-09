@@ -79,13 +79,21 @@ function getImageUrl(index) {
   return props.faq[i]?.image_url || props.faq[0]?.image_url || '/landingpage/service-slide-1.png'
 }
 
+function preloadAndSwap(src, cb) {
+  const img = new Image()
+  img.onload = () => {
+    currentSrc.value = src
+    cb?.()
+  }
+  img.src = src
+}
+
 function toggle(index) {
   if (index === openIndex.value) {
     animateAnswerOut(() => {
       openIndex.value = null
       animateImageOut(() => {
-        currentSrc.value = getImageUrl(0)
-        animateImageIn()
+        preloadAndSwap(getImageUrl(0), animateImageIn)
       })
     })
   } else {
@@ -93,9 +101,8 @@ function toggle(index) {
       animateAnswerOut(() => {
         openIndex.value = index
         nextTick(() => {
-          currentSrc.value = getImageUrl(index)
           animateAnswerIn()
-          animateImageIn()
+          preloadAndSwap(getImageUrl(index), animateImageIn)
         })
       })
     })
@@ -158,6 +165,8 @@ function animateImageOut(done) {
 
 onMounted(async () => {
   await nextTick()
+  const srcs = new Set(props.faq.map((_, i) => getImageUrl(i)))
+  srcs.forEach(src => { const img = new Image(); img.src = src })
   currentSrc.value = getImageUrl(openIndex.value)
   const el = answerOuterRefs[openIndex.value]
   if (el) {
