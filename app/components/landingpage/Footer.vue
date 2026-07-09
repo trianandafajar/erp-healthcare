@@ -10,7 +10,10 @@
           <h3 class="text-sm font-bold text-white mb-4">{{ col.name }}</h3>
           <ul class="space-y-2">
             <li v-for="item in col.menu" :key="item.text">
-              <NuxtLink :to="item.url" class="text-sm hover:text-white transition-colors">{{ item.text }}</NuxtLink>
+              <NuxtLink :to="item.url"
+                :class="['text-sm transition-colors', isActive(item.url) ? 'text-white font-bold' : 'hover:text-white']">
+                {{ item.text }}
+              </NuxtLink>
             </li>
           </ul>
         </div>
@@ -25,9 +28,33 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import config from "~/config/config.json";
 import menu from "~/config/menu.json";
 import { markdownify } from "~/utils/textConverter";
+
+const route = useRoute();
+
+function isActive(url) {
+  if (!url) return false;
+
+  if (url.startsWith('#')) {
+    return route.hash === url;
+  }
+  const [urlPath, urlQueryString] = url.split('?');
+  const targetPath = urlPath || '/';
+
+  if (route.path !== targetPath) return false;
+
+  if (urlQueryString) {
+    const urlParams = new URLSearchParams(urlQueryString);
+    for (const [key, value] of urlParams) {
+      if (route.query[key] !== value) return false;
+    }
+  }
+
+  return true;
+}
 
 const { footer } = menu;
 const { copyright } = config.params;
