@@ -1,12 +1,13 @@
 <template>
   <div class="schedule-page">
     <Header always-shadow/>
-    <section class="py-16 md:py-32">
+    <section class="py-16 md:py-28">
       <div class="container mx-auto px-4 pt-12">
         <div class="text-center max-w-2xl mx-auto mb-12">
-          <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Schedule a Call</h1>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Schedule a Call</h1>
           <p class="mt-3 text-gray-500 leading-relaxed">Pick a date that works best for you. We'll get back to
             you shortly.</p>
+            
         </div>
 
         <div v-if="submitted" class="max-w-lg mx-auto text-center py-16">
@@ -23,20 +24,20 @@
         </div>
 
         <div v-else class="max-w-4xl mx-auto">
-          <div class="bg-white rounded-2xl border border-gray-200 p-6">
+          <div class="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
             <div class="schedule-calendar-shell">
-              <div class="flex items-center justify-between mb-4">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Select a Date</h3>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center gap-2">
                   <button @click="calendarApi?.prev()"
-                    class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600">
+                    class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600">
                     <v-icon icon="mdi-chevron-left" size="20" />
                   </button>
+                  <span class="text-sm font-semibold text-gray-700 text-center w-28 sm:w-32">{{ calendarTitle }}</span>
                   <button @click="calendarApi?.next()"
-                    class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600">
+                    class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600">
                     <v-icon icon="mdi-chevron-right" size="20" />
                   </button>
-                  <span class="text-sm font-semibold text-gray-700 w-32 text-center">{{ calendarTitle }}</span>
                 </div>
               </div>
               <FullCalendar ref="calendarRef" :options="calendarOptions" />
@@ -47,9 +48,9 @@
     </section>
 
     <!-- Booking Modal -->
-    <v-dialog v-model="showModal" max-width="520" scrollable>
+    <v-dialog v-model="showModal" max-width="520" scrollable fullscreen-breakpoint="sm">
       <v-card rounded="lg">
-        <v-card-title class="d-flex align-center justify-space-between py-4 px-6">
+        <v-card-title class="d-flex align-center justify-space-between py-4 px-4 sm:px-6">
           <div>
             <div class="text-xs text-gray-500 uppercase tracking-wide font-medium">Selected Date</div>
             <div class="text-base font-bold text-gray-900">{{ formattedSelectedDate }}</div>
@@ -61,13 +62,13 @@
 
         <v-divider />
 
-        <v-card-text class="px-6 py-5">
+        <v-card-text class="px-4 sm:px-6 py-5">
           <div class="mb-6">
             <div class="text-sm text-gray-500 uppercase tracking-wide font-medium mb-3">Available Times</div>
             <div v-if="timeSlots.length === 0" class="text-sm text-gray-400 py-4 text-center">
               No available time slots for this date.
             </div>
-            <div v-else class="grid grid-cols-3 gap-2">
+            <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <button v-for="slot in timeSlots" :key="slot" type="button" @click="selectedTime = slot" :class="[
                 'px-3 py-2 text-sm font-medium rounded-lg border transition-all',
                 selectedTime === slot
@@ -309,5 +310,26 @@ async function submitBooking() {
 
 .schedule-calendar-shell :deep(.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events) {
   min-height: 0;
+}
+
+@media (max-width: 640px) {
+  .schedule-calendar-shell :deep(.fc .fc-daygrid-day-frame) {
+    min-height: 56px;
+  }
+
+  .schedule-calendar-shell :deep(.fc .fc-daygrid-day-number) {
+    padding: 4px 6px;
+    font-size: 0.8rem;
+  }
+
+  .schedule-calendar-shell :deep(.fc .fc-col-header-cell-cushion) {
+    padding: 8px 0;
+    font-size: 0.65rem;
+  }
+
+  .schedule-calendar-shell :deep(.fc .fc-day-today .fc-daygrid-day-number) {
+    width: 26px;
+    height: 26px;
+  }
 }
 </style>
