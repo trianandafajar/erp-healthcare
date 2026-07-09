@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CallBookingsCalendar from '~/components/dashboard/superadmin/CallBookingsCalendar.vue'
+import CallBookingsCalendarSkeleton from '~/components/dashboard/superadmin/CallBookingsCalendarSkeleton.vue'
 
 definePageMeta({
   layout: 'superadmin',
@@ -30,7 +31,7 @@ type CallBooking = {
 
 <template>
   <div>
-    <v-skeleton-loader v-if="pending" type="card, table" />
+    <CallBookingsCalendarSkeleton  v-if="pending" type="card, table" />
     <CallBookingsCalendar v-else-if="data" :bookings="data as CallBooking[]" @refresh="refresh()" />
   </div>
 </template>
