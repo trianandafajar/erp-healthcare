@@ -190,41 +190,71 @@ function formatDate(dateStr: string) {
     </v-card>
 
     <v-dialog v-model="replyDialog" max-width="600" persistent>
-        <v-card>
-            <v-card-title class="d-flex align-center pa-4 bg-grey-lighten-3">
-                <MailOutlined class="me-2" />
-                Reply to {{ selectedInquiry?.name }}
+        <v-card rounded="lg">
+            <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
+                <div class="d-flex align-center ga-2">
+                    <v-icon icon="mdi-email-outline" size="20" />
+                    <span class="text-h6 font-weight-bold">Reply to {{ selectedInquiry?.name }}</span>
+                </div>
+                <v-btn icon="mdi-close" variant="text" density="compact" :disabled="sending"
+                    @click="replyDialog = false" />
             </v-card-title>
+
+            <v-divider />
+
             <v-card-text class="pa-4">
-                <div class="text-body-2 mb-3 text-grey">
-                    Sending reply to: <strong>{{ selectedInquiry?.email }}</strong>
-                </div>
-                <div v-if="selectedInquiry?.subject" class="text-body-2 mb-3 text-grey">
-                    Subject: <strong>{{ selectedInquiry.subject }}</strong>
-                </div>
-                <div class="text-body-2 mb-3 text-grey">
-                    Original message:
-                </div>
-                <div class="text-body-2 mb-4 pa-3 bg-grey-lighten-4 rounded" style="white-space: pre-wrap;">
-                    {{ selectedInquiry?.message }}
-                </div>
-                <v-textarea v-model="replyBody" variant="outlined" label="Your Reply" rows="6" hide-details
-                    placeholder="Type your reply here..." />
+                <v-row dense>
+                    <v-col cols="12">
+                        <v-label class="text-caption font-weight-medium mb-1">Recipient</v-label>
+                        <div class="text-body-2 text-medium-emphasis">
+                            <strong class="text-high-emphasis">{{ selectedInquiry?.email }}</strong>
+                        </div>
+                    </v-col>
+
+                    <v-col v-if="selectedInquiry?.subject" cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Subject</v-label>
+                        <div class="text-body-2 text-medium-emphasis">
+                            <strong class="text-high-emphasis">{{ selectedInquiry.subject }}</strong>
+                        </div>
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Original Message</v-label>
+                        <div class="text-body-2 pa-3 rounded-lg original-message" style="white-space: pre-wrap;">
+                            {{ selectedInquiry?.message }}
+                        </div>
+                    </v-col>
+
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Your Reply</v-label>
+                        <v-textarea v-model="replyBody" variant="outlined" density="compact" rows="6" hide-details
+                            placeholder="Type your reply here..." />
+                    </v-col>
+                </v-row>
             </v-card-text>
-            <v-card-actions class="pa-4 pt-0">
+
+            <v-divider />
+
+            <v-card-actions class="pa-4 pt-3">
                 <v-spacer />
-                <v-btn variant="text" color="grey" @click="replyDialog = false" :disabled="sending">
+                <v-btn variant="tonal" color="secondary" :disabled="sending" @click="replyDialog = false">
                     Cancel
                 </v-btn>
-                <v-btn color="primary" variant="flat" @click="sendReply" :loading="sending"
+                <v-btn color="primary" variant="flat" prepend-icon="mdi-send" :loading="sending"
                     :disabled="!replyBody.trim() || sending"
-                    :style="sending || !replyBody.trim() ? 'cursor: not-allowed; pointer-events: auto;' : ''">
-                    <template #prepend>
-                        <v-icon icon="mdi-send" />
-                    </template>
+                    :style="sending || !replyBody.trim() ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    @click="sendReply">
                     Send Reply
                 </v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
+
+<style scoped>
+.original-message {
+    background-color: rgba(var(--v-theme-on-surface), 0.04);
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+    color: rgba(var(--v-theme-on-surface), 0.87);
+}
+</style>
