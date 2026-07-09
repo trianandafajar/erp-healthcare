@@ -185,21 +185,23 @@ const statusColor: Record<string, string> = {
                                 </div>
                             </div>
 
-                            <div class="d-flex align-end ga-4 mb-6">
-                                <div>
-                                    <v-label class="text-caption font-weight-medium mb-2">Custom color</v-label>
-                                    <div class="d-flex align-center ga-2">
-                                        <input type="color" v-model="brandColor"
-                                            style="width: 44px; height: 44px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; padding: 2px; background: none;" />
-                                        <v-text-field v-model="brandColor" variant="outlined" density="compact"
-                                            hide-details placeholder="#176D37" style="max-width: 160px;"
-                                            :rules="[(v: string) => /^#[0-9a-fA-F]{6}$/.test(v) || 'Invalid hex']" />
+                            <div>
+                                <v-label class="text-caption font-weight-medium mb-2">Custom color</v-label>
+                                <div class="d-flex align-center ga-4 mb-6">
+                                    <div>
+                                        <div class="d-flex align-center ga-2">
+                                            <input type="color" v-model="brandColor"
+                                                style="width: 44px; height: 44px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; padding: 2px; background: none; flex-shrink: 0;" />
+                                            <v-text-field v-model="brandColor" variant="outlined" density="compact"
+                                                hide-details placeholder="#176D37" style="width: 140px;"
+                                                :rules="[(v: string) => /^#[0-9a-fA-F]{6}$/.test(v) || 'Invalid hex']" />
+                                        </div>
                                     </div>
+                                    <v-btn variant="tonal" color="grey" size="small" height="44"
+                                        @click="brandColor = '#176D37'" :disabled="brandColor === '#176D37'">
+                                        Reset
+                                    </v-btn>
                                 </div>
-                                <v-btn variant="tonal" color="grey" size="small" @click="brandColor = '#176D37'"
-                                    :disabled="brandColor === '#176D37'">
-                                    Reset
-                                </v-btn>
                             </div>
 
                             <v-divider class="mb-4" />
@@ -207,7 +209,7 @@ const statusColor: Record<string, string> = {
                             <div class="d-flex align-center ga-3">
                                 <v-btn variant="flat" color="primary" :loading="saving" @click="saveBrandColor"
                                     :style="saving || brandColor === profileStore.data?.tenant?.brand_color ? 'cursor: not-allowed; pointer-events: auto;' : ''"
-                                    :disabled="brandColor === profileStore.data?.tenant?.brand_color || saving ">
+                                    :disabled="brandColor === profileStore.data?.tenant?.brand_color || saving">
                                     <v-icon start icon="mdi-content-save" size="18" />
                                     Save Changes
                                 </v-btn>
@@ -262,35 +264,42 @@ const statusColor: Record<string, string> = {
                                     <tbody>
                                         <tr>
                                             <td class="text-caption text-medium-emphasis font-weight-medium">Plan</td>
-                                            <td class="text-body-2 font-weight-medium text-capitalize">{{ subscription.plan }}</td>
+                                            <td class="text-body-2 font-weight-medium text-capitalize">{{
+                                                subscription.plan }}</td>
                                         </tr>
                                         <tr>
                                             <td class="text-caption text-medium-emphasis font-weight-medium">Status</td>
                                             <td>
-                                                <v-chip :color="statusColor[subscription.status] || 'grey'" variant="tonal"
-                                                    size="x-small" class="text-capitalize">
+                                                <v-chip :color="statusColor[subscription.status] || 'grey'"
+                                                    variant="tonal" size="x-small" class="text-capitalize">
                                                     {{ subscription.status }}
                                                 </v-chip>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td class="text-caption text-medium-emphasis font-weight-medium">Amount</td>
-                                            <td class="text-body-2 font-weight-medium">{{ formatCurrency(subscription.amount, subscription.currency) }}
-                                                <span class="text-caption text-medium-emphasis">/ {{ subscription.billing_cycle }}</span>
+                                            <td class="text-body-2 font-weight-medium">{{
+                                                formatCurrency(subscription.amount, subscription.currency) }}
+                                                <span class="text-caption text-medium-emphasis">/ {{
+                                                    subscription.billing_cycle }}</span>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="text-caption text-medium-emphasis font-weight-medium">Start Date</td>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Start Date
+                                            </td>
                                             <td class="text-body-2">{{ formatDate(subscription.start_date) }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="text-caption text-medium-emphasis font-weight-medium">Trial Ends</td>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Trial Ends
+                                            </td>
                                             <td class="text-body-2">{{ formatDate(subscription.trial_ends) }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="text-caption text-medium-emphasis font-weight-medium">Next Billing</td>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Next
+                                                Billing</td>
                                             <td class="text-body-2">
-                                                <span :class="isExpired(subscription) ? 'text-error font-weight-bold' : ''">
+                                                <span
+                                                    :class="isExpired(subscription) ? 'text-error font-weight-bold' : ''">
                                                     {{ formatDate(subscription.next_billing) }}
                                                 </span>
                                             </td>
@@ -331,7 +340,8 @@ const statusColor: Record<string, string> = {
                                     <v-card-text class="py-4">
                                         <div class="d-flex align-center justify-space-between mb-3">
                                             <span class="text-caption text-medium-emphasis">Plan</span>
-                                            <span class="text-body-2 font-weight-medium text-capitalize">{{ subscription.plan }}</span>
+                                            <span class="text-body-2 font-weight-medium text-capitalize">{{
+                                                subscription.plan }}</span>
                                         </div>
                                         <div class="d-flex align-center justify-space-between mb-3">
                                             <span class="text-caption text-medium-emphasis">Status</span>
@@ -343,13 +353,16 @@ const statusColor: Record<string, string> = {
                                         <v-divider class="mb-3" />
                                         <div class="d-flex align-center justify-space-between mb-2">
                                             <span class="text-caption text-medium-emphasis">Monthly Cost</span>
-                                            <span class="text-body-2 font-weight-bold" :class="isTrialing(subscription) ? 'text-success' : ''">
-                                                {{ isTrialing(subscription) ? 'Free Trial' : formatCurrency(subscription.amount, subscription.currency) }}
+                                            <span class="text-body-2 font-weight-bold"
+                                                :class="isTrialing(subscription) ? 'text-success' : ''">
+                                                {{ isTrialing(subscription) ? 'Free Trial' :
+                                                    formatCurrency(subscription.amount, subscription.currency) }}
                                             </span>
                                         </div>
                                         <div class="d-flex align-center justify-space-between">
                                             <span class="text-caption text-medium-emphasis">Billing Cycle</span>
-                                            <span class="text-body-2 font-weight-medium text-capitalize">{{ subscription.billing_cycle }}</span>
+                                            <span class="text-body-2 font-weight-medium text-capitalize">{{
+                                                subscription.billing_cycle }}</span>
                                         </div>
                                     </v-card-text>
                                 </v-card>
@@ -359,7 +372,8 @@ const statusColor: Record<string, string> = {
                                         <span class="text-body-2 font-weight-bold">Subscription Expired</span>
                                     </template>
                                     <template #text>
-                                        <span class="text-caption">Your subscription has ended. Renew to continue using all features.</span>
+                                        <span class="text-caption">Your subscription has ended. Renew to continue using
+                                            all features.</span>
                                     </template>
                                 </v-alert>
 
@@ -368,7 +382,9 @@ const statusColor: Record<string, string> = {
                                         <span class="text-body-2 font-weight-bold">Trial Period</span>
                                     </template>
                                     <template #text>
-                                        <span class="text-caption">Your trial ends on {{ formatDate(subscription.trial_ends) }}. Add a payment method to continue.</span>
+                                        <span class="text-caption">Your trial ends on {{
+                                            formatDate(subscription.trial_ends) }}. Add a payment method to
+                                            continue.</span>
                                     </template>
                                 </v-alert>
                             </v-col>
