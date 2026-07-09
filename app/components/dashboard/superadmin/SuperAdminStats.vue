@@ -51,13 +51,13 @@ const stats = computed(() => [
     to: '/super-admin/tenants',
   },
   {
-    name: 'Total Industries',
+    name: 'Total Articles',
     earn: dummyStats.totalIndustries.toLocaleString(),
     percent: null,
     color: 'info',
     icon: null,
     text: 'Landing page articles',
-    to: '/super-admin/industries',
+    to: '/super-admin/landingpage/industries',
   },
 ])
 </script>
