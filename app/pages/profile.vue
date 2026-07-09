@@ -73,7 +73,7 @@ async function onAvatarChange(e: Event) {
         if (!res.ok) throw await res.json()
 
         await profileStore.fetchProfile(true)
-        avatarCacheBust.value = Date.now() // ✅ trigger re-render
+        avatarCacheBust.value = Date.now()
     } catch (err) {
         console.error(err)
     } finally {

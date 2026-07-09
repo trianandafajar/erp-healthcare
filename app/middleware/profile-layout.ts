@@ -8,6 +8,7 @@ export default defineNuxtRouteMiddleware(() => {
         receptionist: 'receptionist',
         patient: 'patient',
         admin: 'default',
+        superadmin: 'superadmin',
     }
 
     const layout = layoutMap[authStore.role ?? ''] ?? 'default'
