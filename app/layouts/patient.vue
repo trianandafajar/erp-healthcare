@@ -3,6 +3,7 @@ import FooterPanel from '~/components/dashboard/footer/FooterPanel.vue';
 import VerticalHeaderVue from '~/components/dashboard/vertical-header/VerticalHeader.vue';
 import Patientverticalsidebar from '~/components/dashboard/vertical-sidebar/Patientverticalsidebar.vue';
 import { useTenantTheme } from '~/composables/useTenantTheme'
+import UpgradeModal from '~/components/dashboard/UpgradeModal.vue'
 useTenantTheme()
 </script>
 
@@ -24,6 +25,7 @@ useTenantTheme()
                     </div>
                 </v-container>
             </v-main>
+            <UpgradeModal />
         </v-app>
     </v-locale-provider>
 </template>
