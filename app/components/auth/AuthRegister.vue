@@ -200,9 +200,9 @@ async function register() {
         <div class="d-sm-inline-flex align-center mt-2 mb-7 mb-sm-0 font-weight-bold">
             <h6 class="text-caption">
                 By Signing up, you agree to our
-                <NuxtLink to="/register" class="text-primary link-hover font-weight-medium">Terms of Service</NuxtLink>
+                <NuxtLink to="/legal?page=terms" class="text-primary link-hover font-weight-medium">Terms of Service</NuxtLink>
                 and
-                <NuxtLink to="/register" class="text-primary link-hover font-weight-medium">Privacy Policy</NuxtLink>
+                <NuxtLink to="/legal?page=privacy" class="text-primary link-hover font-weight-medium">Privacy Policy</NuxtLink>
             </h6>
         </div>
 

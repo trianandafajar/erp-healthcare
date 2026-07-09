@@ -16,8 +16,8 @@ const footerLink = shallowRef([
             <v-col cols="12" md="6" class="text-md-left text-center">
                 <p class="text-subtitle-2 text-lightText mb-md-0 mb-4">
                     © {{ year }} This site is protected by
-                    <span class="text-primary">Privacy Policy</span>. Distributed by
-                    <span rel="noopener noreferrer" class="text-primary">HealthData</span>
+                    <NuxtLink to="/legal?page=privacy" class="text-primary">Privacy Policy</NuxtLink>. Distributed by
+                    <NuxtLink to="/legal?page=about" class="text-primary">HealthData</NuxtLink>
                 </p>
             </v-col>
             <v-col class="d-flex flex-md-row flex-column justify-md-end align-center" cols="12" md="6">
