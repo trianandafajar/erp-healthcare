@@ -14,8 +14,6 @@ type Inquiry = {
     created_at: string
 }
 
-const inquiries = ref<Inquiry[]>([])
-const loading = ref(false)
 const error = ref<string | null>(null)
 const expanded = ref<string | null>(null)
 const replyDialog = ref(false)
@@ -24,21 +22,26 @@ const replyBody = ref('')
 const sending = ref(false)
 
 const search = ref('')
-const page = ref(1)
-const itemsPerPage = ref(10)
+const currentPage = ref(1)
+const itemsPerPage = 10
 
-async function fetchInquiries() {
-    loading.value = true
-    error.value = null
-    try {
-        const data = await $fetch<Inquiry[]>('/api/superadmin/contact-inquiries')
-        inquiries.value = data ?? []
-    } catch (e: any) {
-        error.value = e.message ?? 'Failed to load inquiries'
-    } finally {
-        loading.value = false
-    }
-}
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    inquiries: Inquiry[]
+    total: number
+    totalPages: number
+}>('/api/superadmin/contact-inquiries', { query: queryParams })
+
+const inquiries = computed(() => data.value?.inquiries ?? [])
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalInquiries = computed(() => data.value?.total ?? 0)
+
+watch([search, currentPage], () => { refresh() })
 
 function toggleExpand(id: string) {
     expanded.value = expanded.value === id ? null : id
@@ -58,7 +61,7 @@ async function sendReply() {
             method: 'POST',
             body: { reply_body: replyBody.value },
         })
-        await fetchInquiries()
+        await refresh()
         replyDialog.value = false
         selectedInquiry.value = null
         replyBody.value = ''
@@ -78,22 +81,6 @@ function formatDate(dateStr: string) {
         minute: '2-digit',
     })
 }
-
-const filteredInquiries = computed(() => {
-    if (!search.value.trim()) return inquiries.value
-    const q = search.value.toLowerCase()
-    return inquiries.value.filter(
-        (i) =>
-            i.name.toLowerCase().includes(q) ||
-            i.email.toLowerCase().includes(q) ||
-            (i.subject ?? '').toLowerCase().includes(q) ||
-            i.message.toLowerCase().includes(q),
-    )
-})
-
-onMounted(() => {
-    fetchInquiries()
-})
 </script>
 
 <template>
@@ -106,7 +93,7 @@ onMounted(() => {
                 </p>
             </v-col>
             <v-col cols="12" sm="6" class="text-sm-end">
-                <v-btn variant="outlined" color="primary" @click="fetchInquiries" :loading="loading">
+                <v-btn variant="outlined" color="primary" @click="refresh" :loading="pending">
                     <template #prepend>
                         <v-icon icon="mdi-refresh" />
                     </template>
@@ -118,7 +105,7 @@ onMounted(() => {
         <v-row class="mb-4">
             <v-col cols="12" sm="4">
                 <v-text-field v-model="search" density="compact" variant="outlined" placeholder="Search inquiries..."
-                    hide-details clearable prepend-inner-icon="mdi-magnify" />
+                    hide-details clearable prepend-inner-icon="mdi-magnify" @update:model-value="currentPage = 1" />
             </v-col>
         </v-row>
 
@@ -139,13 +126,18 @@ onMounted(() => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="!loading && filteredInquiries.length === 0">
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="7" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
+                    </td>
+                </tr>
+                <tr v-else-if="inquiries.length === 0">
                     <td colspan="7" class="text-center text-grey py-8">
                         <v-icon icon="mdi-inbox-outline" size="40" class="mb-2" color="grey-lighten-1" />
                         <p class="text-body-2">No inquiries found.</p>
                     </td>
                 </tr>
-                <template v-for="inquiry in filteredInquiries" :key="inquiry.id">
+                <template v-for="inquiry in inquiries" :key="inquiry.id">
                     <tr @click="toggleExpand(inquiry.id)" class="cursor-pointer" style="cursor: pointer;">
                         <td>
                             <v-icon icon="mdi-chevron-down" size="20" color="grey"
@@ -194,8 +186,7 @@ onMounted(() => {
             </tbody>
         </v-table>
 
-        <v-pagination v-if="filteredInquiries.length > itemsPerPage" v-model="page"
-            :length="Math.ceil(filteredInquiries.length / itemsPerPage)" class="mt-4" size="small" />
+        <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" class="mt-4" size="small" />
     </v-card>
 
     <v-dialog v-model="replyDialog" max-width="600" persistent>

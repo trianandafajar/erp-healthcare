@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import RoleModal from './RoleModal.vue'
 
@@ -23,23 +23,30 @@ interface Role {
 const { can } = usePermission()
 
 // fetch data
-const { data, pending } = await useFetch<{ roles: Role[] }>('/api/roles')
+const currentPage = ref(1)
+const itemsPerPage = 10
+
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    roles: Role[]
+    total: number
+    totalPages: number
+}>('/api/roles', { query: queryParams })
+
 const { data: permData } = await useFetch<{ permissions: Permission[]; grouped: Record<string, Permission[]> }>('/api/permissions')
 
 const loading = ref(false)
 const roles = computed(() => data.value?.roles ?? [])
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalRoles = computed(() => data.value?.total ?? 0)
 const groupedPermissions = computed(() => permData.value?.grouped ?? {})
 const moduleKeys = computed(() => Object.keys(groupedPermissions.value).sort())
 
-const currentPage = ref(1)
-const itemsPerPage = 10
-
-const paginatedRoles = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return roles.value.slice(start, start + itemsPerPage)
-})
-
-const totalPages = computed(() => Math.ceil(roles.value.length / itemsPerPage))
+watch([currentPage], () => { refresh() })
 
 // modal
 const dialog = ref(false)
@@ -134,18 +141,18 @@ async function handleSubmit(payload: any) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="5" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="5" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedRoles.length === 0">
+                <tr v-else-if="roles.length === 0">
                     <td colspan="5" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-shield-off-outline" size="32" class="mb-2 d-block mx-auto" />
                         No roles found
                     </td>
                 </tr>
-                <tr v-else v-for="role in paginatedRoles" :key="role.id">
+                <tr v-else v-for="role in roles" :key="role.id">
                     <td class="py-3">
                         <div class="d-flex align-center gap-2">
                             <span class="font-weight-medium">{{ role.label }}</span>
@@ -196,7 +203,7 @@ async function handleSubmit(payload: any) {
         </v-table>
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedRoles.length }} of {{ roles.length }} roles
+                Showing {{ roles.length }} of {{ totalRoles }} roles
             </span>
             <v-pagination 
                 v-if="totalPages > 1" 

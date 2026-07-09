@@ -6,7 +6,7 @@ export default defineEventHandler(async (event: any) => {
 
     if (!departmentId) throw createError({ statusCode: 400, message: 'Department ID is required' })
 
-    const { status, date, page = '1', limit = '20' } = getQuery(event)
+    const { status, date, page = '1', limit = '10' } = getQuery(event)
     const pageNum = parseInt(page as string)
     const limitNum = parseInt(limit as string)
     const offset = (pageNum - 1) * limitNum

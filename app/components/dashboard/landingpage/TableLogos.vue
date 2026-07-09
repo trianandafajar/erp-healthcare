@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import LogoModal from './LogoModal.vue'
 
@@ -18,22 +18,22 @@ const search = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending, refresh } = await useFetch<{ logos: Logo[] }>('/api/superadmin/landingpage/logos')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    logos: Logo[]
+    total: number
+    totalPages: number
+}>('/api/superadmin/landingpage/logos', { query: queryParams })
 
 const logos = computed(() => data.value?.logos ?? [])
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalLogos = computed(() => data.value?.total ?? 0)
 
-const filteredLogos = computed(() => {
-    if (!search.value) return logos.value
-    const q = search.value.toLowerCase()
-    return logos.value.filter((l) => l.title.toLowerCase().includes(q))
-})
-
-const paginatedLogos = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return filteredLogos.value.slice(start, start + itemsPerPage)
-})
-
-const totalPages = computed(() => Math.ceil(filteredLogos.value.length / itemsPerPage))
+watch([currentPage], () => { refresh() })
 
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
@@ -161,18 +161,18 @@ async function handleSubmit(payload: any) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="6" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedLogos.length === 0">
+                <tr v-else-if="logos.length === 0">
                     <td colspan="6" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-image-off-outline" size="32" class="mb-2 d-block mx-auto" />
                         No logos found
                     </td>
                 </tr>
-                <tr v-else v-for="logo in paginatedLogos" :key="logo.id">
+                <tr v-else v-for="logo in logos" :key="logo.id">
                     <td class="py-3">
                         <v-avatar size="48" rounded="lg" color="grey-lighten-3">
                             <v-img v-if="logo.image_url" :src="logo.image_url" contain />
@@ -206,7 +206,7 @@ async function handleSubmit(payload: any) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedLogos.length }} of {{ filteredLogos.length }} logos
+                Showing {{ logos.length }} of {{ totalLogos }} logos
             </span>
             <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
                 density="compact" size="small" />

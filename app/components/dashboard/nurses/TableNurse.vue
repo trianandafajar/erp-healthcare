@@ -25,7 +25,20 @@ const filterAvailable = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
-const { data, pending, refresh } = await useFetch<{ nurses: any[] }>('/api/nurses')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+    department: filterDepartment.value || undefined,
+    available: filterAvailable.value || undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    nurses: any[]
+    total: number
+    totalPages: number
+}>('/api/nurses', { query: queryParams })
+
 const { data: deptData } = await useFetch<{ departments: any[] }>('/api/departments')
 const { data: availableData, refresh: refreshAvailable } = await useFetch<{ users: any[] }>('/api/nurses/available')
 
@@ -90,33 +103,14 @@ async function handleCreateUser(payload: {
     }
 }
 
-const filteredNurses = computed(() => {
-    return nurses.value.filter((n) => {
-        const matchSearch =
-            n.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
-            n.email.toLowerCase().includes(search.value.toLowerCase())
-
-        const matchDept =
-            !filterDepartment.value || n.department?.id === filterDepartment.value
-
-        const matchAvail =
-            filterAvailable.value === '' ||
-            (filterAvailable.value === 'true' ? n.is_available : !n.is_available)
-
-        return matchSearch && matchDept && matchAvail
-    })
-})
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalNurses = computed(() => data.value?.total ?? 0)
 
 function onFilterChange() {
     currentPage.value = 1
 }
 
-const paginatedNurses = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    return filteredNurses.value.slice(start, start + itemsPerPage);
-});
-
-const totalPages = computed(() => Math.ceil(filteredNurses.value.length / itemsPerPage));
+watch([search, filterDepartment, filterAvailable, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name
@@ -271,18 +265,18 @@ function openView(nurses: Nurse) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="6" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedNurses.length === 0">
+                <tr v-else-if="nurses.length === 0">
                     <td colspan="6" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-doctor" size="32" class="mb-2 d-block mx-auto" />
                         No nurses found
                     </td>
                 </tr>
-                <tr v-else v-for="nurse in paginatedNurses" :key="nurse.id">
+                <tr v-else v-for="nurse in nurses" :key="nurse.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-avatar size="34" color="primary" variant="tonal">
@@ -328,7 +322,7 @@ function openView(nurses: Nurse) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedNurses.length }} of {{ filteredNurses.length }} nurses
+                Showing {{ nurses.length }} of {{ totalNurses }} nurses
             </span>
             <v-pagination 
                 v-if="totalPages > 1" 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import TenantModal from './TenantModal.vue';
 
@@ -24,9 +24,6 @@ interface Tenant {
   status: string
 }
 
-const { data, pending } = await useFetch<Tenant[]>('/api/superadmin/tenants')
-const tenants = computed(() => data.value ?? [])
-
 const search = ref('')
 const planFilter = ref('All')
 const currentPage = ref(1)
@@ -34,26 +31,24 @@ const itemsPerPage = 10
 
 const planOptions = ['All', 'free', 'basic', 'pro', 'enterprise']
 
-const filteredTenants = computed(() => {
-  return tenants.value.filter((t) => {
-    const q = search.value.toLowerCase()
-    const matchesSearch =
-      !q ||
-      t.name.toLowerCase().includes(q) ||
-      t.slug.toLowerCase().includes(q) ||
-      (t.owner?.full_name ?? '').toLowerCase().includes(q) ||
-      (t.owner?.email ?? '').toLowerCase().includes(q)
-    const matchesPlan = planFilter.value === 'All' || t.subscription_plan === planFilter.value
-    return matchesSearch && matchesPlan
-  })
-})
+const queryParams = computed(() => ({
+  page: currentPage.value,
+  limit: itemsPerPage,
+  search: search.value || undefined,
+  plan: planFilter.value !== 'All' ? planFilter.value : undefined,
+}))
 
-const paginatedTenants = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filteredTenants.value.slice(start, start + itemsPerPage)
-})
+const { data, pending, refresh } = await useFetch<{
+  tenants: Tenant[]
+  total: number
+  totalPages: number
+}>('/api/superadmin/tenants', { query: queryParams })
 
-const totalPages = computed(() => Math.ceil(filteredTenants.value.length / itemsPerPage))
+const tenants = computed(() => data.value?.tenants ?? [])
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalTenants = computed(() => data.value?.total ?? 0)
+
+watch([search, planFilter, currentPage], () => { refresh() })
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -126,14 +121,9 @@ function notify(msg: string, color = 'success') {
 }
 
 function handleEditSubmit(payload: { plan: string; status: string }) {
-  if (!selectedTenant.value) return
-  const tenant = tenants.value.find((t) => t.id === selectedTenant.value!.id)
-  if (tenant) {
-    tenant.subscription_plan = payload.plan
-    tenant.subscription_status = payload.status
-  }
-  notify(`Subscription updated for ${selectedTenant.value.name}`)
+  notify(`Subscription updated for ${selectedTenant.value!.name}`)
   closeModal()
+  refresh()
 }
 </script>
 
@@ -173,18 +163,18 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
         </tr>
       </thead>
       <tbody>
-        <tr v-if="pending">
-          <td colspan="7" class="text-center py-8 text-medium-emphasis">
-            Loading tenants...
+        <tr v-if="pending" v-for="i in 5" :key="i">
+          <td colspan="7" style="border-bottom: none;">
+            <v-skeleton-loader type="table-row" class="my-1" />
           </td>
         </tr>
-        <tr v-else-if="paginatedTenants.length === 0">
+        <tr v-else-if="tenants.length === 0">
           <td colspan="7" class="text-center py-8 text-medium-emphasis">
             <v-icon icon="mdi-domain-off" size="32" class="mb-2 d-block mx-auto" />
             No tenants found
           </td>
         </tr>
-        <tr v-else v-for="tenant in paginatedTenants" :key="tenant.id" class="cursor-pointer"
+        <tr v-else v-for="tenant in tenants" :key="tenant.id" class="cursor-pointer"
           @click="openDetail(tenant)">
           <td class="py-3">
             <div class="d-flex align-center ga-3">
@@ -225,7 +215,7 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
 
     <div class="d-flex align-center justify-space-between px-4 py-2">
       <span class="text-caption text-medium-emphasis">
-        Showing {{ paginatedTenants.length }} of {{ filteredTenants.length }} tenants
+        Showing {{ tenants.length }} of {{ totalTenants }} tenants
       </span>
       <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
         density="compact" size="small" />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import PermissionModal from './PermissionModal.vue'
 
@@ -14,23 +14,34 @@ interface Permission {
 
 const { can } = usePermission()
 
-// fetch data
-const { data, pending } = await useFetch<{ permissions: Permission[]; grouped: Record<string, Permission[]> }>('/api/permissions')
-
-const permissions = computed(() => data.value?.permissions ?? [])
-const groupedPermissions = computed(() => data.value?.grouped ?? {})
-const moduleKeys = computed(() => Object.keys(groupedPermissions.value).sort())
-
-const loading = ref(false)
+// fetch data (paginated for table)
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const paginatedPermissions = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return permissions.value.slice(start, start + itemsPerPage)
-})
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+}))
 
-const totalPages = computed(() => Math.ceil(permissions.value.length / itemsPerPage))
+const { data, pending, refresh } = await useFetch<{
+    permissions: Permission[]
+    total: number
+    totalPages: number
+    grouped: Record<string, Permission[]>
+}>('/api/permissions', { query: queryParams })
+
+// fetch all permissions for modal (no pagination)
+const { data: allPermData } = await useFetch<{ permissions: Permission[]; grouped: Record<string, Permission[]> }>('/api/permissions')
+
+const permissions = computed(() => data.value?.permissions ?? [])
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalPermissions = computed(() => data.value?.total ?? 0)
+const groupedPermissions = computed(() => allPermData.value?.grouped ?? {})
+const moduleKeys = computed(() => Object.keys(groupedPermissions.value).sort())
+
+const loading = ref(false)
+
+watch([currentPage], () => { refresh() })
 
 // modal
 const dialog = ref(false)
@@ -126,18 +137,18 @@ async function handleSubmit(payload: any) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="4" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="4" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedPermissions.length === 0">
+                <tr v-else-if="permissions.length === 0">
                     <td colspan="4" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-shield-off-outline" size="32" class="mb-2 d-block mx-auto" />
                         No permissions found
                     </td>
                 </tr>
-                <tr v-else v-for="permission in paginatedPermissions" :key="permission.id">
+                <tr v-else v-for="permission in permissions" :key="permission.id">
                     <td class="py-3">
                         <span class="font-weight-medium">{{ permission.label }}</span>
                     </td>
@@ -162,7 +173,7 @@ async function handleSubmit(payload: any) {
         </v-table>
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedPermissions.length }} of {{ permissions.length }} permissions
+                Showing {{ permissions.length }} of {{ totalPermissions }} permissions
             </span>
             <v-pagination 
                 v-if="totalPages > 1" 

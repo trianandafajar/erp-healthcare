@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import TestimonialModal from './TestimonialModal.vue'
 
@@ -22,27 +22,22 @@ const search = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending, refresh } = await useFetch<{ testimonials: Testimonial[] }>('/api/superadmin/landingpage/testimonials')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    testimonials: Testimonial[]
+    total: number
+    totalPages: number
+}>('/api/superadmin/landingpage/testimonials', { query: queryParams })
 
 const testimonials = computed(() => data.value?.testimonials ?? [])
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalTestimonials = computed(() => data.value?.total ?? 0)
 
-const filteredTestimonials = computed(() => {
-    if (!search.value) return testimonials.value
-    const q = search.value.toLowerCase()
-    return testimonials.value.filter((t) =>
-        t.name.toLowerCase().includes(q) ||
-        t.role.toLowerCase().includes(q) ||
-        t.institution.toLowerCase().includes(q) ||
-        t.quote.toLowerCase().includes(q)
-    )
-})
-
-const paginatedTestimonials = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return filteredTestimonials.value.slice(start, start + itemsPerPage)
-})
-
-const totalPages = computed(() => Math.ceil(filteredTestimonials.value.length / itemsPerPage))
+watch([currentPage], () => { refresh() })
 
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
@@ -189,18 +184,18 @@ function getStars(rating: number) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="8" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="8" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedTestimonials.length === 0">
+                <tr v-else-if="totalTestimonials.length === 0">
                     <td colspan="8" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-account-off-outline" size="32" class="mb-2 d-block mx-auto" />
                         No testimonials found
                     </td>
                 </tr>
-                <tr v-else v-for="testimonial in paginatedTestimonials" :key="testimonial.id">
+                <tr v-else v-for="testimonial in testimonials" :key="testimonial.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-avatar size="40" rounded="lg" color="grey-lighten-3">
@@ -255,7 +250,7 @@ function getStars(rating: number) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedTestimonials.length }} of {{ filteredTestimonials.length }} testimonials
+                Showing {{ testimonials.length }} of {{ totalTestimonials }} testimonials
             </span>
             <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
                 density="compact" size="small" />

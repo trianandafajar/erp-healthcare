@@ -183,7 +183,6 @@ function onSearch() {
                     <th class="text-left text-caption font-weight-bold text-uppercase">Plan</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Monthly</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Yearly</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Features</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Recommended</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Active</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Sort</th>
@@ -220,17 +219,6 @@ function onSearch() {
                         <span class="text-body-2 font-weight-medium">
                             {{ plan.yearly_price ? '$' + plan.yearly_price : '-' }}
                         </span>
-                    </td>
-                    <td class="py-3">
-                        <div class="d-flex ga-1" style="max-width: 200px; flex-wrap: wrap;">
-                            <v-chip v-for="(feat, fi) in plan.features.slice(0, 2)" :key="fi" size="x-small"
-                                color="primary" variant="tonal" class="mr-1 mb-1">
-                                {{ feat.length > 20 ? feat.slice(0, 20) + '...' : feat }}
-                            </v-chip>
-                            <v-chip v-if="plan.features.length > 2" size="x-small" color="grey" variant="tonal">
-                                +{{ plan.features.length - 2 }}
-                            </v-chip>
-                        </div>
                     </td>
                     <td class="py-3">
                         <v-chip v-if="plan.is_recommended" color="success" variant="tonal" size="small">

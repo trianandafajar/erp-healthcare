@@ -25,7 +25,18 @@ const genderFilter = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending, refresh } = await useFetch<{ patients: any[] }>('/api/patients')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+    gender: genderFilter.value !== 'all' ? genderFilter.value : undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    patients: any[]
+    total: number
+    totalPages: number
+}>('/api/patients', { query: queryParams })
 
 const patients = computed<Patient[]>(() =>
     (data.value?.patients ?? []).map((p) => ({
@@ -48,23 +59,10 @@ const genderOptions = [
     { label: 'Female', value: 'female' },
 ]
 
-const filteredPatients = computed(() =>
-    patients.value.filter((p) => {
-        const matchGender = genderFilter.value === 'all' || p.gender === genderFilter.value
-        const matchSearch =
-            p.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
-            p.medical_record_number.toLowerCase().includes(search.value.toLowerCase()) ||
-            p.phone.toLowerCase().includes(search.value.toLowerCase())
-        return matchGender && matchSearch
-    })
-)
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalPatients = computed(() => data.value?.total ?? 0)
 
-const paginatedPatients = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return filteredPatients.value.slice(start, start + itemsPerPage)
-})
-
-const totalPages = computed(() => Math.ceil(filteredPatients.value.length / itemsPerPage))
+watch([search, genderFilter, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -210,18 +208,18 @@ async function handleSubmit(payload: any) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="7" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="7" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedPatients.length === 0">
+                <tr v-else-if="patients.length === 0">
                     <td colspan="7" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-account-injury-outline" size="32" class="mb-2 d-block mx-auto" />
                         No patients found
                     </td>
                 </tr>
-                <tr v-else v-for="patient in paginatedPatients" :key="patient.id">
+                <tr v-else v-for="patient in patients" :key="patient.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-avatar size="34" color="secondary" variant="tonal">
@@ -269,7 +267,7 @@ async function handleSubmit(payload: any) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedPatients.length }} of {{ filteredPatients.length }} patients
+                Showing {{ patients.length }} of {{ totalPatients }} patients
             </span>
             <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" density="compact"
                 size="small" />

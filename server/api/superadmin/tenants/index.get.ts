@@ -12,17 +12,46 @@ export default defineEventHandler(async (event) => {
     const isSuperadmin = userRoles?.some((r: any) => r.roles?.name === 'superadmin')
     if (!isSuperadmin) throw createError({ statusCode: 403, message: 'Forbidden' })
 
+    const query = getQuery(event)
+    const page = query.page ? Number(query.page) : undefined
+    const limit = Number(query.limit ?? 10)
+    const search = query.search as string | undefined
+    const plan = query.plan as string | undefined
     const admin = supabaseAdmin()
 
-    const { data: tenants, error } = await admin
+    let q = admin
         .from('tenants')
-        .select('*')
+        .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
 
-    if (error) throw createError({ statusCode: 500, message: error.message })
+    if (search) {
+        q = q.or(
+            `name.ilike.%${search}%,` +
+            `slug.ilike.%${search}%`
+        )
+    }
+
+    if (plan && plan !== 'All') {
+        q = q.eq('subscription_plan', plan)
+    }
+
+    let count: number | null = 0
+    let tenants: any[]
+
+    if (page) {
+        const from = (page - 1) * limit
+        const { data: paginatedData, error: paginatedError, count: totalCount } = await q.range(from, from + limit - 1)
+        if (paginatedError) throw createError({ statusCode: 500, message: paginatedError.message })
+        tenants = paginatedData ?? []
+        count = totalCount
+    } else {
+        const { data: allData, error: allError, count: totalCount } = await q
+        if (allError) throw createError({ statusCode: 500, message: allError.message })
+        tenants = allData ?? []
+        count = totalCount
+    }
 
     const tenantIds = tenants.map((t) => t.id)
-
     const ownerIds = [...new Set(tenants.map((t) => t.owner_id).filter(Boolean))]
 
     let profilesMap: Record<string, any> = {}
@@ -60,5 +89,11 @@ export default defineEventHandler(async (event) => {
         total_users: userCountMap[t.id] ?? 0,
     }))
 
-    return tenantsWithDetails
+    return {
+        tenants: tenantsWithDetails,
+        total: count ?? 0,
+        page: page ?? 1,
+        limit,
+        totalPages: page ? Math.ceil((count ?? 0) / limit) : 1,
+    }
 })

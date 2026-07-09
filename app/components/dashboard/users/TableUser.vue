@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import UserModal from './UserModal.vue';
 
@@ -61,7 +61,18 @@ async function openLoginAs(user: any) {
     }
 }
 
-const { data, pending } = await useFetch<{ profiles: any[] }>('/api/users')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+    role: selectedRole.value !== 'all' ? selectedRole.value : undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    profiles: any[]
+    total: number
+    totalPages: number
+}>('/api/users', { query: queryParams })
 
 const users = computed(() =>
     (data.value?.profiles ?? []).map((u) => ({
@@ -74,29 +85,10 @@ const users = computed(() =>
     }))
 )
 
-const filteredUsers = computed(() => {
-    return users.value.filter((u) => {
-        const matchRole = selectedRole.value === 'all' || u.role === selectedRole.value;
-        const matchSearch =
-            u.name.toLowerCase().includes(search.value.toLowerCase()) ||
-            u.email.toLowerCase().includes(search.value.toLowerCase());
-        return matchRole && matchSearch;
-    });
-});
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalUsers = computed(() => data.value?.total ?? 0)
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / itemsPerPage)));
-const safeCurrentPage = computed(() => Math.min(currentPage.value, totalPages.value));
-
-const paginatedUsers = computed(() => {
-    const start = (safeCurrentPage.value - 1) * itemsPerPage;
-    return filteredUsers.value.slice(start, start + itemsPerPage);
-});
-
-watch(totalPages, () => {
-    if (currentPage.value > totalPages.value) {
-        currentPage.value = totalPages.value;
-    }
-});
+watch([search, selectedRole, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name
@@ -209,18 +201,18 @@ async function handleSubmit(payload: any) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="5" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="5" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedUsers.length === 0">
+                <tr v-else-if="users.length === 0">
                     <td colspan="5" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-account-search" size="32" class="mb-2 d-block mx-auto" />
                         No users found
                     </td>
                 </tr>
-                <tr v-else v-for="user in paginatedUsers" :key="user.id">
+                <tr v-else v-for="user in users" :key="user.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-avatar size="34" :color="roleColors[user.role]" variant="tonal">
@@ -264,7 +256,7 @@ async function handleSubmit(payload: any) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedUsers.length }} of {{ filteredUsers.length }} users
+                Showing {{ users.length }} of {{ totalUsers }} users
             </span>
             <v-pagination 
                 v-if="totalPages > 1" 

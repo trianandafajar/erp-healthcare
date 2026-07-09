@@ -1,7 +1,10 @@
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event: any) => {
     const admin = supabaseAdmin()
+    const query = getQuery(event)
+    const page = query.page ? Number(query.page) : undefined
+    const limit = Number(query.limit ?? 10)
 
-    const { data, error } = await admin
+    let q = admin
         .from('roles')
         .select(`
             id,
@@ -19,13 +22,20 @@ export default defineEventHandler(async () => {
             user_roles (
                 user_id
             )
-        `)
+        `, { count: 'exact' })
         .order('created_at', { ascending: true })
         .returns<any[]>()
 
+    if (page) {
+        const from = (page - 1) * limit
+        q = q.range(from, from + limit - 1)
+    }
+
+    const { data, error, count } = await q
+
     if (error) throw createError({ statusCode: 400, message: error.message })
 
-    const result = data.map(r => ({
+    const result = (data ?? []).map(r => ({
         id: r.id,
         name: r.name,
         label: r.label,
@@ -34,5 +44,11 @@ export default defineEventHandler(async () => {
         user_count: r.user_roles.length
     }))
 
-    return { roles: result }
+    return {
+        roles: result,
+        total: count ?? 0,
+        page: page ?? 1,
+        limit,
+        totalPages: page ? Math.ceil((count ?? 0) / limit) : 1,
+    }
 })

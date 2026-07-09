@@ -11,9 +11,15 @@ export default defineEventHandler(async (event) => {
     const isSuperadmin = userRoles?.some((r: any) => r.roles?.name === 'superadmin')
     if (!isSuperadmin) throw createError({ statusCode: 403, message: 'Forbidden' })
 
+    const query = getQuery(event)
+    const page = query.page ? Number(query.page) : undefined
+    const limit = Number(query.limit ?? 10)
+    const search = query.search as string | undefined
+    const role = query.role as string | undefined
+
     const admin = supabaseAdmin()
 
-    const { data: profiles, error } = await admin
+    let q = admin
         .from('profiles')
         .select(`
             id,
@@ -29,11 +35,36 @@ export default defineEventHandler(async (event) => {
                     label
                 )
             )
-        `)
+        `, { count: 'exact' })
         .neq('id', user.id)
         .returns<any[]>()
 
-    if (error) throw createError({ statusCode: 404, message: error.message })
+    if (search) {
+        q = q.or(
+            `full_name.ilike.%${search}%,` +
+            `email.ilike.%${search}%`
+        )
+    }
+
+    if (role && role !== 'all') {
+        q = q.eq('user_roles.roles.name', role)
+    }
+
+    let count: number | null = 0
+    let profiles: any[]
+
+    if (page) {
+        const from = (page - 1) * limit
+        const { data: paginatedData, error: paginatedError, count: totalCount } = await q.range(from, from + limit - 1)
+        if (paginatedError) throw createError({ statusCode: 404, message: paginatedError.message })
+        profiles = paginatedData ?? []
+        count = totalCount
+    } else {
+        const { data: allData, error: allError, count: totalCount } = await q
+        if (allError) throw createError({ statusCode: 404, message: allError.message })
+        profiles = allData ?? []
+        count = totalCount
+    }
 
     const tenantIds = [...new Set(profiles.map(p => p.tenant_id).filter(Boolean))]
     let tenantMap: Record<string, { name: string; slug: string }> = {}
@@ -61,5 +92,11 @@ export default defineEventHandler(async (event) => {
         role_label: p.user_roles?.[0]?.roles?.label ?? null,
     }))
 
-    return { profiles: result }
+    return {
+        profiles: result,
+        total: count ?? 0,
+        page: page ?? 1,
+        limit,
+        totalPages: page ? Math.ceil((count ?? 0) / limit) : 1,
+    }
 })

@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
 
     if (!nurseId) throw createError({ statusCode: 400, message: 'Nurse ID is required' })
 
-    const { page = '1', limit = '20' } = getQuery(event)
+    const { page = '1', limit = '10' } = getQuery(event)
     const pageNum = parseInt(page as string)
     const limitNum = parseInt(limit as string)
     const offset = (pageNum - 1) * limitNum

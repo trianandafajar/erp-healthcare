@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import DoctorModal from './DoctorModal.vue';
 
@@ -33,7 +34,20 @@ const { can } = usePermission()
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const { data, pending, refresh } = await useFetch<{ doctors: any[] }>('/api/doctors')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+    department: filterDepartment.value || undefined,
+    available: filterAvailable.value || undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    doctors: any[]
+    total: number
+    totalPages: number
+}>('/api/doctors', { query: queryParams })
+
 const { data: deptData, refresh: refreshDepts } = await useFetch<{ departments: any[] }>('/api/departments')
 const { data: availableData, refresh: refreshAvailable } = await useFetch<{ users: any[] }>('/api/doctors/available')
 
@@ -67,12 +81,10 @@ watch(
     { immediate: true }
 )
 
-const paginatedDoctors = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    return filteredDoctors.value.slice(start, start + itemsPerPage);
-});
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalDoctors = computed(() => data.value?.total ?? 0)
 
-const totalPages = computed(() => Math.ceil(filteredDoctors.value.length / itemsPerPage));
+watch([search, filterDepartment, filterAvailable, currentPage], () => { refresh() })
 
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
@@ -100,24 +112,6 @@ function getInitials(name: string) {
         .join('')
         .toUpperCase();
 }
-
-const filteredDoctors = computed(() => {
-    return doctors.value.filter((d) => {
-        const matchSearch =
-            d.full_name.toLowerCase().includes(search.value.toLowerCase()) ||
-            d.email.toLowerCase().includes(search.value.toLowerCase()) ||
-            d.specialization.toLowerCase().includes(search.value.toLowerCase())
-
-        const matchDept =
-            !filterDepartment.value || d.department?.id === filterDepartment.value
-
-        const matchAvail =
-            filterAvailable.value === '' ||
-            (filterAvailable.value === 'true' ? d.is_available : !d.is_available)
-
-        return matchSearch && matchDept && matchAvail
-    })
-})
 
 function onSearch() {
     currentPage.value = 1;
@@ -313,18 +307,18 @@ function openView(doctor: Doctor) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="7" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="7" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedDoctors.length === 0">
+                <tr v-else-if="doctors.length === 0">
                     <td colspan="7" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-stethoscope" size="32" class="mb-2 d-block mx-auto" />
                         No doctors found
                     </td>
                 </tr>
-                <tr v-else v-for="doctor in paginatedDoctors" :key="doctor.id">
+                <tr v-else v-for="doctor in doctors" :key="doctor.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-avatar size="34" color="primary" variant="tonal">
@@ -371,7 +365,7 @@ function openView(doctor: Doctor) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedDoctors.length }} of {{ filteredDoctors.length }} doctors
+                Showing {{ doctors.length }} of {{ totalDoctors }} doctors
             </span>
             <v-pagination 
                 v-if="totalPages > 1" 

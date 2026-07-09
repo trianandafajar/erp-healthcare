@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import DepartmentModal from './DepartmentModal.vue';
 
@@ -22,7 +22,17 @@ const search = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
-const { data, pending } = await useFetch<{ departments: any[] }>('/api/departments')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    departments: any[]
+    total: number
+    totalPages: number
+}>('/api/departments', { query: queryParams })
 
 const departments = computed(() =>
     (data.value?.departments ?? []).map((d) => ({
@@ -34,19 +44,12 @@ const departments = computed(() =>
     }))
 )
 
-const filteredDepartments = computed(() => {
-    return departments.value.filter((d) =>
-        d.name.toLowerCase().includes(search.value.toLowerCase()) ||
-        d.code.toLowerCase().includes(search.value.toLowerCase())
-    )
-})
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalDepartments = computed(() => data.value?.total ?? 0)
 
-const paginatedDepartments = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    return filteredDepartments.value.slice(start, start + itemsPerPage);
-});
-
-const totalPages = computed(() => Math.ceil(filteredDepartments.value.length / itemsPerPage));
+function onSearch() {
+    currentPage.value = 1
+}
 
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
@@ -57,9 +60,7 @@ function formatDate(dateStr?: string) {
     });
 }
 
-function onSearch() {
-    currentPage.value = 1;
-}
+watch([search, currentPage], () => { refresh() })
 
 const dialog = ref(false)
 const modalMode = ref<'add' | 'delete'>('add')
@@ -166,18 +167,18 @@ function openView(department: Department) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="5" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="5" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedDepartments.length === 0">
+                <tr v-else-if="departments.length === 0">
                     <td colspan="5" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-folder-search-outline" size="32" class="mb-2 d-block mx-auto" />
                         No department found
                     </td>
                 </tr>
-                <tr v-else v-for="department in paginatedDepartments" :key="department.id">
+                <tr v-else v-for="department in departments" :key="department.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-2">
                             <span class="text-body-2 font-weight-medium">{{ department.name }}</span>
@@ -219,7 +220,7 @@ function openView(department: Department) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedDepartments.length }} of {{ filteredDepartments.length }} departments
+                Showing {{ departments.length }} of {{ totalDepartments }} departments
             </span>
             <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
                 density="compact" size="small" />

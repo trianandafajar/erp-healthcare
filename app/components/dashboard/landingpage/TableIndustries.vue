@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import IndustryModal from './IndustryModal.vue'
 
@@ -24,22 +24,23 @@ const search = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const { data, pending } = await useFetch<{ industries: Industry[] }>('/api/superadmin/landingpage/industries')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    industries: Industry[]
+    total: number
+    totalPages: number
+}>('/api/superadmin/landingpage/industries', { query: queryParams })
 
 const industries = computed(() => data.value?.industries ?? [])
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalIndustries = computed(() => data.value?.total ?? 0)
 
-const filteredIndustries = computed(() => {
-    return industries.value.filter((d) =>
-        d.title.toLowerCase().includes(search.value.toLowerCase())
-    )
-})
-
-const paginatedIndustries = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return filteredIndustries.value.slice(start, start + itemsPerPage)
-})
-
-const totalPages = computed(() => Math.ceil(filteredIndustries.value.length / itemsPerPage))
+watch([search, currentPage], () => { refresh() })
 
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
@@ -173,18 +174,18 @@ async function handleSubmit(payload: any) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="6" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedIndustries.length === 0">
+                <tr v-else-if="totalIndustries.length === 0">
                     <td colspan="6" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-domain-off-outline" size="32" class="mb-2 d-block mx-auto" />
                         No industries found
                     </td>
                 </tr>
-                <tr v-else v-for="industry in paginatedIndustries" :key="industry.id">
+                <tr v-else v-for="industry in industries" :key="industry.id">
                     <td class="py-3">
                         <div class="d-flex flex-column">
                             <span class="text-body-2 font-weight-medium">{{ industry.title }}</span>
@@ -235,7 +236,7 @@ async function handleSubmit(payload: any) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedIndustries.length }} of {{ filteredIndustries.length }} industries
+                Showing {{ industries.length }} of {{ totalIndustries }} industries
             </span>
             <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
                 density="compact" size="small" />

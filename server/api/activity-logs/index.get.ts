@@ -10,7 +10,7 @@ export default defineEventHandler(async (event: any) => {
     const toDate = query.to as string | undefined
 
     const page = Number(query.page ?? 1)
-    const limit = Number(query.limit ?? 20)
+    const limit = Number(query.limit ?? 10)
 
     const { admin } = await getTenantContext(event)
 

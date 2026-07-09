@@ -31,9 +31,9 @@ const roles = computed<RoleOption[]>(() => {
     return [{ value: 'all', label: 'All Roles' }, ...apiRoles]
 })
 
-const { data: tenantsData } = await useFetch<TenantOption[]>('/api/superadmin/tenants')
+const { data: tenantsData } = await useFetch<{ tenants: TenantOption[] }>('/api/superadmin/tenants')
 
-const tenants = computed<TenantOption[]>(() => tenantsData.value ?? [])
+const tenants = computed<TenantOption[]>(() => tenantsData.value?.tenants ?? [])
 
 const tenantOptions = computed(() => {
     return [{ id: 'all', name: 'All Tenants', slug: '' }, ...tenants.value]
@@ -60,7 +60,19 @@ function showSnackbar(msg: string, color = 'success') {
     snackbar.value = true
 }
 
-const { data, pending } = await useFetch<{ profiles: any[] }>('/api/superadmin/users')
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+    role: selectedRole.value !== 'all' ? selectedRole.value : undefined,
+    tenant_id: selectedTenant.value !== 'all' ? selectedTenant.value : undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    profiles: any[]
+    total: number
+    totalPages: number
+}>('/api/superadmin/users', { query: queryParams })
 
 const users = computed(() =>
     (data.value?.profiles ?? []).map((u) => ({
@@ -75,30 +87,10 @@ const users = computed(() =>
     }))
 )
 
-const filteredUsers = computed(() => {
-    return users.value.filter((u) => {
-        const matchRole = selectedRole.value === 'all' || u.role === selectedRole.value;
-        const matchTenant = selectedTenant.value === 'all' || u.tenant_id === selectedTenant.value;
-        const matchSearch =
-            u.name.toLowerCase().includes(search.value.toLowerCase()) ||
-            u.email.toLowerCase().includes(search.value.toLowerCase());
-        return matchRole && matchTenant && matchSearch;
-    });
-});
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalUsers = computed(() => data.value?.total ?? 0)
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / itemsPerPage)));
-const safeCurrentPage = computed(() => Math.min(currentPage.value, totalPages.value));
-
-const paginatedUsers = computed(() => {
-    const start = (safeCurrentPage.value - 1) * itemsPerPage;
-    return filteredUsers.value.slice(start, start + itemsPerPage);
-});
-
-watch(totalPages, () => {
-    if (currentPage.value > totalPages.value) {
-        currentPage.value = totalPages.value;
-    }
-});
+watch([search, selectedRole, selectedTenant, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name
@@ -213,18 +205,18 @@ async function handleSubmit(payload: any) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="6" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedUsers.length === 0">
+                <tr v-else-if="users.length === 0">
                     <td colspan="6" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-account-search" size="32" class="mb-2 d-block mx-auto" />
                         No users found
                     </td>
                 </tr>
-                <tr v-else v-for="user in paginatedUsers" :key="user.id">
+                <tr v-else v-for="user in users" :key="user.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-avatar size="34" :color="roleColors[user.role]" variant="tonal">
@@ -268,7 +260,7 @@ async function handleSubmit(payload: any) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedUsers.length }} of {{ filteredUsers.length }} users
+                Showing {{ users.length }} of {{ totalUsers }} users
             </span>
             <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
                 density="compact" size="small" />

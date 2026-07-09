@@ -154,9 +154,9 @@ watch(
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="5" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="5" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
                 <tr v-else-if="logs.length === 0">

@@ -28,7 +28,6 @@ interface TenantOption {
     slug: string
 }
 
-const subscriptions = ref<Subscription[]>([])
 const tenants = ref<TenantOption[]>([])
 const loading = ref(false)
 
@@ -41,50 +40,34 @@ const itemsPerPage = 10
 const planOptions = ['All Plan', 'Free', 'Basic', 'Pro', 'Enterprise']
 const statusOptions = ['All Status', 'active', 'suspended', 'trial', 'cancelled']
 
-async function fetchSubscriptions() {
-    loading.value = true
-    try {
-        const data = await $fetch<Subscription[]>('/api/superadmin/subscriptions')
-        subscriptions.value = data ?? []
-    } catch {
-        subscriptions.value = []
-    } finally {
-        loading.value = false
-    }
-}
+const queryParams = computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    search: search.value || undefined,
+    plan: planFilter.value !== 'All Plan' ? planFilter.value : undefined,
+    status: statusFilter.value !== 'All Status' ? statusFilter.value : undefined,
+}))
+
+const { data, pending, refresh } = await useFetch<{
+    subscriptions: Subscription[]
+    total: number
+    totalPages: number
+}>('/api/superadmin/subscriptions', { query: queryParams })
+
+const subscriptions = computed(() => data.value?.subscriptions ?? [])
+const totalPages = computed(() => data.value?.totalPages ?? 1)
+const totalSubscriptions = computed(() => data.value?.total ?? 0)
+
+watch([search, planFilter, statusFilter, currentPage], () => { refresh() })
 
 async function fetchTenants() {
     try {
-        const data = await $fetch<{ id: string; name: string; slug: string }[]>('/api/superadmin/tenants')
-        tenants.value = data ?? []
+        const data = await $fetch<{ tenants: { id: string; name: string; slug: string }[] }>('/api/superadmin/tenants')
+        tenants.value = data?.tenants ?? []
     } catch {
         tenants.value = []
     }
 }
-
-const filteredSubscriptions = computed(() => {
-    return subscriptions.value.filter((s) => {
-        const q = search.value.toLowerCase()
-        const tenantName = s.tenant?.name ?? ''
-        const tenantSlug = s.tenant?.slug ?? ''
-        const pm = s.payment_method ?? ''
-        const matchesSearch =
-            !q ||
-            tenantName.toLowerCase().includes(q) ||
-            tenantSlug.toLowerCase().includes(q) ||
-            pm.toLowerCase().includes(q)
-        const matchesPlan = planFilter.value === 'All Plan' || s.plan === planFilter.value
-        const matchesStatus = statusFilter.value === 'All Status' || s.status === statusFilter.value
-        return matchesSearch && matchesPlan && matchesStatus
-    })
-})
-
-const paginatedSubscriptions = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return filteredSubscriptions.value.slice(start, start + itemsPerPage)
-})
-
-const totalPages = computed(() => Math.ceil(filteredSubscriptions.value.length / itemsPerPage))
 
 const planColors: Record<string, string> = {
     Free: 'grey',
@@ -177,8 +160,19 @@ function notify(msg: string, color = 'success') {
     snackbar.value = true
 }
 
+const allSubscriptions = ref<Subscription[]>([])
+
+async function fetchAllSubscriptions() {
+    try {
+        const res = await $fetch<{ subscriptions: Subscription[] }>('/api/superadmin/subscriptions')
+        allSubscriptions.value = res?.subscriptions ?? []
+    } catch {
+        allSubscriptions.value = []
+    }
+}
+
 const availableTenants = computed(() => {
-    const subscribedIds = new Set(subscriptions.value.map((s) => s.tenant_id))
+    const subscribedIds = new Set(allSubscriptions.value.map((s) => s.tenant_id))
     return tenants.value.filter(
         (t) => !subscribedIds.has(t.id) || modalMode.value === 'edit',
     )
@@ -188,7 +182,7 @@ async function handleSubmit(payload: any) {
     modalLoading.value = true
     try {
         if (modalMode.value === 'add') {
-            const created = await $fetch('/api/superadmin/subscriptions', {
+            await $fetch('/api/superadmin/subscriptions', {
                 method: 'POST',
                 body: {
                     tenant_id: payload.tenant_id,
@@ -200,10 +194,9 @@ async function handleSubmit(payload: any) {
                     payment_method: payload.payment_method || null,
                 },
             })
-            subscriptions.value.push(created)
             notify(`Subscription created`)
         } else if (modalMode.value === 'edit' && selectedSubscription.value) {
-            const updated = await $fetch(`/api/superadmin/subscriptions/${selectedSubscription.value.id}`, {
+            await $fetch(`/api/superadmin/subscriptions/${selectedSubscription.value.id}`, {
                 method: 'PUT',
                 body: {
                     plan: payload.plan,
@@ -214,19 +207,16 @@ async function handleSubmit(payload: any) {
                     payment_method: payload.payment_method || null,
                 },
             })
-            const idx = subscriptions.value.findIndex((s) => s.id === updated.id)
-            if (idx >= 0) subscriptions.value[idx] = updated
             notify(`Subscription updated`)
         } else if (modalMode.value === 'delete' && selectedSubscription.value) {
             await $fetch(`/api/superadmin/subscriptions/${selectedSubscription.value.id}`, {
                 method: 'DELETE',
             })
-            subscriptions.value = subscriptions.value.filter(
-                (s) => s.id !== selectedSubscription.value!.id,
-            )
             notify(`Subscription removed`)
         }
         closeModal()
+        refresh()
+        fetchAllSubscriptions()
     } catch (e: any) {
         notify(e?.message ?? 'Operation failed', 'error')
     } finally {
@@ -274,8 +264,8 @@ function mapToModalPayload(sub: Subscription | null) {
 }
 
 onMounted(() => {
-    fetchSubscriptions()
     fetchTenants()
+    fetchAllSubscriptions()
 })
 </script>
 
@@ -325,27 +315,21 @@ onMounted(() => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="loading && subscriptions.length === 0">
-                    <td colspan="8" class="text-center py-8 text-medium-emphasis">
-                        <v-progress-circular indeterminate size="32" color="primary" class="mb-2" />
-                        <div class="text-body-2">Loading subscriptions...</div>
+                <tr v-if="pending && !data" v-for="i in 5" :key="i">
+                    <td colspan="8" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedSubscriptions.length === 0">
+                <tr v-else-if="subscriptions.length === 0 && data">
                     <td colspan="8" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-credit-card-off-outline" size="36" class="mb-2 d-block mx-auto" />
                         <div class="text-body-1 font-weight-medium mb-1">No subscriptions found</div>
                         <div class="text-caption">
-                            <template v-if="subscriptions.length === 0">
-                                Get started by adding your first subscription.
-                            </template>
-                            <template v-else>
-                                Try adjusting your search or filter criteria.
-                            </template>
+                            Try adjusting your search or filter criteria.
                         </div>
                     </td>
                 </tr>
-                <tr v-else v-for="sub in paginatedSubscriptions" :key="sub.id">
+                <tr v-else v-for="sub in subscriptions" :key="sub.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-avatar size="34" color="primary" variant="tonal">
@@ -406,7 +390,7 @@ onMounted(() => {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedSubscriptions.length }} of {{ filteredSubscriptions.length }} subscriptions
+                Showing {{ subscriptions.length }} of {{ totalSubscriptions }} subscriptions
             </span>
             <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
                 density="compact" size="small" />
