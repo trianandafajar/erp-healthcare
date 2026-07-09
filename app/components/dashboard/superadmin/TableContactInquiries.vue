@@ -129,6 +129,7 @@ onMounted(() => {
         <v-table class="rounded-md" hover>
             <thead>
                 <tr>
+                    <th style="width: 40px;"></th>
                     <th class="text-left font-weight-bold">Name</th>
                     <th class="text-left font-weight-bold">Email</th>
                     <th class="text-left font-weight-bold">Subject</th>
@@ -139,13 +140,17 @@ onMounted(() => {
             </thead>
             <tbody>
                 <tr v-if="!loading && filteredInquiries.length === 0">
-                    <td colspan="6" class="text-center text-grey py-8">
+                    <td colspan="7" class="text-center text-grey py-8">
                         <v-icon icon="mdi-inbox-outline" size="40" class="mb-2" color="grey-lighten-1" />
                         <p class="text-body-2">No inquiries found.</p>
                     </td>
                 </tr>
                 <template v-for="inquiry in filteredInquiries" :key="inquiry.id">
                     <tr @click="toggleExpand(inquiry.id)" class="cursor-pointer" style="cursor: pointer;">
+                        <td>
+                            <v-icon icon="mdi-chevron-down" size="20" color="grey"
+                                :style="{ transform: expanded === inquiry.id ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }" />
+                        </td>
                         <td class="font-weight-medium">{{ inquiry.name }}</td>
                         <td>{{ inquiry.email }}</td>
                         <td>
@@ -171,7 +176,7 @@ onMounted(() => {
                         </td>
                     </tr>
                     <tr v-if="expanded === inquiry.id">
-                        <td colspan="6" class="pa-4 bg-grey-lighten-4">
+                        <td colspan="7" class="pa-4 bg-grey-lighten-4">
                             <div class="text-body-2 mb-2">
                                 <strong>Message:</strong>
                             </div>
@@ -221,7 +226,8 @@ onMounted(() => {
                     Cancel
                 </v-btn>
                 <v-btn color="primary" variant="flat" @click="sendReply" :loading="sending"
-                    :disabled="!replyBody.trim() || sending" :style="sending || !replyBody.trim() ? 'cursor: not-allowed; pointer-events: auto;' : ''">
+                    :disabled="!replyBody.trim() || sending"
+                    :style="sending || !replyBody.trim() ? 'cursor: not-allowed; pointer-events: auto;' : ''">
                     <template #prepend>
                         <v-icon icon="mdi-send" />
                     </template>
