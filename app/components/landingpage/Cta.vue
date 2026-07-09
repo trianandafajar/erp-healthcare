@@ -11,10 +11,6 @@
           <p class="mt-4 text-gray-400 leading-relaxed">Join hundreds of healthcare facilities across Indonesia that
             trust our platform to deliver better patient care.</p>
           <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <NuxtLink to="/login"
-              class="inline-flex items-center px-7 py-3.5 text-sm font-bold text-gray-900 bg-white rounded-full hover:bg-gray-100 transition-all hover:shadow-xl">
-              Get Free Demo
-            </NuxtLink>
             <NuxtLink to="/schedule-call"
               class="inline-flex items-center px-7 py-3.5 text-sm font-bold text-white border border-[#176D37] rounded-full hover:bg-white/10 transition-all">
               Schedule a Call
