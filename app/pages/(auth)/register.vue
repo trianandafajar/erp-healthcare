@@ -20,7 +20,7 @@ useSeoMeta({
 <template>
     <v-row class="bg-containerBg position-relative" no-gutters>
         <div class="blur-logo">
-            <img src="/logo.svg" alt="" style="width: 700px; height: auto; opacity: 0.4;" />
+            <img src="/logo.png" alt="" style="width: 700px; height: auto; opacity: 0.4;" />
         </div>
         <v-col cols="12">
             <div class="pt-6 pl-6">
