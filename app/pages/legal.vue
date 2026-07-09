@@ -368,7 +368,7 @@ onMounted(() => {
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div v-for="stat in stats" :key="stat.label"
-                        class="flex items-center gap-3 p-6 bg-white border border-gray-200 rounded-md">
+                        class="flex items-center gap-3 p-6 bg-white border-[1.5px] border-[#e0e0e0] rounded-md">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                             :style="{ backgroundColor: stat.color + '1a' }">
                             <v-icon :icon="stat.icon" size="20" :color="stat.color" />
@@ -381,7 +381,7 @@ onMounted(() => {
                 </div>
 
                 <div class="grid md:grid-cols-12 gap-6 mb-8">
-                    <div class="md:col-span-7 bg-white border border-gray-200 rounded-md p-6">
+                    <div class="md:col-span-7 bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[#176D37]/10">
                                 <v-icon icon="mdi-bullseye-arrow" size="18" color="#176D37" />
@@ -397,7 +397,7 @@ onMounted(() => {
                         </p>
                     </div>
 
-                    <div class="md:col-span-5 bg-white border border-gray-200 rounded-md p-6">
+                    <div class="md:col-span-5 bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[#176D37]/10">
                                 <v-icon icon="mdi-account-group" size="18" color="#176D37" />
@@ -424,7 +424,7 @@ onMounted(() => {
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div v-for="val in values" :key="val.title"
-                        class="text-center p-6 bg-white border border-gray-200 rounded-md">
+                        class="text-center p-6 bg-white border-[1.5px] border-[#e0e0e0] rounded-md">
                         <div class="w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-3"
                             :style="{ backgroundColor: val.color + '1a' }">
                             <v-icon :icon="val.icon" size="22" :color="val.color" />
@@ -443,7 +443,7 @@ onMounted(() => {
                 </div>
 
                 <div class="grid md:grid-cols-4 gap-6">
-                    <div class="bg-white border border-gray-200 rounded-md p-6">
+                    <div class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
                         <div class="space-y-2">
                             <button v-for="tab in privacyTabs" :key="tab.value" @click="privacyTab = tab.value"
                                 class="relative flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-all duration-300"
@@ -462,7 +462,7 @@ onMounted(() => {
                     <div class="md:col-span-3">
                         <div class="grid md:grid-cols-2 gap-4">
                             <div v-for="item in privacySections[privacyTab]" :key="item.title"
-                                class="bg-white rounded-md p-5 border border-gray-200">
+                                class="bg-white rounded-md p-5 border-[1.5px] border-[#e0e0e0]">
                                 <div class="flex items-center gap-3 mb-3">
                                     <div class="w-10 h-10 rounded-full flex items-center justify-center"
                                         :style="{ backgroundColor: item.color + '1a' }">
@@ -506,7 +506,7 @@ onMounted(() => {
 
                 <div class="grid md:grid-cols-4 gap-6">
                     <div class="md:col-span-1">
-                        <div class="bg-white border border-gray-200 rounded-md p-4 sticky top-24">
+                        <div class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-4 sticky top-24">
                             <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">
                                 In this document
                             </div>
@@ -531,7 +531,7 @@ onMounted(() => {
 
                     <div class="md:col-span-3 space-y-3">
                         <div v-for="(term, i) in terms" :key="i"
-                            class="bg-white border border-gray-200 rounded-md overflow-hidden">
+                            class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md overflow-hidden">
                             <button @click="togglePanel(i)"
                                 class="flex items-center justify-between w-full px-5 py-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center gap-3">
@@ -571,7 +571,7 @@ onMounted(() => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="bg-white border border-gray-200 rounded-md p-6">
+                    <div class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
                         <div class="space-y-2">
                             <button v-for="cat in faqCategories" :key="cat.title" @click="selectCategory(cat.title)"
                                 class="relative flex items-center w-full px-4 py-3 rounded-lg text-left transition-all duration-300"
@@ -592,7 +592,7 @@ onMounted(() => {
                         </div>
 
                         <div v-for="(item, i) in filteredFaqs" :key="i"
-                            class="bg-white border border-gray-200 rounded-md overflow-hidden">
+                            class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md overflow-hidden">
                             <button @click="toggleItem(i)"
                                 class="flex items-center justify-between w-full px-5 py-4 text-left hover:bg-gray-50 transition-colors">
                                 <span class="text-sm font-medium text-gray-900">
@@ -622,7 +622,7 @@ onMounted(() => {
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div v-for="item in contactInfo" :key="item.label"
-                        class="flex items-center gap-3 p-6 bg-white border border-gray-200 rounded-md">
+                        class="flex items-center gap-3 p-6 bg-white border-[1.5px] border-[#e0e0e0] rounded-md">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                             :style="{ backgroundColor: item.color + '1a' }">
                             <v-icon :icon="item.icon" size="20" :color="item.color" />
@@ -635,7 +635,7 @@ onMounted(() => {
                 </div>
 
                 <div class="grid md:grid-cols-5 gap-6">
-                    <div class="md:col-span-3 bg-white border border-gray-200 rounded-md p-6">
+                    <div class="md:col-span-3 bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
                         <h2 class="text-lg font-semibold text-gray-900 mb-5">Send us a message</h2>
 
                         <div v-if="isSubmitted"
@@ -687,7 +687,7 @@ onMounted(() => {
                         </form>
                     </div>
 
-                    <div class="md:col-span-2 bg-white border border-gray-200 rounded-md p-6">
+                    <div class="md:col-span-2 bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
                         <h2 class="text-lg font-semibold text-gray-900 mb-5">Contact Information</h2>
                         <div class="space-y-5">
                             <div v-for="item in contactInfo" :key="item.label" class="flex items-start gap-3">
