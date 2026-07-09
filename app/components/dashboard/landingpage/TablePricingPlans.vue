@@ -185,6 +185,7 @@ function onSearch() {
                     <th class="text-left text-caption font-weight-bold text-uppercase">Yearly</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Recommended</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Active</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Features</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Sort</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Created</th>
                     <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
@@ -192,12 +193,12 @@ function onSearch() {
             </thead>
             <tbody>
                 <tr v-if="pending">
-                    <td colspan="9" class="text-center py-8">
+                    <td colspan="10" class="text-center py-8">
                         <v-progress-circular indeterminate color="primary" />
                     </td>
                 </tr>
                 <tr v-else-if="paginatedPlans.length === 0">
-                    <td colspan="9" class="text-center py-8 text-medium-emphasis">
+                    <td colspan="10" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-currency-usd-off" size="32" class="mb-2 d-block mx-auto" />
                         No pricing plans found
                     </td>
@@ -230,6 +231,18 @@ function onSearch() {
                         <v-chip :color="plan.is_active ? 'success' : 'error'" variant="tonal" size="small">
                             {{ plan.is_active ? 'Active' : 'Inactive' }}
                         </v-chip>
+                    </td>
+                    <td class="py-3">
+                        <div v-if="plan.features && plan.features.length" class="d-flex flex-wrap gap-1">
+                            <v-chip v-for="(f, fi) in plan.features.slice(0, 3)" :key="fi" color="primary"
+                                variant="tonal" size="x-small" class="mr-1">
+                                {{ f }}
+                            </v-chip>
+                            <v-chip v-if="plan.features.length > 3" color="secondary" variant="tonal" size="x-small">
+                                +{{ plan.features.length - 3 }}
+                            </v-chip>
+                        </div>
+                        <span v-else class="text-caption text-medium-emphasis">—</span>
                     </td>
                     <td class="py-3 text-body-2 text-medium-emphasis">
                         {{ plan.sort_order }}

@@ -1,9 +1,11 @@
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
 
-    const { data: existing } = await supabaseAdmin()
+    const admin = supabaseAdmin()
+
+    const { data: existing } = await admin
         .from('pricing_plans')
-        .select('stripe_product_id')
+        .select('stripe_product_id, title')
         .eq('id', id)
         .single()
 
@@ -13,7 +15,11 @@ export default defineEventHandler(async (event) => {
         await stripe.products.update(existing.stripe_product_id, { active: false })
     }
 
-    const { error } = await supabaseAdmin()
+    // Delete associated plan_features
+    const planKey = existing.title.toLowerCase().replace(/\s+/g, '_')
+    await admin.from('plan_features').delete().eq('plan', planKey)
+
+    const { error } = await admin
         .from('pricing_plans')
         .delete()
         .eq('id', id)

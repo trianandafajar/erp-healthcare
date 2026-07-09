@@ -61,7 +61,7 @@ watch(
                 price: plan.price,
                 yearly_price: plan.yearly_price,
                 currency: plan.currency,
-                features: [...plan.features],
+                features: [...(plan.features ?? [])],
                 button_label: plan.button_label,
                 button_link: plan.button_link,
                 is_recommended: plan.is_recommended,

@@ -1,15 +1,21 @@
+function slugify(text: string) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+}
+
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     const body = await readBody(event)
 
-    const allowed = ['title', 'subtitle', 'price', 'yearly_price', 'currency', 'features', 'button_label', 'button_link', 'is_recommended', 'badge_text', 'sort_order', 'is_active']
+    const allowed = ['title', 'subtitle', 'price', 'yearly_price', 'currency', 'button_label', 'button_link', 'is_recommended', 'badge_text', 'sort_order', 'is_active']
     const updates: Record<string, any> = {}
     for (const key of allowed) {
         if (body[key] !== undefined) updates[key] = body[key]
     }
     updates.updated_at = new Date().toISOString()
 
-    const { data: existing } = await supabaseAdmin()
+    const admin = supabaseAdmin()
+
+    const { data: existing } = await admin
         .from('pricing_plans')
         .select('*')
         .eq('id', id)
@@ -53,7 +59,42 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    const { data, error } = await supabaseAdmin()
+    // Handle features upsert
+    if (body.features !== undefined && Array.isArray(body.features)) {
+        const planKey = slugify(body.title || existing.title)
+        const seen = new Set<string>()
+        const featureRows = body.features
+            .filter((f: string) => f.trim())
+            .map((f: string, i: number) => {
+                const key = slugify(f)
+                if (seen.has(key)) return null
+                seen.add(key)
+                return {
+                    plan: planKey,
+                    feature_key: key,
+                    feature_label: f.trim(),
+                    feature_category: 'feature',
+                    is_available: true,
+                    sort_order: i + 1,
+                }
+            })
+            .filter(Boolean)
+
+        // Remove old feature-type rows for this plan
+        await admin
+            .from('plan_features')
+            .delete()
+            .eq('plan', planKey)
+            .eq('feature_category', 'feature')
+
+        // Insert new rows
+        if (featureRows.length > 0) {
+            const { error: fe } = await admin.from('plan_features').insert(featureRows)
+            if (fe) throw createError({ statusCode: 500, message: fe.message })
+        }
+    }
+
+    const { data, error } = await admin
         .from('pricing_plans')
         .update(updates)
         .eq('id', id)
