@@ -33,7 +33,7 @@ const stats = computed(() => [
     to: '/super-admin/users-management',
   },
   {
-    name: 'Active Subscriptions',
+    name: 'Active Subsc',
     earn: dummyStats.activeSubscriptions.toLocaleString(),
     percent: null,
     color: 'warning',
@@ -66,6 +66,7 @@ const stats = computed(() => [
   <v-row class="my-0">
     <v-col cols="6" sm="4" md="" v-for="(card, i) in stats" :key="i" :style="{ flex: '1 1 0' }" class="flex-grow-1">
       <v-card :to="card.to" elevation="0">
+      <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
         <v-card-text>
           <div class="d-flex align-items-center justify-space-between">
             <div>
@@ -87,6 +88,7 @@ const stats = computed(() => [
             </div>
           </div>
         </v-card-text>
+      </v-card>
       </v-card>
     </v-col>
   </v-row>

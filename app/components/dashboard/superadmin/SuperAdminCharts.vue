@@ -117,36 +117,40 @@ const totalPlans = computed(() => subscriptionSeries.value.reduce((a, b) => a + 
 <template>
   <v-row class="my-0" align="stretch">
     <v-col cols="12" md="7">
-      <v-card elevation="0" class="h-100">
-        <v-card-item>
-          <v-card-title class="text-h5">Tenant Growth</v-card-title>
-          <v-card-subtitle>
-            {{ dummyTenantGrowth.total }} new tenants registered this year
-          </v-card-subtitle>
-        </v-card-item>
-        <v-card-text>
-          <ClientOnly>
-            <apexchart type="area" height="300" :options="tenantGrowthOptions" :series="tenantSeries" />
-          </ClientOnly>
-        </v-card-text>
+      <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
+        <v-card elevation="0">
+          <v-card-item>
+            <v-card-title class="text-h5">Tenant Growth</v-card-title>
+            <v-card-subtitle>
+              {{ dummyTenantGrowth.total }} new tenants registered this year
+            </v-card-subtitle>
+          </v-card-item>
+          <v-card-text>
+            <ClientOnly>
+              <apexchart type="area" height="300" :options="tenantGrowthOptions" :series="tenantSeries" />
+            </ClientOnly>
+          </v-card-text>
+        </v-card>
       </v-card>
     </v-col>
 
     <v-col cols="12" md="5">
-      <v-card elevation="0" class="h-100">
-        <v-card-item>
-          <v-card-title class="text-h5">Subscription Plans</v-card-title>
-          <v-card-subtitle>Distribution of {{ totalPlans }} total plans</v-card-subtitle>
-        </v-card-item>
-        <v-card-text>
-          <ClientOnly>
-            <div v-if="subscriptionSeries.length === 0" class="text-center py-8 text-medium-emphasis">
-              <v-icon icon="mdi-chart-pie" size="32" class="mb-2 d-block mx-auto" />
-              No subscription data available
-            </div>
-            <apexchart v-else type="donut" height="300" :options="subscriptionOptions" :series="subscriptionSeries" />
-          </ClientOnly>
-        </v-card-text>
+      <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
+        <v-card elevation="0" class="h-100">
+          <v-card-item>
+            <v-card-title class="text-h5">Subscription Plans</v-card-title>
+            <v-card-subtitle>Distribution of {{ totalPlans }} total plans</v-card-subtitle>
+          </v-card-item>
+          <v-card-text>
+            <ClientOnly>
+              <div v-if="subscriptionSeries.length === 0" class="text-center py-8 text-medium-emphasis">
+                <v-icon icon="mdi-chart-pie" size="32" class="mb-2 d-block mx-auto" />
+                No subscription data available
+              </div>
+              <apexchart v-else type="donut" height="300" :options="subscriptionOptions" :series="subscriptionSeries" />
+            </ClientOnly>
+          </v-card-text>
+        </v-card>
       </v-card>
     </v-col>
   </v-row>

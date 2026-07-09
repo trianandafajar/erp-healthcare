@@ -17,11 +17,13 @@ useSeoMeta({
 </script>
 
 <template>
-  <v-card elevation="0">
-    <v-card-text>
-      <div class="text-h5 font-weight-bold">Superadmin Dashboard</div>
-      <div class="text-caption text-medium-emphasis">Overview of all tenants and system activity</div>
-    </v-card-text>
+  <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
+    <v-card elevation="0">
+      <v-card-text>
+        <div class="text-h5 font-weight-bold">Superadmin Dashboard</div>
+        <div class="text-caption text-medium-emphasis">Overview of all tenants and system activity</div>
+      </v-card-text>
+    </v-card>
   </v-card>
 
   <SuperAdminStats />
