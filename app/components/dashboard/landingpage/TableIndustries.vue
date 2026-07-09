@@ -141,13 +141,13 @@ async function handleSubmit(payload: any) {
     <v-card-item class="pb-2 px-0 pt-0">
         <div class="d-flex justify-space-between align-center">
             <div>
-                <v-card-title class="text-h3">Industries</v-card-title>
-                <v-card-subtitle class="mt-1">Manage healthcare industries displayed on the landing
+                <v-card-title class="text-h3">Articles</v-card-title>
+                <v-card-subtitle class="mt-1">Manage healthcare articles displayed on the landing
                     page</v-card-subtitle>
             </div>
             <v-btn v-if="can('landingpage.industries.create')" color="primary" variant="flat" size="large"
                 prepend-icon="mdi-plus" density="comfortable" @click="openAdd">
-                Add Industry
+                Add Article
             </v-btn>
         </div>
     </v-card-item>
@@ -186,11 +186,9 @@ async function handleSubmit(payload: any) {
                 </tr>
                 <tr v-else v-for="industry in paginatedIndustries" :key="industry.id">
                     <td class="py-3">
-                        <div class="d-flex align-center ga-2">
-                            <v-avatar size="32" rounded="4">
-                                <v-img :src="industry.image_url" :alt="industry.title" />
-                            </v-avatar>
+                        <div class="d-flex flex-column">
                             <span class="text-body-2 font-weight-medium">{{ industry.title }}</span>
+                            <span class="text-caption text-medium-emphasis">/{{ industry.slug }}</span>
                         </div>
                     </td>
                     <td class="py-3">
@@ -212,8 +210,9 @@ async function handleSubmit(payload: any) {
                         </v-chip>
                     </td>
                     <td class="py-3 text-center">
-                        <v-icon :icon="industry.is_active ? 'mdi-check-circle' : 'mdi-close-circle'"
-                            :color="industry.is_active ? 'success' : 'error'" size="20" />
+                        <v-chip :color="industry.is_active ? 'success' : 'error'" size="small" variant="tonal" label>
+                            {{ industry.is_active ? 'Published' : 'Draft' }}
+                        </v-chip>
                     </td>
                     <td class="py-3 text-body-2 text-medium-emphasis">
                         {{ formatDate(industry.created_at) }}

@@ -136,22 +136,22 @@ watch(
 
 const config = computed(() => ({
     add: {
-        title: 'Add Industry',
-        icon: 'mdi-domain-plus',
+        title: 'Add Article',
+        icon: 'mdi-post-outline',
         confirmColor: 'primary',
-        confirmLabel: 'Create Industry',
+        confirmLabel: 'Create Article',
     },
     edit: {
-        title: 'Edit Industry',
+        title: 'Edit Article',
         icon: 'mdi-pencil-outline',
         confirmColor: 'primary',
         confirmLabel: 'Save Changes',
     },
     delete: {
-        title: 'Delete Industry',
+        title: 'Delete Article',
         icon: 'mdi-delete-outline',
         confirmColor: 'error',
-        confirmLabel: 'Delete Industry',
+        confirmLabel: 'Delete Article',
     },
 }[props.mode]))
 

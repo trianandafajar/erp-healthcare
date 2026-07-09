@@ -5,7 +5,7 @@ import {
   AppstoreOutlined,
   TeamOutlined,
   UserOutlined,
-  BuildOutlined,
+  FileTextOutlined,
   CreditCardOutlined,
   CommentOutlined,
   DollarOutlined,
@@ -46,7 +46,7 @@ const sidebarMenu = shallowRef<MenuItem[]>([
   { title: 'Subscriptions', icon: CreditCardOutlined, to: `/super-admin/subscriptions` },
 
    { header: 'Landingpage' },
-   { title: 'Industries', icon: BuildOutlined, to: `/super-admin/landingpage/industries` },
+   { title: 'Articles', icon: FileTextOutlined, to: `/super-admin/landingpage/industries` },
    { title: 'Sponsors', icon: PictureOutlined, to: `/super-admin/landingpage/logos` },
    { title: 'Testimonials', icon: CommentOutlined, to: `/super-admin/landingpage/testimonials` },
    { title: 'Pricing', icon: DollarOutlined, to: `/super-admin/landingpage/pricing` },
