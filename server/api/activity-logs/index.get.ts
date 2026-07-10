@@ -8,6 +8,7 @@ export default defineEventHandler(async (event: any) => {
     const search = query.search as string | undefined
     const fromDate = query.from as string | undefined
     const toDate = query.to as string | undefined
+    const actorId = query.actor_id as string | undefined
 
     const page = Number(query.page ?? 1)
     const limit = Number(query.limit ?? 10)
@@ -51,6 +52,10 @@ export default defineEventHandler(async (event: any) => {
 
     if (toDate) {
         q = q.lte('created_at', new Date(toDate).toISOString())
+    }
+
+    if (actorId) {
+        q = q.eq('actor_id', actorId)
     }
 
     const from = (page - 1) * limit

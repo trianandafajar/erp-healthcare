@@ -17,6 +17,10 @@ interface ActivityLog {
     actor_email: string | null
 }
 
+const props = defineProps<{
+    actorId?: string
+}>()
+
 const search = ref('')
 const actionFilter = ref('all')
 const moduleFilter = ref('all')
@@ -34,6 +38,7 @@ const queryParams = computed(() => ({
     module: moduleFilter.value !== 'all' ? moduleFilter.value : undefined,
     from: dateFrom.value || undefined,
     to: dateTo.value || undefined,
+    actor_id: props.actorId || undefined,
 }))
 
 const { data, pending, refresh } = await useFetch<{
