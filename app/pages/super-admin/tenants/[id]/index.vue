@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import TenantDetailSidebar from '~/components/dashboard/superadmin/TenantDetailSidebar.vue'
 
 definePageMeta({
     layout: 'superadmin',
@@ -12,7 +13,16 @@ useSeoMeta({
 })
 
 const route = useRoute()
+const router = useRouter()
 const tenantId = route.params.id as string
+
+const sidebarOpen = ref(false)
+
+const section = computed(() => (route.query.section as string) || 'dashboard')
+
+function navigateToSection(s: string) {
+    router.push({ query: { section: s } })
+}
 
 const { data, pending, error } = await useFetch(`/api/superadmin/tenants/${tenantId}`)
 const tenant = computed(() => data.value as any)
@@ -38,6 +48,8 @@ function formatCurrency(value?: number) {
 function getInitials(name: string) {
     return name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
 }
+
+const tenantSlug = computed(() => (tenant.value as any)?.slug ?? '')
 
 const planColors: Record<string, string> = {
     free: 'grey', basic: 'primary', pro: 'warning', enterprise: 'error',
@@ -121,6 +133,8 @@ async function toggleSuspend() {
 </script>
 
 <template>
+    <TenantDetailSidebar v-model="sidebarOpen" :slug="tenantSlug" :active-section="section" @navigate="navigateToSection" />
+
     <div v-if="pending" class="d-flex justify-center py-12">
         <v-progress-circular indeterminate color="primary" />
     </div>
