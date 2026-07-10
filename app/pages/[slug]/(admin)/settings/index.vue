@@ -234,6 +234,7 @@ async function saveGeneral() {
         })
         settings.value = result
         logoFile.value = null
+        profileStore.refreshProfile()
         snackbarMsg.value = 'Healthcare branding updated successfully'
         snackbarColor.value = 'success'
         snackbar.value = true
