@@ -50,6 +50,10 @@ const totalTenants = computed(() => data.value?.total ?? 0)
 
 watch([search, planFilter, currentPage], () => { refresh() })
 
+function getRowNumber(index: number) {
+  return (currentPage.value - 1) * itemsPerPage + index + 1
+}
+
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', {
     day: 'numeric',
@@ -153,6 +157,7 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
     <v-table class="bordered-table" hover density="comfortable">
       <thead class="bg-containerBg">
         <tr>
+          <th class="text-left text-caption font-weight-bold text-uppercase" style="width: 50px;">No</th>
           <th class="text-left text-caption font-weight-bold text-uppercase">Tenant</th>
           <th class="text-left text-caption font-weight-bold text-uppercase">Plan</th>
           <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
@@ -164,18 +169,19 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
       </thead>
       <tbody>
         <tr v-if="pending" v-for="i in 5" :key="i">
-          <td colspan="7" style="border-bottom: none;">
+          <td colspan="8" style="border-bottom: none;">
             <v-skeleton-loader type="table-row" class="my-1" />
           </td>
         </tr>
         <tr v-else-if="tenants.length === 0">
-          <td colspan="7" class="text-center py-8 text-medium-emphasis">
+          <td colspan="8" class="text-center py-8 text-medium-emphasis">
             <v-icon icon="mdi-domain-off" size="32" class="mb-2 d-block mx-auto" />
             No tenants found
           </td>
         </tr>
-        <tr v-else v-for="tenant in tenants" :key="tenant.id" class="cursor-pointer"
+        <tr v-else v-for="(tenant, index) in tenants" :key="tenant.id" class="cursor-pointer"
           @click="openDetail(tenant)">
+          <td class="py-3 text-body-2 text-medium-emphasis">{{ getRowNumber(index) }}</td>
           <td class="py-3">
             <div class="d-flex align-center ga-3">
               <v-avatar size="34" color="primary" variant="tonal">
