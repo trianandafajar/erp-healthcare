@@ -136,6 +136,115 @@ const statusColor: Record<string, string> = {
     past_due: 'warning',
     expired: 'error',
 }
+
+// General settings
+const settings = ref<any>(null)
+const displayName = ref('')
+const logoPreview = ref('')
+const logoFile = ref<File | null>(null)
+const uploadingLogo = ref(false)
+const logoError = ref('')
+const logoInputRef = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
+const savingSettings = ref(false)
+
+onMounted(async () => {
+    try {
+        settings.value = await $fetch('/api/tenant/settings')
+        if (settings.value) {
+            displayName.value = settings.value.display_name ?? ''
+            logoPreview.value = settings.value.logo_url ?? ''
+        }
+    } catch {
+        // no settings yet
+    }
+})
+
+function validateFile(file: File): string | null {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowed.includes(file.type)) return 'Only JPG, PNG, or WebP images are allowed.'
+    if (file.size > 2 * 1024 * 1024) return 'Image must be smaller than 2 MB.'
+    return null
+}
+
+function applyLogoFile(file: File) {
+    const err = validateFile(file)
+    if (err) { logoError.value = err; return }
+    logoError.value = ''
+    logoFile.value = file
+    if (logoPreview.value.startsWith('blob:')) URL.revokeObjectURL(logoPreview.value)
+    logoPreview.value = URL.createObjectURL(file)
+}
+
+function onLogoFileInputChange(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (file) applyLogoFile(file)
+}
+
+function onLogoDragOver(event: DragEvent) {
+    event.preventDefault()
+    isDragging.value = true
+}
+
+function onLogoDragLeave() {
+    isDragging.value = false
+}
+
+function onLogoDrop(event: DragEvent) {
+    event.preventDefault()
+    isDragging.value = false
+    const file = event.dataTransfer?.files?.[0]
+    if (file) applyLogoFile(file)
+}
+
+function removeLogo() {
+    if (logoPreview.value.startsWith('blob:')) URL.revokeObjectURL(logoPreview.value)
+    logoFile.value = null
+    logoPreview.value = ''
+    logoError.value = ''
+    if (logoInputRef.value) logoInputRef.value.value = ''
+}
+
+async function uploadLogo(): Promise<string> {
+    if (!logoFile.value) return logoPreview.value
+    uploadingLogo.value = true
+    try {
+        const body = new FormData()
+        body.append('file', logoFile.value)
+        const result = await $fetch<{ url: string }>('/api/upload/tenant-logo', { method: 'POST', body })
+        return result.url
+    } finally {
+        uploadingLogo.value = false
+    }
+}
+
+async function saveGeneral() {
+    savingSettings.value = true
+    try {
+        let logoUrl = logoPreview.value
+        if (logoFile.value) {
+            logoUrl = await uploadLogo()
+        }
+        const result = await $fetch('/api/tenant/settings', {
+            method: 'PUT',
+            body: {
+                display_name: displayName.value,
+                logo_url: logoUrl || null,
+            },
+        })
+        settings.value = result
+        logoFile.value = null
+        snackbarMsg.value = 'Healthcare branding updated successfully'
+        snackbarColor.value = 'success'
+        snackbar.value = true
+    } catch (e: any) {
+        snackbarMsg.value = e?.data?.message || 'Failed to update branding'
+        snackbarColor.value = 'error'
+        snackbar.value = true
+    } finally {
+        savingSettings.value = false
+    }
+}
 </script>
 
 <template>
@@ -155,9 +264,9 @@ const statusColor: Record<string, string> = {
                 <v-icon start icon="mdi-credit-card-outline" size="18" />
                 Billing
             </v-tab>
-            <v-tab value="general" class="text-none" disabled>
-                <v-icon start icon="mdi-information-outline" size="18" />
-                General
+            <v-tab value="general" class="text-none">
+                <v-icon start icon="mdi-hospital-building-outline" size="18" />
+                Healthcare
             </v-tab>
         </v-tabs>
         <v-divider />
@@ -393,10 +502,95 @@ const statusColor: Record<string, string> = {
                 </v-window-item>
 
                 <v-window-item value="general">
-                    <div class="text-center py-12 text-medium-emphasis">
-                        <v-icon icon="mdi-cog-outline" size="40" class="mb-2" />
-                        <div class="text-body-1">General settings coming soon</div>
-                        <div class="text-caption mt-1">Manage tenant name, timezone, and more.</div>
+                    <div class="d-flex flex-column flex-lg-row ga-8">
+                        <div class="flex-grow-1">
+                            <h3 class="text-h6 font-weight-bold mb-1">Healthcare Branding</h3>
+                            <p class="text-body-2 text-medium-emphasis mb-5">
+                                Set the display name and logo for your healthcare facility.
+                            </p>
+
+                            <div class="mb-5">
+                                <v-label class="text-caption font-weight-medium mb-2">Display Name</v-label>
+                                <v-text-field v-model="displayName" placeholder="e.g. My Hospital"
+                                    variant="outlined" density="compact" hide-details max-width="400" />
+                            </div>
+
+                            <div class="mb-5">
+                                <v-label class="text-caption font-weight-medium mb-2">Logo</v-label>
+                                <div class="d-flex ga-3 align-stretch">
+                                    <v-avatar size="80" rounded="lg" color="grey-lighten-3" class="flex-shrink-0">
+                                        <v-img v-if="logoPreview" :src="logoPreview" cover />
+                                        <v-icon v-else icon="mdi-hospital-building-outline" size="40"
+                                            color="grey-lighten-1" />
+                                    </v-avatar>
+
+                                    <div class="photo-dropzone flex-grow-1 d-flex flex-column align-center justify-center ga-1 rounded-lg"
+                                        style="min-height: 80px; height: 80px; max-width: 320px;"
+                                        :class="{
+                                            'photo-dropzone--dragging': isDragging,
+                                            'photo-dropzone--error': !!logoError
+                                        }"
+                                        @dragover="onLogoDragOver" @dragleave="onLogoDragLeave" @drop="onLogoDrop"
+                                        @click="logoInputRef?.click()">
+                                        <v-icon :icon="isDragging ? 'mdi-cloud-download-outline' : 'mdi-image-plus-outline'"
+                                            size="24" :color="isDragging ? 'primary' : 'grey'" />
+                                        <span class="text-caption font-weight-medium">
+                                            {{ isDragging ? 'Drop to upload' : 'Click or drag & drop' }}
+                                        </span>
+                                        <span class="text-caption text-medium-emphasis">
+                                            JPG, PNG, WebP · Max 2 MB
+                                        </span>
+                                    </div>
+
+                                    <input ref="logoInputRef" type="file" accept="image/jpeg,image/png,image/webp"
+                                        style="display: none" @change="onLogoFileInputChange" />
+                                </div>
+
+                                <div v-if="logoError" class="text-caption text-error mt-1 d-flex align-center ga-1">
+                                    <v-icon icon="mdi-alert-circle-outline" size="14" />
+                                    {{ logoError }}
+                                </div>
+
+                                <div v-if="logoPreview" class="mt-1">
+                                    <v-btn variant="text" color="error" size="x-small"
+                                        prepend-icon="mdi-delete-outline" @click="removeLogo">
+                                        Remove image
+                                    </v-btn>
+                                </div>
+                            </div>
+
+                            <v-divider class="mb-4" />
+
+                            <div class="d-flex align-center ga-3">
+                                <v-btn variant="flat" color="primary" :loading="savingSettings || uploadingLogo"
+                                    :disabled="savingSettings || uploadingLogo" @click="saveGeneral">
+                                    <v-icon start icon="mdi-content-save" size="18" />
+                                    Save Changes
+                                </v-btn>
+                            </div>
+                        </div>
+
+                        <div class="flex-shrink-0">
+                            <v-card variant="outlined" class="rounded-lg" max-width="220">
+                                <v-card-item class="pb-2">
+                                    <v-card-title class="text-subtitle-2 font-weight-bold">Preview</v-card-title>
+                                </v-card-item>
+                                <v-divider />
+                                <v-card-text class="d-flex flex-column align-center py-5">
+                                    <v-avatar size="72" rounded="lg" color="grey-lighten-3" class="mb-3">
+                                        <v-img v-if="logoPreview" :src="logoPreview" cover />
+                                        <v-icon v-else icon="mdi-hospital-building-outline" size="36"
+                                            color="grey-lighten-1" />
+                                    </v-avatar>
+                                    <div class="text-body-2 font-weight-medium mb-1 text-center">
+                                        {{ displayName || 'Your Facility' }}
+                                    </div>
+                                    <div class="text-caption text-medium-emphasis text-center">
+                                        Preview of how your branding will appear
+                                    </div>
+                                </v-card-text>
+                            </v-card>
+                        </div>
                     </div>
                 </v-window-item>
             </v-window>
@@ -410,3 +604,27 @@ const statusColor: Record<string, string> = {
         </template>
     </v-snackbar>
 </template>
+
+<style scoped>
+.photo-dropzone {
+    border: 2px dashed rgba(var(--v-border-color), 0.4);
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    text-align: center;
+    overflow: hidden;
+}
+
+.photo-dropzone:hover {
+    border-color: rgb(var(--v-theme-primary));
+    background-color: rgba(var(--v-theme-primary), 0.04);
+}
+
+.photo-dropzone--dragging {
+    border-color: rgb(var(--v-theme-primary));
+    background-color: rgba(var(--v-theme-primary), 0.08);
+}
+
+.photo-dropzone--error {
+    border-color: rgb(var(--v-theme-error));
+}
+</style>

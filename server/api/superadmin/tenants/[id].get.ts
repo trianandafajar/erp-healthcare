@@ -54,6 +54,7 @@ export default defineEventHandler(async (event) => {
         { count: prescriptionCount },
         { count: billingCount },
         { data: billingTotals },
+        { data: settings },
     ] = await Promise.all([
         admin.from('profiles').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId),
         admin.from('doctors').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId),
@@ -66,6 +67,8 @@ export default defineEventHandler(async (event) => {
         admin.from('billing').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId),
         // Billing totals: sum of paid invoices
         admin.from('billing').select('amount, status').eq('tenant_id', tenantId),
+        // Tenant settings
+        admin.from('tenant_settings').select('*').eq('tenant_id', tenantId).maybeSingle(),
     ])
 
     const totalRevenue = (billingTotals ?? [])
@@ -173,5 +176,8 @@ export default defineEventHandler(async (event) => {
 
         // Subscription
         subscription: subscription ?? null,
+
+        // Tenant branding settings
+        settings: settings ?? null,
     }
 })

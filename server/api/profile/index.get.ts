@@ -43,6 +43,7 @@ export default defineEventHandler(async (event) => {
 
   let tenant = null
   let subscription = null
+  let settings = null
   if (profile?.tenant_id) {
     const { data: tenantData } = await supabase
       .from('tenants')
@@ -57,6 +58,13 @@ export default defineEventHandler(async (event) => {
       .eq('tenant_id', profile.tenant_id)
       .maybeSingle()
     subscription = subData
+
+    const { data: settingsData } = await supabase
+      .from('tenant_settings')
+      .select('display_name, logo_url')
+      .eq('tenant_id', profile.tenant_id)
+      .maybeSingle()
+    settings = settingsData
   }
 
   return {
@@ -68,5 +76,6 @@ export default defineEventHandler(async (event) => {
     roles,
     tenant,
     subscription,
+    settings,
   }
 })

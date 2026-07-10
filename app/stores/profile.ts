@@ -33,6 +33,10 @@ type CurrentProfileResponse = {
         start_date: string | null
         stripe_customer_id: string | null
     } | null
+    settings?: {
+        display_name?: string | null
+        logo_url?: string | null
+    } | null
 }
 
 export const useProfileStore = defineStore('profile', () => {
@@ -90,6 +94,7 @@ export const useProfileStore = defineStore('profile', () => {
     const user = computed(() => data.value?.user ?? null)
     const subscription = computed(() => data.value?.subscription ?? null)
     const tenant = computed(() => data.value?.tenant ?? null)
+    const settings = computed(() => data.value?.settings ?? null)
 
     return {
         data,
@@ -101,6 +106,7 @@ export const useProfileStore = defineStore('profile', () => {
         user,
         subscription,
         tenant,
+        settings,
         fetchProfile,
         refreshProfile,
         clearProfile,
