@@ -134,14 +134,14 @@ async function register() {
         <v-row class="my-0">
             <v-col cols="12" sm="6" class="py-0">
                 <div class="mb-6">
-                    <v-label>First Name*</v-label>
+                    <AppLabel required>First Name</AppLabel>
                     <v-text-field v-model="firstname" :rules="firstRules" hide-details="auto" required
                         variant="outlined" class="mt-2" color="primary" placeholder="John"></v-text-field>
                 </div>
             </v-col>
             <v-col cols="12" sm="6" class="py-0">
                 <div class="mb-6">
-                    <v-label>Last Name*</v-label>
+                    <AppLabel required>Last Name</AppLabel>
                     <v-text-field v-model="lastname" :rules="lastRules" hide-details="auto" required variant="outlined"
                         class="mt-2" color="primary" placeholder="Doe"></v-text-field>
                 </div>
@@ -149,13 +149,13 @@ async function register() {
         </v-row>
 
         <div class="mb-6">
-            <v-label>Email Address*</v-label>
+            <AppLabel required>Email Address</AppLabel>
             <v-text-field v-model="email" placeholder="demo@company.com" class="mt-2" required hide-details="auto"
                 variant="outlined" color="primary" />
         </div>
 
         <div class="mb-6">
-            <v-label>Password</v-label>
+            <AppLabel required>Password</AppLabel>
             <v-text-field aria-label="password" placeholder="Enter your password" v-model="password" :rules="passwordRules" required variant="outlined"
                 color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
@@ -177,7 +177,7 @@ async function register() {
         </div>
 
         <div class="mb-6">
-            <v-label>Confirm Password</v-label>
+            <AppLabel required>Confirm Password</AppLabel>
             <v-text-field aria-label="confirm password" placeholder="Confirm your password" v-model="confirmPassword" :rules="confirmPasswordRules" required
                 variant="outlined" color="primary" hide-details="auto" :type="showConfirmPassword ? 'text' : 'password'"
                 class="mt-2">
@@ -192,7 +192,7 @@ async function register() {
         </div>
 
         <div class="mb-6">
-            <v-label>Clinic / Hospital Name*</v-label>
+            <AppLabel required>Clinic / Hospital Name</AppLabel>
             <v-text-field v-model="tenantName" :rules="tenantRules" placeholder="Enter the clinic name"
                 hide-details="auto" required variant="outlined" color="primary" class="mt-2" />
         </div>
