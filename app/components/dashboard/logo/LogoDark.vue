@@ -40,7 +40,7 @@ const hasBranding = computed(() => !isSuperadmin.value && (displayName.value || 
 <template>
   <div class="logo">
     <NuxtLink :to="dashboardLink" aria-label="HealthData logo" class="d-flex align-center ga-2 text-decoration-none">
-      <img v-if="logoUrl" :src="logoUrl" alt="Logo" height="36" style="display:block" />
+      <img v-if="logoUrl" :src="logoUrl" alt="Logo" height="36" width="36" style="display:block" />
       <img v-else src="/logo.png" alt="HealthData" height="36" style="display:block" />
 
       <span v-if="hasBranding" style="font-size:18px;font-weight:800;color:#1a1a1a">
