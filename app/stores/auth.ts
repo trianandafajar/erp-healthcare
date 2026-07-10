@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', () => {
     const tenantSlug = ref<string | null>(null)
     const subscriptionPlan = ref<string>('starter')
     const subscriptionStatus = ref<string | null>(null)
+    const settings = ref<{ logo_url?: string | null } | null>(null)
 
     function setUser(payload: {
         user: any
@@ -15,6 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
         tenantSlug?: string | null
         subscriptionPlan?: string
         subscriptionStatus?: string | null
+        settings?: { logo_url?: string | null } | null
     }) {
         user.value = payload.user
         role.value = payload.role
@@ -23,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
         tenantSlug.value = payload.tenantSlug ?? null
         subscriptionPlan.value = payload.subscriptionPlan ?? 'starter'
         subscriptionStatus.value = payload.subscriptionStatus ?? null
+        if (payload.settings !== undefined) settings.value = payload.settings
     }
 
     function hasPermission(permission: string): boolean {
@@ -41,12 +44,13 @@ export const useAuthStore = defineStore('auth', () => {
         tenantSlug.value = null
         subscriptionPlan.value = 'starter'
         subscriptionStatus.value = null
+        settings.value = null
     }
 
     const isAuthenticated = computed(() => !!user.value)
 
     return {
-        user, role, permissions, tenantId, tenantSlug, subscriptionPlan, subscriptionStatus, isAuthenticated,
+        user, role, permissions, tenantId, tenantSlug, subscriptionPlan, subscriptionStatus, settings, isAuthenticated,
         setUser, hasPermission, hasAnyPermission, clearUser
     }
 })

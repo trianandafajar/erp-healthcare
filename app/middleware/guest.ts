@@ -19,14 +19,32 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
                 const role = (roleData as any)?.roles?.name ?? null
 
+                let tenantId: string | null = null
                 let tenantSlug: string | null = null
+                let subscriptionPlan: string | null = null
+                let settings: { logo_url?: string | null } | null = null
                 if (role && role !== 'superadmin') {
-                    const { data: profile } = await supabase
+                    const { data: profile, error: profileErr } = await supabase
                         .from('profiles')
-                        .select('tenants(slug)')
+                        .select('tenant_id, tenants(slug, subscription_plan)')
                         .eq('id', user.id)
                         .single()
-                    tenantSlug = (profile as any)?.tenants?.slug ?? null
+
+                    if (!profileErr && profile) {
+                        const p = profile as any
+                        tenantId = p.tenant_id ?? null
+                        tenantSlug = p?.tenants?.slug ?? null
+                        subscriptionPlan = p?.tenants?.subscription_plan ?? null
+
+                        if (p.tenant_id) {
+                            const { data: sData } = await supabase
+                                .from('tenant_settings')
+                                .select('logo_url')
+                                .eq('tenant_id', p.tenant_id)
+                                .maybeSingle()
+                            settings = sData as { logo_url?: string | null } | null
+                        }
+                    }
                 }
 
                 const authStore = useAuthStore()
@@ -34,8 +52,19 @@ export default defineNuxtRouteMiddleware(async (to) => {
                     user,
                     role,
                     permissions: [],
+                    tenantId,
                     tenantSlug,
+                    subscriptionPlan: subscriptionPlan ?? 'starter',
                 })
+
+                if (!role || role === 'superadmin') {
+                    return navigateTo(getDashboardPath(role, tenantSlug), { replace: true })
+                }
+
+                const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settings, tenantSlug)
+                if (onboardingPath) {
+                    return navigateTo(onboardingPath, { replace: true })
+                }
 
                 return navigateTo(getDashboardPath(role, tenantSlug), { replace: true })
             }
@@ -47,5 +76,18 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (!authState?.user) return
 
     const authStore = useAuthStore()
+
+    if (authStore.role && authStore.role !== 'superadmin') {
+        const onboardingPath = getOnboardingPath(
+            authState.tenantId ?? authStore.tenantId,
+            authState.subscriptionPlan ?? authStore.subscriptionPlan,
+            authState.settings ?? null,
+            authStore.tenantSlug
+        )
+        if (onboardingPath) {
+            return navigateTo(onboardingPath, { replace: true })
+        }
+    }
+
     return navigateTo(getDashboardPath(authState.role, authStore.tenantSlug), { replace: true })
 })

@@ -51,12 +51,12 @@ const planName = computed(() => {
                 <v-btn variant="tonal" color="secondary" class="mr-2" @click="upgrade.dismiss()">
                     Close
                 </v-btn>
-                <a href="/#pricing" target="_blank" rel="noopener noreferrer"
+                <NuxtLink to="/onboarding/subscription" target="_blank" rel="noopener noreferrer"
                     class="text-decoration-none">
                     <v-btn variant="flat" color="primary">
                         View Pricing Plans
                     </v-btn>
-                </a>
+                </NuxtLink>
             </v-card-actions>
         </v-card>
     </v-dialog>

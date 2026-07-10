@@ -2,25 +2,18 @@
 import { ref, computed } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
-const route = useRoute()
-
 const firstname = ref('')
 const lastname = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
-const tenantName = ref('')
 const errorMsg = ref('')
 const loading = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
-const pricingPlanId = (route.query.plan as string) || null
-const billing = (route.query.billing as string) || 'monthly'
-
 const firstRules = [(v: string) => !!v || 'First name is required']
 const lastRules = [(v: string) => !!v || 'Last name is required']
-const tenantRules = [(v: string) => !!v || 'Clinic or hospital name is required']
 
 const passwordRules = [
     (v: string) => !!v || 'Password is required',
@@ -59,35 +52,6 @@ const passwordStrength = computed(() => {
     return { label: 'Strong', color: 'success', percent: 100 }
 })
 
-async function redirectToCheckout(tenantId: string, planId: string) {
-    try {
-        const { plans } = await $fetch('/api/landingpage/pricing')
-        const plan = plans?.find((p: any) => p.id === planId)
-        if (!plan) throw new Error('Plan not found')
-
-        const p = plan as any
-        const priceId = billing === 'yearly' && p.stripe_price_id_yearly
-            ? p.stripe_price_id_yearly
-            : p.stripe_price_id
-
-        if (!priceId) throw new Error('No Stripe price configured for this plan')
-
-        const { url } = await $fetch('/api/stripe/create-checkout', {
-            method: 'POST',
-            body: {
-                price_id: priceId,
-                tenant_id: tenantId,
-            },
-        })
-
-        if (url) {
-            window.location.href = url
-        }
-    } catch (err: any) {
-        errorMsg.value = err?.data?.message || err.message || 'Failed to start payment'
-    }
-}
-
 async function register() {
     if (password.value !== confirmPassword.value) {
         errorMsg.value = 'Passwords do not match'
@@ -98,22 +62,16 @@ async function register() {
     errorMsg.value = ''
 
     try {
-        const data: any = await $fetch('/api/auth/register', {
+        await $fetch('/api/auth/register', {
             method: 'POST',
             body: {
                 email: email.value,
                 password: password.value,
                 full_name: `${firstname.value} ${lastname.value}`,
-                tenant_name: tenantName.value,
-                pricing_plan_id: pricingPlanId,
             },
         })
 
-        if (pricingPlanId && data?.tenant_id) {
-            await redirectToCheckout(data.tenant_id, pricingPlanId)
-        } else {
-            await navigateTo('/login')
-        }
+        await navigateTo('/login')
     } catch (err: any) {
         errorMsg.value = err.data?.message || 'Registration failed'
     } finally {
@@ -189,12 +147,6 @@ async function register() {
                     </span>
                 </template>
             </v-text-field>
-        </div>
-
-        <div class="mb-6">
-            <AppLabel required>Clinic / Hospital Name</AppLabel>
-            <v-text-field v-model="tenantName" :rules="tenantRules" placeholder="Enter the clinic name"
-                hide-details="auto" required variant="outlined" color="primary" class="mt-2" />
         </div>
 
         <div class="d-sm-inline-flex align-center mt-2 mb-7 mb-sm-0 font-weight-bold">

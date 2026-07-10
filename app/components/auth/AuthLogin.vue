@@ -69,6 +69,8 @@ async function validate() {
             ?.map((rp: any) => rp.permissions?.name)
             .filter(Boolean) ?? []
 
+        const authStore = useAuthStore()
+
         const isSuperAdmin = role === 'superadmin'
 
         let tenantId: string | null = null
@@ -81,8 +83,14 @@ async function validate() {
                 .eq('id', user!.id)
                 .single()
 
-            if (profileError || !profile?.tenant_id) {
-                apiError.value = 'Your account is not yet linked to any tenant.'
+            if (profileError) {
+                apiError.value = 'Failed to load profile.'
+                return
+            }
+
+            if (!profile?.tenant_id) {
+                authStore.setUser({ user, role, permissions: [], tenantId: null, tenantSlug: null })
+                await navigateTo('/onboarding/subscription')
                 return
             }
 
@@ -95,14 +103,40 @@ async function validate() {
             }
         }
 
-        const authStore = useAuthStore()
+        let subscriptionPlan: string | null = null
+        let settingsData: { logo_url?: string | null } | null = null
+        if (!isSuperAdmin && tenantId) {
+            const { data: tenantInfo } = await supabase
+                .from('tenants')
+                .select('subscription_plan')
+                .eq('id', tenantId)
+                .single()
+            subscriptionPlan = (tenantInfo as any)?.subscription_plan ?? null
+
+            const { data: sData } = await supabase
+                .from('tenant_settings')
+                .select('logo_url')
+                .eq('tenant_id', tenantId)
+                .maybeSingle()
+            settingsData = sData as { logo_url?: string | null } | null
+        }
+
         authStore.setUser({
             user,
             role,
             permissions,
             tenantId,
             tenantSlug,
+            subscriptionPlan: subscriptionPlan ?? 'starter',
         })
+
+        if (!isSuperAdmin) {
+            const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settingsData, tenantSlug)
+            if (onboardingPath) {
+                await navigateTo(onboardingPath)
+                return
+            }
+        }
 
         const redirectMap: Record<string, string> = {
             superadmin: 'super-admin/dashboard',

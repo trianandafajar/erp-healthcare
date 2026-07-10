@@ -4,6 +4,8 @@ type EnsuredAuthState = {
   permissions: string[]
   tenantId: string | null
   tenantSlug: string | null
+  subscriptionPlan?: string | null
+  settings?: { logo_url?: string | null } | null
 }
 
 const AUTH_TIMEOUT_MS = 8000
@@ -44,6 +46,8 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
       permissions: authStore.permissions,
       tenantId: authStore.tenantId,
       tenantSlug: authStore.tenantSlug,
+      subscriptionPlan: authStore.subscriptionPlan,
+      settings: authStore.settings,
     }
   }
 
@@ -76,10 +80,11 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
       user: currentProfile.user,
       role,
       permissions,
-      tenantId,
-      tenantSlug,
+      tenantId: tenantId ?? authStore.tenantId,
+      tenantSlug: tenantSlug ?? authStore.tenantSlug,
       subscriptionPlan: currentProfile.subscription?.plan ?? 'starter',
       subscriptionStatus: currentProfile.subscription?.status ?? null,
+      settings: currentProfile.settings ?? null,
     })
 
     return {
@@ -88,6 +93,8 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
       permissions,
       tenantId,
       tenantSlug,
+      subscriptionPlan: currentProfile.subscription?.plan ?? null,
+      settings: currentProfile.settings ?? null,
     }
   } catch {
     authStore.clearUser()
