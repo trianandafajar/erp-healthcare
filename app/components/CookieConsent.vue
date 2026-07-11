@@ -4,8 +4,8 @@ consent.init()
 </script>
 
 <template>
-  <v-snackbar v-model="consent.show.value" location="bottom" :timeout="-1" color="surface" class="cookie-snackbar">
-    <div class="d-flex align-center ga-3">
+  <div v-if="consent.show.value" class="cookie-bar">
+    <div class="d-flex align-center ga-3 justify-center py-6 px-4 flex-wrap">
       <v-icon icon="mdi-cookie" size="20" color="primary" />
       <span class="text-body-2 text-darkText">
         We use cookies to enhance your experience. By continuing, you agree to the use of cookies.
@@ -14,22 +14,18 @@ consent.init()
         Accept
       </v-btn>
     </div>
-  </v-snackbar>
+  </div>
 </template>
 
 <style scoped>
-.cookie-snackbar {
-  max-width: 720px;
-  margin: 0 auto 8px;
-  border-radius: 12px;
-}
-
-.cookie-snackbar :deep(.v-snackbar__wrapper) {
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-}
-
-.cookie-snackbar :deep(.v-snackbar__content) {
-  padding: 12px 20px;
+.cookie-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: rgb(var(--v-theme-surface));
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 }
 </style>

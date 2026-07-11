@@ -22,5 +22,4 @@ useSeoMeta({
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
-  <CookieConsent />
 </template>

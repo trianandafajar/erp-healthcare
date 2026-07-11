@@ -3,4 +3,5 @@
     <div class="blank-layout">
         <slot />
     </div>
+    <CookieConsent />
 </template>
