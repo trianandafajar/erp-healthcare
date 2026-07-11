@@ -27,6 +27,12 @@ export default defineEventHandler(async (event: any) => {
         profiles (
             email,
             status
+        ),
+        patient_admissions (
+            email,
+            description,
+            length_of_stay,
+            created_at
         )
     `, { count: 'exact' })
         .eq('tenant_id', tenantId)
@@ -62,12 +68,24 @@ export default defineEventHandler(async (event: any) => {
 
     if (error) throw createError({ statusCode: 400, message: error.message })
 
-    const result = (data ?? []).map(p => ({
-        ...p,
-        email: p.profiles?.email ?? null,
-        has_account: !!p.profile_id,
-        profiles: undefined
-    }))
+    const result = (data ?? []).map(p => {
+        const admissions = p.patient_admissions ?? []
+        const latestAdmission = admissions.length
+            ? admissions.reduce((latest: any, a: any) =>
+                new Date(a.created_at) > new Date(latest.created_at) ? a : latest
+            )
+            : null
+
+        return {
+            ...p,
+            email: p.profiles?.email ?? latestAdmission?.email ?? null,
+            has_account: !!p.profile_id,
+            description: latestAdmission?.description ?? null,
+            length_of_stay: latestAdmission?.length_of_stay ?? null,
+            profiles: undefined,
+            patient_admissions: undefined
+        }
+    })
 
     return {
         patients: result,

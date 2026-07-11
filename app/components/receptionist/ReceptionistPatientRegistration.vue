@@ -15,7 +15,10 @@ interface Patient {
     phone: string
     address: string
     blood_type: string | null
+    email: string | null
     has_account: boolean
+    description?: string | null
+    length_of_stay?: string | null
 }
 
 const { can } = usePermission()
@@ -49,7 +52,10 @@ const patients = computed<Patient[]>(() =>
         phone: p.phone ?? '-',
         address: p.address ?? '-',
         blood_type: p.blood_type ?? null,
+        email: p.email ?? null,
         has_account: !!p.profile_id,
+        description: p.description ?? null,
+        length_of_stay: p.length_of_stay ?? null,
     }))
 )
 
@@ -123,14 +129,17 @@ async function handleSubmit(payload: any) {
         if (modalMode.value === 'add') {
             await $fetch('/api/patients', {
                 method: 'POST',
-                body: {
-                    full_name: payload.full_name,
-                    date_of_birth: payload.date_of_birth,
-                    gender: payload.gender,
-                    phone: payload.phone,
-                    address: payload.address,
-                    blood_type: payload.blood_type,
-                }
+                    body: {
+                            full_name: payload.full_name,
+                            date_of_birth: payload.date_of_birth,
+                            gender: payload.gender,
+                            phone: payload.phone,
+                            address: payload.address,
+                            blood_type: payload.blood_type,
+                            email: payload.email,
+                            description: payload.description,
+                            length_of_stay: payload.length_of_stay,
+                        }
             })
             notify('Patient registered successfully')
         } else if (modalMode.value === 'edit') {
@@ -202,19 +211,21 @@ async function handleSubmit(payload: any) {
                     <th class="text-left text-caption font-weight-bold text-uppercase">No. RM</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Gender / Age</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Phone</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Email</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Blood Type</th>
+                    <th class="text-left text-caption font-weight-bold text-uppercase">Length of Stay</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Account</th>
                     <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-if="pending" v-for="i in 5" :key="i">
-                    <td colspan="7" style="border-bottom: none;">
+                    <td colspan="9" style="border-bottom: none;">
                         <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
                 <tr v-else-if="patients.length === 0">
-                    <td colspan="7" class="text-center py-8 text-medium-emphasis">
+                    <td colspan="9" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-account-injury-outline" size="32" class="mb-2 d-block mx-auto" />
                         No patients found
                     </td>
@@ -243,6 +254,7 @@ async function handleSubmit(payload: any) {
                         </template>
                     </td>
                     <td class="py-3 text-body-2 text-medium-emphasis">{{ patient.phone }}</td>
+                    <td class="py-3 text-body-2 text-medium-emphasis">{{ patient.email || '-' }}</td>
                     <td class="py-3">
                         <v-chip v-if="patient.blood_type" size="small" variant="tonal"
                             :color="bloodTypeColors[patient.blood_type] ?? 'secondary'">
@@ -250,6 +262,7 @@ async function handleSubmit(payload: any) {
                         </v-chip>
                         <span v-else class="text-medium-emphasis">-</span>
                     </td>
+                    <td class="py-3 text-body-2 text-medium-emphasis">{{ patient.length_of_stay || '-' }}</td>
                     <td class="py-3">
                         <v-chip :color="patient.has_account ? 'success' : 'default'" variant="tonal" size="small">
                             {{ patient.has_account ? 'Registered' : 'Walk-in' }}

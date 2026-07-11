@@ -32,6 +32,22 @@ const genders = [
     { title: 'Female', value: 'female' },
 ]
 
+const stayOptions = [
+    { title: '1 Day', value: '1' },
+    { title: '2 Days', value: '2' },
+    { title: '3 Days', value: '3' },
+    { title: '4 Days', value: '4' },
+    { title: '5 Days', value: '5' },
+    { title: '6 Days', value: '6' },
+    { title: '7 Days', value: '7' },
+    { title: '8 Days', value: '8' },
+    { title: '9 Days', value: '9' },
+    { title: '10 Days', value: '10' },
+    { title: 'No Stay', value: 'No Stay' },
+    { title: 'Undetermined', value: 'Undetermined' },
+    { title: 'Ongoing', value: 'Ongoing' },
+]
+
 const form = ref({
     full_name: '',
     date_of_birth: '',
@@ -39,6 +55,9 @@ const form = ref({
     phone: '',
     address: '',
     blood_type: null as string | null,
+    email: '',
+    description: '',
+    length_of_stay: null as string | null,
 })
 
 watch(
@@ -52,6 +71,9 @@ watch(
                 phone: patient.phone === '-' ? '' : (patient.phone ?? ''),
                 address: patient.address === '-' ? '' : (patient.address ?? ''),
                 blood_type: patient.blood_type ?? null,
+                email: '',
+                description: '',
+                length_of_stay: null,
             }
         } else if (props.mode === 'add') {
             form.value = {
@@ -61,6 +83,9 @@ watch(
                 phone: '',
                 address: '',
                 blood_type: null,
+                email: '',
+                description: '',
+                length_of_stay: null,
             }
         }
     },
@@ -104,6 +129,9 @@ function onSubmit() {
         phone: form.value.phone,
         address: form.value.address,
         blood_type: form.value.blood_type,
+        email: form.value.email || null,
+        description: form.value.description || null,
+        length_of_stay: form.value.length_of_stay || null,
     })
 }
 </script>
@@ -212,6 +240,35 @@ function onSubmit() {
                         <v-textarea v-model="form.address" placeholder="Patient address" variant="outlined"
                             density="compact" rows="2" hide-details />
                     </v-col>
+
+                    <template v-if="mode === 'add'">
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">
+                                Email <span class="text-medium-emphasis">(optional)</span>
+                            </v-label>
+
+                            <v-text-field v-model="form.email" placeholder="e.g. patient@email.com" type="email"
+                                variant="outlined" density="compact" hide-details />
+                        </v-col>
+
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">
+                                Length of Stay
+                            </v-label>
+
+                            <v-select v-model="form.length_of_stay" :items="stayOptions" placeholder="Select length of stay"
+                                variant="outlined" density="compact" hide-details clearable />
+                        </v-col>
+
+                        <v-col cols="12" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">
+                                Description
+                            </v-label>
+
+                            <v-textarea v-model="form.description" placeholder="Describe the patient's condition / disease"
+                                variant="outlined" density="compact" rows="3" hide-details />
+                        </v-col>
+                    </template>
 
                     <v-col v-if="mode === 'edit'" cols="12" class="mt-3">
                         <v-alert v-if="patient?.has_account" type="success" variant="tonal" density="compact"
