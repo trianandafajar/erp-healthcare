@@ -9,7 +9,6 @@ interface Testimonial {
     quote: string
     rating: number
     image_url: string
-    sort_order: number
 }
 
 const props = defineProps<{
@@ -30,7 +29,6 @@ const form = ref({
     quote: '',
     rating: 5,
     image_url: '',
-    sort_order: 0,
 })
 
 const photoFile = ref<File | null>(null)
@@ -124,7 +122,6 @@ watch(
                 quote: testimonial.quote,
                 rating: testimonial.rating,
                 image_url: testimonial.image_url,
-                sort_order: testimonial.sort_order,
             }
             photoPreview.value = testimonial.image_url || ''
             photoFile.value = null
@@ -137,7 +134,6 @@ watch(
                 quote: '',
                 rating: 5,
                 image_url: '',
-                sort_order: 0,
             }
             photoPreview.value = ''
             photoFile.value = null
@@ -187,7 +183,6 @@ async function onSubmit() {
             quote: form.value.quote,
             rating: form.value.rating,
             image_url: form.value.image_url,
-            sort_order: form.value.sort_order,
         })
     } catch (err: any) {
         photoError.value = err?.data?.message ?? err?.message ?? 'Failed to upload photo.'
@@ -256,12 +251,6 @@ async function onSubmit() {
                         <v-label class="text-caption font-weight-medium mb-1">Rating (1-5)</v-label>
                         <v-select v-model.number="form.rating" :items="[1,2,3,4,5]" variant="outlined"
                             density="compact" hide-details />
-                    </v-col>
-
-                    <v-col cols="12" sm="6" class="mt-3">
-                        <v-label class="text-caption font-weight-medium mb-1">Sort Order</v-label>
-                        <v-text-field v-model.number="form.sort_order" type="number" min="0" placeholder="0"
-                            variant="outlined" density="compact" hide-details />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">

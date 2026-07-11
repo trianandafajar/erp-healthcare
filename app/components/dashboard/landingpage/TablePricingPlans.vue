@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import PricingPlanModal from './PricingPlanModal.vue'
 
@@ -22,29 +22,33 @@ interface PricingPlan {
 
 const { can } = usePermission()
 
-const search = ref('')
-const currentPage = ref(1)
-const itemsPerPage = 10
-
 const { data, pending, refresh } = await useFetch<{ plans: PricingPlan[] }>('/api/superadmin/landingpage/pricing')
 
-const plans = computed(() => data.value?.plans ?? [])
+const plans = ref<PricingPlan[]>([])
 
-const filteredPlans = computed(() => {
-    if (!search.value) return plans.value
-    const q = search.value.toLowerCase()
-    return plans.value.filter((p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.subtitle.toLowerCase().includes(q)
-    )
-})
+watch(data, (val) => {
+    if (val?.plans) {
+        plans.value = [...val.plans].sort((a, b) => a.sort_order - b.sort_order)
+    }
+}, { immediate: true })
 
-const paginatedPlans = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return filteredPlans.value.slice(start, start + itemsPerPage)
-})
+const tbodyRef = ref<HTMLElement | null>(null)
 
-const totalPages = computed(() => Math.ceil(filteredPlans.value.length / itemsPerPage))
+async function handleReorder(items: PricingPlan[]) {
+    const updates = items.map((item, i) => ({ id: item.id, sort_order: i }))
+    for (const u of updates) {
+        try {
+            await $fetch(`/api/superadmin/landingpage/pricing/${u.id}`, {
+                method: 'PATCH',
+                body: { sort_order: u.sort_order },
+            })
+        } catch {
+            // silent
+        }
+    }
+}
+
+useSortableTable(tbodyRef, plans, handleReorder)
 
 const dialog = ref(false)
 const modalMode = ref<'add' | 'edit' | 'delete'>('add')
@@ -89,6 +93,7 @@ async function handleSubmit(payload: any) {
     loading.value = true
     try {
         if (modalMode.value === 'add') {
+            const maxSort = Math.max(...plans.value.map(p => p.sort_order), -1)
             await $fetch('/api/superadmin/landingpage/pricing', {
                 method: 'POST',
                 body: {
@@ -102,7 +107,7 @@ async function handleSubmit(payload: any) {
                     button_link: payload.button_link,
                     is_recommended: payload.is_recommended,
                     badge_text: payload.badge_text,
-                    sort_order: payload.sort_order,
+                    sort_order: maxSort + 1,
                 },
             })
             notify('Pricing plan created successfully')
@@ -120,7 +125,6 @@ async function handleSubmit(payload: any) {
                     button_link: payload.button_link,
                     is_recommended: payload.is_recommended,
                     badge_text: payload.badge_text,
-                    sort_order: payload.sort_order,
                     is_active: payload.is_active,
                 },
             })
@@ -148,10 +152,6 @@ function formatDate(dateStr?: string) {
         year: 'numeric',
     })
 }
-
-function onSearch() {
-    currentPage.value = 1
-}
 </script>
 
 <template>
@@ -169,41 +169,36 @@ function onSearch() {
     </v-card-item>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="d-flex align-center gap-3 px-4 py-3">
-            <v-text-field v-model="search" placeholder="Search by title..."
-                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
-                style="max-width: 280px" @update:model-value="onSearch" />
-        </div>
-
-        <v-divider />
-
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
+                    <th style="width:36px" class="text-left text-caption font-weight-bold text-uppercase"></th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Plan</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Monthly</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Yearly</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Recommended</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Active</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Features</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Sort</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Created</th>
                     <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody ref="tbodyRef">
                 <tr v-if="pending">
-                    <td colspan="10" class="text-center py-8">
+                    <td colspan="9" class="text-center py-8">
                         <v-progress-circular indeterminate color="primary" />
                     </td>
                 </tr>
-                <tr v-else-if="paginatedPlans.length === 0">
-                    <td colspan="10" class="text-center py-8 text-medium-emphasis">
+                <tr v-else-if="plans.length === 0">
+                    <td colspan="9" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-currency-usd-off" size="32" class="mb-2 d-block mx-auto" />
                         No pricing plans found
                     </td>
                 </tr>
-                <tr v-else v-for="plan in paginatedPlans" :key="plan.id">
+                <tr v-else v-for="plan in plans" :key="plan.id">
+                    <td class="py-3 drag-handle text-center" style="cursor:grab">
+                        <v-icon icon="mdi-drag" size="18" color="text-medium-emphasis" />
+                    </td>
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-icon icon="mdi-currency-usd" color="primary" size="24" />
@@ -245,9 +240,6 @@ function onSearch() {
                         <span v-else class="text-caption text-medium-emphasis">—</span>
                     </td>
                     <td class="py-3 text-body-2 text-medium-emphasis">
-                        {{ plan.sort_order }}
-                    </td>
-                    <td class="py-3 text-body-2 text-medium-emphasis">
                         {{ formatDate(plan.created_at) }}
                     </td>
                     <td class="py-3 text-right">
@@ -262,10 +254,8 @@ function onSearch() {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ paginatedPlans.length }} of {{ filteredPlans.length }} plans
+                Showing {{ plans.length }} plans
             </span>
-            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
-                density="compact" size="small" />
         </div>
     </UiTitleCard>
 
@@ -281,3 +271,23 @@ function onSearch() {
         </template>
     </v-snackbar>
 </template>
+
+<style scoped>
+.sortable-ghost {
+    opacity: 0.3;
+    background: rgb(var(--v-theme-primary-light)) !important;
+}
+
+.sortable-drag {
+    opacity: 0.9;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+</style>

@@ -20,27 +20,35 @@ interface Industry {
 
 const { can } = usePermission()
 
-const search = ref('')
-const currentPage = ref(1)
-const itemsPerPage = 10
-
-const queryParams = computed(() => ({
-    page: currentPage.value,
-    limit: itemsPerPage,
-    search: search.value || undefined,
-}))
-
 const { data, pending, refresh } = await useFetch<{
     industries: Industry[]
-    total: number
-    totalPages: number
-}>('/api/superadmin/landingpage/industries', { query: queryParams })
+}>('/api/superadmin/landingpage/industries')
 
-const industries = computed(() => data.value?.industries ?? [])
-const totalPages = computed(() => data.value?.totalPages ?? 1)
-const totalIndustries = computed(() => data.value?.total ?? 0)
+const industries = ref<Industry[]>([])
 
-watch([search, currentPage], () => { refresh() })
+watch(data, (val) => {
+    if (val?.industries) {
+        industries.value = [...val.industries].sort((a, b) => a.sort_order - b.sort_order)
+    }
+}, { immediate: true })
+
+const tbodyRef = ref<HTMLElement | null>(null)
+
+async function handleReorder(items: Industry[]) {
+    const updates = items.map((item, i) => ({ id: item.id, sort_order: i }))
+    for (const u of updates) {
+        try {
+            await $fetch(`/api/superadmin/landingpage/industries/${u.id}`, {
+                method: 'PATCH',
+                body: { sort_order: u.sort_order },
+            })
+        } catch {
+            // silent
+        }
+    }
+}
+
+useSortableTable(tbodyRef, industries, handleReorder)
 
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
@@ -49,10 +57,6 @@ function formatDate(dateStr?: string) {
         month: 'short',
         year: 'numeric'
     })
-}
-
-function onSearch() {
-    currentPage.value = 1
 }
 
 const dialog = ref(false)
@@ -98,13 +102,14 @@ async function handleSubmit(payload: any) {
     loading.value = true
     try {
         if (modalMode.value === 'add') {
+            const maxSort = Math.max(...industries.value.map(i => i.sort_order), -1)
             await $fetch('/api/superadmin/landingpage/industries', {
                 method: 'POST',
                 body: {
                     title: payload.title,
                     description: payload.description,
                     image_url: payload.image_url,
-                    sort_order: payload.sort_order,
+                    sort_order: maxSort + 1,
                     slug: payload.slug
                 }
             })
@@ -116,7 +121,6 @@ async function handleSubmit(payload: any) {
                     title: payload.title,
                     description: payload.description,
                     image_url: payload.image_url,
-                    sort_order: payload.sort_order,
                     slug: payload.slug
                 }
             })
@@ -154,38 +158,33 @@ async function handleSubmit(payload: any) {
     </v-card-item>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
-            <v-text-field v-model="search" placeholder="Search by title..." prepend-inner-icon="mdi-magnify"
-                variant="outlined" density="compact" hide-details clearable style="max-width: 280px"
-                @update:model-value="onSearch" />
-        </div>
-
-        <v-divider />
-
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
+                    <th style="width:36px" class="text-left text-caption font-weight-bold text-uppercase"></th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Title</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Description</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Sort Order</th>
                     <th class="text-center text-caption font-weight-bold text-uppercase">Active</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Created</th>
                     <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody ref="tbodyRef">
                 <tr v-if="pending" v-for="i in 5" :key="i">
                     <td colspan="6" style="border-bottom: none;">
                         <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="totalIndustries.length === 0">
+                <tr v-else-if="industries.length === 0">
                     <td colspan="6" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-domain-off-outline" size="32" class="mb-2 d-block mx-auto" />
                         No industries found
                     </td>
                 </tr>
                 <tr v-else v-for="industry in industries" :key="industry.id">
+                    <td class="py-3 drag-handle text-center" style="cursor:grab">
+                        <v-icon icon="mdi-drag" size="18" color="text-medium-emphasis" />
+                    </td>
                     <td class="py-3">
                         <div class="d-flex flex-column">
                             <span class="text-body-2 font-weight-medium">{{ industry.title }}</span>
@@ -204,11 +203,6 @@ async function handleSubmit(payload: any) {
                         <span v-else class="text-body-2 text-medium-emphasis">
                             {{ industry.description }}
                         </span>
-                    </td>
-                    <td class="py-3">
-                        <v-chip size="small" variant="tonal" color="secondary" label>
-                            {{ industry.sort_order }}
-                        </v-chip>
                     </td>
                     <td class="py-3 text-center">
                         <v-chip :color="industry.is_active ? 'success' : 'error'" size="small" variant="tonal" label>
@@ -236,10 +230,8 @@ async function handleSubmit(payload: any) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ industries.length }} of {{ totalIndustries }} industries
+                Showing {{ industries.length }} industries
             </span>
-            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
-                density="compact" size="small" />
         </div>
     </UiTitleCard>
 
@@ -255,3 +247,23 @@ async function handleSubmit(payload: any) {
         </template>
     </v-snackbar>
 </template>
+
+<style scoped>
+.sortable-ghost {
+    opacity: 0.3;
+    background: rgb(var(--v-theme-primary-light)) !important;
+}
+
+.sortable-drag {
+    opacity: 0.9;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+</style>

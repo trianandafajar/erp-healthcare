@@ -5,7 +5,6 @@ interface Logo {
     id: string
     title: string
     image_url: string
-    sort_order: number
 }
 
 const props = defineProps<{
@@ -22,7 +21,6 @@ const emit = defineEmits<{
 const form = ref({
     title: '',
     image_url: '',
-    sort_order: 0,
 })
 
 const photoFile = ref<File | null>(null)
@@ -112,13 +110,12 @@ watch(
             form.value = {
                 title: logo.title,
                 image_url: logo.image_url,
-                sort_order: logo.sort_order,
             }
             photoPreview.value = logo.image_url || ''
             photoFile.value = null
             photoError.value = ''
         } else {
-            form.value = { title: '', image_url: '', sort_order: 0 }
+            form.value = { title: '', image_url: '' }
             photoPreview.value = ''
             photoFile.value = null
             photoError.value = ''
@@ -163,7 +160,6 @@ async function onSubmit() {
             id: props.logo?.id,
             title: form.value.title,
             image_url: form.value.image_url,
-            sort_order: form.value.sort_order,
         })
     } catch (err: any) {
         photoError.value = err?.data?.message ?? err?.message ?? 'Failed to upload photo.'
@@ -251,11 +247,6 @@ async function onSubmit() {
                         </div>
                     </v-col>
 
-                    <v-col cols="12" class="mt-3">
-                        <v-label class="text-caption font-weight-medium mb-1">Sort Order</v-label>
-                        <v-text-field v-model.number="form.sort_order" type="number" min="0" placeholder="0"
-                            variant="outlined" density="compact" hide-details />
-                    </v-col>
                 </v-row>
             </v-card-text>
         </template>

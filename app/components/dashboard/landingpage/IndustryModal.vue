@@ -7,7 +7,6 @@ interface Industry {
     description: string
     image_url: string
     slug: string | null
-    sort_order: number
     is_active: boolean
 }
 
@@ -27,7 +26,6 @@ const form = ref({
     description: '',
     image_url: '',
     slug: '',
-    sort_order: 0,
 })
 
 const photoFile = ref<File | null>(null)
@@ -119,13 +117,12 @@ watch(
                 description: industry.description,
                 image_url: industry.image_url,
                 slug: industry.slug ?? '',
-                sort_order: industry.sort_order,
             }
             photoPreview.value = industry.image_url || ''
             photoFile.value = null
             photoError.value = ''
         } else {
-            form.value = { title: '', description: '', image_url: '', slug: '', sort_order: 0 }
+            form.value = { title: '', description: '', image_url: '', slug: '' }
             photoPreview.value = ''
             photoFile.value = null
             photoError.value = ''
@@ -172,7 +169,6 @@ async function onSubmit() {
             description: form.value.description,
             image_url: form.value.image_url,
             slug: form.value.slug || null,
-            sort_order: form.value.sort_order,
         })
     } catch (err: any) {
         photoError.value = err?.data?.message ?? err?.message ?? 'Failed to upload photo.'
@@ -275,11 +271,6 @@ async function onSubmit() {
                         </div>
                     </v-col>
 
-                    <v-col cols="12" class="mt-3">
-                        <v-label class="text-caption font-weight-medium mb-1">Sort Order</v-label>
-                        <v-text-field v-model.number="form.sort_order" type="number" min="0" placeholder="0"
-                            variant="outlined" density="compact" hide-details />
-                    </v-col>
                 </v-row>
             </v-card-text>
         </template>

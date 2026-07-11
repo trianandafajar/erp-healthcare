@@ -13,7 +13,6 @@ interface PricingPlan {
     button_link: string
     is_recommended: boolean
     badge_text: string
-    sort_order: number
     is_active: boolean
 }
 
@@ -39,7 +38,6 @@ const form = ref({
     button_link: '/contact',
     is_recommended: false,
     badge_text: '',
-    sort_order: 0,
     is_active: true,
 })
 
@@ -66,7 +64,6 @@ watch(
                 button_link: plan.button_link,
                 is_recommended: plan.is_recommended,
                 badge_text: plan.badge_text,
-                sort_order: plan.sort_order,
                 is_active: plan.is_active,
             }
         } else {
@@ -81,7 +78,6 @@ watch(
                 button_link: '/contact',
                 is_recommended: false,
                 badge_text: '',
-                sort_order: 0,
                 is_active: true,
             }
         }
@@ -128,7 +124,6 @@ async function onSubmit() {
         button_link: form.value.button_link,
         is_recommended: form.value.is_recommended,
         badge_text: form.value.badge_text,
-        sort_order: form.value.sort_order,
         is_active: form.value.is_active,
     })
 }
@@ -171,12 +166,6 @@ async function onSubmit() {
                         <v-label class="text-caption font-weight-medium mb-1">Title</v-label>
                         <v-text-field v-model="form.title" placeholder="e.g. Professional" variant="outlined"
                             density="compact" hide-details="auto" />
-                    </v-col>
-
-                    <v-col cols="12" sm="6">
-                        <v-label class="text-caption font-weight-medium mb-1">Sort Order</v-label>
-                        <v-text-field v-model.number="form.sort_order" type="number" min="0" placeholder="0"
-                            variant="outlined" density="compact" hide-details />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">

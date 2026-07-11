@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useTheme } from 'vuetify'
+import UpgradePlanModal from './UpgradePlanModal.vue'
 
 const profileStore = useProfileStore()
 const theme = useTheme()
 
 const tab = ref('appearance')
+const upgradeDialog = ref(false)
 
 const brandColor = ref(profileStore.data?.tenant?.brand_color || '#176D37')
 const saving = ref(false)
@@ -139,7 +141,14 @@ const logoInputRef = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const savingSettings = ref(false)
 
+const route = useRoute()
+
 onMounted(async () => {
+    if (route.query.upgrade === 'true') {
+        tab.value = 'billing'
+        upgradeDialog.value = true
+    }
+
     try {
         settings.value = await $fetch('/api/tenant/settings')
         if (settings.value) {
@@ -335,7 +344,7 @@ async function saveGeneral() {
                                     </div>
                                     <div class="text-body-2 font-weight-medium mb-1">Primary Color</div>
                                     <div class="text-caption font-mono" style="font-family: monospace;">{{ previewColor
-                                        }}</div>
+                                    }}</div>
                                     <div class="d-flex ga-1 mt-2">
                                         <v-chip size="x-small" :color="previewColor" variant="flat">Button</v-chip>
                                         <v-chip size="x-small" :color="previewColor" variant="tonal">Chip</v-chip>
@@ -413,6 +422,11 @@ async function saveGeneral() {
                                         :disabled="!subscription.stripe_customer_id" @click="openCustomerPortal">
                                         <v-icon start icon="mdi-credit-card-outline" size="18" />
                                         Manage Billing
+                                    </v-btn>
+
+                                    <v-btn variant="flat" color="success" @click="upgradeDialog = true">
+                                        <v-icon start icon="mdi-arrow-up-bold-circle-outline" size="18" />
+                                        Upgrade Plan
                                     </v-btn>
 
                                     <v-btn v-if="subscription.stripe_customer_id" variant="tonal" color="secondary"
@@ -503,8 +517,8 @@ async function saveGeneral() {
 
                             <div class="mb-5">
                                 <v-label class="text-caption font-weight-medium mb-2">Display Name</v-label>
-                                <v-text-field v-model="displayName" placeholder="e.g. My Hospital"
-                                    variant="outlined" density="compact" hide-details max-width="400" />
+                                <v-text-field v-model="displayName" placeholder="e.g. My Hospital" variant="outlined"
+                                    density="compact" hide-details max-width="400" />
                             </div>
 
                             <div class="mb-5">
@@ -517,14 +531,13 @@ async function saveGeneral() {
                                     </v-avatar>
 
                                     <div class="photo-dropzone flex-grow-1 d-flex flex-column align-center justify-center ga-1 rounded-lg"
-                                        style="min-height: 80px; height: 80px; max-width: 320px;"
-                                        :class="{
+                                        style="min-height: 80px; height: 80px; max-width: 320px;" :class="{
                                             'photo-dropzone--dragging': isDragging,
                                             'photo-dropzone--error': !!logoError
-                                        }"
-                                        @dragover="onLogoDragOver" @dragleave="onLogoDragLeave" @drop="onLogoDrop"
+                                        }" @dragover="onLogoDragOver" @dragleave="onLogoDragLeave" @drop="onLogoDrop"
                                         @click="logoInputRef?.click()">
-                                        <v-icon :icon="isDragging ? 'mdi-cloud-download-outline' : 'mdi-image-plus-outline'"
+                                        <v-icon
+                                            :icon="isDragging ? 'mdi-cloud-download-outline' : 'mdi-image-plus-outline'"
                                             size="24" :color="isDragging ? 'primary' : 'grey'" />
                                         <span class="text-caption font-weight-medium">
                                             {{ isDragging ? 'Drop to upload' : 'Click or drag & drop' }}
@@ -544,8 +557,8 @@ async function saveGeneral() {
                                 </div>
 
                                 <div v-if="logoPreview" class="mt-1">
-                                    <v-btn variant="text" color="error" size="x-small"
-                                        prepend-icon="mdi-delete-outline" @click="removeLogo">
+                                    <v-btn variant="text" color="error" size="x-small" prepend-icon="mdi-delete-outline"
+                                        @click="removeLogo">
                                         Remove image
                                     </v-btn>
                                 </div>
@@ -588,6 +601,8 @@ async function saveGeneral() {
             </v-window>
         </v-card-text>
     </v-card>
+
+    <UpgradePlanModal v-model="upgradeDialog" />
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
         {{ snackbarMsg }}

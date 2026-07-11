@@ -6,6 +6,15 @@ const planName = computed(() => {
     const p = plan.value
     return p.charAt(0).toUpperCase() + p.slice(1)
 })
+
+function navigateToUpgrade() {
+    upgrade.dismiss()
+    const auth = useAuthStore()
+    const slug = auth.tenantSlug
+    if (slug) {
+        navigateTo(`/${slug}/settings?upgrade=true`)
+    }
+}
 </script>
 
 <template>
@@ -50,12 +59,9 @@ const planName = computed(() => {
                 <v-btn variant="tonal" color="secondary" class="mr-2" @click="upgrade.dismiss()">
                     Close
                 </v-btn>
-                <NuxtLink to="/onboarding/subscription" target="_blank" rel="noopener noreferrer"
-                    class="text-decoration-none">
-                    <v-btn variant="flat" color="primary">
-                        View Pricing Plans
-                    </v-btn>
-                </NuxtLink>
+                <v-btn variant="flat" color="primary" @click="navigateToUpgrade">
+                    View Upgrade Options
+                </v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

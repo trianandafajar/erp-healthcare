@@ -18,26 +18,35 @@ interface Testimonial {
 
 const { can } = usePermission()
 
-const search = ref('')
-const currentPage = ref(1)
-const itemsPerPage = 10
-
-const queryParams = computed(() => ({
-    page: currentPage.value,
-    limit: itemsPerPage,
-}))
-
 const { data, pending, refresh } = await useFetch<{
     testimonials: Testimonial[]
-    total: number
-    totalPages: number
-}>('/api/superadmin/landingpage/testimonials', { query: queryParams })
+}>('/api/superadmin/landingpage/testimonials')
 
-const testimonials = computed(() => data.value?.testimonials ?? [])
-const totalPages = computed(() => data.value?.totalPages ?? 1)
-const totalTestimonials = computed(() => data.value?.total ?? 0)
+const testimonials = ref<Testimonial[]>([])
 
-watch([currentPage], () => { refresh() })
+watch(data, (val) => {
+    if (val?.testimonials) {
+        testimonials.value = [...val.testimonials].sort((a, b) => a.sort_order - b.sort_order)
+    }
+}, { immediate: true })
+
+const tbodyRef = ref<HTMLElement | null>(null)
+
+async function handleReorder(items: Testimonial[]) {
+    const updates = items.map((item, i) => ({ id: item.id, sort_order: i }))
+    for (const u of updates) {
+        try {
+            await $fetch(`/api/superadmin/landingpage/testimonials/${u.id}`, {
+                method: 'PATCH',
+                body: { sort_order: u.sort_order },
+            })
+        } catch {
+            // silent
+        }
+    }
+}
+
+useSortableTable(tbodyRef, testimonials, handleReorder)
 
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
@@ -46,10 +55,6 @@ function formatDate(dateStr?: string) {
         month: 'short',
         year: 'numeric',
     })
-}
-
-function onSearch() {
-    currentPage.value = 1
 }
 
 const dialog = ref(false)
@@ -95,6 +100,7 @@ async function handleSubmit(payload: any) {
     loading.value = true
     try {
         if (modalMode.value === 'add') {
+            const maxSort = Math.max(...testimonials.value.map(t => t.sort_order), -1)
             await $fetch('/api/superadmin/landingpage/testimonials', {
                 method: 'POST',
                 body: {
@@ -104,7 +110,7 @@ async function handleSubmit(payload: any) {
                     quote: payload.quote,
                     rating: payload.rating,
                     image_url: payload.image_url,
-                    sort_order: payload.sort_order,
+                    sort_order: maxSort + 1,
                 },
             })
             notify('Testimonial created successfully')
@@ -118,7 +124,6 @@ async function handleSubmit(payload: any) {
                     quote: payload.quote,
                     rating: payload.rating,
                     image_url: payload.image_url,
-                    sort_order: payload.sort_order,
                 },
             })
             notify('Testimonial updated successfully')
@@ -162,17 +167,10 @@ function getStars(rating: number) {
     </v-card-item>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="d-flex align-center gap-3 px-4 py-3">
-            <v-text-field v-model="search" placeholder="Search by name, role, or institution..."
-                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
-                style="max-width: 280px" @update:model-value="onSearch" />
-        </div>
-
-        <v-divider />
-
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
+                    <th style="width:36px" class="text-left text-caption font-weight-bold text-uppercase"></th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Person</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Role</th>
                     <th class="text-left text-caption font-weight-bold text-uppercase">Institution</th>
@@ -183,19 +181,22 @@ function getStars(rating: number) {
                     <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody ref="tbodyRef">
                 <tr v-if="pending" v-for="i in 5" :key="i">
-                    <td colspan="8" style="border-bottom: none;">
+                    <td colspan="9" style="border-bottom: none;">
                         <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="totalTestimonials.length === 0">
-                    <td colspan="8" class="text-center py-8 text-medium-emphasis">
+                <tr v-else-if="testimonials.length === 0">
+                    <td colspan="9" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-account-off-outline" size="32" class="mb-2 d-block mx-auto" />
                         No testimonials found
                     </td>
                 </tr>
                 <tr v-else v-for="testimonial in testimonials" :key="testimonial.id">
+                    <td class="py-3 drag-handle text-center" style="cursor:grab">
+                        <v-icon icon="mdi-drag" size="18" color="text-medium-emphasis" />
+                    </td>
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
                             <v-avatar size="40" rounded="lg" color="grey-lighten-3">
@@ -250,10 +251,8 @@ function getStars(rating: number) {
 
         <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
-                Showing {{ testimonials.length }} of {{ totalTestimonials }} testimonials
+                Showing {{ testimonials.length }} testimonials
             </span>
-            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
-                density="compact" size="small" />
         </div>
     </UiTitleCard>
 
@@ -269,3 +268,23 @@ function getStars(rating: number) {
         </template>
     </v-snackbar>
 </template>
+
+<style scoped>
+.sortable-ghost {
+    opacity: 0.3;
+    background: rgb(var(--v-theme-primary-light)) !important;
+}
+
+.sortable-drag {
+    opacity: 0.9;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+</style>
