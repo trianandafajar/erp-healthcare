@@ -128,10 +128,11 @@ async function validate() {
             tenantId,
             tenantSlug,
             subscriptionPlan: subscriptionPlan ?? 'starter',
+            settings: settingsData,
         })
 
         if (!isSuperAdmin) {
-            const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settingsData, tenantSlug)
+            const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settingsData, tenantSlug, role)
             if (onboardingPath) {
                 await navigateTo(onboardingPath)
                 return

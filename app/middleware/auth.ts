@@ -33,7 +33,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
           authStore.tenantId,
           authState.subscriptionPlan ?? authStore.subscriptionPlan,
           authState.settings ?? null,
-          authStore.tenantSlug
+          authStore.tenantSlug,
+          role
         )
 
         if (onboardingPath && !to.path.startsWith('/onboarding/') && !to.path.includes('/configure')) {

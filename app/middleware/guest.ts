@@ -61,7 +61,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
                     return navigateTo(getDashboardPath(role, tenantSlug), { replace: true })
                 }
 
-                const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settings, tenantSlug)
+                const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settings, tenantSlug, role)
                 if (onboardingPath) {
                     return navigateTo(onboardingPath, { replace: true })
                 }
@@ -82,7 +82,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
             authState.tenantId ?? authStore.tenantId,
             authState.subscriptionPlan ?? authStore.subscriptionPlan,
             authState.settings ?? null,
-            authStore.tenantSlug
+            authStore.tenantSlug,
+            authStore.role
         )
         if (onboardingPath) {
             return navigateTo(onboardingPath, { replace: true })

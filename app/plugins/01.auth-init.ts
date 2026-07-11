@@ -13,7 +13,8 @@ export default defineNuxtPlugin(async () => {
                 authState.tenantId ?? authStore.tenantId,
                 authState.subscriptionPlan ?? authStore.subscriptionPlan,
                 authState.settings ?? null,
-                authStore.tenantSlug
+                authStore.tenantSlug,
+                authState.role
             )
             if (onboardingPath) {
                 await navigateTo(onboardingPath, { replace: true })
