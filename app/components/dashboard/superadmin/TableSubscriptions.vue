@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { refDebounced } from '@vueuse/core'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 import SubscriptionModal from './SubscriptionModal.vue'
 import { useRuntimeConfig } from 'nuxt/app'
@@ -32,19 +33,20 @@ const tenants = ref<TenantOption[]>([])
 const loading = ref(false)
 
 const search = ref('')
+const debouncedSearch = refDebounced(search, 400)
 const planFilter = ref('All Plan')
 const statusFilter = ref('All Status')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const planOptions = ['All Plan', 'Free', 'Basic', 'Pro', 'Enterprise']
+const planOptions = ['All Plan', 'Starter', 'Basic', 'Professional', 'Enterprise']
 const statusOptions = ['All Status', 'active', 'suspended', 'trial', 'cancelled']
 
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
-    plan: planFilter.value !== 'All Plan' ? planFilter.value : undefined,
+    search: debouncedSearch.value || undefined,
+    plan: planFilter.value !== 'All Plan' ? planFilter.value.toLowerCase() : undefined,
     status: statusFilter.value !== 'All Status' ? statusFilter.value : undefined,
 }))
 
@@ -58,7 +60,9 @@ const subscriptions = computed(() => data.value?.subscriptions ?? [])
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalSubscriptions = computed(() => data.value?.total ?? 0)
 
-watch([search, planFilter, statusFilter, currentPage], () => { refresh() })
+watch([debouncedSearch, planFilter, statusFilter], () => {
+    currentPage.value = 1
+})
 
 async function fetchTenants() {
     try {
@@ -116,10 +120,6 @@ function getInitials(name: string) {
         .slice(0, 2)
         .join('')
         .toUpperCase()
-}
-
-function onSearch() {
-    currentPage.value = 1
 }
 
 const dialog = ref(false)
@@ -287,15 +287,14 @@ onMounted(() => {
         <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
             <div class="d-flex align-center flex-grow-1" style="min-width: 220px; max-width: 400px">
                 <v-text-field v-model="search" placeholder="Search by tenant or payment..."
-                    prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
-                    @update:model-value="onSearch" />
+                    prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable />
             </div>
 
             <div class="d-flex align-center ga-3">
                 <v-select v-model="planFilter" :items="planOptions" variant="outlined" density="compact" hide-details
-                    style="max-width: 250px" @update:model-value="onSearch" />
+                    style="max-width: 250px" />
                 <v-select v-model="statusFilter" :items="statusOptions" variant="outlined" density="compact" hide-details
-                    style="max-width: 250px" @update:model-value="onSearch" />
+                    style="max-width: 250px" />
             </div>
         </div>
 

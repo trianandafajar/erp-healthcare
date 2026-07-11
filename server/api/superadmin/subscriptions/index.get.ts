@@ -14,12 +14,28 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const page = query.page ? Number(query.page) : undefined
     const limit = Number(query.limit ?? 10)
+    const search = query.search ? String(query.search).trim() : undefined
+    const plan = query.plan ? String(query.plan) : undefined
+    const status = query.status ? String(query.status) : undefined
+
     const admin = supabaseAdmin()
 
     let q = admin
         .from('tenant_subscriptions')
-        .select('*, tenant:tenants(name, slug, owner_id)', { count: 'exact' })
+        .select('*, tenant:tenants!inner(name, slug, owner_id)', { count: 'exact' })
         .order('created_at', { ascending: false })
+
+    if (plan) {
+        q = q.eq('plan', plan)
+    }
+
+    if (status) {
+        q = q.eq('status', status)
+    }
+
+    if (search) {
+        q = q.ilike('tenant.name', `%${search}%`)
+    }
 
     if (page) {
         const from = (page - 1) * limit

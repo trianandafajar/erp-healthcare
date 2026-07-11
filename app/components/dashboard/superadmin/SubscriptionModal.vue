@@ -36,7 +36,7 @@ const emit = defineEmits<{
 
 const form = ref({
   tenant_id: '',
-  plan: 'Free',
+  plan: 'Starter',
   status: 'active',
   billing_cycle: 'monthly',
   amount: 0,
@@ -45,9 +45,9 @@ const form = ref({
 })
 
 const planDefaults: Record<string, number> = {
-  Free: 0,
-  Basic: 49,
-  Pro: 99,
+  Starter: 29,
+  Basic: 59,
+  Professional: 99,
   Enterprise: 199,
 }
 
@@ -67,10 +67,10 @@ watch(
     } else if (props.mode === 'add') {
       form.value = {
         tenant_id: '',
-        plan: 'Free',
+        plan: 'Starter',
         status: 'active',
         billing_cycle: 'monthly',
-        amount: 0,
+        amount: 29,
         start_date: new Date().toISOString().split('T')[0],
         payment_method: '',
       }
@@ -119,7 +119,7 @@ function onSubmit() {
   emit('submit', {
     id: props.subscription?.id,
     tenant_id: form.value.tenant_id,
-    plan: form.value.plan,
+    plan: form.value.plan.toLowerCase(),
     status: form.value.status,
     billing_cycle: form.value.billing_cycle,
     amount: form.value.amount,
@@ -181,7 +181,7 @@ function onSubmit() {
 
           <v-col cols="12" sm="6" class="mt-3">
             <v-label class="text-caption font-weight-medium mb-1">Plan</v-label>
-            <v-select v-model="form.plan" :items="['Free', 'Basic', 'Pro', 'Enterprise']"
+            <v-select v-model="form.plan" :items="['Starter', 'Basic', 'Professional', 'Enterprise']"
               variant="outlined" density="compact" hide-details @update:model-value="onPlanChange" />
           </v-col>
 
