@@ -16,6 +16,7 @@ export default defineEventHandler(async (event) => {
     const limit = Number(query.limit ?? 10)
     const search = query.search as string | undefined
     const role = query.role as string | undefined
+    const tenantId = query.tenant_id as string | undefined
 
     const admin = supabaseAdmin()
 
@@ -29,8 +30,8 @@ export default defineEventHandler(async (event) => {
             created_at,
             updated_at,
             tenant_id,
-            user_roles (
-                roles (
+            user_roles!inner (
+                roles!inner (
                     name,
                     label
                 )
@@ -44,6 +45,10 @@ export default defineEventHandler(async (event) => {
             `full_name.ilike.%${search}%,` +
             `email.ilike.%${search}%`
         )
+    }
+
+    if (tenantId) {
+        q = q.eq('tenant_id', tenantId)
     }
 
     if (role && role !== 'all') {

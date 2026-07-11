@@ -90,7 +90,9 @@ const users = computed(() =>
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalUsers = computed(() => data.value?.total ?? 0)
 
-watch([search, selectedRole, selectedTenant, currentPage], () => { refresh() })
+watch([search, selectedRole, selectedTenant], () => {
+    currentPage.value = 1
+})
 
 function getInitials(name: string) {
     return name
@@ -107,10 +109,6 @@ function formatDate(dateStr: string) {
         month: 'short',
         year: 'numeric'
     });
-}
-
-function onFilterChange() {
-    currentPage.value = 1;
 }
 
 // modal
@@ -154,7 +152,7 @@ async function handleSubmit(payload: any) {
             await $fetch('/api/superadmin/users', { method: 'DELETE', body: payload })
         }
 
-        await refreshNuxtData()
+        await refresh()
         closeModal()
     } catch (err: any) {
         showSnackbar(err?.data?.message || 'Failed')
@@ -180,14 +178,12 @@ async function handleSubmit(payload: any) {
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
         <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
             <v-text-field v-model="search" placeholder="Search by name or email..." prepend-inner-icon="mdi-magnify"
-                variant="outlined" density="compact" hide-details clearable style="max-width: 280px"
-                @update:model-value="onFilterChange" />
+                variant="outlined" density="compact" hide-details clearable style="max-width: 280px" />
             <div class="d-flex align-center ga-2">
                 <v-select v-model="selectedTenant" :items="tenantOptions" item-title="name" item-value="id"
-                    variant="outlined" density="compact" hide-details style="max-width: 200px"
-                    @update:model-value="onFilterChange" />
+                    variant="outlined" density="compact" hide-details style="max-width: 200px" />
                 <v-select v-model="selectedRole" :items="roles" item-title="label" item-value="value" variant="outlined"
-                    density="compact" hide-details style="max-width: 180px" @update:model-value="onFilterChange" />
+                    density="compact" hide-details style="max-width: 180px" />
             </div>
         </div>
 
