@@ -8,6 +8,10 @@ const sidebarHeight = ref('calc(100vh - 60px)')
 
 let observer: ResizeObserver | null = null
 
+function updateHeight() {
+  sidebarHeight.value = `calc(100vh - ${sidebarTop.value}px)`
+}
+
 onMounted(() => {
   const el = document.querySelector('.page-wrapper') as HTMLElement | null
   if (!el) return
@@ -17,15 +21,17 @@ onMounted(() => {
     if (!isNaN(left) && left > 0) sidebarLeft.value = left
     const top = parseInt(styles.paddingTop, 10)
     if (!isNaN(top) && top > 0) sidebarTop.value = top
-    sidebarHeight.value = el.clientHeight + 'px'
+    updateHeight()
   }
   update()
   observer = new ResizeObserver(update)
   observer.observe(el)
+  window.addEventListener('resize', updateHeight)
 })
 
 onUnmounted(() => {
   observer?.disconnect()
+  window.removeEventListener('resize', updateHeight)
 })
 
 const props = defineProps<{
@@ -33,6 +39,8 @@ const props = defineProps<{
   activeSection: string
   modelValue: boolean
 }>()
+
+const isSubSection = computed(() => props.activeSection !== 'detail')
 
 const emit = defineEmits<{
   navigate: [section: string]
@@ -70,20 +78,32 @@ function toggle() {
     </div>
 
     <div class="sidebar-panel">
-      <div class="pa-4 d-flex align-center justify-space-between"
-        style="border-bottom: 1px solid rgb(var(--v-theme-borderLight));">
-        <div>
-          <div class="text-caption font-weight-bold text-medium-emphasis text-uppercase"
-            style="letter-spacing: 1px; font-size: 11px;">
-            Admin Menu
+      <div class="sidebar-header">
+        <div class="pa-4 d-flex align-center justify-space-between"
+          style="border-bottom: 1px solid rgb(var(--v-theme-borderLight));">
+          <div>
+            <div class="text-caption font-weight-bold text-medium-emphasis text-uppercase"
+              style="letter-spacing: 1px; font-size: 11px;">
+              Admin Menu
+            </div>
+            <div class="text-body-2 font-weight-medium mt-1">{{ slug }}</div>
           </div>
-          <div class="text-body-2 font-weight-medium mt-1">{{ slug }}</div>
+          <v-btn icon="mdi-close" variant="text" size="small" density="comfortable" @click="toggle" />
         </div>
-        <v-btn icon="mdi-close" variant="text" size="small" density="comfortable" @click="toggle" />
       </div>
 
       <div class="sidebar-scroll">
         <v-list density="compact" nav>
+          <v-list-item v-if="isSubSection" color="primary" class="mb-1 gap-1.5"
+            @click="emit('navigate', 'detail'); emit('update:modelValue', false)" style="cursor: pointer;">
+            <template v-slot:prepend>
+              <v-icon icon="mdi-arrow-left" size="18" />
+            </template>
+            <v-list-item-title class="text-body-2 font-weight-medium">Back to Detail</v-list-item-title>
+          </v-list-item>
+
+          <v-divider v-if="isSubSection" class="my-2" />
+
           <template v-for="(item, i) in sidebarMenu" :key="i">
             <v-list-subheader v-if="item.header" class="text-caption text-medium-emphasis text-uppercase mt-2 mb-1"
               style="letter-spacing: 0.5px; font-weight: 600; font-size: 11px; padding: 0 16px;">
@@ -111,6 +131,7 @@ function toggle() {
   position: fixed;
   z-index: 100;
   pointer-events: none;
+  max-height: 100vh;
 }
 
 .sidebar-trigger {
@@ -145,7 +166,8 @@ function toggle() {
   border-right: 1px solid rgb(var(--v-theme-borderLight));
   transition: left 0.2s ease;
   pointer-events: auto;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .expanded .sidebar-panel {
@@ -153,9 +175,34 @@ function toggle() {
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
 }
 
+.sidebar-header {
+  height: 80px;
+  flex-shrink: 0;
+}
+
 .sidebar-scroll {
-  height: calc(100% - 80px);
+  flex: 1 1 auto;
   overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--v-theme-primary), 0.2) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 1px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(var(--v-theme-primary), 0.3);
+  border-radius: 0;
+}
+
+.sidebar-scroll::-webkit-scrollbar-button {
+  display: none;
 }
 
 .v-list-item--active {

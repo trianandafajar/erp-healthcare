@@ -35,8 +35,7 @@ const planName = computed(() => {
                         {{ planName }} Plan Features
                     </p>
                     <div v-if="currentPlanFeatures.length" class="d-flex flex-column ga-1">
-                        <div v-for="f in currentPlanFeatures" :key="f.feature_key"
-                            class="d-flex align-center ga-2">
+                        <div v-for="f in currentPlanFeatures" :key="f.feature_key" class="d-flex align-center ga-2">
                             <v-icon icon="mdi-check-circle" size="18" color="green-darken-1" />
                             <span class="text-body-3 text-medium-emphasis">{{ f.feature_label }}</span>
                         </div>
