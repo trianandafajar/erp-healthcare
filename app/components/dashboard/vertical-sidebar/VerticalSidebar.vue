@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
+import { useAuthStore } from '~/stores/auth';
 import { getSidebarItems } from './sidebarItem';
 
 import NavGroup from './NavGroup/NavGroup.vue';
@@ -9,10 +10,11 @@ import NavCollapse from './NavCollapse/NavCollapse.vue';
 import Logo from '../logo/LogoDark.vue';
 
 const customizer = useCustomizerStore();
+const authStore = useAuthStore();
 const route = useRoute();
 
 const sidebarMenu = computed(() => {
-  const slug = route.params.slug as string;
+  const slug = (route.params.slug as string) || authStore.tenantSlug;
   if (!slug) return [];
   return getSidebarItems(slug);
 });

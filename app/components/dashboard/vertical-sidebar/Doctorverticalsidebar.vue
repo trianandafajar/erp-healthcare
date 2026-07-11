@@ -14,6 +14,7 @@ import NavGroup from './NavGroup/NavGroup.vue';
 import NavItem from './NavItem/NavItem.vue';
 import NavCollapse from './NavCollapse/NavCollapse.vue';
 import Logo from '../logo/LogoDark.vue';
+import { useAuthStore } from '~/stores/auth';
 
 type MenuItem = {
   header?: string
@@ -32,8 +33,9 @@ type MenuItem = {
 }
 
 const customizer = useCustomizerStore();
+const authStore = useAuthStore();
 const route = useRoute();
-const slug = route.params.slug as string;
+const slug = (route.params.slug as string) || authStore.tenantSlug;
 
 const sidebarMenu = shallowRef<MenuItem[]>([
   {
