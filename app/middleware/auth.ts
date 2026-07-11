@@ -26,19 +26,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     const authStore = useAuthStore()
-    const onboardingPath = getOnboardingPath(
-      authStore.tenantId,
-      authState.subscriptionPlan ?? authStore.subscriptionPlan,
-      authState.settings ?? null,
-      authStore.tenantSlug
-    )
+    const role = authState.role ?? null
 
-    if (onboardingPath && !to.path.startsWith('/onboarding/') && !to.path.includes('/configure')) {
-        return navigateTo(onboardingPath, { replace: true })
+    if (role !== 'superadmin') {
+        const onboardingPath = getOnboardingPath(
+          authStore.tenantId,
+          authState.subscriptionPlan ?? authStore.subscriptionPlan,
+          authState.settings ?? null,
+          authStore.tenantSlug
+        )
+
+        if (onboardingPath && !to.path.startsWith('/onboarding/') && !to.path.includes('/configure')) {
+            return navigateTo(onboardingPath, { replace: true })
+        }
     }
 
     if (!allowedRoles) return
-    const role = authState.role ?? null
 
     if (role && allowedRoles.includes(role)) return
 
