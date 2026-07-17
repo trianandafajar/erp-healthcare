@@ -265,9 +265,9 @@ async function saveGeneral() {
                 <v-icon start icon="mdi-credit-card-outline" size="18" />
                 Billing
             </v-tab>
-            <v-tab value="general" class="text-none">
-                <v-icon start icon="mdi-hospital-building-outline" size="18" />
-                Healthcare
+            <v-tab value="branding" class="text-none">
+                <v-icon start icon="mdi-label-outline" size="18" />
+                Branding
             </v-tab>
         </v-tabs>
         <v-divider />
@@ -507,10 +507,10 @@ async function saveGeneral() {
                     </template>
                 </v-window-item>
 
-                <v-window-item value="general">
+                <v-window-item value="branding">
                     <div class="d-flex flex-column flex-lg-row ga-8">
                         <div class="flex-grow-1">
-                            <h3 class="text-h6 font-weight-bold mb-1">Healthcare Branding</h3>
+                            <h3 class="text-h6 font-weight-bold mb-1">Facility Branding</h3>
                             <p class="text-body-2 text-medium-emphasis mb-5">
                                 Set the display name and logo for your healthcare facility.
                             </p>
