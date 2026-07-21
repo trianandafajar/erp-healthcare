@@ -11,10 +11,10 @@ const footerLink = shallowRef([
 </script>
 
 <template>
-  <v-footer class="px-0 footer" color="containerbg">
+  <v-footer class="px-0 footer" style="background: transparent !important; color: rgb(var(--v-theme-lightText)) !important">
     <v-row justify="center" no-gutters>
       <v-col cols="6">
-        <p class="text-caption mb-0">
+        <p class="text-subtitle-2 mb-0">
           © {{ year }} All rights reserved ·
           <NuxtLink to="/legal?page=privacy" class="text-primary">Privacy Policy</NuxtLink> ·
           Distributed by
@@ -23,7 +23,7 @@ const footerLink = shallowRef([
       </v-col>
       <v-col class="text-right" cols="6">
         <NuxtLink v-for="(item, i) in footerLink" :key="i" :to="item.to"
-          class="mx-2 text-caption text-darkText text-decoration-none">
+          class="mx-2 text-subtitle-2 text-lightText text-decoration-none">
           {{ item.title }}
         </NuxtLink>
       </v-col>
