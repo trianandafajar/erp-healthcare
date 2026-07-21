@@ -153,6 +153,45 @@ async function openLoginAs(user: any) {
     }
 }
 
+const resetDialog = ref(false)
+const resetUser = ref<any>(null)
+const newPassword = ref('')
+const confirmPassword = ref('')
+const showPassword = ref(false)
+const resetLoading = ref(false)
+
+function openResetPassword(user: any) {
+    resetUser.value = user
+    newPassword.value = ''
+    confirmPassword.value = ''
+    showPassword.value = false
+    resetDialog.value = true
+}
+
+async function handleResetPassword() {
+    if (newPassword.value.length < 8) {
+        showSnackbar('Password must be at least 8 characters', 'error')
+        return
+    }
+    if (newPassword.value !== confirmPassword.value) {
+        showSnackbar('Passwords do not match', 'error')
+        return
+    }
+    resetLoading.value = true
+    try {
+        await $fetch('/api/superadmin/users/reset-password', {
+            method: 'POST',
+            body: { id: resetUser.value.id, password: newPassword.value }
+        })
+        showSnackbar('Password reset successfully')
+        resetDialog.value = false
+    } catch (err: any) {
+        showSnackbar(err?.data?.message || 'Failed to reset password', 'error')
+    } finally {
+        resetLoading.value = false
+    }
+}
+
 const actionLoading = computed(() => loading.value || pending.value)
 
 async function handleSubmit(payload: any) {
@@ -260,11 +299,12 @@ async function handleSubmit(payload: any) {
                     </td>
                     <td class="py-3 text-right">
                         <v-btn v-if="can('user.impersonate')" icon variant="text" size="small" color="warning"
-                            density="comfortable" title="Login as this user"
-                            :loading="isLoggingInAs === user.id" :disabled="isLoggingInAs !== null"
-                            @click="openLoginAs(user)">
+                            density="comfortable" title="Login as this user" :loading="isLoggingInAs === user.id"
+                            :disabled="isLoggingInAs !== null" @click="openLoginAs(user)">
                             <v-icon icon="mdi-account-arrow-right-outline" />
                         </v-btn>
+                        <v-btn icon="mdi-lock-reset" variant="text" size="small" color="info" density="comfortable"
+                            title="Reset Password" @click="openResetPassword(user)" />
                         <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
                             density="comfortable" @click="openEdit(user)" />
                         <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"
@@ -288,6 +328,40 @@ async function handleSubmit(payload: any) {
                 @submit="handleSubmit" @cancel="closeModal" />
         </v-dialog>
     </div>
+
+    <v-dialog v-model="resetDialog" width="420" persistent>
+        <v-card rounded="lg">
+            <v-card-title class="d-flex align-center pa-4 pb-2">
+                <v-icon icon="mdi-lock-reset" size="20" class="mr-2" />
+                <span class="text-h6 font-weight-bold">Reset Password</span>
+                <v-spacer />
+                <v-btn icon="mdi-close" variant="text" density="compact" @click="resetDialog = false" />
+            </v-card-title>
+            <v-divider />
+            <v-card-text class="pa-4">
+                <div class="text-body-2 mb-4">
+                    Reset password for <strong>{{ resetUser?.name }}</strong> ({{ resetUser?.email }})
+                </div>
+                <v-text-field v-model="newPassword" :type="showPassword ? 'text' : 'password'" label="New Password"
+                    variant="outlined" density="compact" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                    @click:append-inner="showPassword = !showPassword" hide-details="auto" class="mb-3" />
+                <v-text-field v-model="confirmPassword" :type="showPassword ? 'text' : 'password'"
+                    label="Confirm Password" variant="outlined" density="compact" hide-details="auto" />
+            </v-card-text>
+            <v-divider />
+            <v-card-actions class="pa-4 pt-3">
+                <v-spacer />
+                <v-btn variant="tonal" color="secondary" @click="resetDialog = false">
+                    Cancel
+                </v-btn>
+                <v-btn variant="flat" color="primary"
+                    :style="resetLoading || !newPassword || !confirmPassword ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                    :loading="resetLoading" :disabled="resetLoading || !newPassword || !confirmPassword" @click="handleResetPassword">
+                    Reset Password
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
         {{ snackbarMsg }}
