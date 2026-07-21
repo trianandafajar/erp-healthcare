@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
-import TenantModal from './TenantModal.vue';
 
 interface TenantOwner {
   id: string
@@ -96,39 +95,6 @@ function onSearch() {
 function openDetail(tenant: Tenant) {
   navigateTo(`/super-admin/tenants/${tenant.id}`)
 }
-
-const dialog = ref(false)
-const selectedTenant = ref<Tenant | null>(null)
-
-function openEdit(tenant: Tenant) {
-  selectedTenant.value = {
-    ...tenant,
-    plan: tenant.subscription_plan,
-    status: tenant.subscription_status,
-  }
-  dialog.value = true
-}
-
-function closeModal() {
-  dialog.value = false
-  selectedTenant.value = null
-}
-
-const snackbar = ref(false)
-const snackbarMsg = ref('')
-const snackbarColor = ref('success')
-
-function notify(msg: string, color = 'success') {
-  snackbarMsg.value = msg
-  snackbarColor.value = color
-  snackbar.value = true
-}
-
-function handleEditSubmit(payload: { plan: string; status: string }) {
-  notify(`Subscription updated for ${selectedTenant.value!.name}`)
-  closeModal()
-  refresh()
-}
 </script>
 
 <template>
@@ -212,8 +178,6 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
           <td class="py-3 text-right" @click.stop>
             <v-btn icon="mdi-eye" variant="text" size="small" color="primary" density="comfortable"
               @click="openDetail(tenant)" />
-            <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="primary" density="comfortable"
-              @click="openEdit(tenant)" />
           </td>
         </tr>
       </tbody>
@@ -227,10 +191,6 @@ function handleEditSubmit(payload: { plan: string; status: string }) {
         density="compact" size="small" />
     </div>
   </UiTitleCard>
-
-  <v-dialog v-model="dialog" max-width="480" persistent>
-    <TenantModal :tenant="selectedTenant" @submit="handleEditSubmit" @cancel="closeModal" />
-  </v-dialog>
 
   <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
     {{ snackbarMsg }}
