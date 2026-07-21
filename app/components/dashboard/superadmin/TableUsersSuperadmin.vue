@@ -139,6 +139,20 @@ function closeModal() {
     selectedUser.value = null
 }
 
+const { can } = usePermission()
+const { loginAs } = useImpersonation()
+const isLoggingInAs = ref<string | null>(null)
+
+async function openLoginAs(user: any) {
+    isLoggingInAs.value = user.id
+    try {
+        await loginAs({ id: user.id, name: user.name, role: user.role })
+    } catch (err: any) {
+        showSnackbar(err?.data?.message || err?.message || 'Gagal masuk sebagai user ini.', 'error')
+        isLoggingInAs.value = null
+    }
+}
+
 const actionLoading = computed(() => loading.value || pending.value)
 
 async function handleSubmit(payload: any) {
@@ -245,6 +259,12 @@ async function handleSubmit(payload: any) {
                         {{ formatDate(user.joined) }}
                     </td>
                     <td class="py-3 text-right">
+                        <v-btn v-if="can('user.impersonate')" icon variant="text" size="small" color="warning"
+                            density="comfortable" title="Login as this user"
+                            :loading="isLoggingInAs === user.id" :disabled="isLoggingInAs !== null"
+                            @click="openLoginAs(user)">
+                            <v-icon icon="mdi-account-arrow-right-outline" />
+                        </v-btn>
                         <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
                             density="comfortable" @click="openEdit(user)" />
                         <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" density="comfortable"

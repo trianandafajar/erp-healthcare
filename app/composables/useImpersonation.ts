@@ -19,6 +19,8 @@ export const useImpersonation = () => {
             user: currentProfile.user,
             role: primaryRole?.name ?? null,
             permissions,
+            tenantId: currentProfile.tenant?.id ?? null,
+            tenantSlug: currentProfile.tenant?.slug ?? null,
         })
     }
 
@@ -43,12 +45,15 @@ export const useImpersonation = () => {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) return
 
+        // Store actor's current role so exitImpersonation can redirect correctly
+        const actorRole = authStore.role || 'admin'
         localStorage.setItem('admin_session', JSON.stringify({
             access_token: session.access_token,
             refresh_token: session.refresh_token,
         }))
         localStorage.setItem('impersonated_name', user.name)
         localStorage.setItem('impersonated_role', user.role)
+        localStorage.setItem('impersonated_by_role', actorRole)
 
         try {
             const res = await $fetch<{ access_token: string; refresh_token: string }>(
@@ -61,14 +66,15 @@ export const useImpersonation = () => {
                 refresh_token: res.refresh_token,
             })
 
-            const dashboard = getDashboardPath(user.role)
             await syncCurrentSessionProfile()
+            const dashboard = getDashboardPath(authStore.role, authStore.tenantSlug)
             await navigateTo(dashboard)
 
         } catch (err: any) {
             localStorage.removeItem('admin_session')
             localStorage.removeItem('impersonated_name')
             localStorage.removeItem('impersonated_role')
+            localStorage.removeItem('impersonated_by_role')
             throw err
         }
     }
@@ -81,12 +87,14 @@ export const useImpersonation = () => {
 
         await supabase.auth.setSession(adminSession)
 
+        const actorRole = localStorage.getItem('impersonated_by_role') || 'admin'
         localStorage.removeItem('admin_session')
         localStorage.removeItem('impersonated_name')
         localStorage.removeItem('impersonated_role')
+        localStorage.removeItem('impersonated_by_role')
 
         await syncCurrentSessionProfile()
-        await navigateTo('/users-management')
+        await navigateTo(actorRole === 'superadmin' ? '/super-admin/users-management' : '/users-management')
     }
 
     return {

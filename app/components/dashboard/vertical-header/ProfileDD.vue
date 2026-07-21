@@ -43,6 +43,7 @@ async function confirmLogout() {
     localStorage.removeItem('admin_session')
     localStorage.removeItem('impersonated_name')
     localStorage.removeItem('impersonated_role')
+    localStorage.removeItem('impersonated_by_role')
   } finally {
     isLoggingOut.value = false
     dialog.value = false

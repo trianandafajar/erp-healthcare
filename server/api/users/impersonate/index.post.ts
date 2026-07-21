@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
     const actorRoleName = actorRoleRows?.[0]?.roles?.name
 
-    if (actorRoleName !== 'admin') {
+    if (!['admin', 'superadmin'].includes(actorRoleName)) {
         throw createError({ statusCode: 403, message: 'Only admins can impersonate users.' })
     }
 
