@@ -30,6 +30,7 @@ module.exports = {
     content: [
         './app/layouts/landing.vue',
         './app/pages/(landingpage)/**/*.vue',
+        './app/pages/onboarding/**/*.vue',
         './app/components/landingpage/**/*.vue',
         "./components/landingpage/**/*.{js,ts,vue}",
         "./content/**/*.{md,mdx}",

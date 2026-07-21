@@ -137,11 +137,11 @@ function savingsPercent(plan: any) {
               <button class="text-red-400 hover:text-red-600" @click="errorMsg = ''">✕</button>
             </div>
 
-            <div class="max-w-xl mx-auto mb-12 rounded-2xl border bg-white border-gray-200 p-6 lg:p-8">
+            <div class="clinic-card max-w-xl mx-auto mb-12 rounded-2xl border border-solid bg-white border-[#176D37] p-6 lg:p-8">
               <AppLabel required class="block text-sm font-semibold text-gray-900 mb-2">Clinic or hospital name
               </AppLabel>
               <input v-model="clinicName" type="text" placeholder="e.g. Hospital Medika"
-                class="w-full rounded-xl !border-2 !border-gray-500 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#176D37]/20 focus:border-[#176D37] transition-colors duration-200">
+                class="w-full rounded-xl !border-2 !border-solid !border-gray-500 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#176D37]/20 focus:border-[#176D37] transition-colors duration-200">
               <p class="text-xs text-gray-400 mt-2">This name shows up on invoices, appointments, and patient-facing
                 pages.
               </p>
@@ -288,5 +288,10 @@ function savingsPercent(plan: any) {
   left: 10%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.plan-card,
+.clinic-card {
+  border-color: #176D37 !important;
 }
 </style>
