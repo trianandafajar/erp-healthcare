@@ -1,7 +1,8 @@
 import { getTenantContext } from "~~/server/utils/getTenantContext"
 
 export default defineEventHandler(async (event: any) => {
-    const { email, password, full_name, role, status } = await readBody(event)
+    const body = await readBody(event)
+    const { email, password, full_name, role, status } = body
 
     if (!email || !password || !full_name || !role) {
         throw createError({
@@ -59,18 +60,60 @@ export default defineEventHandler(async (event: any) => {
         if (patientUpdateError) {
             throw createError({ statusCode: 400, message: patientUpdateError.message })
         }
-        patientId = patient?.id ?? null
-        medicalRecordNumber = patient?.medical_record_number ?? null
+
+        if (patient) {
+            patientId = patient.id
+            medicalRecordNumber = patient.medical_record_number
+
+            const patientUpdates: Record<string, any> = {}
+            if (body.date_of_birth) patientUpdates.date_of_birth = body.date_of_birth
+            if (body.gender) patientUpdates.gender = body.gender
+            if (body.phone) patientUpdates.phone = body.phone
+            if (body.blood_type) patientUpdates.blood_type = body.blood_type
+            if (body.address) patientUpdates.address = body.address
+
+            if (Object.keys(patientUpdates).length) {
+                await admin.from('patients').update(patientUpdates).eq('id', patient.id)
+            }
+        }
     }
 
     if (role === 'doctor') {
-        const { error: doctorUpdateError } = await admin
+        const doctorUpdates: Record<string, any> = { tenant_id: tenantId }
+        if (body.department_id) doctorUpdates.department_id = body.department_id
+        if (body.specialization) doctorUpdates.specialization = body.specialization
+        if (body.str_number) doctorUpdates.str_number = body.str_number
+        if (body.sip_number) doctorUpdates.sip_number = body.sip_number
+        if (body.phone) doctorUpdates.phone = body.phone
+        if (body.biography) doctorUpdates.biography = body.biography
+        if (body.experience_years !== undefined) doctorUpdates.experience_years = body.experience_years
+        if (body.consultation_fee !== undefined) doctorUpdates.consultation_fee = body.consultation_fee
+        if (body.is_available !== undefined) doctorUpdates.is_available = body.is_available
+
+        const { error: doctorUpsertError } = await admin
             .from('doctors')
-            .update({ tenant_id: tenantId })
+            .upsert({ id: userId, ...doctorUpdates })
             .eq('id', userId)
 
-        if (doctorUpdateError) {
-            throw createError({ statusCode: 400, message: doctorUpdateError.message })
+        if (doctorUpsertError) {
+            throw createError({ statusCode: 400, message: doctorUpsertError.message })
+        }
+    }
+
+    if (role === 'nurse') {
+        const nurseUpdates: Record<string, any> = { tenant_id: tenantId }
+        if (body.department_id) nurseUpdates.department_id = body.department_id
+        if (body.phone) nurseUpdates.phone = body.phone
+        if (body.experience_years !== undefined) nurseUpdates.experience_years = body.experience_years
+        if (body.is_available !== undefined) nurseUpdates.is_available = body.is_available
+
+        const { error: nurseUpsertError } = await admin
+            .from('nurses')
+            .upsert({ id: userId, ...nurseUpdates })
+            .eq('id', userId)
+
+        if (nurseUpsertError) {
+            throw createError({ statusCode: 400, message: nurseUpsertError.message })
         }
     }
 

@@ -15,33 +15,77 @@ const emit = defineEmits<{
     (e: 'submit', data: any): void
     (e: 'cancel'): void
 }>()
-const { data } = await useFetch<{ roles: any[] }>('/api/roles')
+
+const { data: rolesData } = await useFetch<{ roles: any[] }>('/api/roles')
+const { data: deptData } = await useFetch<{ departments: any[] }>('/api/departments')
 
 const roles = computed(() =>
-    (data.value?.roles ?? []).map((r) => ({
+    (rolesData.value?.roles ?? []).map((r) => ({
         id: r.id,
         name: r.name ?? '-',
         label: r.label ?? '-',
     }))
 )
 
+const departments = computed(() => deptData.value?.departments ?? [])
+
+const bloodTypes = ['A', 'B', 'AB', 'O']
+const genderOptions = [
+    { title: 'Male', value: 'male' },
+    { title: 'Female', value: 'female' },
+]
+
 const form = ref({
     full_name: '',
     email: '',
     role: 'patient',
-    status: 'active'
+    status: 'active',
+    // doctor fields
+    department_id: null as string | null,
+    specialization: '',
+    str_number: '',
+    sip_number: '',
+    phone: '',
+    biography: '',
+    experience_years: 0,
+    consultation_fee: 0,
+    is_available: true,
+    // patient fields
+    date_of_birth: '',
+    gender: null as string | null,
+    blood_type: null as string | null,
+    address: '',
 })
 
 watch(() => props.user, (u) => {
     if (u && props.mode === 'edit') {
         form.value = {
+            ...form.value,
             full_name: u.name,
             email: u.email,
             role: u.role,
-            status: u.status
+            status: u.status,
         }
     } else {
-        form.value = { full_name: '', email: '', role: 'patient', status: 'active' }
+        form.value = {
+            full_name: '',
+            email: '',
+            role: 'patient',
+            status: 'active',
+            department_id: null,
+            specialization: '',
+            str_number: '',
+            sip_number: '',
+            phone: '',
+            biography: '',
+            experience_years: 0,
+            consultation_fee: 0,
+            is_available: true,
+            date_of_birth: '',
+            gender: null,
+            blood_type: null,
+            address: '',
+        }
     }
 }, { immediate: true })
 
@@ -58,17 +102,39 @@ function onSubmit() {
     if (props.mode === 'delete') {
         emit('submit', { id: props.user?.id })
     } else {
-        emit('submit', {
+        const payload: Record<string, any> = {
             ...form.value,
             id: props.user?.id,
-            password: 'Password123'
-        })
+            password: 'Password123',
+        }
+        if (form.value.role !== 'doctor') {
+            delete payload.department_id
+            delete payload.specialization
+            delete payload.str_number
+            delete payload.sip_number
+            delete payload.biography
+            delete payload.consultation_fee
+        }
+        if (form.value.role !== 'doctor' && form.value.role !== 'nurse') {
+            delete payload.experience_years
+            delete payload.is_available
+        }
+        if (form.value.role !== 'patient') {
+            delete payload.date_of_birth
+            delete payload.gender
+            delete payload.blood_type
+            delete payload.address
+        }
+        if (form.value.role !== 'doctor' && form.value.role !== 'nurse') {
+            delete payload.phone
+        }
+        emit('submit', payload)
     }
 }
 </script>
 
 <template>
-    <v-card rounded="lg" min-width="480">
+    <v-card rounded="lg" min-width="520">
         <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
             <div class="d-flex align-center ga-2">
                 <v-icon :icon="config.icon" size="20" />
@@ -96,7 +162,7 @@ function onSubmit() {
         </template>
 
         <template v-else>
-            <v-card-text class="pa-4">
+            <v-card-text class="pa-4" style="max-height: 560px; overflow-y: auto;">
                 <v-row dense>
                     <v-col cols="12">
                         <v-label class="text-caption font-weight-medium mb-1">Full Name</v-label>
@@ -119,6 +185,120 @@ function onSubmit() {
                             :items="[{ title: 'Active', value: 'active' }, { title: 'Inactive', value: 'inactive' }]"
                             variant="outlined" density="compact" hide-details />
                     </v-col>
+
+                    <!-- Doctor-specific fields -->
+                    <template v-if="form.role === 'doctor'">
+                        <v-col cols="12" class="mt-4">
+                            <v-divider />
+                            <div class="text-subtitle-2 font-weight-bold mt-3 mb-2">Doctor Details</div>
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-1">
+                            <v-label class="text-caption font-weight-medium mb-1">Department / Poli</v-label>
+                            <v-select v-model="form.department_id" :items="departments" item-title="name"
+                                item-value="id" placeholder="Select department" variant="outlined" density="compact"
+                                hide-details clearable />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-1">
+                            <v-label class="text-caption font-weight-medium mb-1">Specialization</v-label>
+                            <v-text-field v-model="form.specialization" placeholder="e.g. Pediatrician"
+                                variant="outlined" density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">STR Number</v-label>
+                            <v-text-field v-model="form.str_number" placeholder="Enter STR Number" variant="outlined"
+                                density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">SIP Number</v-label>
+                            <v-text-field v-model="form.sip_number" placeholder="Enter SIP Number" variant="outlined"
+                                density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Phone</v-label>
+                            <v-text-field v-model="form.phone" placeholder="e.g. 081234567890" variant="outlined"
+                                density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="6" sm="3" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Experience (years)</v-label>
+                            <v-text-field v-model.number="form.experience_years" type="number" min="0"
+                                variant="outlined" density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="6" sm="3" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Consultation Fee</v-label>
+                            <v-text-field v-model.number="form.consultation_fee" type="number" min="0" prefix="$"
+                                variant="outlined" density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="12" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Biography</v-label>
+                            <v-textarea v-model="form.biography" placeholder="Short biography" variant="outlined"
+                                density="compact" rows="2" hide-details />
+                        </v-col>
+                        <v-col cols="12" class="mt-3">
+                            <v-switch v-model="form.is_available" color="success" label="Available for consultation"
+                                hide-details density="compact" />
+                        </v-col>
+                    </template>
+
+                    <!-- Nurse-specific fields -->
+                    <template v-if="form.role === 'nurse'">
+                        <v-col cols="12" class="mt-4">
+                            <v-divider />
+                            <div class="text-subtitle-2 font-weight-bold mt-3 mb-2">Nurse Details</div>
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-1">
+                            <v-label class="text-caption font-weight-medium mb-1">Department / Poli</v-label>
+                            <v-select v-model="form.department_id" :items="departments" item-title="name"
+                                item-value="id" placeholder="Select department" variant="outlined" density="compact"
+                                hide-details clearable />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-1">
+                            <v-label class="text-caption font-weight-medium mb-1">Phone</v-label>
+                            <v-text-field v-model="form.phone" placeholder="e.g. 081234567890" variant="outlined"
+                                density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Experience (years)</v-label>
+                            <v-text-field v-model.number="form.experience_years" type="number" min="0"
+                                variant="outlined" density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="12" class="mt-3">
+                            <v-switch v-model="form.is_available" color="success" label="Available for duty"
+                                hide-details density="compact" />
+                        </v-col>
+                    </template>
+
+                    <!-- Patient-specific fields -->
+                    <template v-if="form.role === 'patient'">
+                        <v-col cols="12" class="mt-4">
+                            <v-divider />
+                            <div class="text-subtitle-2 font-weight-bold mt-3 mb-2">Patient Details</div>
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-1">
+                            <v-label class="text-caption font-weight-medium mb-1">Date of Birth</v-label>
+                            <v-text-field v-model="form.date_of_birth" type="date" variant="outlined" density="compact"
+                                hide-details />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-1">
+                            <v-label class="text-caption font-weight-medium mb-1">Gender</v-label>
+                            <v-select v-model="form.gender" :items="genderOptions" placeholder="Select gender"
+                                variant="outlined" density="compact" hide-details clearable />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Phone</v-label>
+                            <v-text-field v-model="form.phone" placeholder="e.g. 081234567890" variant="outlined"
+                                density="compact" hide-details />
+                        </v-col>
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Blood Type</v-label>
+                            <v-select v-model="form.blood_type" :items="bloodTypes" placeholder="Select blood type"
+                                variant="outlined" density="compact" hide-details clearable />
+                        </v-col>
+                        <v-col cols="12" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Address</v-label>
+                            <v-textarea v-model="form.address" placeholder="Patient address" variant="outlined"
+                                density="compact" rows="2" hide-details />
+                        </v-col>
+                    </template>
                 </v-row>
             </v-card-text>
         </template>
