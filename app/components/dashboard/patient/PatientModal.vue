@@ -232,13 +232,13 @@ function onSubmit() {
                             variant="outlined" density="compact" hide-details clearable />
                     </v-col>
 
-                    <v-col cols="12" sm="6" class="mt-3">
+                    <v-col cols="12" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">
-                            Email <span class="text-medium-emphasis">(optional)</span>
+                            Email
                         </v-label>
 
                         <v-text-field v-model="form.email" placeholder="e.g. patient@email.com" type="email"
-                            variant="outlined" density="compact" hide-details />
+                            variant="outlined" density="compact" hide-details :disabled="mode === 'edit'" />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">
@@ -256,8 +256,9 @@ function onSubmit() {
                                 Length of Stay
                             </v-label>
 
-                            <v-select v-model="form.length_of_stay" :items="stayOptions" placeholder="Select length of stay"
-                                variant="outlined" density="compact" hide-details clearable />
+                            <v-select v-model="form.length_of_stay" :items="stayOptions"
+                                placeholder="Select length of stay" variant="outlined" density="compact" hide-details
+                                clearable />
                         </v-col>
 
                         <v-col cols="12" class="mt-3">
@@ -265,8 +266,9 @@ function onSubmit() {
                                 Description
                             </v-label>
 
-                            <v-textarea v-model="form.description" placeholder="Describe the patient's condition / disease"
-                                variant="outlined" density="compact" rows="3" hide-details />
+                            <v-textarea v-model="form.description"
+                                placeholder="Describe the patient's condition / disease" variant="outlined"
+                                density="compact" rows="3" hide-details />
                         </v-col>
                     </template>
 
