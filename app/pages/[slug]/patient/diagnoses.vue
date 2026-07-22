@@ -86,13 +86,13 @@ function formatDate(dateStr: string) {
         <v-table class="text-no-wrap">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Diagnosis</th>
-                    <th>Code</th>
-                    <th>Department</th>
-                    <th>Doctor</th>
-                    <!-- <th>Severity</th> -->
-                    <th class="text-right">Action</th>
+                    <th class="text-no-wrap">Date</th>
+                    <th class="text-no-wrap">Diagnosis</th>
+                    <th class="text-no-wrap">Code</th>
+                    <th class="text-no-wrap">Department</th>
+                    <th class="text-no-wrap">Doctor</th>
+                    <!-- <th class="text-no-wrap">Severity</th> -->
+                    <th class="text-no-wrap text-right">Action</th>
                 </tr>
             </thead>
             <tbody>

@@ -28,7 +28,7 @@ const dayHeaders = Array.from({ length: cols }, (_, i) => i)
                 <table class="skeleton-calendar">
                     <thead>
                         <tr>
-                            <th v-for="d in dayHeaders" :key="d">
+                            <th class="text-no-wrap" v-for="d in dayHeaders" :key="d">
                                 <span class="skeleton-day-header" />
                             </th>
                         </tr>

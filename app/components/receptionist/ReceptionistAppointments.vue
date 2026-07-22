@@ -247,13 +247,13 @@ async function updateStatus(id: string, status: string) {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Schedule</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Doctor</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Type</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Queue</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Schedule</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Doctor</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Type</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Queue</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>

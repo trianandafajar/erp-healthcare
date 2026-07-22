@@ -132,11 +132,11 @@ async function handleSubmit(payload: any) {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Role</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Identifier</th>
-                    <th class="text-center text-caption font-weight-bold text-uppercase" style="width: 80px">Users</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Permissions</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase" style="width: 100px">Actions
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Role</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Identifier</th>
+                    <th class="text-no-wrap text-center text-caption font-weight-bold text-uppercase" style="width: 80px">Users</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Permissions</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase" style="width: 100px">Actions
                     </th>
                 </tr>
             </thead>

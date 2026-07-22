@@ -539,12 +539,12 @@ async function uploadAttachments(
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Medicine</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Frequency</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Duration</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Instructions</th>
-                                <th class="text-right text-caption font-weight-bold text-uppercase">Action</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Medicine</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Dosage</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Frequency</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Duration</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Instructions</th>
+                                <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Action</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -90,11 +90,11 @@ function formatDate(dateStr?: string | null) {
                         <v-table hover density="comfortable">
                             <thead class="bg-containerBg">
                                 <tr>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">From Doctor</th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">Reason</th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">From Doctor</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Reason</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -141,13 +141,13 @@ function formatDate(dateStr?: string | null) {
                         <v-table hover density="comfortable">
                             <thead class="bg-containerBg">
                                 <tr>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">To Department
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">To Department
                                     </th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">To Doctor</th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">Reason</th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                                    <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">To Doctor</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Reason</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
                                 </tr>
                             </thead>
                             <tbody>

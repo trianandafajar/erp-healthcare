@@ -85,23 +85,23 @@ function openDetail(record: MedicalRecord) {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         Patient
                     </th>
 
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         Diagnosis
                     </th>
 
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         ICD-10
                     </th>
 
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         Date
                     </th>
 
-                    <th class="text-right text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">
                         Actions
                     </th>
                 </tr>

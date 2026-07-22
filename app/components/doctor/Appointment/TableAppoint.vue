@@ -231,13 +231,13 @@ async function handleCreatePatient(payload: { full_name: string; email: string }
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">time</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Type</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Complaint</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">time</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Type</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Complaint</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>

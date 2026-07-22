@@ -150,11 +150,11 @@ async function handleSubmit(payload: any) {
             <thead class="bg-containerBg">
                 <tr>
                     <th style="width:36px" class="text-left text-caption font-weight-bold text-uppercase"></th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Logo</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Title</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Active</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Created</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Logo</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Title</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Active</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Created</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody ref="tbodyRef">

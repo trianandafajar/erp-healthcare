@@ -349,9 +349,9 @@ function formatTime(time?: string) {
                             <v-table density="compact" fixed-header>
                                 <thead>
                                     <tr>
-                                        <th>Patient</th>
-                                        <th>Time</th>
-                                        <th>Status</th>
+                                        <th class="text-no-wrap">Patient</th>
+                                        <th class="text-no-wrap">Time</th>
+                                        <th class="text-no-wrap">Status</th>
                                     </tr>
                                 </thead>
 
@@ -402,9 +402,9 @@ function formatTime(time?: string) {
                             <v-table density="compact" fixed-header>
                                 <thead>
                                     <tr>
-                                        <th>Patient</th>
-                                        <th>Medicine</th>
-                                        <th>Dosage</th>
+                                        <th class="text-no-wrap">Patient</th>
+                                        <th class="text-no-wrap">Medicine</th>
+                                        <th class="text-no-wrap">Dosage</th>
                                     </tr>
                                 </thead>
 

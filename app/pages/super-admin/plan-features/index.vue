@@ -101,12 +101,12 @@ async function deleteFeature(item: any) {
             <v-table v-else density="comfortable" hover>
                 <thead class="bg-containerBg">
                     <tr>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Category</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Feature Key</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Label</th>
-                        <th class="text-center text-caption font-weight-bold text-uppercase">Available</th>
-                        <th class="text-center text-caption font-weight-bold text-uppercase">Limit</th>
-                        <th class="text-center text-caption font-weight-bold text-uppercase">Actions</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Category</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Feature Key</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Label</th>
+                        <th class="text-no-wrap text-center text-caption font-weight-bold text-uppercase">Available</th>
+                        <th class="text-no-wrap text-center text-caption font-weight-bold text-uppercase">Limit</th>
+                        <th class="text-no-wrap text-center text-caption font-weight-bold text-uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

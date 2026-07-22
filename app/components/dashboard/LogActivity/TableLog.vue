@@ -151,11 +151,11 @@ watch(
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">User</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Action</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Module</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Description</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Time</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">User</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Action</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Module</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Description</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Time</th>
                 </tr>
             </thead>
             <tbody>

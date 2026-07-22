@@ -173,14 +173,14 @@ function formatDate(dateStr?: string) {
             <thead class="bg-containerBg">
                 <tr>
                     <th style="width:36px" class="text-left text-caption font-weight-bold text-uppercase"></th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Plan</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Monthly</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Yearly</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Recommended</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Active</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Features</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Created</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Plan</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Monthly</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Yearly</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Recommended</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Active</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Features</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Created</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody ref="tbodyRef">

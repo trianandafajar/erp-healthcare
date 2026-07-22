@@ -87,12 +87,12 @@ function handleAction(item: { invoiceNumber: string; status: string }) {
         <v-table class="text-no-wrap">
             <thead>
                 <tr>
-                    <th>Invoice Number</th>
-                    <th>Service Date</th>
-                    <th>Service Name</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th class="text-right">Action</th>
+                    <th class="text-no-wrap">Invoice Number</th>
+                    <th class="text-no-wrap">Service Date</th>
+                    <th class="text-no-wrap">Service Name</th>
+                    <th class="text-no-wrap">Amount</th>
+                    <th class="text-no-wrap">Status</th>
+                    <th class="text-no-wrap text-right">Action</th>
                 </tr>
             </thead>
             <tbody>

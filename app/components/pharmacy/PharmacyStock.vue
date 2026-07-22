@@ -205,13 +205,13 @@ function formatDate(value: string) {
             <v-table hover density="comfortable">
                 <thead class="bg-containerBg">
                     <tr>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Medicine</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Supplier / Batch</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Expiry</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Stock</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                        <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Medicine</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Dosage</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Supplier / Batch</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Expiry</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Stock</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                        <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

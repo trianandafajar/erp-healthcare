@@ -90,12 +90,12 @@ function onSearch() {
     <v-table class="bordered-table" hover density="comfortable">
       <thead class="bg-containerBg">
         <tr>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Tenant</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Plan</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Owner</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Users</th>
-          <th class="text-right text-caption font-weight-bold text-uppercase">Joined</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Tenant</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Plan</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Owner</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Users</th>
+          <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Joined</th>
         </tr>
       </thead>
       <tbody>

@@ -368,11 +368,11 @@ const careNoteColor: Record<string, string> = {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Day</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Start</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">End</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Max Patients</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Day</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Start</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">End</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Max Patients</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -405,14 +405,14 @@ const careNoteColor: Record<string, string> = {
                     <v-table v-else hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Recorded At</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Blood Pressure</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Temp (°C)</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Pulse</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Weight (kg)</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Height (cm)</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Notes</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Recorded At</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Blood Pressure</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Temp (°C)</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Pulse</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Weight (kg)</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Height (cm)</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Notes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -450,11 +450,11 @@ const careNoteColor: Record<string, string> = {
                     <v-table v-else hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Recorded At</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Category</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Note</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Author</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Recorded At</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Category</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Note</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Author</th>
                             </tr>
                         </thead>
                         <tbody>

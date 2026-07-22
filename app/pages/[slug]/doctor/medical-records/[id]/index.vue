@@ -265,12 +265,12 @@ function formatTime(timeStr?: string) {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Medication</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Frequency</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Duration</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Instructions</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Medication</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Dosage</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Frequency</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Duration</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Instructions</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -315,12 +315,12 @@ function formatTime(timeStr?: string) {
                     <v-table v-else hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left">Document</th>
-                                <th class="text-left">Category</th>
-                                <th class="text-left">Type</th>
-                                <th class="text-left">Size</th>
-                                <th class="text-left">Uploaded</th>
-                                <th class="text-right">Action</th>
+                                <th class="text-no-wrap text-left">Document</th>
+                                <th class="text-no-wrap text-left">Category</th>
+                                <th class="text-no-wrap text-left">Type</th>
+                                <th class="text-no-wrap text-left">Size</th>
+                                <th class="text-no-wrap text-left">Uploaded</th>
+                                <th class="text-no-wrap text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody>

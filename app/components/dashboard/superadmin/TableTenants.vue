@@ -123,14 +123,14 @@ function openDetail(tenant: Tenant) {
     <v-table class="bordered-table" hover density="comfortable">
       <thead class="bg-containerBg">
         <tr>
-          <th class="text-left text-caption font-weight-bold text-uppercase" style="width: 50px;">No</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Tenant</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Plan</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Owner</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Users</th>
-          <th class="text-left text-caption font-weight-bold text-uppercase">Created</th>
-          <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase" style="width: 50px;">No</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Tenant</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Plan</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Owner</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Users</th>
+          <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Created</th>
+          <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
         </tr>
       </thead>
       <tbody>

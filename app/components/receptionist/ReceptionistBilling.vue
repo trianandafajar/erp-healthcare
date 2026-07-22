@@ -193,12 +193,12 @@ function openReceipt(invoiceNumber: string) {
         <v-table class="text-no-wrap">
             <thead>
                 <tr>
-                    <th>Invoice</th>
-                    <th>Patient</th>
-                    <th>Service</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th class="text-right">Action</th>
+                    <th class="text-no-wrap">Invoice</th>
+                    <th class="text-no-wrap">Patient</th>
+                    <th class="text-no-wrap">Service</th>
+                    <th class="text-no-wrap">Amount</th>
+                    <th class="text-no-wrap">Status</th>
+                    <th class="text-no-wrap text-right">Action</th>
                 </tr>
             </thead>
             <tbody>

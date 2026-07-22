@@ -262,15 +262,15 @@ async function handleSubmit(payload: any) {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">No. RM</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Gender / Age</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Phone</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Email</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Blood Type</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Length of Stay</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Account</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">No. RM</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Gender / Age</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Phone</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Email</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Blood Type</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Length of Stay</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Account</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>

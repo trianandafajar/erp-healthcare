@@ -324,14 +324,14 @@ await loadAppointments()
         <v-table class="text-no-wrap">
             <thead>
                 <tr>
-                    <th>Appointment ID</th>
-                    <th>Date</th>
-                    <th>Doctor</th>
-                    <th>Department</th>
-                    <th>Practice Time</th>
-                    <th>Complaint</th>
-                    <th>Status</th>
-                    <th class="text-right">Action</th>
+                    <th class="text-no-wrap">Appointment ID</th>
+                    <th class="text-no-wrap">Date</th>
+                    <th class="text-no-wrap">Doctor</th>
+                    <th class="text-no-wrap">Department</th>
+                    <th class="text-no-wrap">Practice Time</th>
+                    <th class="text-no-wrap">Complaint</th>
+                    <th class="text-no-wrap">Status</th>
+                    <th class="text-no-wrap text-right">Action</th>
                 </tr>
             </thead>
             <tbody>

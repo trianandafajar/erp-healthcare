@@ -78,12 +78,12 @@ const filteredSchedules = computed(() => {
         <v-table class="text-no-wrap">
             <thead>
                 <tr>
-                    <th>Doctor</th>
-                    <th>Specialty</th>
-                    <th>Department</th>
-                    <th>Day</th>
-                    <th>Time</th>
-                    <th>Slots</th>
+                    <th class="text-no-wrap">Doctor</th>
+                    <th class="text-no-wrap">Specialty</th>
+                    <th class="text-no-wrap">Department</th>
+                    <th class="text-no-wrap">Day</th>
+                    <th class="text-no-wrap">Time</th>
+                    <th class="text-no-wrap">Slots</th>
                 </tr>
             </thead>
             <tbody>

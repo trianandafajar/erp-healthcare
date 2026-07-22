@@ -303,14 +303,14 @@ onMounted(() => {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Tenant</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Plan</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Amount</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Cycle</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Next Billing</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Payment</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Tenant</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Plan</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Amount</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Cycle</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Next Billing</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Payment</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>

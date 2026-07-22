@@ -461,12 +461,12 @@ function getPriorityColor(priority: NurseProcedure['priority']) {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Procedure</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Schedule</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Priority</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                                <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Procedure</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Schedule</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Priority</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                             </tr>
                         </thead>
                         <tbody>

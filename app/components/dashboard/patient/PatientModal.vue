@@ -71,7 +71,7 @@ watch(
                 phone: patient.phone === '-' ? '' : (patient.phone ?? ''),
                 address: patient.address === '-' ? '' : (patient.address ?? ''),
                 blood_type: patient.blood_type ?? null,
-                email: '',
+                email: patient.email ?? '',
                 description: '',
                 length_of_stay: null,
             }
@@ -232,6 +232,15 @@ function onSubmit() {
                             variant="outlined" density="compact" hide-details clearable />
                     </v-col>
 
+                    <v-col cols="12" sm="6" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">
+                            Email <span class="text-medium-emphasis">(optional)</span>
+                        </v-label>
+
+                        <v-text-field v-model="form.email" placeholder="e.g. patient@email.com" type="email"
+                            variant="outlined" density="compact" hide-details />
+                    </v-col>
+
                     <v-col cols="12" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">
                             Address
@@ -242,15 +251,6 @@ function onSubmit() {
                     </v-col>
 
                     <template v-if="mode === 'add'">
-                        <v-col cols="12" sm="6" class="mt-3">
-                            <v-label class="text-caption font-weight-medium mb-1">
-                                Email <span class="text-medium-emphasis">(optional)</span>
-                            </v-label>
-
-                            <v-text-field v-model="form.email" placeholder="e.g. patient@email.com" type="email"
-                                variant="outlined" density="compact" hide-details />
-                        </v-col>
-
                         <v-col cols="12" sm="6" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">
                                 Length of Stay

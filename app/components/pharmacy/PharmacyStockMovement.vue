@@ -106,14 +106,14 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
             <v-table hover density="comfortable" class="pharmacy-log-table">
                 <thead class="bg-containerBg">
                     <tr>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Medicine</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Reference</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">{{ metaLabel }}</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Quantity</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Batch / Expiry</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Performed By</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Logged At</th>
-                        <th class="text-left text-caption font-weight-bold text-uppercase">Note</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Medicine</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Reference</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">{{ metaLabel }}</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Quantity</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Batch / Expiry</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Performed By</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Logged At</th>
+                        <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Note</th>
                     </tr>
                 </thead>
                 <tbody>

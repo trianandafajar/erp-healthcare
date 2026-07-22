@@ -97,27 +97,27 @@ function openExamination(record: Examination) {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         Queue
                     </th>
 
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         Time
                     </th>
 
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         Patient
                     </th>
 
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         MRN
                     </th>
 
-                    <th class="text-left text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
                         Complaint
                     </th>
 
-                    <th class="text-right text-caption font-weight-bold text-uppercase">
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">
                         Actions
                     </th>
                 </tr>

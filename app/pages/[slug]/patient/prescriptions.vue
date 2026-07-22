@@ -105,14 +105,14 @@ function shortId(id?: string | null) {
         <v-table class="text-no-wrap">
             <thead>
                 <tr>
-                    <th>Prescribed At</th>
-                    <th>Prescription ID</th>
-                    <th>Doctor</th>
-                    <th>Department</th>
-                    <th>Visit Ref</th>
-                    <th>Items</th>
-                    <th>Status</th>
-                    <th class="text-right">Action</th>
+                    <th class="text-no-wrap">Prescribed At</th>
+                    <th class="text-no-wrap">Prescription ID</th>
+                    <th class="text-no-wrap">Doctor</th>
+                    <th class="text-no-wrap">Department</th>
+                    <th class="text-no-wrap">Visit Ref</th>
+                    <th class="text-no-wrap">Items</th>
+                    <th class="text-no-wrap">Status</th>
+                    <th class="text-no-wrap text-right">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -187,10 +187,10 @@ function shortId(id?: string | null) {
                 <v-table density="compact">
                     <thead>
                         <tr>
-                            <th>Medication</th>
-                            <th>Dosage</th>
-                            <th>Frequency</th>
-                            <th>Duration</th>
+                            <th class="text-no-wrap">Medication</th>
+                            <th class="text-no-wrap">Dosage</th>
+                            <th class="text-no-wrap">Frequency</th>
+                            <th class="text-no-wrap">Duration</th>
                         </tr>
                     </thead>
                     <tbody>

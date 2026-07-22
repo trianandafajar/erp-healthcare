@@ -402,13 +402,13 @@ function referralStatusColor(status: string) {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Time</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Doctor</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Department</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Type</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Complaint</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Time</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Doctor</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Department</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Type</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Complaint</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -457,12 +457,12 @@ function referralStatusColor(status: string) {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Doctor</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Diagnosis</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">ICD-10</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Vital Signs</th>
-                                <th class="text-right text-caption font-weight-bold text-uppercase">Action</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Doctor</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Diagnosis</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">ICD-10</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Vital Signs</th>
+                                <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -505,14 +505,14 @@ function referralStatusColor(status: string) {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Recorded At</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Blood Pressure</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Temperature</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Pulse</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Weight</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Height</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Recorded By</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Notes</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Recorded At</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Blood Pressure</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Temperature</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Pulse</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Weight</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Height</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Recorded By</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Notes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -557,14 +557,14 @@ function referralStatusColor(status: string) {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Medicine</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Frequency</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Duration</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Instructions</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Doctor</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Medicine</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Dosage</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Frequency</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Duration</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Instructions</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Doctor</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -605,14 +605,14 @@ function referralStatusColor(status: string) {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Invoice</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Service</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Department</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Amount</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Payment Method</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Service Date</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Paid At</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Invoice</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Service</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Department</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Amount</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Payment Method</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Service Date</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Paid At</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -653,12 +653,12 @@ function referralStatusColor(status: string) {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">From Doctor</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">To Department</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Reason</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Notes</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">From Doctor</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">To Department</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Reason</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Notes</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
                             </tr>
                         </thead>
                         <tbody>

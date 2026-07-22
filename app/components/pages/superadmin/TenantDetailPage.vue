@@ -359,12 +359,12 @@ watchEffect(() => {
                                 <v-table density="comfortable">
                                     <thead class="bg-containerBg">
                                         <tr>
-                                            <th class="text-left text-caption font-weight-bold text-uppercase">Patient
+                                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient
                                             </th>
-                                            <th class="text-left text-caption font-weight-bold text-uppercase">Doctor
+                                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Doctor
                                             </th>
-                                            <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
-                                            <th class="text-left text-caption font-weight-bold text-uppercase">Status
+                                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
+                                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status
                                             </th>
                                         </tr>
                                     </thead>
@@ -504,10 +504,10 @@ watchEffect(() => {
                     <v-table hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">User</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Role</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Joined</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">User</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Role</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Joined</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -555,10 +555,10 @@ watchEffect(() => {
                     <v-table density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Action</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Module</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Actor</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Time</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Action</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Module</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Actor</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Time</th>
                             </tr>
                         </thead>
                         <tbody>

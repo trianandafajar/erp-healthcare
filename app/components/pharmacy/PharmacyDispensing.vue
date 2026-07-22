@@ -153,10 +153,10 @@ function statusColor(status: PrescriptionItem['status']) {
                     <v-table density="comfortable" class="pharmacy-group-table">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Medication</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Dosage</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Frequency</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Duration</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Medication</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Dosage</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Frequency</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Duration</th>
                             </tr>
                         </thead>
                         <tbody>

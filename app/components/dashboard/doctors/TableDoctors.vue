@@ -297,13 +297,13 @@ function openView(doctor: Doctor) {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Doctor</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Specialization</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Department</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Experience</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Fee</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Doctor</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Specialization</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Department</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Experience</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Fee</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>

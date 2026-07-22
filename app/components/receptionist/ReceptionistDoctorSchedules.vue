@@ -130,11 +130,11 @@ function slotColor(remaining: number, max: number | null) {
         <v-table class="bordered-table" hover density="comfortable">
             <thead class="bg-containerBg">
                 <tr>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Doctor</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Department</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Day</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Time</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Slots</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Doctor</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Department</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Day</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Time</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Slots</th>
                 </tr>
             </thead>
             <tbody>

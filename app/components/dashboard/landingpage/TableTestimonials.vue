@@ -171,14 +171,14 @@ function getStars(rating: number) {
             <thead class="bg-containerBg">
                 <tr>
                     <th style="width:36px" class="text-left text-caption font-weight-bold text-uppercase"></th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Person</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Role</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Institution</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Quote</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Rating</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Active</th>
-                    <th class="text-left text-caption font-weight-bold text-uppercase">Created</th>
-                    <th class="text-right text-caption font-weight-bold text-uppercase">Actions</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Person</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Role</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Institution</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Quote</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Rating</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Active</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Created</th>
+                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody ref="tbodyRef">

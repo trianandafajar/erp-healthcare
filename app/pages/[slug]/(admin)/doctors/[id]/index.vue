@@ -475,13 +475,13 @@ function genderColor(gender?: string | null) {
                     <v-table v-else hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Date</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Time</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Department</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Type</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Status</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Complaint</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Time</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Department</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Type</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Complaint</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -534,14 +534,14 @@ function genderColor(gender?: string | null) {
                     <v-table v-else hover density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">MRN</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Gender</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Date of Birth</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Age</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Blood Type</th>
-                                <th class="text-left text-caption font-weight-bold text-uppercase">Phone</th>
-                                <th class="text-right text-caption font-weight-bold text-uppercase">Action</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">MRN</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Gender</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Date of Birth</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Age</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Blood Type</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Phone</th>
+                                <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Action</th>
                             </tr>
                         </thead>
                         <tbody>

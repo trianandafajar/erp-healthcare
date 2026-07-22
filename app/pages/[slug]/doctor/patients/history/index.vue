@@ -83,11 +83,11 @@ function openHistory(patientId: string) {
                 <v-table hover density="comfortable">
                     <thead class="bg-containerBg">
                         <tr>
-                            <th class="text-left text-caption font-weight-bold text-uppercase">No. RM</th>
-                            <th class="text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                            <th class="text-left text-caption font-weight-bold text-uppercase">Gender</th>
-                            <th class="text-left text-caption font-weight-bold text-uppercase">Phone</th>
-                            <th class="text-right text-caption font-weight-bold text-uppercase">Action</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">No. RM</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Gender</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Phone</th>
+                            <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Action</th>
                         </tr>
                     </thead>
                     <tbody>
