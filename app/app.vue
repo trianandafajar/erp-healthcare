@@ -1,6 +1,15 @@
 <script setup lang="ts">
 const APP_NAME = 'Healthcare'
 const DEFAULT_DESCRIPTION = 'Healthcare management platform for appointments, medical records, pharmacy, billing, and operations.'
+const DEFAULT_LOADING_COLOR = '#176D37'
+
+const authStore = useAuthStore()
+const profileStore = useProfileStore()
+
+const loadingBarColor = computed(() => {
+  if (authStore.role === 'superadmin') return DEFAULT_LOADING_COLOR
+  return profileStore.data?.tenant?.brand_color ?? DEFAULT_LOADING_COLOR
+})
 
 useHead({
   titleTemplate: (title) => {
@@ -18,7 +27,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <NuxtLoadingIndicator color="#176D37" :height="4" />
+  <NuxtLoadingIndicator :color="loadingBarColor" :height="4" />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
