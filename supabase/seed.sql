@@ -185,7 +185,19 @@
     ('landingpage.pricing.view', 'View Pricing Plans', 'landingpage', 'admin'),
     ('landingpage.pricing.create', 'Create Pricing Plans', 'landingpage', 'admin'),
     ('landingpage.pricing.edit', 'Edit Pricing Plans', 'landingpage', 'admin'),
-    ('landingpage.pricing.delete', 'Delete Pricing Plans', 'landingpage', 'admin')
+    ('landingpage.pricing.delete', 'Delete Pricing Plans', 'landingpage', 'admin'),
+
+    -- Pharmacy (admin master data)
+    ('pharmacy.view', 'View Pharmacists', 'pharmacy', 'admin'),
+    ('pharmacy.create', 'Create Pharmacist', 'pharmacy', 'admin'),
+    ('pharmacy.edit', 'Edit Pharmacist', 'pharmacy', 'admin'),
+    ('pharmacy.delete', 'Delete Pharmacist', 'pharmacy', 'admin'),
+
+    -- Receptionist (admin master data)
+    ('receptionist.view', 'View Receptionists', 'receptionist', 'admin'),
+    ('receptionist.create', 'Create Receptionist', 'receptionist', 'admin'),
+    ('receptionist.edit', 'Edit Receptionist', 'receptionist', 'admin'),
+    ('receptionist.delete', 'Delete Receptionist', 'receptionist', 'admin')
 
     ON CONFLICT (name) DO NOTHING;
 

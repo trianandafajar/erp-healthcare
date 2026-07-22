@@ -45,6 +45,8 @@ export function getSidebarItems(slug: string): menu[] {
     { title: 'Doctors', icon: MedicineBoxOutlined, to: `${base}/doctors` },
     { title: 'Nurses', icon: UsergroupAddOutlined, to: `${base}/nurses` },
     { title: 'Patient', icon: SolutionOutlined, to: `${base}/patients` },
+    { title: 'Pharmacy', icon: MedicineBoxOutlined, to: `${base}/pharmacies` },
+    { title: 'Receptionist', icon: TeamOutlined, to: `${base}/receptionists` },
 
     { header: 'Access Management' },
     { title: 'Users', icon: TeamOutlined, to: `${base}/users-management` },
