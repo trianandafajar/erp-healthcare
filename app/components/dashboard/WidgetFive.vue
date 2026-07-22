@@ -94,7 +94,7 @@ const fivecards = computed(() => [
     <v-row class="my-0">
         <v-col cols="6" sm="4" md="" v-for="(card5, i) in fivecards" :key="i" :style="{ flex: '1 1 0' }"
             class="flex-grow-1">
-            <v-card :to="card5.to" elevation="0">
+            <v-card :to="card5.to" elevation="0" class="stat-card">
                 <v-card-text>
                     <div class="d-flex align-items-center justify-space-between">
                         <div>
@@ -104,7 +104,7 @@ const fivecards = computed(() => [
                                 <v-chip v-if="card5.percent" :color="card5.color"
                                     :border="`${card5.color} solid thin opacity-50`" class="ml-2" size="small" label>
                                     <template v-slot:prepend>
-                                        <component :is="card5.icon" :style="{ fontSize: '12px' }"
+                                            <component :is="card5.icon" :style="{ fontSize: '12px' }"
                                             :class="'mr-1 text-' + card5.color" />
                                     </template>
                                     {{ card5.percent }}
@@ -120,3 +120,12 @@ const fivecards = computed(() => [
         </v-col>
     </v-row>
 </template>
+
+<style scoped>
+.stat-card.v-card--link:before {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
+</style>
