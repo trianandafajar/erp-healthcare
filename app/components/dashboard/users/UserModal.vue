@@ -55,6 +55,7 @@ const form = ref({
     gender: null as string | null,
     blood_type: null as string | null,
     address: '',
+    room: '',
 })
 
 watch(() => props.user, (u) => {
@@ -85,6 +86,7 @@ watch(() => props.user, (u) => {
             gender: null,
             blood_type: null,
             address: '',
+            room: '',
         }
     }
 }, { immediate: true })
@@ -124,6 +126,7 @@ function onSubmit() {
             delete payload.gender
             delete payload.blood_type
             delete payload.address
+            delete payload.room
         }
         if (form.value.role !== 'doctor' && form.value.role !== 'nurse') {
             delete payload.phone
@@ -297,6 +300,11 @@ function onSubmit() {
                             <v-label class="text-caption font-weight-medium mb-1">Address</v-label>
                             <v-textarea v-model="form.address" placeholder="Patient address" variant="outlined"
                                 density="compact" rows="2" hide-details />
+                        </v-col>
+                        <v-col cols="12" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">Room</v-label>
+                            <v-text-field v-model="form.room" placeholder="e.g. 12A" variant="outlined"
+                                density="compact" hide-details />
                         </v-col>
                     </template>
                 </v-row>

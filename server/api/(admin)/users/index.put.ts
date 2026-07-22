@@ -95,6 +95,7 @@ export default defineEventHandler(async (event: any) => {
         if (body.phone) patientUpdates.phone = body.phone
         if (body.blood_type) patientUpdates.blood_type = body.blood_type
         if (body.address) patientUpdates.address = body.address
+        if (body.room) patientUpdates.room = body.room
 
         if (Object.keys(patientUpdates).length) {
             const { error: patientError } = await admin

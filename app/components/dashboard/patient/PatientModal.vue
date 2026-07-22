@@ -11,6 +11,7 @@ interface Patient {
     phone?: string | null
     address?: string | null
     blood_type?: string | null
+    room?: string | null
     email?: string | null
     has_account?: boolean
 }
@@ -55,6 +56,7 @@ const form = ref({
     phone: '',
     address: '',
     blood_type: null as string | null,
+    room: '',
     email: '',
     description: '',
     length_of_stay: null as string | null,
@@ -71,6 +73,7 @@ watch(
                 phone: patient.phone === '-' ? '' : (patient.phone ?? ''),
                 address: patient.address === '-' ? '' : (patient.address ?? ''),
                 blood_type: patient.blood_type ?? null,
+                room: patient.room ?? '',
                 email: patient.email ?? '',
                 description: '',
                 length_of_stay: null,
@@ -83,6 +86,7 @@ watch(
                 phone: '',
                 address: '',
                 blood_type: null,
+                room: '',
                 email: '',
                 description: '',
                 length_of_stay: null,
@@ -129,6 +133,7 @@ function onSubmit() {
         phone: form.value.phone,
         address: form.value.address,
         blood_type: form.value.blood_type,
+        room: form.value.room || null,
         email: form.value.email || null,
         description: form.value.description || null,
         length_of_stay: form.value.length_of_stay || null,
@@ -259,6 +264,15 @@ function onSubmit() {
                             <v-select v-model="form.length_of_stay" :items="stayOptions"
                                 placeholder="Select length of stay" variant="outlined" density="compact" hide-details
                                 clearable />
+                        </v-col>
+
+                        <v-col cols="12" sm="6" class="mt-3">
+                            <v-label class="text-caption font-weight-medium mb-1">
+                                Room
+                            </v-label>
+
+                            <v-text-field v-model="form.room" placeholder="e.g. 12A" variant="outlined"
+                                density="compact" hide-details />
                         </v-col>
 
                         <v-col cols="12" class="mt-3">
