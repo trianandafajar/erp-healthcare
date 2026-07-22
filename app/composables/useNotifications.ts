@@ -262,7 +262,7 @@ function formatShortTime(value: string) {
   }).format(date)
 }
 
-function toViewItem(notification: NotificationRow, currentRole: string | null): NotificationViewItem {
+function toViewItem(notification: NotificationRow, currentRole: string | null, tenantSlug: string | null): NotificationViewItem {
   const catalog = NOTIFICATION_CATALOG[notification.type] ?? DEFAULT_NOTIFICATION_CATALOG
   const dataAudience = notification.data?.audience_role
   const audienceRoles = Array.isArray(dataAudience)
@@ -284,24 +284,31 @@ function toViewItem(notification: NotificationRow, currentRole: string | null): 
     relativeTime: formatRelativeTime(notification.created_at),
     shortTime: formatShortTime(notification.created_at),
     summary: notification.body ?? notification.title,
-    targetRoute: resolveRoute(notification, catalog, audienceRoles, currentRole),
+    targetRoute: resolveRoute(notification, catalog, audienceRoles, currentRole, tenantSlug),
   }
 }
 
-function resolveRoute(notification: NotificationRow, catalog: NotificationCatalogEntry, audienceRoles: string[], currentRole: string | null) {
+function addSlugIfNeeded(route: string, tenantSlug: string | null, role: string | null): string {
+  if (!tenantSlug) return route
+  if (role === 'superadmin') return route
+  if (route.startsWith(`/${tenantSlug}/`)) return route
+  return `/${tenantSlug}${route}`
+}
+
+function resolveRoute(notification: NotificationRow, catalog: NotificationCatalogEntry, audienceRoles: string[], currentRole: string | null, tenantSlug: string | null) {
   const explicitRoute = notification.data?.redirect_to
   if (typeof explicitRoute === 'string' && explicitRoute.trim()) {
-    return explicitRoute.trim()
+    return addSlugIfNeeded(explicitRoute.trim(), tenantSlug, currentRole)
   }
 
   if (!currentRole) return null
 
   const route = catalog.routes[currentRole] ?? null
-  if (route) return route
+  if (route) return addSlugIfNeeded(route, tenantSlug, currentRole)
 
   for (const role of audienceRoles) {
     const fallback = catalog.routes[role]
-    if (fallback) return fallback
+    if (fallback) return addSlugIfNeeded(fallback, tenantSlug, currentRole)
   }
 
   return null
@@ -389,7 +396,7 @@ export const useNotifications = () => {
   }
 
   function upsertLocalRow(row: NotificationRow) {
-    const nextItem = toViewItem(row, role.value)
+    const nextItem = toViewItem(row, role.value, authStore.tenantSlug)
     const exists = items.value.findIndex(item => item.id === row.id)
     const isNewRow = !knownNotificationIds.has(row.id)
 
@@ -441,7 +448,7 @@ export const useNotifications = () => {
       return
     }
 
-    items.value = sortItems((data ?? []).map(notification => toViewItem(notification, role.value)))
+    items.value = sortItems((data ?? []).map(notification => toViewItem(notification, role.value, authStore.tenantSlug)))
     knownNotificationIds.clear()
     for (const item of items.value) {
       knownNotificationIds.add(item.id)
