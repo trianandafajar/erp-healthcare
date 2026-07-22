@@ -154,7 +154,7 @@ function openView(patient: NursePatient) {
                             </v-avatar>
                             <div>
                                 <div class="text-body-2 font-weight-medium">{{ patient.full_name }}</div>
-                                <div class="text-caption text-medium-emphasis">{{ patient.address }}</div>
+                                <div class="text-caption text-medium-emphasis" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ patient.address }}</div>
                             </div>
                         </div>
                     </td>

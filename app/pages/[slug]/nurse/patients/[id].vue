@@ -310,7 +310,7 @@ function referralStatusColor(status: string) {
                                                     Address
                                                 </div>
 
-                                                <div class="text-body-2">
+                                                <div class="text-body-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                                                     {{ patient.address || "-" }}
                                                 </div>
                                             </v-col>
