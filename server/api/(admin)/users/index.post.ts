@@ -90,30 +90,30 @@ export default defineEventHandler(async (event: any) => {
         if (body.consultation_fee !== undefined) doctorUpdates.consultation_fee = body.consultation_fee
         if (body.is_available !== undefined) doctorUpdates.is_available = body.is_available
 
-        const { error: doctorUpsertError } = await admin
+        const { error: doctorUpdateError } = await admin
             .from('doctors')
-            .upsert({ id: userId, ...doctorUpdates })
+            .update(doctorUpdates)
             .eq('id', userId)
 
-        if (doctorUpsertError) {
-            throw createError({ statusCode: 400, message: doctorUpsertError.message })
+        if (doctorUpdateError) {
+            throw createError({ statusCode: 400, message: doctorUpdateError.message })
         }
     }
 
     if (role === 'nurse') {
-        const nurseUpdates: Record<string, any> = { tenant_id: tenantId }
-        if (body.department_id) nurseUpdates.department_id = body.department_id
-        if (body.phone) nurseUpdates.phone = body.phone
-        if (body.experience_years !== undefined) nurseUpdates.experience_years = body.experience_years
-        if (body.is_available !== undefined) nurseUpdates.is_available = body.is_available
-
-        const { error: nurseUpsertError } = await admin
+        const { error: nurseInsertError } = await admin
             .from('nurses')
-            .upsert({ id: userId, ...nurseUpdates })
-            .eq('id', userId)
+            .insert({
+                id: userId,
+                tenant_id: tenantId,
+                department_id: body.department_id ?? null,
+                phone: body.phone ?? null,
+                experience_years: body.experience_years ?? 0,
+                is_available: body.is_available ?? true,
+            })
 
-        if (nurseUpsertError) {
-            throw createError({ statusCode: 400, message: nurseUpsertError.message })
+        if (nurseInsertError) {
+            throw createError({ statusCode: 400, message: nurseInsertError.message })
         }
     }
 
