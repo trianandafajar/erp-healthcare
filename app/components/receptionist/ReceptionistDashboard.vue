@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
+
 definePageMeta({
     middleware: ['auth'],
 })
@@ -141,59 +143,105 @@ const typeLabels: Record<string, string> = {
 
     <v-row>
         <v-col v-for="card in statCards" :key="card.title" cols="12" sm="6" lg="4">
-            <v-card elevation="0" border :to="card.to" class="h-100 receptionist-stat-card">
-                <v-card-text class="d-flex flex-column ga-2">
-                    <div class="d-flex align-center justify-space-between">
-                        <div class="text-caption text-medium-emphasis text-uppercase">{{ card.title }}</div>
-                        <v-avatar size="34" :color="card.color" variant="tonal">
-                            <v-icon :icon="card.icon" size="19" />
-                        </v-avatar>
-                    </div>
-                    <div class="text-h3 font-weight-bold">{{ card.value }}</div>
-                    <div class="text-body-2 text-medium-emphasis">{{ card.caption }}</div>
-                </v-card-text>
+            <v-card :to="card.to" elevation="0" class="h-100 receptionist-stat-card">
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
+                    <v-card-text class="d-flex flex-column ga-2">
+                        <div class="d-flex align-center justify-space-between">
+                            <div class="text-caption text-medium-emphasis text-uppercase">{{ card.title }}</div>
+                            <v-avatar size="34" :color="card.color" variant="tonal">
+                                <v-icon :icon="card.icon" size="19" />
+                            </v-avatar>
+                        </div>
+                        <div class="text-h3 font-weight-bold">{{ card.value }}</div>
+                        <div class="text-body-2 text-medium-emphasis">{{ card.caption }}</div>
+                    </v-card-text>
+                </v-card>
             </v-card>
         </v-col>
     </v-row>
 
+    <!-- Today's Appointments & Active Queue: flat style, no card border/shadow -->
     <v-row class="mt-4">
         <v-col cols="12" lg="7">
-            <v-card elevation="0" border class="h-100">
+            <UiTitleCard class-name="px-0 pb-0 rounded-md">
                 <v-card-item class="pb-2">
-                    <v-card-title class="text-h5">Today's Appointments</v-card-title>
-                    <v-card-subtitle>Visits that need receptionist monitoring</v-card-subtitle>
+                    <v-card-title class="text-h5">
+                        Today's Appointments
+                    </v-card-title>
+                    <v-card-subtitle>
+                        Visits that need receptionist monitoring
+                    </v-card-subtitle>
                 </v-card-item>
+
                 <v-divider />
-                <v-table hover density="comfortable">
+
+                <v-table class="bordered-table" density="comfortable">
                     <thead class="bg-containerBg">
                         <tr>
-                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Schedule</th>
-                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Doctor</th>
-                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
+                                Patient
+                            </th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
+                                Schedule
+                            </th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
+                                Doctor
+                            </th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
+                                Status
+                            </th>
                         </tr>
                     </thead>
+
                     <tbody>
                         <tr v-if="recentAppointments.length === 0">
-                            <td colspan="4" class="text-center py-6 text-medium-emphasis">No appointments today</td>
+                            <td colspan="4" class="text-center py-8 text-medium-emphasis">
+                                <v-icon icon="mdi-calendar-remove-outline" size="32" class="mb-2 d-block mx-auto" />
+                                No appointments today
+                            </td>
                         </tr>
+
                         <tr v-else v-for="item in recentAppointments" :key="item.id">
                             <td class="py-3">
-                                <div class="text-body-2 font-weight-medium">{{ item.patient?.full_name ?? '-' }}</div>
-                                <div class="text-caption text-medium-emphasis">{{ item.patient?.medical_record_number ??
-                                    '-' }}</div>
-                            </td>
-                            <td class="py-3">
-                                <div class="text-body-2">{{ item.appointment_time?.slice(0, 5) ?? '-' }}</div>
-                                <div class="text-caption text-medium-emphasis">{{ typeLabels[item.type] ?? item.type }}
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar size="34" color="primary" variant="tonal">
+                                        <span class="text-caption font-weight-bold">
+                                            {{ item.patient?.full_name?.charAt(0) ?? "-" }}
+                                        </span>
+                                    </v-avatar>
+
+                                    <div>
+                                        <div class="text-body-2 font-weight-medium">
+                                            {{ item.patient?.full_name ?? "-" }}
+                                        </div>
+
+                                        <div class="text-caption text-medium-emphasis">
+                                            {{ item.patient?.medical_record_number ?? "-" }}
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
+
                             <td class="py-3">
-                                <div class="text-body-2">{{ item.doctor?.profile?.full_name ?? '-' }}</div>
+                                <div class="text-body-2">
+                                    {{ item.appointment_time?.slice(0, 5) ?? "-" }}
+                                </div>
+
                                 <div class="text-caption text-medium-emphasis">
-                                    {{ item.department?.name ?? item.doctor?.department?.name ?? '-' }}
+                                    {{ typeLabels[item.type] ?? item.type }}
                                 </div>
                             </td>
+
+                            <td class="py-3">
+                                <div class="text-body-2">
+                                    {{ item.doctor?.profile?.full_name ?? "-" }}
+                                </div>
+
+                                <div class="text-caption text-medium-emphasis">
+                                    {{ item.department?.name ?? item.doctor?.department?.name ?? "-" }}
+                                </div>
+                            </td>
+
                             <td class="py-3">
                                 <v-chip size="small" variant="tonal" :color="statusColors[item.status] ?? 'default'">
                                     {{ item.status.replace('_', ' ') }}
@@ -202,41 +250,95 @@ const typeLabels: Record<string, string> = {
                         </tr>
                     </tbody>
                 </v-table>
-            </v-card>
+
+                <div class="d-flex align-center justify-space-between px-4 py-2">
+                    <span class="text-caption text-medium-emphasis">
+                        Showing {{ recentAppointments.length }}
+                        of {{ todayAppointments.length }} appointments
+                    </span>
+                </div>
+            </UiTitleCard>
         </v-col>
 
         <v-col cols="12" lg="5">
-            <v-card elevation="0" border class="h-100">
+            <UiTitleCard class-name="px-0 pb-0 rounded-md">
                 <v-card-item class="pb-2">
-                    <v-card-title class="text-h5">Active Queue</v-card-title>
-                    <v-card-subtitle>Queue numbers currently waiting or in progress</v-card-subtitle>
+                    <v-card-title class="text-h5">
+                        Active Queue
+                    </v-card-title>
+
+                    <v-card-subtitle>
+                        Queue numbers currently waiting or in progress
+                    </v-card-subtitle>
                 </v-card-item>
+
                 <v-divider />
-                <v-card-text class="d-flex flex-column ga-3">
-                    <div v-if="recentQueue.length === 0" class="text-center py-4 text-medium-emphasis">
-                        No active queue
-                    </div>
-                    <div v-else v-for="item in recentQueue" :key="item.id"
-                        class="d-flex align-center justify-space-between ga-3">
-                        <div class="d-flex align-center ga-3">
-                            <v-avatar color="primary" variant="tonal" rounded="md">
-                                <span class="text-caption font-weight-bold">{{ item.queue_number ?? '-' }}</span>
-                            </v-avatar>
-                            <div>
-                                <div class="text-body-2 font-weight-medium">{{ item.patient?.full_name ?? '-' }}</div>
-                                <div class="text-caption text-medium-emphasis">
-                                    {{ item.department?.name ?? item.doctor?.department?.name ?? '-' }}
-                                    <template v-if="item.appointment_time"> · {{ item.appointment_time.slice(0, 5)
-                                    }}</template>
+
+                <v-table class="bordered-table" density="comfortable">
+                    <thead class="bg-containerBg">
+                        <tr>
+                            <th>Queue</th>
+                            <th>Patient</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-if="recentQueue.length === 0">
+                            <td colspan="4" class="text-center py-8 text-medium-emphasis">
+                                <v-icon icon="mdi-format-list-numbered" size="32" class="mb-2 d-block mx-auto" />
+                                No active queue
+                            </td>
+                        </tr>
+
+                        <tr v-else v-for="item in recentQueue" :key="item.id">
+                            <td class="py-3">
+                                <v-chip color="primary" variant="tonal" size="small">
+                                    {{ item.queue_number ?? '-' }}
+                                </v-chip>
+                            </td>
+
+                            <td class="py-3">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar size="34" color="primary" variant="tonal">
+                                        <span class="text-caption font-weight-bold">
+                                            {{ item.patient?.full_name?.charAt(0) ?? '-' }}
+                                        </span>
+                                    </v-avatar>
+
+                                    <div>
+                                        <div class="text-body-2 font-weight-medium">
+                                            {{ item.patient?.full_name ?? '-' }}
+                                        </div>
+
+                                        <div class="text-caption text-medium-emphasis">
+                                            {{ item.department?.name ?? item.doctor?.department?.name ?? '-' }}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <v-chip size="small" variant="tonal" :color="statusColors[item.status] ?? 'default'">
-                            {{ item.status.replace('_', ' ') }}
-                        </v-chip>
-                    </div>
-                </v-card-text>
-            </v-card>
+                            </td>
+
+                            <td class="py-3">
+                                {{ item.appointment_time?.slice(0, 5) ?? '-' }}
+                            </td>
+
+                            <td class="py-3">
+                                <v-chip size="small" variant="tonal" :color="statusColors[item.status] ?? 'default'">
+                                    {{ item.status.replace('_', ' ') }}
+                                </v-chip>
+                            </td>
+                        </tr>
+                    </tbody>
+                </v-table>
+
+                <div class="d-flex align-center justify-space-between px-4 py-2">
+                    <span class="text-caption text-medium-emphasis">
+                        Showing {{ recentQueue.length }}
+                        of {{ summary.activeQueue }} queue
+                    </span>
+                </div>
+            </UiTitleCard>
         </v-col>
     </v-row>
 </template>
