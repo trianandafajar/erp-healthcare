@@ -242,7 +242,7 @@ async function onSubmit() {
 }
 
 const isSubmitDisabled = computed(() =>
-    (props.mode === 'add' && !form.value.id) || submitting.value
+    (props.mode === 'add' && (!form.value.id || !form.value.department_id)) || submitting.value
 )
 </script>
 
@@ -347,7 +347,7 @@ const isSubmitDisabled = computed(() =>
                         <v-label class="text-caption font-weight-medium mb-1">Department / Poli</v-label>
                         <v-select v-model="form.department_id" :items="departments ?? []" item-title="name"
                             item-value="id" placeholder="Select department" variant="outlined" density="compact"
-                            hide-details clearable />
+                            hide-details :rules="[v => !!v || 'Department is required']" />
                     </v-col>
 
                     <v-col cols="12" sm="6" class="mt-3">

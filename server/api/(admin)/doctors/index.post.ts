@@ -31,7 +31,7 @@ export default defineEventHandler(async (event: any) => {
 
   const { data, error } = await admin
     .from('doctors')
-    .insert({
+    .upsert({
       id,
       department_id,
       specialization,
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event: any) => {
       consultation_fee,
       is_available: is_available ?? true,
       tenant_id: tenantId
-    })
+    }, { onConflict: 'id' })
     .select()
     .single()
 

@@ -26,14 +26,14 @@ export default defineEventHandler(async (event: any) => {
 
     const { data, error } = await admin
         .from('nurses')
-        .insert({
+        .upsert({
             id,
             department_id,
             phone,
             experience_years,
             is_available: is_available ?? true,
             tenant_id: tenantId
-        })
+        }, { onConflict: 'id' })
         .select()
         .single()
 

@@ -260,7 +260,7 @@ async function onSubmit() {
 }
 
 const isSubmitDisabled = computed(() =>
-    (props.mode === 'add' && !form.value.id) ||
+    (props.mode === 'add' && (!form.value.id || !form.value.department_id)) ||
     !!props.loading
 )
 </script>
@@ -375,7 +375,7 @@ const isSubmitDisabled = computed(() =>
 
                             <v-autocomplete v-model="form.department_id" :items="departments ?? []" item-title="name"
                                 item-value="id" placeholder="Search department..." variant="outlined" density="compact"
-                                hide-details clearable class="flex-grow-1">
+                                hide-details :rules="[v => !!v || 'Department is required']" class="flex-grow-1">
                                 <template #item="{ props: itemProps, item }">
                                     <v-list-item v-bind="itemProps"
                                         :subtitle="item.raw.code ? `Code: ${item.raw.code}` : undefined" />
