@@ -358,8 +358,10 @@ const isSubmitDisabled = computed(() =>
 
                     <v-col cols="12" sm="12" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Experience (years)</v-label>
-                        <v-text-field v-model.number="form.experience_years" type="number" min="0" variant="outlined"
-                            density="compact" hide-details />
+                         <v-text-field v-model.number="form.experience_years" type="number" min="0" variant="outlined"
+                            density="compact" hide-details :rules="[v => v >= 0]"
+                            @update:model-value="val => { if (Number(val) < 0) form.experience_years = 0 }"
+                            @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">

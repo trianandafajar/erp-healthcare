@@ -10,22 +10,48 @@ const dummyTenantGrowth = {
   total: 30,
 }
 
-const subscriptions = ref<{ plan: string }[]>([])
+interface Subscription {
+  id: string
+  plan: string
+  status: string
+  billing_cycle: string
+  amount: number
+  currency: string
+  start_date: string
+  next_billing: string | null
+  trial_ends: string | null
+  payment_method: string | null
+  tenant: {
+    name: string
+    slug: string
+    owner_id: string | null
+  }
+}
+
+let subscriptions = ref<Subscription[]>([])
 
 async function fetchSubscriptions() {
   try {
-    const data = await $fetch<{ plan: string }[]>('/api/superadmin/subscriptions')
-    subscriptions.value = data ?? []
-  } catch {
+    const data = await $fetch<{
+      subscriptions: Subscription[]
+      total: number
+      page: number
+      limit: number
+      totalPages: number
+    }>('/api/superadmin/subscriptions')
+    subscriptions.value = data.subscriptions ?? []
+    console.log('Fetched subscriptions:', data)
+  } catch (error) {
+    console.error('Failed to fetch subscriptions:', error)
     subscriptions.value = []
   }
 }
 
 const subscriptionDistribution = computed(() => {
-  const counts: Record<string, number> = { Free: 0, Basic: 0, Pro: 0, Enterprise: 0 }
+  const counts: Record<string, number> = {}
   for (const s of subscriptions.value) {
     const plan = s.plan
-    counts[plan] = (counts[plan] ?? 0) + 1
+    counts[plan] = (counts[plan] || 0) + 1
   }
   return counts
 })
