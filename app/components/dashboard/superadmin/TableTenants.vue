@@ -95,6 +95,10 @@ function onSearch() {
 function openDetail(tenant: Tenant) {
   navigateTo(`/super-admin/tenants/${tenant.id}`)
 }
+
+const snackbar = ref(false)
+const snackbarMsg = ref('')
+const snackbarColor = ref('success')
 </script>
 
 <template>
@@ -176,8 +180,16 @@ function openDetail(tenant: Tenant) {
           <td class="py-3 text-body-2">{{ (tenant.total_users ?? 0).toLocaleString() }}</td>
           <td class="py-3 text-body-2 text-medium-emphasis">{{ formatDate(tenant.created_at) }}</td>
           <td class="py-3 text-right" @click.stop>
-            <v-btn icon="mdi-eye" variant="text" size="small" color="primary" density="comfortable"
-              @click="openDetail(tenant)" />
+            <div class="d-flex align-center justify-end ga-1">
+              <v-tooltip v-if="tenant.subscription_plan && tenant.subscription_plan !== 'free'" location="top">
+                <template #activator="{ props }">
+                  <v-icon v-bind="props" icon="mdi-crown" color="amber" size="20" />
+                </template>
+                <span>Subscribed</span>
+              </v-tooltip>
+              <v-btn icon="mdi-eye" variant="text" size="small" color="primary" density="comfortable"
+                @click="openDetail(tenant)" />
+            </div>
           </td>
         </tr>
       </tbody>
