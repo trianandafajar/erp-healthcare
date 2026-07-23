@@ -38,7 +38,7 @@ const sectionComponents: Record<string, any> = {
   roles: defineAsyncComponent(() => import('~/components/dashboard/roles/TableRole.vue')),
   permissions: defineAsyncComponent(() => import('~/components/dashboard/permissions/TablePermissions.vue')),
   'log-activity': defineAsyncComponent(() => import('~/components/dashboard/LogActivity/TableLog.vue')),
-  settings: defineAsyncComponent(() => import('~/components/pages/admin/SettingsPage.vue')),
+  settings: defineAsyncComponent(() => import('~/components/pages/superadmin/SuperAdminTenantSettingsPage.vue')),
 }
 
 const currentComponent = computed(() => {

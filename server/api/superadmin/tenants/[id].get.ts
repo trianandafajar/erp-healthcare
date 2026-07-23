@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
     // Subscription details
     const { data: subscription } = await admin
         .from('tenant_subscriptions')
-        .select('plan, status, billing_cycle, amount, currency, next_billing, trial_ends, start_date, stripe_customer_id, stripe_subscription_id, stripe_price_id')
+        .select('id, plan, status, billing_cycle, amount, currency, next_billing, trial_ends, start_date, payment_method, stripe_customer_id, stripe_subscription_id, stripe_price_id')
         .eq('tenant_id', tenantId)
         .maybeSingle()
 

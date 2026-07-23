@@ -4,6 +4,8 @@ import { ref, computed, watch, watchEffect } from 'vue'
 const route = useRoute()
 const tenantId = route.params.id as string
 
+import SubscriptionModal from '~/components/dashboard/superadmin/SubscriptionModal.vue'
+
 const activeTab = ref('overview')
 
 const { data, pending, error } = await useFetch(`/api/superadmin/tenants/${tenantId}`)
@@ -26,7 +28,7 @@ function getInitials(name: string) {
     return (name ?? '-').split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
 }
 
-const planColors: Record<string, string> = { free: 'grey', basic: 'primary', pro: 'warning', enterprise: 'error' }
+const planColors: Record<string, string> = { free: 'grey', starter: 'primary', basic: 'warning', pro: 'warning', professional: 'info', enterprise: 'error' }
 function getPlanColor(plan?: string) { return planColors[plan?.toLowerCase() ?? ''] ?? 'secondary' }
 
 const roleColors: Record<string, string> = {
@@ -188,6 +190,73 @@ watchEffect(() => {
         document.cookie = `preview_tenant_slug=${tenantSlug.value}; path=/; max-age=3600; SameSite=Lax`
     }
 })
+
+const subscription = computed(() => (tenant.value as any)?.subscription ?? null)
+const subscriptionDialog = ref(false)
+const subscriptionLoading = ref(false)
+
+const subscriptionForModal = computed(() => {
+    const sub = subscription.value
+    if (!sub) return null
+    return {
+        id: sub.id,
+        tenant_id: tenantId,
+        tenant_name: (tenant.value as any)?.name ?? '',
+        tenant_slug: (tenant.value as any)?.slug ?? '',
+        plan: sub.plan,
+        status: sub.status,
+        billing_cycle: sub.billing_cycle ?? 'monthly',
+        amount: sub.amount,
+        start_date: sub.start_date,
+        next_billing: sub.next_billing ?? '',
+        trial_ends: sub.trial_ends ?? null,
+        payment_method: sub.payment_method ?? '',
+    }
+})
+
+async function handleSubscriptionSubmit(payload: any) {
+    subscriptionLoading.value = true
+    try {
+        await $fetch(`/api/superadmin/subscriptions/${subscription.value?.id}`, {
+            method: 'PUT',
+            body: {
+                plan: payload.plan,
+                status: payload.status,
+                billing_cycle: payload.billing_cycle,
+                amount: payload.amount,
+                start_date: payload.start_date,
+                payment_method: payload.payment_method || null,
+            },
+        })
+        await refreshNuxtData()
+        subscriptionDialog.value = false
+        notify('Subscription updated successfully')
+    } catch (e: any) {
+        notify(e?.message ?? 'Failed to update subscription', 'error')
+    } finally {
+        subscriptionLoading.value = false
+    }
+}
+
+function isExpired(sub: any) {
+    if (!sub) return false
+    if (sub.status === 'cancelled' || sub.status === 'past_due') return true
+    if (sub.next_billing && new Date(sub.next_billing) < new Date()) return true
+    return false
+}
+
+function isTrialing(sub: any) {
+    return sub?.status === 'trial'
+}
+
+const statusColor: Record<string, string> = {
+    active: 'success',
+    trial: 'info',
+    cancelled: 'error',
+    past_due: 'warning',
+    expired: 'error',
+    suspended: 'warning',
+}
 </script>
 
 <template>
@@ -243,6 +312,7 @@ watchEffect(() => {
         <v-card elevation="0" class="rounded-md">
             <v-tabs v-model="activeTab" color="primary" class="px-2">
                 <v-tab value="overview" prepend-icon="mdi-view-dashboard-outline">Overview</v-tab>
+                <v-tab value="billing" prepend-icon="mdi-credit-card-outline">Billing</v-tab>
                 <v-tab value="branding" prepend-icon="mdi-palette-outline">Branding</v-tab>
                 <v-tab value="users" prepend-icon="mdi-account-group-outline">
                     Users
@@ -396,6 +466,155 @@ watchEffect(() => {
                             </v-card>
                         </v-col>
                     </v-row>
+                </v-window-item>
+
+                <v-window-item value="billing" class="pa-4">
+                    <template v-if="!subscription">
+                        <div class="text-center py-12 text-medium-emphasis">
+                            <v-icon icon="mdi-credit-card-outline" size="40" class="mb-2" />
+                            <div class="text-body-1">No subscription data available</div>
+                            <div class="text-caption mt-1">This tenant does not have an active subscription.</div>
+                        </div>
+                    </template>
+
+                    <template v-else>
+                        <h3 class="text-h6 font-weight-bold mb-1">Subscription Plan</h3>
+                        <p class="text-body-2 text-medium-emphasis mb-5">Manage the tenant's subscription and billing information.</p>
+
+                        <v-row>
+                            <v-col cols="12" md="8">
+                                <v-table density="comfortable" class="rounded-lg border">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Plan</td>
+                                            <td>
+                                                <v-chip :color="getPlanColor(subscription.plan)" variant="tonal" size="small" class="text-capitalize">
+                                                    {{ subscription.plan }}
+                                                </v-chip>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Status</td>
+                                            <td>
+                                                <v-chip :color="statusColor[subscription.status] || 'grey'" variant="tonal" size="x-small" class="text-capitalize">
+                                                    {{ subscription.status }}
+                                                </v-chip>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Amount</td>
+                                            <td class="text-body-2 font-weight-medium">
+                                                {{ formatCurrency(subscription.amount) }}
+                                                <span class="text-caption text-medium-emphasis">/ {{ subscription.billing_cycle }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Billing Cycle</td>
+                                            <td class="text-body-2 text-capitalize">{{ subscription.billing_cycle }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Currency</td>
+                                            <td class="text-body-2">{{ subscription.currency?.toUpperCase() ?? '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Start Date</td>
+                                            <td class="text-body-2">{{ formatDate(subscription.start_date) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Trial Ends</td>
+                                            <td class="text-body-2">{{ formatDate(subscription.trial_ends) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Next Billing</td>
+                                            <td class="text-body-2">
+                                                <span :class="isExpired(subscription) ? 'text-error font-weight-bold' : ''">
+                                                    {{ formatDate(subscription.next_billing) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Payment Method</td>
+                                            <td class="text-body-2">{{ subscription.payment_method || '-' }}</td>
+                                        </tr>
+                                        <tr v-if="subscription.stripe_customer_id">
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Stripe Customer</td>
+                                            <td>
+                                                <code class="text-caption">{{ subscription.stripe_customer_id }}</code>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="subscription.stripe_subscription_id">
+                                            <td class="text-caption text-medium-emphasis font-weight-medium">Stripe Subscription</td>
+                                            <td>
+                                                <code class="text-caption">{{ subscription.stripe_subscription_id }}</code>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </v-table>
+
+                                <div class="d-flex flex-wrap ga-3 mt-5">
+                                    <v-btn variant="flat" color="primary" @click="subscriptionDialog = true">
+                                        <v-icon start icon="mdi-pencil-outline" size="18" />
+                                        Edit Subscription
+                                    </v-btn>
+                                </div>
+                            </v-col>
+
+                            <v-col cols="12" md="4">
+                                <v-card variant="outlined" class="rounded-lg">
+                                    <v-card-item class="pb-2">
+                                        <v-card-title class="text-subtitle-2 font-weight-bold d-flex align-center ga-2">
+                                            <v-icon icon="mdi-information-outline" size="18" color="primary" />
+                                            Summary
+                                        </v-card-title>
+                                    </v-card-item>
+                                    <v-divider />
+                                    <v-card-text class="py-4">
+                                        <div class="d-flex align-center justify-space-between mb-3">
+                                            <span class="text-caption text-medium-emphasis">Plan</span>
+                                            <v-chip :color="getPlanColor(subscription.plan)" variant="tonal" size="x-small" class="text-capitalize">
+                                                {{ subscription.plan }}
+                                            </v-chip>
+                                        </div>
+                                        <div class="d-flex align-center justify-space-between mb-3">
+                                            <span class="text-caption text-medium-emphasis">Status</span>
+                                            <v-chip :color="statusColor[subscription.status] || 'grey'" variant="tonal" size="x-small" class="text-capitalize">
+                                                {{ subscription.status }}
+                                            </v-chip>
+                                        </div>
+                                        <v-divider class="mb-3" />
+                                        <div class="d-flex align-center justify-space-between mb-2">
+                                            <span class="text-caption text-medium-emphasis">Cost</span>
+                                            <span class="text-body-2 font-weight-bold" :class="isTrialing(subscription) ? 'text-success' : ''">
+                                                {{ isTrialing(subscription) ? 'Free Trial' : formatCurrency(subscription.amount) }}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-center justify-space-between">
+                                            <span class="text-caption text-medium-emphasis">Billing Cycle</span>
+                                            <span class="text-body-2 font-weight-medium text-capitalize">{{ subscription.billing_cycle }}</span>
+                                        </div>
+                                    </v-card-text>
+                                </v-card>
+
+                                <v-alert v-if="isExpired(subscription)" type="warning" variant="tonal" class="mt-3">
+                                    <template #title>
+                                        <span class="text-body-2 font-weight-bold">Subscription Expired</span>
+                                    </template>
+                                    <template #text>
+                                        <span class="text-caption">This tenant's subscription has ended.</span>
+                                    </template>
+                                </v-alert>
+
+                                <v-alert v-else-if="isTrialing(subscription)" type="info" variant="tonal" class="mt-3">
+                                    <template #title>
+                                        <span class="text-body-2 font-weight-bold">Trial Period</span>
+                                    </template>
+                                    <template #text>
+                                        <span class="text-caption">Trial ends on {{ formatDate(subscription.trial_ends) }}.</span>
+                                    </template>
+                                </v-alert>
+                            </v-col>
+                        </v-row>
+                    </template>
                 </v-window-item>
 
                 <v-window-item value="branding" class="pa-4">
@@ -583,6 +802,11 @@ watchEffect(() => {
             </v-window>
         </v-card>
     </template>
+
+    <v-dialog v-model="subscriptionDialog" max-width="540" persistent>
+        <SubscriptionModal mode="edit" :subscription="subscriptionForModal" :loading="subscriptionLoading"
+            @submit="handleSubscriptionSubmit" @cancel="subscriptionDialog = false" />
+    </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
         {{ snackbarMsg }}
