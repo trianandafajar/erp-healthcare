@@ -8,9 +8,7 @@
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div class="text-center lg:!text-left">
           <div
-            class="inline-flex items-center gap-2 px-4 py-2 bg-[#176D37]/5 border border-[#176D37]/10 rounded-full text-xs font-semibold text-[#176D37] mb-6">
-            <span class="w-2 h-2 rounded-full bg-[#176D37] animate-pulse" />
-            Healthcare ERP Platform
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-[#176D37] mb-6">
           </div>
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight">
             All-in-One Healthcare<br class="hidden sm:block" />
