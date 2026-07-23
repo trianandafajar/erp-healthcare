@@ -27,8 +27,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     const authStore = useAuthStore()
     const role = authState.role ?? null
+    const isImpersonating = import.meta.client && !!localStorage.getItem('admin_session')
 
-    if (role !== 'superadmin') {
+    if (role !== 'superadmin' && !isImpersonating) {
         const onboardingPath = getOnboardingPath(
           authStore.tenantId,
           authState.subscriptionPlan ?? authStore.subscriptionPlan,

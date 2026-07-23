@@ -7,8 +7,9 @@ export default defineNuxtPlugin(async () => {
 
     if (authState?.user && GUEST_ROUTES.includes(useRoute().path)) {
         const authStore = useAuthStore()
+        const isImpersonating = !!localStorage.getItem('admin_session')
 
-        if (authState.role !== 'superadmin') {
+        if (authState.role !== 'superadmin' && !isImpersonating) {
             const onboardingPath = getOnboardingPath(
                 authState.tenantId ?? authStore.tenantId,
                 authState.subscriptionPlan ?? authStore.subscriptionPlan,
