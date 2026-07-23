@@ -14,6 +14,8 @@ interface Patient {
     room?: string | null
     email?: string | null
     has_account?: boolean
+    length_of_stay?: string | null
+    description?: string | null
 }
 
 const props = defineProps<{
@@ -75,8 +77,8 @@ watch(
                 blood_type: patient.blood_type ?? null,
                 room: patient.room ?? '',
                 email: patient.email ?? '',
-                description: '',
-                length_of_stay: null,
+                description: patient.description ?? '',
+                length_of_stay: patient.length_of_stay ?? null,
             }
         } else if (props.mode === 'add') {
             form.value = {
@@ -243,7 +245,7 @@ function onSubmit() {
                         </v-label>
 
                         <v-text-field v-model="form.email" placeholder="e.g. patient@email.com" type="email"
-                            variant="outlined" density="compact" hide-details :disabled="mode === 'edit'" />
+                            variant="outlined" density="compact" hide-details :disabled="mode === 'edit' && patient?.has_account" />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">
@@ -255,36 +257,34 @@ function onSubmit() {
                             density="compact" rows="2" hide-details />
                     </v-col>
 
-                    <template v-if="mode === 'add'">
-                        <v-col cols="12" sm="6" class="mt-3">
-                            <v-label class="text-caption font-weight-medium mb-1">
-                                Length of Stay
-                            </v-label>
+                    <v-col cols="12" sm="6" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">
+                            Length of Stay
+                        </v-label>
 
-                            <v-select v-model="form.length_of_stay" :items="stayOptions"
-                                placeholder="Select length of stay" variant="outlined" density="compact" hide-details
-                                clearable />
-                        </v-col>
+                        <v-select v-model="form.length_of_stay" :items="stayOptions"
+                            placeholder="Select length of stay" variant="outlined" density="compact" hide-details
+                            clearable />
+                    </v-col>
 
-                        <v-col cols="12" sm="6" class="mt-3">
-                            <v-label class="text-caption font-weight-medium mb-1">
-                                Room
-                            </v-label>
+                    <v-col cols="12" sm="6" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">
+                            Room
+                        </v-label>
 
-                            <v-text-field v-model="form.room" placeholder="e.g. 12A" variant="outlined"
-                                density="compact" hide-details />
-                        </v-col>
+                        <v-text-field v-model="form.room" placeholder="e.g. 12A" variant="outlined"
+                            density="compact" hide-details />
+                    </v-col>
 
-                        <v-col cols="12" class="mt-3">
-                            <v-label class="text-caption font-weight-medium mb-1">
-                                Description
-                            </v-label>
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">
+                            Description
+                        </v-label>
 
-                            <v-textarea v-model="form.description"
-                                placeholder="Describe the patient's condition / disease" variant="outlined"
-                                density="compact" rows="3" hide-details />
-                        </v-col>
-                    </template>
+                        <v-textarea v-model="form.description"
+                            placeholder="Describe the patient's condition / disease" variant="outlined"
+                            density="compact" rows="3" hide-details />
+                    </v-col>
 
                     <v-col v-if="mode === 'edit'" cols="12" class="mt-3">
                         <v-alert v-if="patient?.has_account" type="success" variant="tonal" density="compact"

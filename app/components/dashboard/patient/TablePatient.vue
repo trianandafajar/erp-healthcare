@@ -202,6 +202,10 @@ async function handleSubmit(payload: any) {
                     phone: payload.phone,
                     address: payload.address,
                     blood_type: payload.blood_type,
+                    room: payload.room,
+                    email: payload.email,
+                    description: payload.description,
+                    length_of_stay: payload.length_of_stay,
                 }
             })
             notify('Patient updated successfully')
