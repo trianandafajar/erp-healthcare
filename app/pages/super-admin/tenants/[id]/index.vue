@@ -33,12 +33,20 @@ const sectionComponents: Record<string, any> = {
   departments: defineAsyncComponent(() => import('~/components/dashboard/departments/TableDepartments.vue')),
   doctors: defineAsyncComponent(() => import('~/components/dashboard/doctors/TableDoctors.vue')),
   nurses: defineAsyncComponent(() => import('~/components/dashboard/nurses/TableNurse.vue')),
+  pharmacies: defineAsyncComponent(() => import('~/components/dashboard/pharmacies/TablePharmacy.vue')),
+  receptionists: defineAsyncComponent(() => import('~/components/dashboard/receptionists/TableReceptionist.vue')),
   patients: defineAsyncComponent(() => import('~/components/dashboard/patient/TablePatient.vue')),
   'users-management': defineAsyncComponent(() => import('~/components/dashboard/users/TableUser.vue')),
   roles: defineAsyncComponent(() => import('~/components/dashboard/roles/TableRole.vue')),
   permissions: defineAsyncComponent(() => import('~/components/dashboard/permissions/TablePermissions.vue')),
   'log-activity': defineAsyncComponent(() => import('~/components/dashboard/LogActivity/TableLog.vue')),
   settings: defineAsyncComponent(() => import('~/components/pages/superadmin/SuperAdminTenantSettingsPage.vue')),
+  'doctor-detail': defineAsyncComponent(() => import('~/components/pages/superadmin/DoctorDetailPage.vue')),
+  'nurse-detail': defineAsyncComponent(() => import('~/components/pages/superadmin/NurseDetailPage.vue')),
+  'department-detail': defineAsyncComponent(() => import('~/components/pages/superadmin/DepartmentDetailPage.vue')),
+  'doctor-edit': defineAsyncComponent(() => import('~/components/pages/superadmin/DoctorEditSection.vue')),
+  'nurse-edit': defineAsyncComponent(() => import('~/components/pages/superadmin/NurseEditSection.vue')),
+  'department-edit': defineAsyncComponent(() => import('~/components/pages/superadmin/DepartmentEditSection.vue')),
 }
 
 const currentComponent = computed(() => {
@@ -51,6 +59,6 @@ const currentComponent = computed(() => {
     @navigate="navigateToSection" />
 
   <KeepAlive>
-    <component v-if="currentComponent" :is="currentComponent" :key="section" />
+    <component v-if="currentComponent" :is="currentComponent" :key="section" :tenant-slug="tenant?.slug" />
   </KeepAlive>
 </template>

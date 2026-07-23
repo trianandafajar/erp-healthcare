@@ -212,7 +212,11 @@ async function handleSubmit(payload: any) {
     }
 }
 function openView(nurses: Nurse) {
-    navigateTo(`/${slug.value}/nurses/${nurses.id}`)
+    if (route.params.slug) {
+        navigateTo(`/${route.params.slug}/nurses/${nurses.id}`)
+    } else {
+        navigateTo({ query: { section: 'nurse-detail', entityId: nurses.id } })
+    }
 }
 </script>
 

@@ -129,7 +129,11 @@ async function handleSubmit(payload: any) {
     }
 }
 function openView(department: Department) {
-    navigateTo(`/${slug.value}/departments/${department.id}`)
+    if (route.params.slug) {
+        navigateTo(`/${route.params.slug}/departments/${department.id}`)
+    } else {
+        navigateTo({ query: { section: 'department-detail', entityId: department.id } })
+    }
 }
 </script>
 

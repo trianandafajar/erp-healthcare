@@ -254,7 +254,11 @@ async function handleSubmit(payload: any) {
     }
 }
 function openView(doctor: Doctor) {
-    navigateTo(`/${slug.value}/doctors/${doctor.id}`)
+    if (route.params.slug) {
+        navigateTo(`/${route.params.slug}/doctors/${doctor.id}`)
+    } else {
+        navigateTo({ query: { section: 'doctor-detail', entityId: doctor.id } })
+    }
 }
 </script>
 
