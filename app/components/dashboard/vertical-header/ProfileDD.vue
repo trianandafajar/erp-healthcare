@@ -64,11 +64,6 @@ async function confirmLogout() {
         <h6 class="text-body-2 mb-0">{{ profile?.full_name ?? '-' }}</h6>
         <p class="text-caption mb-0">{{(roles ?? []).map(r => r.label).join(', ')}}</p>
       </div>
-      <div class="ml-auto">
-        <v-btn variant="text" color="primary" rounded="sm" icon size="large" @click="dialog = true">
-          <LogoutOutlined :style="{ fontSize: '20px' }" />
-        </v-btn>
-      </div>
     </div>
 
     <v-divider />
