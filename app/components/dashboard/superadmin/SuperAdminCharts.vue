@@ -40,9 +40,7 @@ async function fetchSubscriptions() {
       totalPages: number
     }>('/api/superadmin/subscriptions')
     subscriptions.value = data.subscriptions ?? []
-    console.log('Fetched subscriptions:', data)
   } catch (error) {
-    console.error('Failed to fetch subscriptions:', error)
     subscriptions.value = []
   }
 }

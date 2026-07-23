@@ -61,6 +61,25 @@ async function openLoginAs(user: any) {
     }
 }
 
+let searchTimeout: NodeJS.Timeout | null = null
+
+watch(search, () => {
+    if (searchTimeout) clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(() => {
+        currentPage.value = 1
+        refresh()
+    }, 300)
+})
+
+watch(selectedRole, () => {
+    currentPage.value = 1
+    refresh()
+})
+
+watch(currentPage, () => {
+    refresh()
+})
+
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
@@ -74,7 +93,7 @@ const { data, pending, refresh } = await useFetch<{
     totalPages: number
 }>('/api/users', { query: queryParams })
 
-const users = computed(() =>
+const allUsers = computed(() =>
     (data.value?.profiles ?? []).map((u) => ({
         id: u.id,
         name: u.full_name ?? '-',
@@ -85,10 +104,26 @@ const users = computed(() =>
     }))
 )
 
+const users = computed(() => {
+    let result = allUsers.value
+
+    if (selectedRole.value !== 'all') {
+        result = result.filter(u => u.role === selectedRole.value)
+    }
+
+    if (search.value) {
+        const q = search.value.toLowerCase()
+        result = result.filter(u =>
+            u.name.toLowerCase().includes(q) ||
+            u.email.toLowerCase().includes(q)
+        )
+    }
+
+    return result
+})
+
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalUsers = computed(() => data.value?.total ?? 0)
-
-watch([search, selectedRole, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name
@@ -107,15 +142,6 @@ function formatDate(dateStr: string) {
     });
 }
 
-function onRoleChange() {
-    currentPage.value = 1;
-}
-
-function onSearch() {
-    currentPage.value = 1;
-}
-
-// modal
 const dialog = ref(false)
 const modalMode = ref<'add' | 'edit' | 'delete'>('add')
 const selectedUser = ref<any>(null)
@@ -182,10 +208,9 @@ async function handleSubmit(payload: any) {
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
         <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
             <v-text-field v-model="search" placeholder="Search by name or email..." prepend-inner-icon="mdi-magnify"
-                variant="outlined" density="compact" hide-details clearable style="max-width: 280px"
-                @update:model-value="onSearch" />
+                variant="outlined" density="compact" hide-details clearable style="max-width: 280px" />
             <v-select v-model="selectedRole" :items="roles" item-title="label" item-value="value" variant="outlined"
-                density="compact" hide-details style="max-width: 200px" @update:model-value="onRoleChange" />
+                density="compact" hide-details style="max-width: 200px" />
         </div>
 
         <v-divider />
