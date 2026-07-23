@@ -56,6 +56,7 @@ export default defineEventHandler(async (event) => {
 
     await admin.rpc('log_activity', {
         p_actor_id: user.id,
+        p_tenant_id: body.tenant_id,
         p_action: 'create',
         p_module: 'subscriptions',
         p_entity_id: data.id,

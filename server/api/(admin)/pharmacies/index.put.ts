@@ -5,7 +5,7 @@ export default defineEventHandler(async (event: any) => {
 
     if (!id) throw createError({ statusCode: 400, message: 'ID is required' })
 
-    const { admin, user } = await getTenantContext(event)
+    const { admin, tenantId, user } = await getTenantContext(event)
 
     const { data: before } = await admin
         .from('profiles')
@@ -27,6 +27,7 @@ export default defineEventHandler(async (event: any) => {
 
     await admin.rpc('log_activity', {
         p_actor_id: user?.id,
+        p_tenant_id: tenantId,
         p_action: 'update',
         p_module: 'pharmacies',
         p_entity_id: id,

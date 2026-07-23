@@ -72,6 +72,7 @@ export default defineEventHandler(async (event: any) => {
 
   await admin.rpc('log_activity', {
     p_actor_id: user.id,
+    p_tenant_id: tenantId,
     p_action: 'update',
     p_module: 'schedules',
     p_entity_id: data.id,
