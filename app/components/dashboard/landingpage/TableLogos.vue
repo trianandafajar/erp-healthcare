@@ -103,6 +103,7 @@ async function handleSubmit(payload: any) {
                     title: payload.title,
                     image_url: payload.image_url,
                     sort_order: maxSort + 1,
+                    is_active: payload.is_active ?? true,
                 },
             })
             notify('Logo created successfully')
@@ -112,6 +113,7 @@ async function handleSubmit(payload: any) {
                 body: {
                     title: payload.title,
                     image_url: payload.image_url,
+                    is_active: payload.is_active ?? true,
                 },
             })
             notify('Logo updated successfully')

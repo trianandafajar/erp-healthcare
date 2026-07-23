@@ -111,6 +111,7 @@ async function handleSubmit(payload: any) {
                     rating: payload.rating,
                     image_url: payload.image_url,
                     sort_order: maxSort + 1,
+                    is_active: payload.is_active ?? true,
                 },
             })
             notify('Testimonial created successfully')
@@ -124,6 +125,7 @@ async function handleSubmit(payload: any) {
                     quote: payload.quote,
                     rating: payload.rating,
                     image_url: payload.image_url,
+                    is_active: payload.is_active ?? true,
                 },
             })
             notify('Testimonial updated successfully')
@@ -144,7 +146,7 @@ async function handleSubmit(payload: any) {
 
 function getStars(rating: number) {
     const stars = []
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= rating; i++) {
         stars.push(i <= rating)
     }
     return stars
@@ -221,7 +223,7 @@ function getStars(rating: number) {
                             "{{ testimonial.quote }}"
                         </div>
                     </td>
-                    <td class="py-3">
+                    <td class="py-3 ">
                         <div class="d-flex align-center gap-1">
                             <svg v-for="(star, i) in getStars(testimonial.rating)" :key="i"
                                 class="w-4 h-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">

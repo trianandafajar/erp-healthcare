@@ -5,6 +5,7 @@ interface Logo {
     id: string
     title: string
     image_url: string
+    is_active?: boolean
 }
 
 const props = defineProps<{
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 const form = ref({
     title: '',
     image_url: '',
+    is_active: true,
 })
 
 const photoFile = ref<File | null>(null)
@@ -110,12 +112,13 @@ watch(
             form.value = {
                 title: logo.title,
                 image_url: logo.image_url,
+                is_active: logo.is_active ?? true,
             }
             photoPreview.value = logo.image_url || ''
             photoFile.value = null
             photoError.value = ''
         } else {
-            form.value = { title: '', image_url: '' }
+            form.value = { title: '', image_url: '', is_active: true }
             photoPreview.value = ''
             photoFile.value = null
             photoError.value = ''
@@ -160,6 +163,7 @@ async function onSubmit() {
             id: props.logo?.id,
             title: form.value.title,
             image_url: form.value.image_url,
+            is_active: form.value.is_active,
         })
     } catch (err: any) {
         photoError.value = err?.data?.message ?? err?.message ?? 'Failed to upload photo.'
@@ -247,6 +251,16 @@ async function onSubmit() {
                         </div>
                     </v-col>
 
+                    <!-- Tambahan checkbox status aktif/nonaktif -->
+                    <v-col cols="12" class="mt-2">
+                        <v-label class="text-caption font-weight-medium mb-1">Status</v-label>
+                        <v-switch
+                            v-model="form.is_active"
+                            :label="form.is_active ? 'Active' : 'Inactive'"
+                            color="success"
+                            hide-details
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
         </template>

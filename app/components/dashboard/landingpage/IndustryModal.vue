@@ -26,6 +26,7 @@ const form = ref({
     description: '',
     image_url: '',
     slug: '',
+    is_active: true,
 })
 
 const photoFile = ref<File | null>(null)
@@ -117,12 +118,19 @@ watch(
                 description: industry.description,
                 image_url: industry.image_url,
                 slug: industry.slug ?? '',
+                is_active: industry.is_active ?? true,
             }
             photoPreview.value = industry.image_url || ''
             photoFile.value = null
             photoError.value = ''
         } else {
-            form.value = { title: '', description: '', image_url: '', slug: '' }
+            form.value = {
+                title: '',
+                description: '',
+                image_url: '',
+                slug: '',
+                is_active: true,
+            }
             photoPreview.value = ''
             photoFile.value = null
             photoError.value = ''
@@ -169,6 +177,7 @@ async function onSubmit() {
             description: form.value.description,
             image_url: form.value.image_url,
             slug: form.value.slug || null,
+            is_active: form.value.is_active,
         })
     } catch (err: any) {
         photoError.value = err?.data?.message ?? err?.message ?? 'Failed to upload photo.'
@@ -271,6 +280,16 @@ async function onSubmit() {
                         </div>
                     </v-col>
 
+                    <!-- Status Active Switch -->
+                    <v-col cols="12" class="mt-3">
+                        <v-label class="text-caption font-weight-medium mb-1">Status</v-label>
+                        <v-switch
+                            v-model="form.is_active"
+                            :label="form.is_active ? 'Active' : 'Inactive'"
+                            color="success"
+                            hide-details
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
         </template>

@@ -110,7 +110,8 @@ async function handleSubmit(payload: any) {
                     description: payload.description,
                     image_url: payload.image_url,
                     sort_order: maxSort + 1,
-                    slug: payload.slug
+                    slug: payload.slug,
+                    is_active: payload.is_active ?? true,
                 }
             })
             notify('Industry created successfully')
@@ -121,7 +122,8 @@ async function handleSubmit(payload: any) {
                     title: payload.title,
                     description: payload.description,
                     image_url: payload.image_url,
-                    slug: payload.slug
+                    slug: payload.slug,
+                    is_active: payload.is_active ?? true,
                 }
             })
             notify('Industry updated successfully')
