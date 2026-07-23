@@ -96,6 +96,35 @@ function openDetail(tenant: Tenant) {
   navigateTo(`/super-admin/tenants/${tenant.id}`)
 }
 
+const deleteDialog = ref(false)
+const tenantToDelete = ref<Tenant | null>(null)
+const deleting = ref(false)
+
+function openDeleteTenant(tenant: Tenant) {
+  tenantToDelete.value = tenant
+  deleteDialog.value = true
+}
+
+async function confirmDeleteTenant() {
+  if (!tenantToDelete.value) return
+  deleting.value = true
+  try {
+    await $fetch(`/api/superadmin/tenants/${tenantToDelete.value.id}`, { method: 'DELETE' })
+    snackbarMsg.value = `Tenant "${tenantToDelete.value.name}" and all associated data deleted`
+    snackbarColor.value = 'success'
+    snackbar.value = true
+    deleteDialog.value = false
+    tenantToDelete.value = null
+    refresh()
+  } catch (e: any) {
+    snackbarMsg.value = e?.data?.message ?? e?.message ?? 'Failed to delete tenant'
+    snackbarColor.value = 'error'
+    snackbar.value = true
+  } finally {
+    deleting.value = false
+  }
+}
+
 const snackbar = ref(false)
 const snackbarMsg = ref('')
 const snackbarColor = ref('success')
@@ -189,6 +218,13 @@ const snackbarColor = ref('success')
               </v-tooltip>
               <v-btn icon="mdi-eye" variant="text" size="small" color="primary" density="comfortable"
                 @click="openDetail(tenant)" />
+              <v-tooltip location="top">
+                <template #activator="{ props }">
+                  <v-btn v-bind="props" icon="mdi-delete-outline" variant="text" size="small" color="error"
+                    density="comfortable" @click.stop="openDeleteTenant(tenant)" />
+                </template>
+                <span>Delete tenant</span>
+              </v-tooltip>
             </div>
           </td>
         </tr>
@@ -203,6 +239,48 @@ const snackbarColor = ref('success')
         density="compact" size="small" />
     </div>
   </UiTitleCard>
+
+  <v-dialog v-model="deleteDialog" max-width="480" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
+        <div class="d-flex align-center ga-2">
+          <v-icon icon="mdi-delete-outline" size="20" color="error" />
+          <span class="text-h6 font-weight-bold">Delete Tenant</span>
+        </div>
+        <v-btn icon="mdi-close" variant="text" density="compact" :disabled="deleting" @click="deleteDialog = false; tenantToDelete = null" />
+      </v-card-title>
+      <v-divider />
+      <v-card-text class="pa-5">
+        <div class="d-flex flex-column align-center text-center ga-3">
+          <v-avatar color="error" variant="tonal" size="56">
+            <v-icon icon="mdi-delete-outline" size="28" />
+          </v-avatar>
+          <div>
+            <p class="text-body-1 font-weight-medium">
+              Are you sure you want to delete this tenant?
+            </p>
+            <p class="text-body-2 text-medium-emphasis mt-1">
+              <strong>{{ tenantToDelete?.name }}</strong> and all its data (patients, doctors, appointments, billing, etc.) will be permanently removed.
+            </p>
+            <p class="text-body-2 text-error mt-2 font-weight-medium">
+              This action cannot be undone.
+            </p>
+          </div>
+        </div>
+      </v-card-text>
+      <v-divider />
+      <v-card-actions class="pa-4 pt-3">
+        <v-spacer />
+        <v-btn variant="tonal" color="secondary" :disabled="deleting" @click="deleteDialog = false; tenantToDelete = null">
+          Cancel
+        </v-btn>
+        <v-btn variant="flat" color="error" :loading="deleting" :disabled="deleting"
+          :style="deleting ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="confirmDeleteTenant">
+          Delete Tenant
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
   <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" timeout="3000">
     {{ snackbarMsg }}
