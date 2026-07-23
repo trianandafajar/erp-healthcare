@@ -44,6 +44,10 @@ export const useImpersonation = () => {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) return
 
+        const router = useRouter()
+        const currentRoute = router.currentRoute.value
+        const returnUrl = currentRoute.fullPath
+
         // Store actor's current role so exitImpersonation can redirect correctly
         const actorRole = authStore.role || 'admin'
         localStorage.setItem('admin_session', JSON.stringify({
@@ -53,6 +57,7 @@ export const useImpersonation = () => {
         localStorage.setItem('impersonated_name', user.name)
         localStorage.setItem('impersonated_role', user.role)
         localStorage.setItem('impersonated_by_role', actorRole)
+        localStorage.setItem('impersonated_return_to', returnUrl)
 
         try {
             const res = await $fetch<{ access_token: string; refresh_token: string }>(
@@ -87,13 +92,19 @@ export const useImpersonation = () => {
         await supabase.auth.setSession(adminSession)
 
         const actorRole = localStorage.getItem('impersonated_by_role') || 'admin'
+        const returnTo = localStorage.getItem('impersonated_return_to')
         localStorage.removeItem('admin_session')
         localStorage.removeItem('impersonated_name')
         localStorage.removeItem('impersonated_role')
         localStorage.removeItem('impersonated_by_role')
+        localStorage.removeItem('impersonated_return_to')
 
         await syncCurrentSessionProfile()
-        await navigateTo(actorRole === 'superadmin' ? '/super-admin/users-management' : '/users-management')
+        if (returnTo) {
+            await navigateTo(returnTo)
+        } else {
+            await navigateTo(actorRole === 'superadmin' ? '/super-admin/users-management' : '/users-management')
+        }
     }
 
     return {
