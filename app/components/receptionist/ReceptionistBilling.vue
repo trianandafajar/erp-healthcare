@@ -259,7 +259,9 @@ function openReceipt(invoiceNumber: string) {
                 <v-select v-model="form.department" :items="departments" item-title="name" item-value="name"
                     label="Department" variant="outlined" density="compact" />
                 <v-text-field v-model.number="form.amount" label="Amount" type="number" variant="outlined"
-                    density="compact" prefix="$" />
+                    density="compact" prefix="$" min="0"
+                    :rules="[v => v >= 0 || 'Amount must be non-negative']"
+                    @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                 <v-select v-model="form.paymentMethod"
                     :items="['Cash', 'Credit Card', 'Debit Card', 'Insurance', 'Transfer']" label="Payment Method"
                     variant="outlined" density="compact" />

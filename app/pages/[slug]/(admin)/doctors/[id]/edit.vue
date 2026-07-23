@@ -335,12 +335,17 @@ async function deleteSchedule(scheduleId: string) {
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model.number="form.experience_years" label="Experience (years)"
                                     type="number" variant="outlined" density="comfortable"
-                                    prepend-inner-icon="mdi-briefcase" min="0" />
+                                    prepend-inner-icon="mdi-briefcase" min="0"
+                                    :rules="[v => v >= 0 || 'Must be non-negative']"
+                                    @keydown="e => { if (e.key === '-') e.preventDefault() }"
+                                    @update:model-value="val => { if (Number(val) < 0) form.experience_years = 0 }" />
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model.number="form.consultation_fee" label="Consultation Fee (USD)"
                                     type="number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-cash"
-                                    min="0" />
+                                    min="0" :rules="[v => v >= 0 || 'Must be non-negative']"
+                                    @keydown="e => { if (e.key === '-') e.preventDefault() }"
+                                    @update:model-value="val => { if (Number(val) < 0) form.consultation_fee = 0 }" />
                             </v-col>
                             <v-col cols="12">
                                 <v-textarea v-model="form.biography" label="Biography" variant="outlined"
@@ -390,7 +395,8 @@ async function deleteSchedule(scheduleId: string) {
                                     <v-col cols="6" sm="2">
                                         <v-text-field v-model.number="newSchedule.max_patients" label="Max patients"
                                             type="number" variant="outlined" density="comfortable" hide-details
-                                            min="1" />
+                                            min="1" :rules="[v => v >= 1 || 'Must be at least 1']"
+                                            @keydown="e => { if (e.key === '-' || e.key === '.') e.preventDefault() }" />
                                     </v-col>
                                     <v-col cols="6" sm="3" class="d-flex ga-2">
                                         <v-btn color="primary" variant="tonal" :loading="savingSchedule"

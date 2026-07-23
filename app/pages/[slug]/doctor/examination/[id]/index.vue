@@ -448,20 +448,24 @@ async function uploadAttachments(
                                 density="comfortable" variant="outlined" />
                         </v-col>
                         <v-col cols="12" md="4">
-                            <v-text-field v-model="form.heart_rate" label="Heart Rate" type="number" suffix="bpm"
-                                density="comfortable" variant="outlined" />
+                            <v-text-field v-model.number="form.heart_rate" label="Heart Rate" type="number" suffix="bpm"
+                                min="0" density="comfortable" variant="outlined"
+                                @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                         </v-col>
                         <v-col cols="12" md="4">
-                            <v-text-field v-model="form.temperature" label="Temperature" type="number" suffix="°C"
-                                density="comfortable" variant="outlined" />
+                            <v-text-field v-model.number="form.temperature" label="Temperature" type="number" suffix="°C"
+                                min="0" density="comfortable" variant="outlined"
+                                @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                         </v-col>
                         <v-col cols="12" md="4">
-                            <v-text-field v-model="form.weight" label="Weight" type="number" suffix="kg"
-                                density="comfortable" variant="outlined" />
+                            <v-text-field v-model.number="form.weight" label="Weight" type="number" suffix="kg"
+                                min="0" density="comfortable" variant="outlined"
+                                @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                         </v-col>
                         <v-col cols="12" md="4">
-                            <v-text-field v-model="form.height" label="Height" type="number" suffix="cm"
-                                density="comfortable" variant="outlined" />
+                            <v-text-field v-model.number="form.height" label="Height" type="number" suffix="cm"
+                                min="0" density="comfortable" variant="outlined"
+                                @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                         </v-col>
                     </v-row>
                 </v-card-text>
@@ -562,12 +566,14 @@ async function uploadAttachments(
                                         variant="outlined" hide-details />
                                 </td>
                                 <td class="py-2" style="min-width: 120px;">
-                                    <v-text-field v-model="medicine.frequency" placeholder="e.g. 3" density="compact"
-                                        variant="outlined" hide-details suffix="×/day" />
+                                    <v-text-field v-model.number="medicine.frequency" placeholder="e.g. 3" type="number"
+                                        min="1" density="compact" variant="outlined" hide-details suffix="×/day"
+                                        @keydown="e => { if (e.key === '-' || e.key === '.') e.preventDefault() }" />
                                 </td>
                                 <td class="py-2" style="min-width: 110px;">
-                                    <v-text-field v-model="medicine.duration" placeholder="e.g. 5" density="compact"
-                                        variant="outlined" hide-details suffix="days" />
+                                    <v-text-field v-model.number="medicine.duration" placeholder="e.g. 5" type="number"
+                                        min="1" density="compact" variant="outlined" hide-details suffix="days"
+                                        @keydown="e => { if (e.key === '-' || e.key === '.') e.preventDefault() }" />
                                 </td>
                                 <td class="py-2" style="min-width: 160px;">
                                     <v-select v-model="medicine.instructions" placeholder="Search medicine..."

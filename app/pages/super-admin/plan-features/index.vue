@@ -150,8 +150,9 @@ async function deleteFeature(item: any) {
                     hint="e.g. Lab Integration" persistent-hint density="comfortable" class="mb-3" />
                 <v-select v-model="newFeature.feature_category" :items="['feature', 'limit', 'role']"
                     label="Category" density="comfortable" class="mb-3" />
-                <v-text-field v-model.number="newFeature.sort_order" label="Sort Order" type="number"
-                    density="comfortable" class="mb-3" />
+                <v-text-field v-model.number="newFeature.sort_order" label="Sort Order" type="number" min="0"
+                    density="comfortable" class="mb-3"
+                    @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                 <v-text-field v-if="newFeature.feature_category === 'limit'"
                     v-model.number="newFeature.limit_value" label="Limit Value (-1 = unlimited)" type="number"
                     density="comfortable" />

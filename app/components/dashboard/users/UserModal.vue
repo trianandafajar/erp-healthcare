@@ -224,12 +224,16 @@ function onSubmit() {
                         <v-col cols="6" sm="3" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">Experience (years)</v-label>
                             <v-text-field v-model.number="form.experience_years" type="number" min="0"
-                                variant="outlined" density="compact" hide-details />
+                                variant="outlined" density="compact" hide-details
+                                :rules="[v => v >= 0 || 'Must be non-negative']"
+                                @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                         </v-col>
                         <v-col cols="6" sm="3" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">Consultation Fee</v-label>
                             <v-text-field v-model.number="form.consultation_fee" type="number" min="0" prefix="$"
-                                variant="outlined" density="compact" hide-details />
+                                variant="outlined" density="compact" hide-details
+                                :rules="[v => v >= 0 || 'Must be non-negative']"
+                                @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                         </v-col>
                         <v-col cols="12" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">Biography</v-label>
@@ -262,7 +266,9 @@ function onSubmit() {
                         <v-col cols="12" sm="6" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">Experience (years)</v-label>
                             <v-text-field v-model.number="form.experience_years" type="number" min="0"
-                                variant="outlined" density="compact" hide-details />
+                                variant="outlined" density="compact" hide-details
+                                :rules="[v => v >= 0 || 'Must be non-negative']"
+                                @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                         </v-col>
                         <v-col cols="12" class="mt-3">
                             <v-switch v-model="form.is_available" color="success" label="Available for duty"

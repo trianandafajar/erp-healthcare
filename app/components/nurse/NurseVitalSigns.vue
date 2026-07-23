@@ -389,24 +389,28 @@ function formatDate(dateStr: string) {
 
                     <v-col cols="12" md="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Temperature</v-label>
-                        <v-text-field v-model="form.temperature" placeholder="36.8" suffix="°C" variant="outlined"
-                            density="compact" hide-details />
+                        <v-text-field v-model.number="form.temperature" placeholder="36.8" suffix="°C" type="number"
+                            min="0" variant="outlined" density="compact" hide-details
+                            @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                     </v-col>
                     <v-col cols="12" md="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Pulse</v-label>
-                        <v-text-field v-model="form.pulse" placeholder="78" suffix="bpm" variant="outlined"
-                            density="compact" hide-details />
+                        <v-text-field v-model.number="form.pulse" placeholder="78" suffix="bpm" type="number"
+                            min="0" variant="outlined" density="compact" hide-details
+                            @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" md="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Weight</v-label>
-                        <v-text-field v-model="form.weight" placeholder="60" suffix="kg" variant="outlined"
-                            density="compact" hide-details />
+                        <v-text-field v-model.number="form.weight" placeholder="60" suffix="kg" type="number"
+                            min="0" variant="outlined" density="compact" hide-details
+                            @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                     </v-col>
                     <v-col cols="12" md="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Height</v-label>
-                        <v-text-field v-model="form.height" placeholder="165" suffix="cm" variant="outlined"
-                            density="compact" hide-details />
+                        <v-text-field v-model.number="form.height" placeholder="165" suffix="cm" type="number"
+                            min="0" variant="outlined" density="compact" hide-details
+                            @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">

@@ -257,7 +257,10 @@ function getInitials(name?: string | null) {
                                 </v-label>
                                 <v-text-field v-model.number="form.experience_years" placeholder="e.g. 5" type="number"
                                     min="0" variant="outlined" density="compact" hide-details
-                                    prepend-inner-icon="mdi-briefcase-clock-outline" />
+                                    prepend-inner-icon="mdi-briefcase-clock-outline"
+                                    :rules="[v => v >= 0 || 'Must be non-negative']"
+                                    @keydown="e => { if (e.key === '-') e.preventDefault() }"
+                                    @update:model-value="val => { if (Number(val) < 0) form.experience_years = 0 }" />
                             </v-col>
                         </v-row>
                     </v-card-text>

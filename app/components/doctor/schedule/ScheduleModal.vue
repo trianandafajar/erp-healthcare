@@ -177,7 +177,8 @@ const isFormValid = computed(() =>
                     <v-col cols="12" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Max Patients</v-label>
                         <v-text-field v-model.number="form.max_patients" type="number" min="1" variant="outlined"
-                            density="compact" hide-details />
+                            density="compact" hide-details :rules="[v => v >= 1 || 'Must be at least 1']"
+                            @keydown="e => { if (e.key === '-' || e.key === '.') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">

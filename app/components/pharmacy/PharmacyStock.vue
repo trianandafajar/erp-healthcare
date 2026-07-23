@@ -306,13 +306,17 @@ function formatDate(value: string) {
                     <v-col cols="12" sm="4">
                         <v-label class="text-caption font-weight-medium mb-1">Current Stock</v-label>
                         <v-text-field v-model.number="form.quantity" type="number" min="0" variant="outlined"
-                            density="compact" hide-details="auto" />
+                            density="compact" hide-details="auto"
+                            :rules="[v => v >= 0 || 'Must be non-negative']"
+                            @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
                         <v-label class="text-caption font-weight-medium mb-1">Minimum Stock</v-label>
                         <v-text-field v-model.number="form.minimumStock" type="number" min="0" variant="outlined"
-                            density="compact" hide-details="auto" />
+                            density="compact" hide-details="auto"
+                            :rules="[v => v >= 0 || 'Must be non-negative']"
+                            @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" sm="4">

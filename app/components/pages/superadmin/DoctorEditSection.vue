@@ -132,10 +132,10 @@ async function save() {
                 <v-text-field v-model="form.phone" label="Phone" variant="outlined" density="comfortable" prepend-inner-icon="mdi-phone" />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model.number="form.experience_years" label="Experience (years)" type="number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-briefcase" min="0" />
+                <v-text-field v-model.number="form.experience_years" label="Experience (years)" type="number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-briefcase" min="0" :rules="[v => v >= 0 || 'Must be non-negative']" @keydown="e => { if (e.key === '-') e.preventDefault() }" @update:model-value="val => { if (Number(val) < 0) form.experience_years = 0 }" />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model.number="form.consultation_fee" label="Consultation Fee (USD)" type="number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-cash" min="0" />
+                <v-text-field v-model.number="form.consultation_fee" label="Consultation Fee (USD)" type="number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-cash" min="0" :rules="[v => v >= 0 || 'Must be non-negative']" @keydown="e => { if (e.key === '-') e.preventDefault() }" @update:model-value="val => { if (Number(val) < 0) form.consultation_fee = 0 }" />
               </v-col>
               <v-col cols="12">
                 <v-textarea v-model="form.biography" label="Biography" variant="outlined" density="comfortable" rows="4" prepend-inner-icon="mdi-text-account" auto-grow />
