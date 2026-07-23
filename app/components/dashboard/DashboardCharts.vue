@@ -96,16 +96,13 @@ function hslToHex(h: number, s: number, l: number) {
   return `#${f(0)}${f(8)}${f(4)}`
 }
 
-function generatePalette(baseHex: string): string[] {
-  const { h, s, l } = hexToHsl(baseHex)
-  return [
-    hslToHex(h, Math.min(s + 10, 100), Math.min(l + 35, 92)),
-    hslToHex(h, Math.min(s + 5, 100), Math.min(l + 22, 85)),
-    hslToHex(h, s, Math.min(l + 12, 78)),
-    hslToHex(h, s, l),
-    hslToHex(h, s, Math.max(l - 12, 10)),
-    hslToHex(h, Math.min(s + 8, 100), Math.max(l - 22, 8)),
-  ]
+function generatePalette(baseHex: string, count = 6): string[] {
+  const { h, s } = hexToHsl(baseHex)
+  const clampedS = Math.min(Math.max(s, 45), 85)
+  const lightnessSteps = [65, 58, 51, 44, 38, 32]
+  return lightnessSteps.slice(0, count).map((l) =>
+    hslToHex(h, clampedS, l)
+  )
 }
 
 const profileStore = useProfileStore()
