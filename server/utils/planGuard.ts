@@ -39,22 +39,21 @@ export async function requirePlanFeature(event: any, feature: string) {
 
 async function getPlanContext(event: any) {
     const supabase = serverSupabase(event)
-    const { data: { user } } = await supabase.auth.getUser()
+const { user, tenantId } = await getTenantContext(event);
     if (!user) throw createError({ statusCode: 401, message: 'Unauthorized' })
 
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id')
-        .eq('id', user.id)
-        .single()
-
-    if (!profile?.tenant_id) throw createError({ statusCode: 403, message: 'No tenant found' })
+    // const { data: profile } = await supabase
+    //     .from('profiles')
+    //     .select('tenant_id')
+    //     .eq('id', user.id)
+    //     .single()
+    if (!tenantId) throw createError({ statusCode: 403, message: 'No tenant found' })
 
     const admin = supabaseAdmin()
     const { data: sub } = await admin
         .from('tenant_subscriptions')
         .select('plan')
-        .eq('tenant_id', profile.tenant_id)
+        .eq('tenant_id', tenantId)
         .maybeSingle()
 
     const plan = (sub?.plan as string) ?? 'starter'
