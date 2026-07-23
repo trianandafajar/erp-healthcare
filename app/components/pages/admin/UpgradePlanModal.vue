@@ -55,6 +55,11 @@ const sortedPlans = computed(() => {
   })
 })
 
+function uniqueFeatures(plan: any): string[] {
+  const list: string[] = plan.features || []
+  return Array.from(new Set(list)).slice(0, 5)
+}
+
 function displayPrice(plan: any) {
   const p = billingCycle.value === 'yearly' && plan.yearly_price ? plan.yearly_price / 12 : plan.price
   return formatNumber(p)
@@ -125,8 +130,9 @@ async function doUpgrade(plan: any) {
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="900" persistent>
-    <v-card rounded="xl" class="pa-2">
+  <v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="1000"
+    persistent>
+    <v-card rounded="sm" class="pa-2">
       <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
         <div class="d-flex align-center ga-2">
           <v-icon icon="mdi-arrow-up-bold-circle-outline" size="22" color="primary" />
@@ -147,19 +153,15 @@ async function doUpgrade(plan: any) {
         </div>
 
         <div class="d-flex justify-center mb-6">
-          <div class="inline-flex items-center bg-gray-100 rounded-full p-1" style="background-color: rgb(var(--v-theme-surface-variant));">
-            <button
-              :class="['px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200', billingCycle === 'monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-medium-emphasis hover:text-gray-700']"
-              style="border: none; cursor: pointer;"
+          <div class="billing-toggle">
+            <button :class="['toggle-btn', billingCycle === 'monthly' ? 'toggle-btn--active' : '']" type="button"
               @click="billingCycle = 'monthly'">
               Monthly
             </button>
-            <button
-              :class="['px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200', billingCycle === 'yearly' ? 'bg-white text-gray-900 shadow-sm' : 'text-medium-emphasis hover:text-gray-700']"
-              style="border: none; cursor: pointer;"
+            <button :class="['toggle-btn', billingCycle === 'yearly' ? 'toggle-btn--active' : '']" type="button"
               @click="billingCycle = 'yearly'">
               Yearly
-              <span class="text-success ml-1 text-xs font-semibold">Save 15%</span>
+              <span class="toggle-badge">Save 15%</span>
             </button>
           </div>
         </div>
@@ -172,65 +174,52 @@ async function doUpgrade(plan: any) {
         </div>
 
         <div v-else class="grid-layout">
-          <div v-for="plan in sortedPlans" :key="plan.id"
-            :class="[
-              'relative rounded-xl border p-5 flex flex-col transition-all duration-200',
-              plan.title?.toLowerCase() === currentPlan
-                ? 'border-medium-emphasis opacity-70 cursor-not-allowed'
-                : 'hover:-translate-y-1 hover:shadow-md cursor-pointer',
-              plan.is_recommended && plan.title?.toLowerCase() !== currentPlan
-                ? 'border-primary bg-white shadow-lg'
-                : 'border'
-            ]"
-            @click="plan.title?.toLowerCase() !== currentPlan && doUpgrade(plan)">
+          <div v-for="plan in sortedPlans" :key="plan.id" :class="[
+            'plan-card',
+            plan.title?.toLowerCase() === currentPlan ? 'plan-card--current' : 'plan-card--selectable',
+            plan.is_recommended && plan.title?.toLowerCase() !== currentPlan ? 'plan-card--recommended' : ''
+          ]" @click="plan.title?.toLowerCase() !== currentPlan && doUpgrade(plan)">
 
-            <div v-if="plan.is_recommended && plan.title?.toLowerCase() !== currentPlan"
-              class="absolute -top-3 left-1/2 -translate-x-1/2">
-              <span class="bg-primary text-white text-xs font-bold px-3 py-0.5 rounded-full">
+            <div v-if="plan.is_recommended && plan.title?.toLowerCase() !== currentPlan" class="plan-badge">
+              <span class="plan-badge__text">
                 {{ plan.badge_text || 'Most Popular' }}
               </span>
             </div>
 
-            <div v-if="plan.title?.toLowerCase() === currentPlan"
-              class="absolute top-3 right-3">
+            <div v-if="plan.title?.toLowerCase() === currentPlan" class="plan-current-chip">
               <v-chip color="success" variant="tonal" size="x-small">Current</v-chip>
             </div>
 
             <div class="mb-4">
-              <h3 class="text-lg font-bold">{{ plan.title }}</h3>
+              <h3 class="text-lg font-weight-bold">{{ plan.title }}</h3>
               <p class="text-caption text-medium-emphasis mt-1">{{ plan.subtitle }}</p>
             </div>
 
             <div class="mb-4">
-              <div class="d-flex align-baseline gap-1">
+              <div class="d-flex align-baseline ga-1">
                 <span class="text-caption text-medium-emphasis">{{ plan.currency === 'IDR' ? 'Rp' : '$' }}</span>
-                <span class="text-3xl lg:text-4xl font-bold tracking-tight">{{ displayPrice(plan) }}</span>
+                <span class="plan-price">{{ displayPrice(plan) }}</span>
                 <span class="text-caption text-medium-emphasis">/mo</span>
               </div>
               <p v-if="billingCycle === 'yearly' && plan.yearly_price" class="text-caption text-medium-emphasis mt-1">
                 ${{ formatNumber(plan.yearly_price) }} billed annually
               </p>
               <p v-if="billingCycle === 'yearly' && plan.yearly_price && plan.price > 0"
-                class="text-caption text-success font-semibold mt-0.5">
+                class="text-caption text-success font-weight-bold mt-0.5">
                 Save {{ savingsPercent(plan) }}%
               </p>
             </div>
 
-            <ul class="space-y-2 mb-5 flex-1">
-              <li v-for="(feature, fi) in (plan.features || []).slice(0, 5)" :key="fi"
-                class="d-flex align-start ga-2 text-body-2 text-medium-emphasis">
+            <ul class="plan-feature-list mb-5">
+              <li v-for="(feature, fi) in uniqueFeatures(plan)" :key="fi" class="plan-feature-item">
                 <v-icon icon="mdi-check-circle" size="16" color="success" class="flex-shrink-0 mt-0.5" />
                 {{ feature }}
               </li>
             </ul>
 
-            <v-btn
-              v-if="plan.title?.toLowerCase() !== currentPlan"
-              variant="flat"
+            <v-btn v-if="plan.title?.toLowerCase() !== currentPlan" variant="flat"
               :color="plan.is_recommended ? 'primary' : 'secondary'"
-              :loading="submitting && selectedPlan === plan.title?.toLowerCase()"
-              :disabled="submitting"
-              block
+              :loading="submitting && selectedPlan === plan.title?.toLowerCase()" :disabled="submitting" block
               @click.stop="doUpgrade(plan)">
               <span v-if="submitting && selectedPlan === plan.title?.toLowerCase()">
                 <v-icon icon="mdi-loading mdi-spin" size="18" class="mr-1" />
@@ -272,11 +261,120 @@ async function doUpgrade(plan: any) {
   gap: 16px;
 }
 
-.inline-flex {
+.billing-toggle {
   display: inline-flex;
+  align-items: center;
+  background-color: rgba(var(--v-theme-on-surface), 0.06);
+  border-radius: 999px;
+  padding: 4px;
 }
 
-.items-center {
-  align-items: center;
+.toggle-btn {
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  padding: 8px 22px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.toggle-btn:hover {
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.toggle-btn--active {
+  background-color: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-surface));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.toggle-badge {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-success));
+}
+
+/* Plan cards */
+.plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.plan-card--selectable {
+  cursor: pointer;
+}
+
+.plan-card--selectable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.plan-card--current {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.plan-card--recommended {
+  border-color: rgb(var(--v-theme-primary));
+  background-color: rgb(var(--v-theme-surface));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.plan-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.plan-badge__text {
+  background-color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-primary));
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 12px;
+  border-radius: 999px;
+}
+
+.plan-current-chip {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.plan-price {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.plan-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
 }
 </style>
