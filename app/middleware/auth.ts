@@ -30,7 +30,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const impersonationMeta = useCookie<any>('impersonation_meta', { default: () => null })
     const isImpersonating = !!impersonationMeta.value
 
-    if (role !== 'superadmin' && !isImpersonating) {
+    if (!authStore.skipOnboarding && role !== 'superadmin' && !isImpersonating) {
         const onboardingPath = getOnboardingPath(
           authStore.tenantId,
           authState.subscriptionPlan ?? authStore.subscriptionPlan,
@@ -40,9 +40,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
         )
 
         if (onboardingPath && !to.path.startsWith('/onboarding/') && !to.path.includes('/configure')) {
+            authStore.skipOnboarding = false
             return navigateTo(onboardingPath, { replace: true })
         }
     }
+    authStore.skipOnboarding = false
 
     if (!allowedRoles) return
 

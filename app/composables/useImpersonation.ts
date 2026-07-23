@@ -34,9 +34,12 @@ export const useImpersonation = () => {
         if (!supabase) return
 
         try {
+            const router = useRouter()
+            const returnTo = router.currentRoute.value.fullPath
+
             await $fetch('/api/users/impersonate/start', {
                 method: 'POST',
-                body: { id: user.id },
+                body: { id: user.id, return_to: returnTo },
             })
 
             await syncCurrentSessionProfile()
@@ -51,11 +54,23 @@ export const useImpersonation = () => {
         if (!supabase) return
 
         try {
-            await $fetch('/api/users/impersonate/stop', { method: 'POST' })
+            const returnTo = metaCookie.value?.return_to
+            const actorRole = metaCookie.value?.by_role || 'admin'
+
+            const res = await $fetch<any>('/api/users/impersonate/stop', { method: 'POST' })
+            if (res.access_token) {
+                await supabase.auth.setSession({ access_token: res.access_token, refresh_token: res.refresh_token })
+            }
 
             await syncCurrentSessionProfile()
-            const actorRole = metaCookie.value?.by_role || 'admin'
-            await navigateTo(actorRole === 'superadmin' ? '/super-admin/users-management' : '/users-management')
+            authStore.skipOnboarding = true
+            if (returnTo) {
+                await navigateTo(returnTo)
+            } else if (actorRole === 'superadmin') {
+                await navigateTo('/super-admin/users-management')
+            } else {
+                await navigateTo(authStore.tenantSlug ? `/${authStore.tenantSlug}/users-management` : '/dashboard')
+            }
         } catch (err: any) {
             console.error('Failed to exit impersonation:', err)
         }

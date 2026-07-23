@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
     const subscriptionPlan = ref<string>('starter')
     const subscriptionStatus = ref<string | null>(null)
     const settings = ref<{ logo_url?: string | null } | null>(null)
+    const skipOnboarding = ref(false)
 
     function hydrate() {
         if (!import.meta.client) return
@@ -87,7 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
     const isAuthenticated = computed(() => !!user.value)
 
     return {
-        user, role, permissions, tenantId, tenantSlug, subscriptionPlan, subscriptionStatus, settings, isAuthenticated,
+        user, role, permissions, tenantId, tenantSlug, subscriptionPlan, subscriptionStatus, settings, skipOnboarding, isAuthenticated,
         setUser, hasPermission, hasAnyPermission, clearUser
     }
 })

@@ -2,7 +2,7 @@ import { supabaseEphemeral } from "~~/server/utils/supabase"
 import { setCookie, parseCookies } from "h3"
 
 export default defineEventHandler(async (event) => {
-    const { id } = await readBody(event)
+    const { id, return_to } = await readBody(event)
     if (!id) throw createError({ statusCode: 400, message: 'User ID is required.' })
 
     const admin = supabaseAdmin()
@@ -71,6 +71,7 @@ export default defineEventHandler(async (event) => {
         name: targetName,
         role: targetUser.user.user_metadata?.role ?? '',
         by_role: actorRoleName,
+        return_to: return_to ?? '',
     }), {
         path: '/',
         httpOnly: false,

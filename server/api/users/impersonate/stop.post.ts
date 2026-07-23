@@ -28,5 +28,5 @@ export default defineEventHandler(async (event) => {
     setCookie(event, 'admin_session_backup', '', { path: '/', maxAge: 0 })
     setCookie(event, 'impersonation_meta', '', { path: '/', maxAge: 0 })
 
-    return { success: true }
+    return { success: true, access_token: backup.access_token, refresh_token: backup.refresh_token }
 })
