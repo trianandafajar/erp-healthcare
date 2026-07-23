@@ -13,9 +13,9 @@ const loading = ref(false)
 
 export function usePlan() {
     const auth = useAuthStore()
-    const profile = useProfileStore()
-
-    const plan = computed(() => auth.subscriptionPlan ?? 'starter')
+    const profileStore = useProfileStore()
+// console.log("profileStore:", profileStore.settings, profileStore.profile, profileStore.tenant, profileStore.roles)
+    const plan = computed(() => profileStore.tenant?.subscription_plan ?? 'starter')
 
     const features = computed(() => cache.value[plan.value] ?? [])
 

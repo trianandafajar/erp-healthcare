@@ -2,7 +2,6 @@ export const useImpersonation = () => {
     const supabase = useSupabase()
     const authStore = useAuthStore()
     const profileStore = useProfileStore()
-
     async function syncCurrentSessionProfile() {
         authStore.clearUser()
         profileStore.clearProfile()

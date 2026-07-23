@@ -1,3 +1,8 @@
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { useSupabase } from '~/composables/useSupabase'
+import { useAuthStore } from '~/stores/auth'
+import { useProfileStore } from '~/stores/profile'
+
 type NotificationLevel = 'info' | 'success' | 'warning' | 'critical'
 
 export type NotificationRow = {
@@ -379,16 +384,20 @@ export const useNotifications = () => {
 
   let realtimeChannel: any = null
   let disposed = false
+  let isSettingUp = false
 
   const role = computed(() => authStore.role ?? profileStore.roles?.[0]?.name ?? null)
   const userId = computed(() => authStore.user?.id ?? profileStore.user?.id ?? null)
 
   function clearRealtime() {
-    if (realtimeChannel && supabase) {
-      supabase.removeChannel(realtimeChannel)
+    if (realtimeChannel) {
+      try {
+        supabase?.removeChannel(realtimeChannel)
+      } catch {
+        // ignore
+      }
+      realtimeChannel = null
     }
-
-    realtimeChannel = null
   }
 
   function sortItems(list: NotificationViewItem[]) {
@@ -414,7 +423,7 @@ export const useNotifications = () => {
         try {
           playBibSound()
         } catch {
-          // Ignore audio failures when the browser blocks autoplay.
+          // ignore
         }
       })
     }
@@ -527,9 +536,15 @@ export const useNotifications = () => {
   }
 
   function setupRealtime() {
+    if (isSettingUp) return
+    isSettingUp = true
+
     clearRealtime()
 
-    if (import.meta.server || !supabase || !userId.value) return
+    if (import.meta.server || !supabase || !userId.value) {
+      isSettingUp = false
+      return
+    }
 
     if (!soundListenersBound && typeof window !== 'undefined') {
       soundListenersBound = true
@@ -544,45 +559,51 @@ export const useNotifications = () => {
 
     connectionStatus.value = 'connecting'
 
-    realtimeChannel = supabase
-      .channel(`notifications-${userId.value}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId.value}`,
-        },
-        (payload) => {
-          const row = payload.new as NotificationRow
-          if (!row) return
-          upsertLocalRow(row)
-        },
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId.value}`,
-        },
-        (payload) => {
-          const row = payload.new as NotificationRow
-          if (!row) return
-          upsertLocalRow(row)
-        },
-      )
-      .subscribe((status: string) => {
-        if (status === 'SUBSCRIBED') {
-          connectionStatus.value = 'connected'
-        } else if (status === 'CHANNEL_ERROR') {
-          connectionStatus.value = 'error'
-        } else if (status === 'CLOSED') {
-          connectionStatus.value = 'idle'
-        }
-      })
+    try {
+      realtimeChannel = supabase
+        .channel(`notifications-${userId.value}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${userId.value}`,
+          },
+          (payload) => {
+            const row = payload.new as NotificationRow
+            if (!row) return
+            upsertLocalRow(row)
+          },
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${userId.value}`,
+          },
+          (payload) => {
+            const row = payload.new as NotificationRow
+            if (!row) return
+            upsertLocalRow(row)
+          },
+        )
+        .subscribe((status: string) => {
+          if (status === 'SUBSCRIBED') {
+            connectionStatus.value = 'connected'
+          } else if (status === 'CHANNEL_ERROR') {
+            connectionStatus.value = 'error'
+          } else if (status === 'CLOSED') {
+            connectionStatus.value = 'idle'
+          }
+          isSettingUp = false
+        })
+    } catch (e) {
+      connectionStatus.value = 'error'
+      isSettingUp = false
+    }
   }
 
   watch([role, userId], async () => {
