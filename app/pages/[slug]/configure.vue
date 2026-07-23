@@ -109,6 +109,7 @@ async function save() {
 
     successMsg.value = 'Configuration saved!'
     await profileStore.refreshProfile()
+    authStore.tenantId = profileStore.tenant?.id ?? null
     authStore.settings = profileStore.settings
     await navigateTo(`/${tenantSlug.value}/dashboard`)
   } catch (err: any) {
