@@ -1,11 +1,9 @@
 import { supabaseEphemeral } from "~~/server/utils/supabase"
+import { setCookie, parseCookies } from "h3"
 
 export default defineEventHandler(async (event) => {
     const { id } = await readBody(event)
-
-    if (!id) {
-        throw createError({ statusCode: 400, message: 'User ID is required.' })
-    }
+    if (!id) throw createError({ statusCode: 400, message: 'User ID is required.' })
 
     const admin = supabaseAdmin()
     const supabase = serverSupabase(event)
@@ -24,7 +22,6 @@ export default defineEventHandler(async (event) => {
         .returns<any[]>()
 
     const actorRoleName = actorRoleRows?.[0]?.roles?.name
-
     if (!['admin', 'superadmin'].includes(actorRoleName)) {
         throw createError({ statusCode: 403, message: 'Only admins can impersonate users.' })
     }
@@ -35,6 +32,12 @@ export default defineEventHandler(async (event) => {
     }
 
     const email = targetUser.user.email!
+    const targetName = targetUser.user.user_metadata?.full_name ?? email
+
+    const { data: actorSession } = await supabase.auth.getSession()
+    if (!actorSession.session) {
+        throw createError({ statusCode: 500, message: 'No active session.' })
+    }
 
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
         type: 'magiclink',
@@ -49,22 +52,49 @@ export default defineEventHandler(async (event) => {
         type: 'magiclink',
         token_hash: linkData.properties.hashed_token,
     })
-
     if (otpError || !otpData.session) {
         throw createError({ statusCode: 500, message: otpError?.message ?? 'Failed to create impersonation session.' })
     }
+
+    setCookie(event, 'admin_session_backup', JSON.stringify({
+        access_token: actorSession.session.access_token,
+        refresh_token: actorSession.session.refresh_token,
+    }), {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: 60 * 60,
+    })
+
+    setCookie(event, 'impersonation_meta', JSON.stringify({
+        name: targetName,
+        role: targetUser.user.user_metadata?.role ?? '',
+        by_role: actorRoleName,
+    }), {
+        path: '/',
+        httpOnly: false,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: 60 * 60,
+    })
+
+    await supabase.auth.setSession({
+        access_token: otpData.session.access_token,
+        refresh_token: otpData.session.refresh_token,
+    })
 
     await admin.rpc('log_activity', {
         p_actor_id: actor.id,
         p_action: 'impersonate',
         p_module: 'users',
         p_entity_id: id,
-        p_description: `Admin impersonated user '${targetUser.user.user_metadata?.full_name ?? email}'`,
+        p_description: `Admin impersonated user '${targetName}'`,
         p_metadata: { target_email: email }
     })
 
     return {
-        access_token: otpData.session.access_token,
-        refresh_token: otpData.session.refresh_token,
+        name: targetName,
+        role: targetUser.user.user_metadata?.role ?? '',
     }
 })

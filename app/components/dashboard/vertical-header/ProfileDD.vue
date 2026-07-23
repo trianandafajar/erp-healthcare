@@ -35,15 +35,16 @@ function getInitials(name: string) {
 async function confirmLogout() {
   isLoggingOut.value = true
   try {
+    const { isImpersonating, exitImpersonation } = useImpersonation()
+    if (isImpersonating.value) {
+      await exitImpersonation()
+      return
+    }
+
     await $fetch('/api/auth/logout', { method: 'POST' })
     authStore.clearUser()
     profileStore.clearProfile()
     await navigateTo('/login')
-
-    localStorage.removeItem('admin_session')
-    localStorage.removeItem('impersonated_name')
-    localStorage.removeItem('impersonated_role')
-    localStorage.removeItem('impersonated_by_role')
   } finally {
     isLoggingOut.value = false
     dialog.value = false
