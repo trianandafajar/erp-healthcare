@@ -18,6 +18,7 @@ interface Tenant {
   owner: TenantOwner | null
   total_users: number
   brand_color: string | null
+  logo_url: string | null
   created_at: string
   plan: string
   status: string
@@ -183,8 +184,14 @@ const snackbarColor = ref('success')
           <td class="py-3 text-body-2 text-medium-emphasis">{{ getRowNumber(index) }}</td>
           <td class="py-3">
             <div class="d-flex align-center ga-3">
-              <v-avatar size="34" color="primary" variant="tonal">
-                <span class="text-caption font-weight-bold">{{ getInitials(tenant.name) }}</span>
+              <v-avatar size="34" rounded="lg">
+                <v-img :src="tenant.logo_url || '/placeholder/LogoTenant.png'" cover>
+                  <template #error>
+                    <v-avatar size="34" color="primary" variant="tonal">
+                      <span class="text-caption font-weight-bold">{{ getInitials(tenant.name) }}</span>
+                    </v-avatar>
+                  </template>
+                </v-img>
               </v-avatar>
               <div>
                 <div class="text-body-2 font-weight-medium">{{ tenant.name }}</div>

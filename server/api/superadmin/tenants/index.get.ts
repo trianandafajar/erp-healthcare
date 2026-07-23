@@ -67,6 +67,7 @@ export default defineEventHandler(async (event) => {
     }
 
     let userCountMap: Record<string, number> = {}
+    let settingsMap: Record<string, any> = {}
     if (tenantIds.length > 0) {
         const { data: allProfiles, error: countError } = await admin
             .from('profiles')
@@ -81,12 +82,22 @@ export default defineEventHandler(async (event) => {
             }
             return acc
         }, {})
+
+        const { data: allSettings, error: settingsError } = await admin
+            .from('tenant_settings')
+            .select('tenant_id, logo_url')
+            .in('tenant_id', tenantIds)
+
+        if (settingsError) throw createError({ statusCode: 500, message: settingsError.message })
+
+        settingsMap = Object.fromEntries((allSettings ?? []).map((s) => [s.tenant_id, s]))
     }
 
     const tenantsWithDetails = tenants.map((t) => ({
         ...t,
         owner: t.owner_id ? profilesMap[t.owner_id] ?? null : null,
         total_users: userCountMap[t.id] ?? 0,
+        logo_url: settingsMap[t.id]?.logo_url ?? null,
     }))
 
     return {

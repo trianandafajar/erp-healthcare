@@ -273,10 +273,14 @@ const statusColor: Record<string, string> = {
             <div class="d-flex align-center ga-3">
                 <v-btn icon="mdi-arrow-left" variant="tonal" size="small" color="primary"
                     @click="navigateTo('/super-admin/tenants')" />
-                <v-avatar size="44" rounded="lg" color="primary" variant="tonal">
-                    <v-img v-if="tenant?.settings?.logo_url" :src="tenant.settings.logo_url" cover />
-                    <span v-else class="text-subtitle-2 font-weight-bold">{{ getInitials(tenant?.name) }}</span>
-                </v-avatar>
+                <v-img :src="tenant?.settings?.logo_url || '/placeholder/LogoTenant.png'" cover
+                    width="44" height="44" min-width="44" class="rounded-lg flex-shrink-0">
+                    <template #error>
+                        <v-avatar size="44" color="primary" variant="tonal" class="rounded-lg">
+                            <span class="text-subtitle-2 font-weight-bold">{{ getInitials(tenant?.name) }}</span>
+                        </v-avatar>
+                    </template>
+                </v-img>
                 <div>
                     <div class="d-flex align-center ga-2">
                         <span class="text-h5 font-weight-bold">{{ tenant?.name }}</span>
