@@ -176,9 +176,10 @@ async function handleSubmit(payload: any) {
                         <v-icon icon="mdi-drag" size="18" color="text-medium-emphasis" />
                     </td>
                     <td class="py-3">
-                        <v-avatar size="48" rounded="lg" color="grey-lighten-3">
-                            <v-img v-if="logo.image_url" :src="logo.image_url" contain />
-                            <v-icon v-else icon="mdi-image-outline" size="24" color="grey-lighten-1" />
+                        <img v-if="logo.image_url" :src="logo.image_url" :alt="logo.title"
+                            class="logo-thumb" />
+                        <v-avatar v-else size="48" color="grey-lighten-3">
+                            <v-icon icon="mdi-image-outline" size="24" color="grey-lighten-1" />
                         </v-avatar>
                     </td>
                     <td class="py-3">
@@ -238,5 +239,12 @@ async function handleSubmit(payload: any) {
 
 .drag-handle:active {
     cursor: grabbing;
+}
+
+.logo-thumb {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+    max-width: 120px;
 }
 </style>
