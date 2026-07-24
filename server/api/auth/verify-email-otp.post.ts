@@ -46,13 +46,23 @@ export default defineEventHandler(async (event) => {
         .update({ used_at: new Date().toISOString() })
         .eq('id', record.id)
 
-    const { error: updateError } = await supabase
+    const { data: profile, error: updateError } = await supabase
         .from('profiles')
         .update({ email_verified: true })
         .eq('email', email)
+        .select('id')
+        .single()
 
-    if (updateError) {
+    if (updateError || !profile) {
         throw createError({ statusCode: 500, message: 'Failed to verify email' })
+    }
+
+    const { error: confirmError } = await supabase.auth.admin.updateUserById(profile.id, {
+        email_confirm: true
+    })
+
+    if (confirmError) {
+        throw createError({ statusCode: 500, message: 'Failed to confirm email in auth system' })
     }
 
     return { message: 'Email verified successfully' }

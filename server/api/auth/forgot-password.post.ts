@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     const resetLink = `${baseURL}/reset-password?token=${token}`
 
     const { error: emailError } = await resend.emails.send({
-        from: 'trianandafajar.com',
+        from: 'HealthData <noreply@trianandafajar.com>',
         to: email,
         subject: 'Reset Your HealthData Password',
         html: `
