@@ -249,13 +249,19 @@ async function saveGeneral() {
 </script>
 
 <template>
-    <div class="d-flex align-center ga-2 mb-1">
-        <v-icon icon="mdi-cog-outline" size="24" color="primary" />
-        <div class="text-h5 font-weight-bold">Settings</div>
-    </div>
-    <div class="text-caption text-medium-emphasis mb-5">Manage your tenant preferences and appearance</div>
+    <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="mb-5">
+        <v-card elevation="0">
+            <v-card-text>
+                <div class="d-flex align-center ga-2">
+                    <v-icon icon="mdi-cog-outline" size="24" color="primary" />
+                    <div class="text-h5 font-weight-bold">Settings</div>
+                </div>
+                <div class="text-caption text-medium-emphasis mt-1">Manage your tenant preferences and appearance</div>
+            </v-card-text>
+        </v-card>
+    </v-card>
 
-    <v-card elevation="0" class="rounded-md">
+    <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="bg-surface">
         <v-tabs v-model="tab" color="primary" class="px-4 pt-2">
             <v-tab value="appearance" class="text-none">
                 <v-icon start icon="mdi-palette" size="18" />

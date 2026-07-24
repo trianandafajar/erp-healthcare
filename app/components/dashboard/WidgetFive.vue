@@ -94,7 +94,7 @@ const fivecards = computed(() => [
     <v-row class="my-0">
         <v-col cols="6" sm="4" md="" v-for="(card5, i) in fivecards" :key="i" :style="{ flex: '1 1 0' }"
             class="flex-grow-1">
-            <v-card :to="card5.to" elevation="0" class="stat-card">
+            <v-card :to="card5.to" elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="stat-card bg-surface">
                 <v-card-text>
                     <div class="d-flex align-items-center justify-space-between">
                         <div>

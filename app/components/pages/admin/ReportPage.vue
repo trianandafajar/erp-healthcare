@@ -208,16 +208,20 @@ const availableReports = computed(() => {
     <v-row>
         <v-col cols="12">
             <v-card-item class="pb-2 px-0 pt-0">
-                <div class="d-flex justify-space-between align-center flex-wrap ga-3 mb-4">
-                    <div>
-                        <v-card-title class="text-h3">Reports</v-card-title>
-                        <v-card-subtitle class="mt-1">
-                            Overview of clinic activity — {{ activePeriodLabel }}
-                        </v-card-subtitle>
-                    </div>
-                </div>
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="mb-4">
+                    <v-card elevation="0">
+                        <div class="d-flex justify-space-between align-center flex-wrap ga-3">
+                            <div>
+                                <v-card-title class="text-h3">Reports</v-card-title>
+                                <v-card-subtitle class="mt-1">
+                                    Overview of clinic activity — {{ activePeriodLabel }}
+                                </v-card-subtitle>
+                            </div>
+                        </div>
+                    </v-card>
+                </v-card>
 
-                <v-card elevation="0" border class="pa-3">
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="pa-3 bg-surface">
                     <div class="d-flex align-center gap-3 flex-wrap">
                         <v-btn-toggle v-model="filterMode" density="compact" variant="tonal" divided mandatory
                             color="primary">
@@ -257,7 +261,7 @@ const availableReports = computed(() => {
 
         <template v-else>
             <v-col cols="12" sm="6" md="3" v-for="(card, i) in summaryCards" :key="i">
-                <v-card elevation="0">
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="bg-surface">
                     <v-card-text>
                         <div class="d-flex justify-space-between align-start">
                             <div>
@@ -282,51 +286,56 @@ const availableReports = computed(() => {
             </v-col>
 
             <v-col cols="12" md="7">
-                <v-card elevation="0" class="h-100">
-                    <v-card-item>
-                        <v-card-title class="text-h5">Monthly Visits</v-card-title>
-                        <v-card-subtitle>Total appointments per month — {{ filterYear }}</v-card-subtitle>
-                    </v-card-item>
-                    <v-card-text>
-                        <ClientOnly>
-                            <apexchart type="bar" height="300" :options="visitsChartOptions"
-                                :series="visitsChartSeries" />
-                        </ClientOnly>
-                    </v-card-text>
-                </v-card>
-            </v-col>
-
-            <v-col cols="12" md="5">
-                <v-card elevation="0" class="h-100">
-                    <v-card-item>
-                        <v-card-title class="text-h5">Department Load</v-card-title>
-                        <v-card-subtitle>Share of appointments per department — {{ activePeriodLabel
-                            }}</v-card-subtitle>
-                    </v-card-item>
-                    <v-card-text>
-                        <template v-if="departmentChartSeries.length">
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
+                    <v-card elevation="0" class="h-100">
+                        <v-card-item>
+                            <v-card-title class="text-h5">Monthly Visits</v-card-title>
+                            <v-card-subtitle>Total appointments per month — {{ filterYear }}</v-card-subtitle>
+                        </v-card-item>
+                        <v-card-text>
                             <ClientOnly>
-                                <apexchart type="donut" height="300" :options="departmentChartOptions"
-                                    :series="departmentChartSeries" />
+                                <apexchart type="bar" height="300" :options="visitsChartOptions"
+                                    :series="visitsChartSeries" />
                             </ClientOnly>
-                        </template>
-                        <div v-else class="d-flex align-center justify-center" style="height: 300px;">
-                            <div class="text-center text-medium-emphasis">
-                                <v-icon icon="mdi-chart-donut" size="48" class="mb-2 d-block" />
-                                <span class="text-body-2">No appointments in this period</span>
-                            </div>
-                        </div>
-                    </v-card-text>
+                        </v-card-text>
+                    </v-card>
                 </v-card>
             </v-col>
 
             <v-col cols="12" md="5">
-                <v-card elevation="0" class="h-100">
-                    <v-card-item>
-                        <v-card-title class="text-h5">Top Diagnoses</v-card-title>
-                        <v-card-subtitle>Most frequent diagnoses — {{ activePeriodLabel }}</v-card-subtitle>
-                    </v-card-item>
-                    <v-divider />
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
+                    <v-card elevation="0" class="h-100">
+                        <v-card-item>
+                            <v-card-title class="text-h5">Department Load</v-card-title>
+                            <v-card-subtitle>Share of appointments per department — {{ activePeriodLabel
+                                }}</v-card-subtitle>
+                        </v-card-item>
+                        <v-card-text>
+                            <template v-if="departmentChartSeries.length">
+                                <ClientOnly>
+                                    <apexchart type="donut" height="300" :options="departmentChartOptions"
+                                        :series="departmentChartSeries" />
+                                </ClientOnly>
+                            </template>
+                            <div v-else class="d-flex align-center justify-center" style="height: 300px;">
+                                <div class="text-center text-medium-emphasis">
+                                    <v-icon icon="mdi-chart-donut" size="48" class="mb-2 d-block" />
+                                    <span class="text-body-2">No appointments in this period</span>
+                                </div>
+                            </div>
+                        </v-card-text>
+                    </v-card>
+                </v-card>
+            </v-col>
+
+            <v-col cols="12" md="5">
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
+                    <v-card elevation="0" class="h-100">
+                        <v-card-item>
+                            <v-card-title class="text-h5">Top Diagnoses</v-card-title>
+                            <v-card-subtitle>Most frequent diagnoses — {{ activePeriodLabel }}</v-card-subtitle>
+                        </v-card-item>
+                        <v-divider />
                     <template v-if="topDiagnoses.length">
                         <v-list density="comfortable">
                             <v-list-item v-for="d in topDiagnoses" :key="d.rank">
@@ -346,14 +355,16 @@ const availableReports = computed(() => {
                         No diagnosis data for this period.
                     </div>
                 </v-card>
+                </v-card>
             </v-col>
 
             <v-col cols="12" md="7">
-                <v-card elevation="0" class="h-100">
-                    <v-card-item>
-                        <div class="d-flex justify-space-between align-center">
-                            <div>
-                                <v-card-title class="text-h5">Generated Reports</v-card-title>
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
+                    <v-card elevation="0" class="h-100">
+                        <v-card-item>
+                            <div class="d-flex justify-space-between align-center">
+                                <div>
+                                    <v-card-title class="text-h5">Generated Reports</v-card-title>
                                 <v-card-subtitle>Based on live clinic data — {{ activePeriodLabel }}</v-card-subtitle>
                             </div>
                             <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-plus" disabled>
@@ -386,6 +397,7 @@ const availableReports = computed(() => {
                             </tr>
                         </tbody>
                     </v-table>
+                </v-card>
                 </v-card>
             </v-col>
         </template>
