@@ -11,7 +11,7 @@
       <div class="grid md:grid-cols-3 gap-6">
         <div v-for="(testimonial, i) in testimonials" :key="i" class="bg-white rounded-2xl p-8 border border-gray-100">
           <div class="flex items-center gap-1 mb-4">
-            <svg v-for="n in testimonial.rating" :key="n" class="w-4 h-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+            <svg v-for="n in 5" :key="n" class="w-4 h-4" :class="n <= testimonial.rating ? 'text-yellow-400' : 'text-gray-300'" viewBox="0 0 20 20" fill="currentColor">
               <path
                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
@@ -38,6 +38,7 @@ import { computed } from 'vue'
 
 const fallbackTestimonials = [
   {
+    rating: 5,
     quote: "This platform has completely transformed how we manage patient records. The integration between registration, pharmacy, and billing saved us hours of manual work every day.",
     initials: 'DR',
     name: 'Dr. Andi Pratama',
@@ -46,6 +47,7 @@ const fallbackTestimonials = [
     image_url: '/landingpage/testimonials/andri.png',
   },
   {
+    rating: 5,
     quote: "The real-time dashboard and reporting features give us unprecedented visibility into our operations. We can now make data-driven decisions that improve patient care.",
     initials: 'SN',
     name: 'Siti Nurhaliza',
@@ -54,6 +56,7 @@ const fallbackTestimonials = [
     image_url: '/landingpage/testimonials/siti.png',
   },
   {
+    rating: 4,
     quote: "Implementing this ERP was the best decision we made. The pharmacy module alone reduced medication errors by 80% and streamlined our entire supply chain.",
     initials: 'AR',
     name: 'Apt. Rahmatullah',
