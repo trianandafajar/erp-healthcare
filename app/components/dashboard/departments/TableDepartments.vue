@@ -88,6 +88,14 @@ function onModalCancel() {
     if (!loading.value) closeModal()
 }
 
+function openEdit(department: Department) {
+    if (route.params.slug) {
+        navigateTo(`/${route.params.slug}/departments/${department.id}/edit`)
+    } else {
+        navigateTo({ query: { section: 'department-edit', entityId: department.id } })
+    }
+}
+
 function openDelete(department: Department) {
     modalMode.value = 'delete'
     selectedDepartment.value = department
@@ -215,6 +223,8 @@ function openView(department: Department) {
                     <td class="py-3 text-right">
                         <v-btn @click="openView(department)" icon="mdi-eye-outline" variant="text" size="small"
                             color="primary" density="comfortable" />
+                        <v-btn v-if="can('department.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(department)" />
                         <v-btn v-if="can('department.delete')" icon="mdi-delete-outline" variant="text" size="small"
                             color="error" density="comfortable" @click="openDelete(department)" />
                     </td>

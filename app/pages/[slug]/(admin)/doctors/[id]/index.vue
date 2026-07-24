@@ -146,12 +146,7 @@ function genderColor(gender?: string | null) {
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex ga-2">
-                        <v-btn variant="tonal" color="primary" prepend-icon="mdi-pencil"
-                            @click="navigateTo(`/${slug}/doctors/${id}/edit`)">
-                            Edit
-                        </v-btn>
-                    </div>
+                    <div class="d-flex ga-2"></div>
                 </div>
             </v-card-item>
         </v-card>

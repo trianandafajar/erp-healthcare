@@ -142,6 +142,14 @@ function openAdd() {
     dialog.value = true
 }
 
+function openEdit(doctor: Doctor) {
+    if (route.params.slug) {
+        navigateTo(`/${route.params.slug}/doctors/${doctor.id}/edit`)
+    } else {
+        navigateTo({ query: { section: 'doctor-edit', entityId: doctor.id } })
+    }
+}
+
 function openDelete(doctor: Doctor) {
     modalMode.value = 'delete'
     selectedDoctor.value = doctor
@@ -360,6 +368,8 @@ function openView(doctor: Doctor) {
                     <td class="py-3 text-right">
                         <v-btn @click="openView(doctor)" icon="mdi-eye-outline" variant="text" size="small"
                             color="primary" density="comfortable" />
+                        <v-btn v-if="can('doctor.edit')" icon="mdi-pencil-outline" variant="text" size="small"
+                            color="secondary" density="comfortable" @click="openEdit(doctor)" />
                         <v-btn v-if="can('doctor.delete')" icon="mdi-delete-outline" variant="text" size="small"
                             color="error" density="comfortable" @click="openDelete(doctor)" />
                     </td>

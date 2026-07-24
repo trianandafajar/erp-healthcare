@@ -112,10 +112,7 @@ const careNoteColor: Record<string, string> = {
                             </div>
                         </div>
                     </div>
-                    <v-btn variant="tonal" color="primary" prepend-icon="mdi-pencil"
-                        @click="navigateTo(`/${slug}/nurses/${id}/edit`)">
-                        Edit
-                    </v-btn>
+
                 </div>
             </v-card-item>
         </v-card>
