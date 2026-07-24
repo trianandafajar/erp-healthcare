@@ -48,7 +48,11 @@ export default defineEventHandler(async (event: any) => {
         throw createError({ statusCode: 404, message: error.message })
     }
 
-    const result = (profiles ?? []).map(p => ({
+    const filtered = (profiles ?? []).filter(
+        p => p.user_roles?.[0]?.roles?.name !== 'admin'
+    )
+
+    const result = filtered.map(p => ({
         ...p,
         role: p.user_roles?.[0]?.roles?.name ?? null,
         role_label: p.user_roles?.[0]?.roles?.label ?? null,
@@ -57,9 +61,9 @@ export default defineEventHandler(async (event: any) => {
 
     return {
         profiles: result,
-        total: count ?? 0,
+        total: filtered.length,
         page,
         limit,
-        totalPages: Math.ceil((count ?? 0) / limit),
+        totalPages: Math.ceil(filtered.length / limit),
     }
 })
