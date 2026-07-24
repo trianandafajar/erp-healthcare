@@ -8,7 +8,7 @@ import { useRuntimeConfig } from 'nuxt/app'
 interface Subscription {
     id: string
     tenant_id: string
-    tenant: { name: string; slug: string; owner_id: string | null } | null
+    tenant: { name: string; slug: string; owner_id: string | null; logo_url: string | null } | null
     plan: string
     status: string
     billing_cycle: string | null
@@ -331,8 +331,14 @@ onMounted(() => {
                 <tr v-else v-for="sub in subscriptions" :key="sub.id">
                     <td class="py-3">
                         <div class="d-flex align-center ga-3">
-                            <v-avatar size="34" color="primary" variant="tonal">
-                                <span class="text-caption font-weight-bold">{{ getInitials(sub.tenant?.name ?? sub.tenant_id) }}</span>
+                            <v-avatar size="34" rounded="lg">
+                                <v-img :src="sub.tenant?.logo_url || '/placeholder/LogoTenant.png'" cover>
+                                    <template #error>
+                                        <v-avatar size="34" color="primary" variant="tonal">
+                                            <span class="text-caption font-weight-bold">{{ getInitials(sub.tenant?.name ?? sub.tenant_id) }}</span>
+                                        </v-avatar>
+                                    </template>
+                                </v-img>
                             </v-avatar>
                             <div>
                                 <div class="text-body-2 font-weight-medium">{{ sub.tenant?.name ?? 'Unknown' }}</div>

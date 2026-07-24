@@ -46,8 +46,24 @@ export default defineEventHandler(async (event) => {
 
     if (error) throw createError({ statusCode: 500, message: error.message })
 
+    const tenantIds = data.map((s: any) => s.tenant_id).filter(Boolean)
+    let settingsMap: Record<string, any> = {}
+    if (tenantIds.length > 0) {
+        const { data: allSettings } = await admin
+            .from('tenant_settings')
+            .select('tenant_id, logo_url')
+            .in('tenant_id', tenantIds)
+
+        settingsMap = Object.fromEntries((allSettings ?? []).map((s) => [s.tenant_id, s]))
+    }
+
+    const subscriptions = data.map((s: any) => ({
+        ...s,
+        tenant: s.tenant ? { ...s.tenant, logo_url: settingsMap[s.tenant_id]?.logo_url ?? null } : null,
+    }))
+
     return {
-        subscriptions: data,
+        subscriptions,
         total: count ?? 0,
         page: page ?? 1,
         limit,
