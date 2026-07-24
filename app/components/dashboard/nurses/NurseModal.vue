@@ -380,8 +380,8 @@ const isSubmitDisabled = computed(() =>
             <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
                 Cancel
             </v-btn>
-            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
-                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading || submitting" :disabled="loading || submitting"
+                :style="(loading || submitting) ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>

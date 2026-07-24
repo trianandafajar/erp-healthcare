@@ -17,8 +17,8 @@ const emit = defineEmits<{
     (e: 'cancel'): void
 }>()
 
-const { data: rolesData } = await useFetch<{ roles: any[] }>('/api/roles')
-const { data: deptData } = await useFetch<{ departments: any[] }>('/api/departments')
+const { data: rolesData } = useLazyFetch<{ roles: any[] }>('/api/roles')
+const { data: deptData } = useLazyFetch<{ departments: any[] }>('/api/departments')
 
 const roles = computed(() =>
     (rolesData.value?.roles ?? []).map((r) => ({
