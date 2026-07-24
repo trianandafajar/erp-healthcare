@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import AppLogo from '~/components/AppLogo.vue'
 import AuthFooter from '~/components/auth/AuthFooter.vue'
+import { getOnboardingPath } from '~/utils/onboardingRedirect'
+import { getDashboardPath } from '~/utils/roleRedirect'
 
 definePageMeta({
   layout: false,
@@ -18,11 +20,10 @@ useSeoMeta({
 })
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const profileStore = useProfileStore()
 
-const clinicName = ref('')
-const billing = ref<'monthly' | 'yearly'>('monthly')
 const plans = ref<any[]>([])
 const loading = ref(false)
 const submitting = ref(false)
@@ -31,6 +32,9 @@ const errorMsg = ref('')
 
 const showFeatureModal = ref(false)
 const selectedPlan = ref<any>(null)
+
+const clinicName = ref('')
+const billing = ref<'monthly' | 'yearly'>('monthly')
 
 function openFeatureModal(plan: any) {
   selectedPlan.value = plan
@@ -51,12 +55,40 @@ async function loadPlans() {
 
 loadPlans()
 
+onMounted(() => {
+  const savedName = sessionStorage.getItem('onboarding_clinic')
+  const savedBilling = sessionStorage.getItem('onboarding_billing')
+  if (savedName) clinicName.value = savedName
+  if (savedBilling === 'monthly' || savedBilling === 'yearly') billing.value = savedBilling
+
+  if (authStore.tenantId) {
+    const path = getOnboardingPath(
+      authStore.tenantId,
+      authStore.subscriptionPlan,
+      authStore.settings,
+      authStore.tenantSlug,
+      authStore.role
+    )
+    if (path) {
+      return navigateTo(path, { replace: true })
+    }
+    return navigateTo(getDashboardPath(authStore.role, authStore.tenantSlug), { replace: true })
+  }
+
+  if (route.query.canceled === 'true') {
+    errorMsg.value = 'Payment was canceled. Your clinic details have been saved — you can review and try again.'
+  }
+})
+
 async function selectPlan(plan: any) {
   if (!clinicName.value.trim()) {
     errorMsg.value = 'Please enter your clinic or hospital name.'
     return
   }
   if (!plan?.id) return
+
+  sessionStorage.setItem('onboarding_clinic', clinicName.value.trim())
+  sessionStorage.setItem('onboarding_billing', billing.value)
 
   submitting.value = true
   selectedPlanId.value = plan.id
@@ -77,6 +109,8 @@ async function selectPlan(plan: any) {
     if (data.url) {
       window.location.href = data.url
     } else if (data.slug) {
+      sessionStorage.removeItem('onboarding_clinic')
+      sessionStorage.removeItem('onboarding_billing')
       await profileStore.refreshProfile()
       await navigateTo(`/${data.slug}/configure`)
     }

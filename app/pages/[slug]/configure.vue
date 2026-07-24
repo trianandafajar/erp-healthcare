@@ -111,6 +111,7 @@ async function save() {
     await profileStore.refreshProfile()
     authStore.tenantId = profileStore.tenant?.id ?? null
     authStore.settings = profileStore.settings
+    authStore.clearOnboarding()
     await navigateTo(`/${tenantSlug.value}/dashboard`)
   } catch (err: any) {
     errorMsg.value = err?.data?.message || err.message || 'Failed to save configuration'

@@ -8,6 +8,8 @@ export const useAuthStore = defineStore('auth', () => {
     const subscriptionStatus = ref<string | null>(null)
     const settings = ref<{ logo_url?: string | null } | null>(null)
     const skipOnboarding = ref(false)
+    const onboardingClinicName = ref('')
+    const onboardingBillingCycle = ref<'monthly' | 'yearly'>('monthly')
 
     function hydrate() {
         if (!import.meta.client) return
@@ -23,6 +25,8 @@ export const useAuthStore = defineStore('auth', () => {
             subscriptionPlan.value = saved.subscriptionPlan ?? 'starter'
             subscriptionStatus.value = saved.subscriptionStatus ?? null
             settings.value = saved.settings ?? null
+            onboardingClinicName.value = saved.onboardingClinicName ?? ''
+            onboardingBillingCycle.value = saved.onboardingBillingCycle ?? 'monthly'
         } catch {}
     }
 
@@ -37,6 +41,8 @@ export const useAuthStore = defineStore('auth', () => {
             subscriptionPlan: subscriptionPlan.value,
             subscriptionStatus: subscriptionStatus.value,
             settings: settings.value,
+            onboardingClinicName: onboardingClinicName.value,
+            onboardingBillingCycle: onboardingBillingCycle.value,
         }))
     }
 
@@ -80,15 +86,24 @@ export const useAuthStore = defineStore('auth', () => {
         subscriptionPlan.value = 'starter'
         subscriptionStatus.value = null
         settings.value = null
+        onboardingClinicName.value = ''
+        onboardingBillingCycle.value = 'monthly'
         if (import.meta.client) {
             localStorage.removeItem('auth')
         }
+    }
+
+    function clearOnboarding() {
+        onboardingClinicName.value = ''
+        onboardingBillingCycle.value = 'monthly'
+        persist()
     }
 
     const isAuthenticated = computed(() => !!user.value)
 
     return {
         user, role, permissions, tenantId, tenantSlug, subscriptionPlan, subscriptionStatus, settings, skipOnboarding, isAuthenticated,
-        setUser, hasPermission, hasAnyPermission, clearUser
+        onboardingClinicName, onboardingBillingCycle,
+        setUser, hasPermission, hasAnyPermission, clearUser, clearOnboarding, persist
     }
 })
