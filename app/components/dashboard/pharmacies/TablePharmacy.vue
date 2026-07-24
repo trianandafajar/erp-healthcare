@@ -209,7 +209,7 @@ async function handleSubmit(payload: any) {
         </div>
     </UiTitleCard>
     <div class="text-xs-center">
-        <v-dialog v-model="dialog" width="480" persistent>
+        <v-dialog v-model="dialog" width="480">
             <PharmacyModal :loading="actionLoading" :mode="modalMode" :user="selectedUser" @submit="handleSubmit"
                 @cancel="closeModal" />
         </v-dialog>

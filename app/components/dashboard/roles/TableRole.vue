@@ -216,7 +216,7 @@ async function handleSubmit(payload: any) {
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="700" persistent>
+    <v-dialog v-model="dialog" max-width="700">
         <RoleModal :mode="modalMode" :role="selectedRole" :grouped-permissions="groupedPermissions"
             @submit="handleSubmit" @cancel="dialog = false" :loading="actionLoading" />
     </v-dialog>

@@ -357,7 +357,7 @@ async function handleSubmit(payload: any) {
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="600" persistent>
+    <v-dialog v-model="dialog" max-width="600">
         <PatientModal :loading="actionLoading" :mode="modalMode" :patient="selectedPatient" @submit="handleSubmit"
             @cancel="closeModal" />
     </v-dialog>

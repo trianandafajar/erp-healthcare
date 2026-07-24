@@ -18,7 +18,7 @@ function navigateToUpgrade() {
 </script>
 
 <template>
-    <v-dialog v-model="upgrade.shown" max-width="480" persistent>
+    <v-dialog v-model="upgrade.shown" max-width="480">
         <v-card rounded="xl" class="pa-2">
             <v-card-text class="text-center pa-6 pb-2">
                 <v-avatar color="amber-lighten-4" size="72" class="mb-4">

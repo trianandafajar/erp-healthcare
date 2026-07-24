@@ -259,7 +259,7 @@ function formatDate(dateStr?: string) {
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="600" persistent>
+    <v-dialog v-model="dialog" max-width="600">
         <PricingPlanModal :mode="modalMode" :plan="selectedPlan" :loading="actionLoading"
             @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>

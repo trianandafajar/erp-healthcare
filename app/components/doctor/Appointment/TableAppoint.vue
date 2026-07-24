@@ -317,7 +317,7 @@ async function handleCreatePatient(payload: { full_name: string; email: string }
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="480" persistent>
+    <v-dialog v-model="dialog" max-width="480">
         <ApptModal :loading="actionLoading" :mode="modalMode" :appointment="selectedAppointment" :patients="patients"
             :can-create-patient="can('user.create')" @submit="handleSubmit" @cancel="closeModal"
             @patient-created="(p) => patients.unshift(p)" />

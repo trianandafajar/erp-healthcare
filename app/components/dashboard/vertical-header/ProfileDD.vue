@@ -102,7 +102,7 @@ async function confirmLogout() {
     </v-list>
   </div>
 
-  <v-dialog v-model="dialog" max-width="400" persistent>
+  <v-dialog v-model="dialog" max-width="400">
     <v-card rounded="lg">
       <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
         <div class="d-flex align-center ga-2">

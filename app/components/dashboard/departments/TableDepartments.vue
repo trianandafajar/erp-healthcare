@@ -241,7 +241,7 @@ function openView(department: Department) {
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="500" persistent>
+    <v-dialog v-model="dialog" max-width="500">
         <DepartmentModal :mode="modalMode" :department="selectedDepartment" :loading="actionLoading"
             @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>

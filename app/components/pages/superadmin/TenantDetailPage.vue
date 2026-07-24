@@ -778,7 +778,7 @@ const statusColor: Record<string, string> = {
         </v-card>
     </template>
 
-    <v-dialog v-model="subscriptionDialog" max-width="540" persistent>
+    <v-dialog v-model="subscriptionDialog" max-width="540">
         <SubscriptionModal mode="edit" :subscription="subscriptionForModal" :loading="subscriptionLoading"
             @submit="handleSubscriptionSubmit" @cancel="subscriptionDialog = false" />
     </v-dialog>

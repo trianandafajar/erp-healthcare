@@ -70,7 +70,7 @@ function onSubmit() {
 </script>
 
 <template>
-    <v-dialog :model-value="modelValue" max-width="520" persistent
+    <v-dialog :model-value="modelValue" max-width="520"
         @update:model-value="emit('update:modelValue', $event)">
         <v-card rounded="lg">
             <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">

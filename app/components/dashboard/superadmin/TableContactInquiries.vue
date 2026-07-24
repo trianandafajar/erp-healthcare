@@ -189,7 +189,7 @@ function formatDate(dateStr: string) {
         <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" class="mt-4" size="small" />
     </v-card>
 
-    <v-dialog v-model="replyDialog" max-width="600" persistent>
+    <v-dialog v-model="replyDialog" max-width="600">
         <v-card rounded="lg">
             <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
                 <div class="d-flex align-center ga-2">

@@ -71,7 +71,7 @@ async function submit() {
 </script>
 
 <template>
-    <v-dialog :model-value="props.modelValue" max-width="520" persistent
+    <v-dialog :model-value="props.modelValue" max-width="520"
         @update:model-value="(v) => emit('update:modelValue', v)">
         <v-card rounded="lg" width="100%">
             <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">

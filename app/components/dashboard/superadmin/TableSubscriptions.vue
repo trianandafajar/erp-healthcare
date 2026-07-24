@@ -402,7 +402,7 @@ onMounted(() => {
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="540" persistent>
+    <v-dialog v-model="dialog" max-width="540">
         <SubscriptionModal :mode="modalMode" :subscription="mapToModalPayload(selectedSubscription)"
             :available-tenants="availableTenants" :loading="modalLoading" @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>

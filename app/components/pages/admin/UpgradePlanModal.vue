@@ -130,8 +130,7 @@ async function doUpgrade(plan: any) {
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="1000"
-    persistent>
+  <v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="1000">
     <v-card rounded="sm" class="pa-2">
       <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
         <div class="d-flex align-center ga-2">

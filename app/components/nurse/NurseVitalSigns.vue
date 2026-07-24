@@ -348,7 +348,7 @@ function formatDate(dateStr: string) {
         </v-table>
     </v-card>
 
-    <v-dialog v-model="dialog" max-width="640" persistent>
+    <v-dialog v-model="dialog" max-width="640">
         <v-card rounded="lg">
             <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
                 <div class="d-flex align-center ga-2">
@@ -436,7 +436,7 @@ function formatDate(dateStr: string) {
         </v-card>
     </v-dialog>
 
-    <v-dialog v-model="deleteDialog" max-width="420" persistent>
+    <v-dialog v-model="deleteDialog" max-width="420">
         <v-card rounded="lg">
             <v-card-text class="pa-6 text-center">
                 <v-avatar color="error" variant="tonal" size="56" class="mb-4">

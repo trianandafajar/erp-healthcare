@@ -324,7 +324,7 @@ async function updateStatus(id: string, status: string) {
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="720" persistent>
+    <v-dialog v-model="dialog" max-width="720">
         <v-card>
             <v-card-title class="text-h5">Create Appointment</v-card-title>
             <v-divider />

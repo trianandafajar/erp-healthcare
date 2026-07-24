@@ -599,7 +599,7 @@ async function handleSubscriptionSubmit(payload: any) {
             </v-card-text>
         </v-card>
 
-        <v-dialog v-model="subscriptionDialog" max-width="540" persistent>
+        <v-dialog v-model="subscriptionDialog" max-width="540">
             <SubscriptionModal mode="edit" :subscription="subscriptionForModal" :loading="subscriptionLoading"
                 @submit="handleSubscriptionSubmit" @cancel="subscriptionDialog = false" />
         </v-dialog>

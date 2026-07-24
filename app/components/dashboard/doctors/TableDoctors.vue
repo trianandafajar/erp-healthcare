@@ -392,7 +392,7 @@ function openView(doctor: Doctor) {
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="600" persistent>
+    <v-dialog v-model="dialog" max-width="600">
         <DoctorModal :mode="modalMode" :doctor="selectedDoctor" :available-users="availableUsers"
             :departments="departments" :on-create-user="handleCreateUser" :on-create-department="handleCreateDepartment"
             :loading="actionLoading" @submit="handleSubmit" @cancel="closeModal" />

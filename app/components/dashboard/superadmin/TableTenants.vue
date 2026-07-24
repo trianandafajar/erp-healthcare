@@ -278,11 +278,11 @@ const snackbarColor = ref('success')
     </div>
   </UiTitleCard>
 
-  <v-dialog v-model="createDialog" max-width="540" persistent>
+  <v-dialog v-model="createDialog" max-width="540">
     <TenantCreateModal :loading="creating" @submit="handleCreate" @cancel="createDialog = false" />
   </v-dialog>
 
-  <v-dialog v-model="deleteDialog" max-width="480" persistent>
+  <v-dialog v-model="deleteDialog" max-width="480">
     <v-card rounded="lg">
       <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
         <div class="d-flex align-center ga-2">

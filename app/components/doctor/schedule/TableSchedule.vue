@@ -219,7 +219,7 @@ async function handleSubmit(payload: any) {
         </div>
     </UiTitleCard>
 
-    <v-dialog v-model="dialog" max-width="480" persistent>
+    <v-dialog v-model="dialog" max-width="480">
         <ScheduleModal :loading="actionLoading" :mode="modalMode" :schedule="selectedSchedule" :schedules="schedules"
             @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>

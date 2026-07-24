@@ -324,13 +324,13 @@ async function handleSubmit(payload: any) {
         </div>
     </UiTitleCard>
     <div class="text-xs-center">
-        <v-dialog v-model="dialog" width="520" persistent>
+        <v-dialog v-model="dialog" width="520">
             <UserModalSuperadmin :loading="actionLoading" :mode="modalMode" :user="selectedUser" :tenants="tenants"
                 @submit="handleSubmit" @cancel="closeModal" />
         </v-dialog>
     </div>
 
-    <v-dialog v-model="resetDialog" width="420" persistent>
+    <v-dialog v-model="resetDialog" width="420">
         <v-card rounded="lg">
             <v-card-title class="d-flex align-center pa-4 pb-2">
                 <v-icon icon="mdi-lock-reset" size="20" class="mr-2" />

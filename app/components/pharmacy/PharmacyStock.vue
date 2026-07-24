@@ -265,7 +265,7 @@ function formatDate(value: string) {
         </v-card-text>
     </v-card>
 
-    <v-dialog v-model="dialog" max-width="640" persistent>
+    <v-dialog v-model="dialog" max-width="640">
         <v-card rounded="lg">
             <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
                 <div class="d-flex align-center ga-2">
@@ -363,7 +363,7 @@ function formatDate(value: string) {
         </v-card>
     </v-dialog>
 
-    <v-dialog v-model="adjustDialog" max-width="480" persistent>
+    <v-dialog v-model="adjustDialog" max-width="480">
         <v-card rounded="lg">
             <v-card-title class="d-flex align-center justify-space-between pa-4 pb-2">
                 <div class="d-flex align-center ga-2">
