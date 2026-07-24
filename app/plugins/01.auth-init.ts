@@ -1,4 +1,4 @@
-const GUEST_ROUTES = ['/', '/login', '/register', '/forgot-password']
+const GUEST_ROUTES = ['/', '/login', '/register', '/forgot-password', '/verify']
 
 export default defineNuxtPlugin(async () => {
     if (import.meta.server) return
@@ -11,6 +11,11 @@ export default defineNuxtPlugin(async () => {
         const isImpersonating = !!impersonationMeta.value
 
         if (authState.role !== 'superadmin' && !isImpersonating) {
+            if (!authState.emailVerified) {
+                await navigateTo(`/verify?email=${encodeURIComponent(authState.user?.email ?? '')}`, { replace: true })
+                return
+            }
+
             const onboardingPath = getOnboardingPath(
                 authState.tenantId ?? authStore.tenantId,
                 authState.subscriptionPlan ?? authStore.subscriptionPlan,

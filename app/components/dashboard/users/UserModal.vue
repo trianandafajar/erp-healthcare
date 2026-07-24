@@ -7,6 +7,7 @@ const props = defineProps<{
         email: string
         role: string
         status: string
+        is_owner?: boolean
     } | null
     loading?: boolean
 }>()
@@ -180,7 +181,8 @@ function onSubmit() {
                     <v-col cols="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Role</v-label>
                         <v-select v-model="form.role" :items="roles" item-title="label" item-value="name"
-                            variant="outlined" density="compact" hide-details />
+                            variant="outlined" density="compact" hide-details
+                            :disabled="mode === 'edit' && user?.is_owner" />
                     </v-col>
                     <v-col cols="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Status</v-label>

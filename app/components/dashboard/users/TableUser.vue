@@ -101,6 +101,7 @@ const allUsers = computed(() =>
         role: u.role,
         status: u.status,
         joined: u.created_at,
+        is_owner: u.is_owner ?? false,
     }))
 )
 

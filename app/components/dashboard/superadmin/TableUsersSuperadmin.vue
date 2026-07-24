@@ -84,6 +84,7 @@ const users = computed(() =>
         joined: u.created_at,
         tenant_id: u.tenant_id,
         tenant_name: u.tenant_name,
+        is_owner: u.is_owner ?? false,
     }))
 )
 

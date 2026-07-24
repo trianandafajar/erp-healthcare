@@ -25,6 +25,26 @@ export default defineEventHandler(async (event) => {
         .eq('id', id)
         .single()
 
+    if (role) {
+        const { data: tenant } = await admin
+            .from('tenants')
+            .select('owner_id')
+            .eq('id', before?.tenant_id)
+            .single()
+
+        if (tenant && tenant.owner_id === id) {
+            const { data: currentRole } = await admin
+                .from('user_roles')
+                .select('roles(name)')
+                .eq('user_id', id)
+                .single()
+
+            if (currentRole && currentRole.roles?.name !== role) {
+                throw createError({ statusCode: 403, message: 'Cannot change the role of the tenant owner' })
+            }
+        }
+    }
+
     const { error: authError } = await admin.auth.admin.updateUserById(id, {
         user_metadata: { full_name, role },
     })

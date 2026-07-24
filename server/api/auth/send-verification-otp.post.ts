@@ -2,42 +2,48 @@ import { Resend } from 'resend'
 import { randomInt } from 'crypto'
 
 export default defineEventHandler(async (event) => {
-    const { email, password, full_name } = await readBody(event)
+    const { email } = await readBody(event)
 
-    if (!email || !password || !full_name) {
-        throw createError({
-            statusCode: 400,
-            message: 'Email, password, and full name are required.',
-        })
+    if (!email) {
+        throw createError({ statusCode: 400, message: 'Email is required' })
     }
 
-    const admin = supabaseAdmin()
+    const supabase = supabaseAdmin()
+    const config = useRuntimeConfig()
 
-    const { data, error } = await admin.auth.admin.createUser({
-        email,
-        password,
-        user_metadata: { full_name, role: 'admin' },
-        email_confirm: false,
-    })
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('email_verified')
+        .eq('email', email)
+        .maybeSingle()
 
-    if (error) throw createError({ statusCode: 401, message: error.message })
+    if (!profile) {
+        throw createError({ statusCode: 404, message: 'User not found' })
+    }
+
+    if (profile.email_verified) {
+        throw createError({ statusCode: 400, message: 'Email already verified' })
+    }
 
     const otp = String(randomInt(100000, 999999))
     const expiresAt = new Date(Date.now() + 1000 * 60 * 30)
 
-    await admin
+    await supabase
         .from('email_verifications')
         .delete()
         .eq('email', email)
 
-    await admin
+    const { error: insertError } = await supabase
         .from('email_verifications')
         .insert({ email, otp, expires_at: expiresAt.toISOString() })
 
-    const config = useRuntimeConfig()
+    if (insertError) {
+        throw createError({ statusCode: 500, message: 'Failed to generate OTP' })
+    }
+
     const resend = new Resend(config.resendApiKey)
 
-    await resend.emails.send({
+    const { error: emailError } = await resend.emails.send({
         from: 'onboarding@resend.dev',
         to: email,
         subject: 'Verify Your Email Address',
@@ -81,6 +87,9 @@ export default defineEventHandler(async (event) => {
                                             </td>
                                         </tr>
                                     </table>
+                                    <p style="margin:24px 0 0;color:#8a94a6;font-size:13px;line-height:1.6;">
+                                        If you didn't create an account, you can safely ignore this email.
+                                    </p>
                                 </td>
                             </tr>
                             <tr>
@@ -90,7 +99,10 @@ export default defineEventHandler(async (event) => {
                             </tr>
                             <tr>
                                 <td style="padding:24px 40px;text-align:center;">
-                                    <p style="margin:0;color:#aab4c0;font-size:12px;line-height:1.6;">
+                                    <p style="margin:0 0 8px;color:#aab4c0;font-size:12px;line-height:1.6;">
+                                        This is an automated message from HealthData.
+                                    </p>
+                                    <p style="margin:0;color:#c8cfd8;font-size:11px;">
                                         &copy; ${new Date().getFullYear()} HealthData &middot; All rights reserved
                                     </p>
                                 </td>
@@ -104,8 +116,9 @@ export default defineEventHandler(async (event) => {
         `,
     })
 
-    return {
-        message: 'Registration successful. Please check your email for the verification code.',
-        redirect: `/verify?email=${encodeURIComponent(email)}`,
+    if (emailError) {
+        throw createError({ statusCode: 500, message: 'Failed to send verification email' })
     }
+
+    return { message: 'Verification code sent to your email' }
 })

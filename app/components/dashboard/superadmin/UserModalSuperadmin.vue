@@ -15,6 +15,7 @@ const props = defineProps<{
         status: string
         tenant_id?: string
         tenant_name?: string
+        is_owner?: boolean
     } | null
     loading?: boolean
     tenants: Tenant[]
@@ -141,7 +142,8 @@ function onSubmit() {
                     <v-col cols="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Role</v-label>
                         <v-select v-model="form.role" :items="roles" item-title="label" item-name="name"
-                            variant="outlined" density="compact" hide-details />
+                            variant="outlined" density="compact" hide-details
+                            :disabled="mode === 'edit' && user?.is_owner" />
                     </v-col>
                     <v-col cols="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Status</v-label>

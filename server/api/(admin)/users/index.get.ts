@@ -48,6 +48,15 @@ export default defineEventHandler(async (event: any) => {
         throw createError({ statusCode: 404, message: error.message })
     }
 
+    const { data: tenant } = await admin
+        .from('tenants')
+        .select('owner_id')
+        .eq('id', tenantId)
+        .single()
+        .returns<{ owner_id: string | null }>()
+
+    const ownerId = tenant?.owner_id ?? null
+
     const filtered = (profiles ?? []).filter(
         p => p.user_roles?.[0]?.roles?.name !== 'admin'
     )
@@ -56,6 +65,7 @@ export default defineEventHandler(async (event: any) => {
         ...p,
         role: p.user_roles?.[0]?.roles?.name ?? null,
         role_label: p.user_roles?.[0]?.roles?.label ?? null,
+        is_owner: p.id === ownerId,
         user_roles: undefined
     }))
 

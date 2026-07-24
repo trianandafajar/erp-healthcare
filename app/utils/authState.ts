@@ -4,6 +4,7 @@ type EnsuredAuthState = {
   permissions: string[]
   tenantId: string | null
   tenantSlug: string | null
+  emailVerified: boolean
   subscriptionPlan?: string | null
   settings?: { logo_url?: string | null } | null
 }
@@ -46,6 +47,7 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
       permissions: authStore.permissions,
       tenantId: authStore.tenantId,
       tenantSlug: authStore.tenantSlug,
+      emailVerified: profileStore.profile?.email_verified ?? false,
       subscriptionPlan: authStore.subscriptionPlan,
       settings: authStore.settings,
     }
@@ -75,6 +77,7 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
       .filter(Boolean) ?? []
     const tenantId = currentProfile.tenant?.id ?? currentProfile.profile?.tenant_id ?? null
     const tenantSlug = currentProfile.tenant?.slug ?? null
+    const emailVerified = currentProfile.profile?.email_verified ?? false
 
     authStore.setUser({
       user: currentProfile.user,
@@ -93,6 +96,7 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
       permissions,
       tenantId,
       tenantSlug,
+      emailVerified,
       subscriptionPlan: currentProfile.subscription?.plan ?? null,
       settings: currentProfile.settings ?? null,
     }

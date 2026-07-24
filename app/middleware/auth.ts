@@ -30,18 +30,24 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const impersonationMeta = useCookie<any>('impersonation_meta', { default: () => null })
     const isImpersonating = !!impersonationMeta.value
 
-    if (!authStore.skipOnboarding && role !== 'superadmin' && !isImpersonating) {
-        const onboardingPath = getOnboardingPath(
-          authStore.tenantId,
-          authState.subscriptionPlan ?? authStore.subscriptionPlan,
-          authState.settings ?? null,
-          authStore.tenantSlug,
-          role
-        )
+    if (role !== 'superadmin' && !isImpersonating) {
+        if (!authState.emailVerified && !to.path.startsWith('/verify')) {
+            return navigateTo(`/verify?email=${encodeURIComponent(authState.user?.email ?? '')}`, { replace: true })
+        }
 
-        if (onboardingPath && !to.path.startsWith('/onboarding/') && !to.path.includes('/configure')) {
-            authStore.skipOnboarding = false
-            return navigateTo(onboardingPath, { replace: true })
+        if (!authStore.skipOnboarding) {
+            const onboardingPath = getOnboardingPath(
+              authStore.tenantId,
+              authState.subscriptionPlan ?? authStore.subscriptionPlan,
+              authState.settings ?? null,
+              authStore.tenantSlug,
+              role
+            )
+
+            if (onboardingPath && !to.path.startsWith('/onboarding/') && !to.path.includes('/configure')) {
+                authStore.skipOnboarding = false
+                return navigateTo(onboardingPath, { replace: true })
+            }
         }
     }
     authStore.skipOnboarding = false

@@ -62,7 +62,7 @@ async function register() {
     errorMsg.value = ''
 
     try {
-        await $fetch('/api/auth/register', {
+        const res = await $fetch<{ redirect: string }>('/api/auth/register', {
             method: 'POST',
             body: {
                 email: email.value,
@@ -71,7 +71,7 @@ async function register() {
             },
         })
 
-        await navigateTo('/login')
+        await navigateTo(res.redirect)
     } catch (err: any) {
         errorMsg.value = err.data?.message || 'Registration failed'
     } finally {

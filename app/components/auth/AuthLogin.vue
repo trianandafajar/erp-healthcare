@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
+
+const route = useRoute()
 
 const checkbox = ref(false)
 const showPassword = ref(false)
@@ -8,6 +10,13 @@ const password = ref('')
 const email = ref('')
 const isSubmitting = ref(false)
 const apiError = ref('')
+const verifiedMsg = ref('')
+
+onMounted(() => {
+    if (route.query.verified === 'true') {
+        verifiedMsg.value = 'Email verified successfully! You can now log in.'
+    }
+})
 
 const passwordRules = [
     (v: string) => !!v || 'Password is required',
@@ -79,12 +88,18 @@ async function validate() {
         if (!isSuperAdmin) {
             const { data: profile, error: profileError } = await supabase
                 .from('profiles')
-                .select('tenant_id, tenants(slug)')
+                .select('tenant_id, email_verified, tenants(slug)')
                 .eq('id', user!.id)
                 .single()
 
             if (profileError) {
                 apiError.value = 'Failed to load profile.'
+                return
+            }
+
+            if (!profile?.email_verified) {
+                authStore.setUser({ user, role, permissions: [], tenantId: null, tenantSlug: null })
+                await navigateTo(`/verify?email=${encodeURIComponent(email.value.trim())}`)
                 return
             }
 
@@ -169,6 +184,8 @@ async function validate() {
         <h3 class="text-h3 text-center mb-0">Login</h3>
         <NuxtLink to="/register" class="text-primary text-decoration-none">Don't Have an account?</NuxtLink>
     </div>
+
+    <v-alert v-if="verifiedMsg" type="success" class="mt-4 mb-2">{{ verifiedMsg }}</v-alert>
 
     <v-form @submit.prevent="validate" class="mt-7 loginForm">
         <div class="mb-6">

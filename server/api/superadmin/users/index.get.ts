@@ -72,11 +72,11 @@ export default defineEventHandler(async (event) => {
     }
 
     const tenantIds = [...new Set(profiles.map(p => p.tenant_id).filter(Boolean))]
-    let tenantMap: Record<string, { name: string; slug: string }> = {}
+    let tenantMap: Record<string, { name: string; slug: string; owner_id: string | null }> = {}
     if (tenantIds.length > 0) {
         const { data: tenants } = await admin
             .from('tenants')
-            .select('id, name, slug')
+            .select('id, name, slug, owner_id')
             .in('id', tenantIds)
         if (tenants) {
             tenantMap = Object.fromEntries(tenants.map(t => [t.id, t]))
@@ -93,6 +93,7 @@ export default defineEventHandler(async (event) => {
         tenant_id: p.tenant_id,
         tenant_name: p.tenant_id ? tenantMap[p.tenant_id]?.name ?? null : null,
         tenant_slug: p.tenant_id ? tenantMap[p.tenant_id]?.slug ?? null : null,
+        is_owner: p.tenant_id ? tenantMap[p.tenant_id]?.owner_id === p.id : false,
         role: p.user_roles?.[0]?.roles?.name ?? null,
         role_label: p.user_roles?.[0]?.roles?.label ?? null,
     }))

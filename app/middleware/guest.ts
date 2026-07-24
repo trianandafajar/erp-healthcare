@@ -1,7 +1,7 @@
 import { getDashboardPath } from '~/utils/roleRedirect'
 
 export default defineNuxtRouteMiddleware(async (to) => {
-    if (to.path === '/reset-password') return
+    if (to.path === '/reset-password' || to.path.startsWith('/verify')) return
 
     if (import.meta.server) {
         try {
@@ -23,15 +23,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
                 let tenantSlug: string | null = null
                 let subscriptionPlan: string | null = null
                 let settings: { logo_url?: string | null } | null = null
+                let emailVerified = false
                 if (role && role !== 'superadmin') {
                     const { data: profile, error: profileErr } = await supabase
                         .from('profiles')
-                        .select('tenant_id, tenants(slug, subscription_plan)')
+                        .select('tenant_id, email_verified, tenants(slug, subscription_plan)')
                         .eq('id', user.id)
                         .single()
 
                     if (!profileErr && profile) {
                         const p = profile as any
+                        emailVerified = p.email_verified ?? false
                         tenantId = p.tenant_id ?? null
                         tenantSlug = p?.tenants?.slug ?? null
                         subscriptionPlan = p?.tenants?.subscription_plan ?? null
@@ -45,6 +47,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
                             settings = sData as { logo_url?: string | null } | null
                         }
                     }
+                }
+
+                if (!emailVerified && role !== 'superadmin') {
+                    return navigateTo(`/verify?email=${encodeURIComponent(user.email ?? '')}`, { replace: true })
                 }
 
                 const authStore = useAuthStore()
@@ -79,7 +85,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const impersonationMeta = useCookie<any>('impersonation_meta', { default: () => null })
     const isImpersonating = !!impersonationMeta.value
 
-    if (authStore.role && authStore.role !== 'superadmin' && !isImpersonating) {
+    if (authState.role !== 'superadmin' && !isImpersonating) {
+        if (!authState.emailVerified) {
+            return navigateTo(`/verify?email=${encodeURIComponent(authState.user?.email ?? '')}`, { replace: true })
+        }
+
         const onboardingPath = getOnboardingPath(
             authState.tenantId ?? authStore.tenantId,
             authState.subscriptionPlan ?? authStore.subscriptionPlan,
