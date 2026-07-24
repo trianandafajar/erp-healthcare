@@ -79,6 +79,7 @@ async function validate() {
             .filter(Boolean) ?? []
 
         const authStore = useAuthStore()
+        const profileStore = useProfileStore()
 
         const isSuperAdmin = role === 'superadmin'
 
@@ -130,10 +131,10 @@ async function validate() {
 
             const { data: sData } = await supabase
                 .from('tenant_settings')
-                .select('logo_url')
+                .select('logo_url, display_name')
                 .eq('tenant_id', tenantId)
                 .maybeSingle()
-            settingsData = sData as { logo_url?: string | null } | null
+            settingsData = sData as { logo_url?: string | null; display_name?: string | null } | null
         }
 
         authStore.setUser({
@@ -145,6 +146,8 @@ async function validate() {
             subscriptionPlan: subscriptionPlan ?? 'starter',
             settings: settingsData,
         })
+
+        await profileStore.fetchProfile(true)
 
         if (!isSuperAdmin) {
             const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settingsData, tenantSlug, role)
@@ -190,14 +193,16 @@ async function validate() {
     <v-form @submit.prevent="validate" class="mt-7 loginForm">
         <div class="mb-6">
             <v-label>Email Address</v-label>
-            <v-text-field aria-label="email address" placeholder="youremail@example.com" v-model="email" :rules="emailRules" class="mt-2" required
-                hide-details="auto" variant="outlined" color="primary"></v-text-field>
+            <v-text-field aria-label="email address" placeholder="youremail@example.com" v-model="email"
+                :rules="emailRules" class="mt-2" required hide-details="auto" variant="outlined"
+                color="primary"></v-text-field>
         </div>
 
         <div>
             <v-label>Password</v-label>
-            <v-text-field aria-label="password" v-model="password" placeholder="Enter your password" :rules="passwordRules" required variant="outlined"
-                color="primary" hide-details="auto" :type="showPassword ? 'text' : 'password'" class="mt-2">
+            <v-text-field aria-label="password" v-model="password" placeholder="Enter your password"
+                :rules="passwordRules" required variant="outlined" color="primary" hide-details="auto"
+                :type="showPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
                     <span @click="showPassword = !showPassword"
                         style="cursor: pointer; display: flex; align-items: center; color: rgb(var(--v-theme-secondary))">
