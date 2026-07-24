@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import { randomInt } from 'crypto'
 
 export default defineEventHandler(async (event) => {
-    const { email, password, full_name } = await readBody(event)
+    const { email, password, full_name, role = 'patient', tenant_name, tenant_slug } = await readBody(event)
 
     if (!email || !password || !full_name) {
         throw createError({
@@ -16,11 +16,21 @@ export default defineEventHandler(async (event) => {
     const { data, error } = await admin.auth.admin.createUser({
         email,
         password,
-        user_metadata: { full_name, role: 'admin' },
+        user_metadata: { full_name, role, tenant_name, tenant_slug },
         email_confirm: false,
     })
 
     if (error) throw createError({ statusCode: 401, message: error.message })
+
+    const config = useRuntimeConfig()
+    const resend = new Resend(config.resendApiKey)
+
+    if (role === 'superadmin') {
+        return {
+            message: 'Registration successful.',
+            redirect: '/login',
+        }
+    }
 
     const otp = String(randomInt(100000, 999999))
     const expiresAt = new Date(Date.now() + 1000 * 60 * 30)
@@ -30,12 +40,14 @@ export default defineEventHandler(async (event) => {
         .delete()
         .eq('email', email)
 
-    await admin
+    const { error: otpError } = await admin
         .from('email_verifications')
         .insert({ email, otp, expires_at: expiresAt.toISOString() })
 
-    const config = useRuntimeConfig()
-    const resend = new Resend(config.resendApiKey)
+    if (otpError) {
+        console.error('OTP insert error:', otpError)
+        throw createError({ statusCode: 500, message: 'Failed to generate verification code' })
+    }
 
     await resend.emails.send({
         from: 'onboarding@resend.dev',

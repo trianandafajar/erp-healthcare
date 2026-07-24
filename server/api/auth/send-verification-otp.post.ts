@@ -38,6 +38,7 @@ export default defineEventHandler(async (event) => {
         .insert({ email, otp, expires_at: expiresAt.toISOString() })
 
     if (insertError) {
+        console.error('Insert error:', insertError)
         throw createError({ statusCode: 500, message: 'Failed to generate OTP' })
     }
 
