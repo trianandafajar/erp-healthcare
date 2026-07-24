@@ -1,52 +1,43 @@
 import { defineStore } from 'pinia';
 import config from '~/utils/config';
 
-export const useCustomizerStore = defineStore('customizer', () => {
-    const sidebarDrawerCookie = useCookie<boolean>('sidebar_drawer', { default: () => true, sameSite: 'lax' })
-    const miniSidebarCookie = useCookie<boolean>('mini_sidebar', { default: () => false, sameSite: 'lax' })
+type CustomizerState = {
+    Sidebar_drawer: boolean;
+    mini_sidebar: boolean;
+    actTheme: string;
+    fontTheme: string;
+};
 
-    const savedTheme = import.meta.client ? localStorage.getItem('customizer:theme') : null
-    const savedFont = import.meta.client ? localStorage.getItem('customizer:font') : null
+function persistState(state: CustomizerState) {
+    if (!import.meta.client) return
+    localStorage.setItem('customizer', JSON.stringify(state))
+}
 
-    const Sidebar_drawer = ref(sidebarDrawerCookie.value)
-    const mini_sidebar = ref(miniSidebarCookie.value)
-    const actTheme = ref(savedTheme || config.actTheme)
-    const fontTheme = ref(savedFont || config.fontTheme)
+export const useCustomizerStore = defineStore('customizer', {
+    state: (): CustomizerState => ({
+        Sidebar_drawer: config.Sidebar_drawer,
+        mini_sidebar: config.mini_sidebar,
+        actTheme: config.actTheme,
+        fontTheme: config.fontTheme
+    }),
 
-    watch(Sidebar_drawer, (val) => { sidebarDrawerCookie.value = val })
-    watch(mini_sidebar, (val) => { miniSidebarCookie.value = val })
-
-    watch(actTheme, (val) => {
-        if (import.meta.client) localStorage.setItem('customizer:theme', val)
-    })
-    watch(fontTheme, (val) => {
-        if (import.meta.client) localStorage.setItem('customizer:font', val)
-    })
-
-    function SET_SIDEBAR_DRAWER() {
-        Sidebar_drawer.value = !Sidebar_drawer.value
+    getters: {},
+    actions: {
+        SET_SIDEBAR_DRAWER(this: CustomizerState) {
+            this.Sidebar_drawer = !this.Sidebar_drawer;
+            persistState(this.$state)
+        },
+        SET_MINI_SIDEBAR(this: CustomizerState, payload: boolean) {
+            this.mini_sidebar = payload;
+            persistState(this.$state)
+        },
+        SET_THEME(this: CustomizerState, payload: string) {
+            this.actTheme = payload;
+            persistState(this.$state)
+        },
+        SET_FONT(this: CustomizerState, payload: string) {
+            this.fontTheme = payload;
+            persistState(this.$state)
+        }
     }
-
-    function SET_MINI_SIDEBAR(payload: boolean) {
-        mini_sidebar.value = payload
-    }
-
-    function SET_THEME(payload: string) {
-        actTheme.value = payload
-    }
-
-    function SET_FONT(payload: string) {
-        fontTheme.value = payload
-    }
-
-    return {
-        Sidebar_drawer,
-        mini_sidebar,
-        actTheme,
-        fontTheme,
-        SET_SIDEBAR_DRAWER,
-        SET_MINI_SIDEBAR,
-        SET_THEME,
-        SET_FONT,
-    }
-})
+});
