@@ -21,11 +21,13 @@ const { data: rolesData } = useLazyFetch<{ roles: any[] }>('/api/roles')
 const { data: deptData } = useLazyFetch<{ departments: any[] }>('/api/departments')
 
 const roles = computed(() =>
-    (rolesData.value?.roles ?? []).map((r) => ({
-        id: r.id,
-        name: r.name ?? '-',
-        label: r.label ?? '-',
-    }))
+    (rolesData.value?.roles ?? [])
+        .filter((r) => r.name !== 'admin' && r.name !== 'superadmin')
+        .map((r) => ({
+            id: r.id,
+            name: r.name ?? '-',
+            label: r.label ?? '-',
+        }))
 )
 
 const departments = computed(() => deptData.value?.departments ?? [])

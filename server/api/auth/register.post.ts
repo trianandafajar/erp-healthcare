@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import { randomInt } from 'crypto'
 
 export default defineEventHandler(async (event) => {
-    const { email, password, full_name, role = 'patient', tenant_name, tenant_slug } = await readBody(event)
+    const { email, password, full_name, role = 'admin', tenant_name, tenant_slug } = await readBody(event)
 
     if (!email || !password || !full_name) {
         throw createError({

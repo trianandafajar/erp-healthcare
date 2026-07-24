@@ -11,6 +11,10 @@ export default defineEventHandler(async (event: any) => {
         })
     }
 
+    if (role === 'admin' || role === 'superadmin') {
+        throw createError({ statusCode: 403, message: 'Cannot create admin or superadmin users through this endpoint.' })
+    }
+
     const { admin, tenantId, user } = await getTenantContext(event)
 
     const { data: foundRole, error: roleError } = await admin

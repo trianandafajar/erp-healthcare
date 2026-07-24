@@ -8,6 +8,10 @@ export default defineEventHandler(async (event: any) => {
         throw createError({ statusCode: 400, message: 'User ID is required' })
     }
 
+    if (role === 'admin' || role === 'superadmin') {
+        throw createError({ statusCode: 403, message: 'Cannot assign admin or superadmin roles through this endpoint.' })
+    }
+
     const { admin, tenantId, user } = await getTenantContext(event)
 
     const { data: before } = await admin
