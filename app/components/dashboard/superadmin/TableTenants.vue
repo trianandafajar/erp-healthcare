@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
+import TenantCreateModal from './TenantCreateModal.vue';
 
 interface TenantOwner {
   id: string
@@ -126,6 +127,30 @@ async function confirmDeleteTenant() {
   }
 }
 
+const createDialog = ref(false)
+const creating = ref(false)
+
+async function handleCreate(payload: any) {
+    creating.value = true
+    try {
+        await $fetch('/api/superadmin/tenants', {
+            method: 'POST',
+            body: payload,
+        })
+        snackbarMsg.value = `Tenant "${payload.tenant_name}" created successfully`
+        snackbarColor.value = 'success'
+        snackbar.value = true
+        createDialog.value = false
+        refresh()
+    } catch (e: any) {
+        snackbarMsg.value = e?.data?.message ?? e?.message ?? 'Failed to create tenant'
+        snackbarColor.value = 'error'
+        snackbar.value = true
+    } finally {
+        creating.value = false
+    }
+}
+
 const snackbar = ref(false)
 const snackbarMsg = ref('')
 const snackbarColor = ref('success')
@@ -133,11 +158,17 @@ const snackbarColor = ref('success')
 
 <template>
   <v-card-item class="pb-2 px-0 pt-0">
-    <div>
-      <v-card-title class="text-h3">Tenants Management</v-card-title>
-      <v-card-subtitle class="mt-1">
-        Manage all registered tenants and their subscriptions
-      </v-card-subtitle>
+    <div class="d-flex justify-space-between align-center">
+      <div>
+        <v-card-title class="text-h3">Tenants Management</v-card-title>
+        <v-card-subtitle class="mt-1">
+          Manage all registered tenants and their subscriptions
+        </v-card-subtitle>
+      </div>
+      <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+        density="comfortable" @click="createDialog = true">
+        Add Tenant
+      </v-btn>
     </div>
   </v-card-item>
 
@@ -246,6 +277,10 @@ const snackbarColor = ref('success')
         density="compact" size="small" />
     </div>
   </UiTitleCard>
+
+  <v-dialog v-model="createDialog" max-width="540" persistent>
+    <TenantCreateModal :loading="creating" @submit="handleCreate" @cancel="createDialog = false" />
+  </v-dialog>
 
   <v-dialog v-model="deleteDialog" max-width="480" persistent>
     <v-card rounded="lg">
