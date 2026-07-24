@@ -211,17 +211,17 @@ function onSubmit() {
                         <v-col cols="12" sm="6" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">STR Number</v-label>
                             <v-text-field v-model="form.str_number" placeholder="Enter STR Number" variant="outlined"
-                                density="compact" hide-details />
+                                density="compact" hide-details inputmode="numeric" />
                         </v-col>
                         <v-col cols="12" sm="6" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">SIP Number</v-label>
                             <v-text-field v-model="form.sip_number" placeholder="Enter SIP Number" variant="outlined"
-                                density="compact" hide-details />
+                                density="compact" hide-details inputmode="numeric" />
                         </v-col>
                         <v-col cols="12" sm="6" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">Phone</v-label>
                             <v-text-field v-model="form.phone" placeholder="e.g. 081234567890" variant="outlined"
-                                density="compact" hide-details />
+                                density="compact" hide-details type="tel" inputmode="numeric" />
                         </v-col>
                         <v-col cols="6" sm="3" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">Experience (years)</v-label>
@@ -263,7 +263,7 @@ function onSubmit() {
                         <v-col cols="12" sm="6" class="mt-1">
                             <v-label class="text-caption font-weight-medium mb-1">Phone</v-label>
                             <v-text-field v-model="form.phone" placeholder="e.g. 081234567890" variant="outlined"
-                                density="compact" hide-details />
+                                density="compact" hide-details type="tel" inputmode="numeric" />
                         </v-col>
                         <v-col cols="12" sm="6" class="mt-3">
                             <v-label class="text-caption font-weight-medium mb-1">Experience (years)</v-label>

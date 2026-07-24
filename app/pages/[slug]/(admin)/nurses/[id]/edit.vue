@@ -246,7 +246,7 @@ function getInitials(name?: string | null) {
                                 </v-label>
                                 <v-text-field v-model="form.phone" placeholder="e.g. +62 812 3456 7890"
                                     variant="outlined" density="compact" hide-details
-                                    prepend-inner-icon="mdi-phone-outline" />
+                                    prepend-inner-icon="mdi-phone-outline" type="tel" inputmode="numeric" />
                             </v-col>
 
                             <!-- Experience years -->

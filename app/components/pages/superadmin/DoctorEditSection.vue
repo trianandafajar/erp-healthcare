@@ -126,10 +126,10 @@ async function save() {
                 <v-select v-model="form.department_id" :items="departments" item-title="name" item-value="id" label="Department" variant="outlined" density="comfortable" prepend-inner-icon="mdi-hospital-building" clearable />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="form.sip_number" label="SIP Number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-card-account-details" />
+                <v-text-field v-model="form.sip_number" label="SIP Number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-card-account-details" inputmode="numeric" />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="form.phone" label="Phone" variant="outlined" density="comfortable" prepend-inner-icon="mdi-phone" />
+                <v-text-field v-model="form.phone" label="Phone" variant="outlined" density="comfortable" prepend-inner-icon="mdi-phone" type="tel" inputmode="numeric" />
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field v-model.number="form.experience_years" label="Experience (years)" type="number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-briefcase" min="0" :rules="[v => v >= 0 || 'Must be non-negative']" @keydown="e => { if (e.key === '-') e.preventDefault() }" @update:model-value="val => { if (Number(val) < 0) form.experience_years = 0 }" />
@@ -141,7 +141,7 @@ async function save() {
                 <v-textarea v-model="form.biography" label="Biography" variant="outlined" density="comfortable" rows="4" prepend-inner-icon="mdi-text-account" auto-grow />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="form.str_number" label="STR Number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-shield-check" />
+                <v-text-field v-model="form.str_number" label="STR Number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-shield-check" inputmode="numeric" />
               </v-col>
             </v-row>
           </v-card-text>

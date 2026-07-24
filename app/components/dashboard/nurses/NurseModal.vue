@@ -353,7 +353,7 @@ const isSubmitDisabled = computed(() =>
                     <v-col cols="12" sm="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Phone</v-label>
                         <v-text-field v-model="form.phone" placeholder="e.g. 081234567890" variant="outlined"
-                            density="compact" hide-details />
+                            density="compact" hide-details type="tel" inputmode="numeric" />
                     </v-col>
 
                     <v-col cols="12" sm="12" class="mt-3">

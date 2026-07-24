@@ -105,7 +105,7 @@ async function save() {
           <v-card-text class="pa-5">
             <v-row>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="form.phone" label="Phone" variant="outlined" density="comfortable" prepend-inner-icon="mdi-phone" />
+                <v-text-field v-model="form.phone" label="Phone" variant="outlined" density="comfortable" prepend-inner-icon="mdi-phone" type="tel" inputmode="numeric" />
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select v-model="form.department_id" :items="departments" item-title="name" item-value="id" label="Department" variant="outlined" density="comfortable" prepend-inner-icon="mdi-hospital-building" clearable />
