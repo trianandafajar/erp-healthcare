@@ -8,7 +8,7 @@ export function getOnboardingPath(
   if (!tenantId) {
     return '/onboarding/subscription'
   }
-  if (role === 'admin' && !settings?.logo_url && tenantSlug) {
+  if (role === 'admin' && !settings?.display_name && tenantSlug) {
     return `/${tenantSlug}/configure`
   }
   return null

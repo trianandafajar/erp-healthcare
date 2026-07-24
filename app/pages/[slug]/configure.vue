@@ -243,7 +243,7 @@ async function save() {
               </v-row>
 
               <div class="d-flex justify-end mt-4">
-                <v-btn color="primary" variant="flat" size="large" :loading="submitting" @click="save">
+                <v-btn color="primary" variant="flat" size="large" :loading="submitting" :disabled="!displayName.trim()" @click="save" :style="submitting || !displayName.trim() ? 'cursor: not-allowed; pointer-events: auto;' : ''">
                   Save & Continue
                 </v-btn>
               </div>
