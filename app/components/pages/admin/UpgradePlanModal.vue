@@ -216,7 +216,7 @@ async function doUpgrade(plan: any) {
               </li>
             </ul>
 
-            <v-btn v-if="plan.title?.toLowerCase() !== currentPlan" variant="flat"
+            <v-btn v-if="plan.title?.toLowerCase() !== currentPlan" variant="flat" rounded="sm"
               :color="plan.is_recommended ? 'primary' : 'secondary'"
               :loading="submitting && selectedPlan === plan.title?.toLowerCase()" :disabled="submitting" block
               @click.stop="doUpgrade(plan)">
@@ -227,7 +227,7 @@ async function doUpgrade(plan: any) {
               <span v-else>Upgrade to {{ plan.title }}</span>
             </v-btn>
 
-            <v-btn v-else variant="tonal" color="grey" block disabled>
+            <v-btn v-else variant="tonal" color="grey" rounded="sm" block disabled>
               Current Plan
             </v-btn>
           </div>
@@ -238,7 +238,7 @@ async function doUpgrade(plan: any) {
 
       <v-card-actions class="pa-4 pt-3">
         <v-spacer />
-        <v-btn variant="tonal" color="secondary" @click="$emit('update:modelValue', false)">
+        <v-btn variant="outlined" color="primary" rounded="xl" @click="$emit('update:modelValue', false)">
           Close
         </v-btn>
       </v-card-actions>
@@ -264,7 +264,7 @@ async function doUpgrade(plan: any) {
   display: inline-flex;
   align-items: center;
   background-color: rgba(var(--v-theme-on-surface), 0.06);
-  border-radius: 999px;
+  border-radius: 5px;
   padding: 4px;
 }
 
@@ -272,10 +272,10 @@ async function doUpgrade(plan: any) {
   border: none;
   cursor: pointer;
   background: transparent;
-  padding: 8px 22px;
-  border-radius: 999px;
+  padding: 8px 24px;
+  border-radius: 5px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
   white-space: nowrap;
   color: rgba(var(--v-theme-on-surface), 0.6);
@@ -305,7 +305,7 @@ async function doUpgrade(plan: any) {
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  border-radius: 16px;
+  border-radius: 5px;
   padding: 20px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
