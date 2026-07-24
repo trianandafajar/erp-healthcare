@@ -244,9 +244,10 @@ function getInitials(name?: string | null) {
                                     Phone
                                     <span class="text-medium-emphasis font-weight-regular">(optional)</span>
                                 </v-label>
-                                <v-text-field v-model="form.phone" placeholder="e.g. +62 812 3456 7890"
+                                <v-text-field v-model="form.phone" placeholder="e.g. 081234567890"
                                     variant="outlined" density="compact" hide-details
-                                    prepend-inner-icon="mdi-phone-outline" type="tel" inputmode="numeric" />
+                                    prepend-inner-icon="mdi-phone-outline" type="tel" inputmode="numeric"
+                                    @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
                             </v-col>
 
                             <!-- Experience years -->

@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
             invoice_number: invoiceNumber,
             service_name: body.serviceName,
             department: body.department,
-            amount: body.amount,
+            amount: body.amount != null ? Number(body.amount) : 0,
             status: 'Pending',
             payment_method: body.paymentMethod,
             service_date: body.serviceDate ?? new Date().toISOString(),

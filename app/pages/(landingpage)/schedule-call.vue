@@ -97,9 +97,10 @@
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                  <input v-model="form.phone" type="tel"
+                  <input v-model="form.phone" type="tel" inputmode="numeric"
                     class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-[#176D37] focus:ring-1 focus:ring-[#176D37] transition-colors"
-                    placeholder="+62 xxx" />
+                    placeholder="081234567890"
+                    @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>

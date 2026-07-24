@@ -200,7 +200,8 @@ function onSubmit() {
           <v-col cols="12" sm="6" class="mt-3">
             <v-label class="text-caption font-weight-medium mb-1">Amount ($)</v-label>
             <v-text-field v-model.number="form.amount" type="number" min="0" prefix="$"
-              variant="outlined" density="compact" hide-details />
+              variant="outlined" density="compact" hide-details
+              @keydown="e => { if (e.key === '-' || e.key === 'e' || e.key === 'E') e.preventDefault() }" />
           </v-col>
 
           <v-col cols="12" sm="6" class="mt-3">

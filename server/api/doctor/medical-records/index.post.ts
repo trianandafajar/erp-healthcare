@@ -56,10 +56,10 @@ export default defineEventHandler(async (event: any) => {
       tenant_id: tenantId,
 
       blood_pressure,
-      temperature,
-      heart_rate,
-      weight,
-      height,
+      temperature: temperature != null ? Number(temperature) : null,
+      heart_rate: heart_rate != null ? Number(heart_rate) : null,
+      weight: weight != null ? Number(weight) : null,
+      height: height != null ? Number(height) : null,
 
       subjective,
       objective,

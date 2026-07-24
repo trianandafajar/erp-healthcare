@@ -177,13 +177,15 @@ async function onSubmit() {
                     <v-col cols="12" sm="4" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Monthly Price</v-label>
                         <v-text-field v-model.number="form.price" type="number" min="0" prefix="$"
-                            variant="outlined" density="compact" hide-details />
+                            variant="outlined" density="compact" hide-details
+                            @keydown="e => { if (e.key === '-' || e.key === 'e' || e.key === 'E') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" sm="4" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Yearly Price</v-label>
                         <v-text-field v-model.number="form.yearly_price" type="number" min="0" prefix="$"
-                            variant="outlined" density="compact" hide-details clearable />
+                            variant="outlined" density="compact" hide-details clearable
+                            @keydown="e => { if (e.key === '-' || e.key === 'e' || e.key === 'E') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" sm="4" class="mt-3">

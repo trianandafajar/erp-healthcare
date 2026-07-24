@@ -155,7 +155,8 @@ async function deleteFeature(item: any) {
                     @keydown="e => { if (e.key === '-') e.preventDefault() }" />
                 <v-text-field v-if="newFeature.feature_category === 'limit'"
                     v-model.number="newFeature.limit_value" label="Limit Value (-1 = unlimited)" type="number"
-                    density="comfortable" />
+                    density="comfortable"
+                    @keydown="e => { if (e.key === 'e' || e.key === 'E') e.preventDefault() }" />
             </v-card-text>
             <v-card-actions>
                 <v-spacer />

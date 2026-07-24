@@ -400,19 +400,22 @@ const isSubmitDisabled = computed(() =>
                     <v-col cols="12" sm="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">STR Number</v-label>
                         <v-text-field v-model="form.str_number" placeholder="Enter STR Number" variant="outlined"
-                            density="compact" hide-details inputmode="numeric" />
+                            density="compact" hide-details inputmode="numeric"
+                            @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" sm="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">SIP Number</v-label>
                         <v-text-field v-model="form.sip_number" placeholder="Enter SIP number" variant="outlined"
-                            density="compact" hide-details inputmode="numeric" />
+                            density="compact" hide-details inputmode="numeric"
+                            @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="12" sm="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Phone</v-label>
                         <v-text-field v-model="form.phone" placeholder="e.g. 081234567890" variant="outlined"
-                            density="compact" hide-details type="tel" inputmode="numeric" />
+                            density="compact" hide-details type="tel" inputmode="numeric"
+                            @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
                     </v-col>
 
                     <v-col cols="6" sm="3" class="mt-3">

@@ -326,11 +326,13 @@ async function deleteSchedule(scheduleId: string) {
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model="form.sip_number" label="SIP Number" variant="outlined"
-                                    density="comfortable" prepend-inner-icon="mdi-card-account-details" inputmode="numeric" />
+                                    density="comfortable" prepend-inner-icon="mdi-card-account-details" inputmode="numeric"
+                                    @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model="form.phone" label="Phone" variant="outlined"
-                                    density="comfortable" prepend-inner-icon="mdi-phone" type="tel" inputmode="numeric" />
+                                    density="comfortable" prepend-inner-icon="mdi-phone" type="tel" inputmode="numeric"
+                                    @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model.number="form.experience_years" label="Experience (years)"
@@ -523,7 +525,8 @@ async function deleteSchedule(scheduleId: string) {
                     <v-divider />
                     <v-card-text class="pa-5">
                         <v-text-field v-model="form.str_number" label="STR Number" variant="outlined"
-                            density="comfortable" prepend-inner-icon="mdi-shield-check" inputmode="numeric" />
+                            density="comfortable" prepend-inner-icon="mdi-shield-check" inputmode="numeric"
+                            @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
                     </v-card-text>
                 </v-card>
                 <v-card variant="flat" class="mb-4">
