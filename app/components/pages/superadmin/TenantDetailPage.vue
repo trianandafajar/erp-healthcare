@@ -322,7 +322,6 @@ const statusColor: Record<string, string> = {
                     Users
                     <v-chip size="x-small" class="ml-2" variant="tonal">{{ users.length }}</v-chip>
                 </v-tab>
-                <v-tab value="activity" prepend-icon="mdi-history">Activity</v-tab>
             </v-tabs>
             <v-divider />
 
@@ -774,35 +773,7 @@ const statusColor: Record<string, string> = {
                     </v-table>
                 </v-window-item>
 
-                <v-window-item value="activity">
-                    <v-table density="comfortable">
-                        <thead class="bg-containerBg">
-                            <tr>
-                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Action</th>
-                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Module</th>
-                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Actor</th>
-                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="!tenant?.recent_activity?.length">
-                                <td colspan="4" class="text-center py-6 text-medium-emphasis">No activity recorded</td>
-                            </tr>
-                            <tr v-else v-for="log in tenant.recent_activity" :key="log.id">
-                                <td class="py-2">
-                                    <div class="text-body-2 font-weight-medium">{{ log.action }}</div>
-                                    <div class="text-caption text-medium-emphasis">{{ log.description }}</div>
-                                </td>
-                                <td class="py-2">
-                                    <v-chip size="x-small" variant="tonal" color="secondary" label>{{ log.module
-                                        }}</v-chip>
-                                </td>
-                                <td class="py-2 text-body-2 text-medium-emphasis">{{ log.actor_name }}</td>
-                                <td class="py-2 text-body-2 text-medium-emphasis">{{ formatDate(log.created_at) }}</td>
-                            </tr>
-                        </tbody>
-                    </v-table>
-                </v-window-item>
+
             </v-window>
         </v-card>
     </template>
