@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
     }
 
     await resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'trianandafajar.com',
         to: email,
         subject: 'Verify Your Email Address',
         html: `

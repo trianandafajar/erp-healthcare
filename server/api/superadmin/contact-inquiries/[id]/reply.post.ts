@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
         : 'Response from HealthData Support'
 
     const { error: emailError } = await resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'trianandafajar.com',
         to: inquiry.email,
         subject: subjectLine,
         html: `
