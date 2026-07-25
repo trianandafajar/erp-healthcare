@@ -46,6 +46,27 @@ export const useProfileStore = defineStore('profile', () => {
     const error = ref<any>(null)
     let inFlight: Promise<CurrentProfileResponse | null> | null = null
 
+    function hydrate() {
+        if (!import.meta.client) return
+        if (data.value) return
+        try {
+            const raw = localStorage.getItem('profile')
+            if (!raw) return
+            const saved = JSON.parse(raw)
+            data.value = saved
+            loaded.value = true
+        } catch { /* ignore corrupt data */ }
+    }
+
+    function persist() {
+        if (!import.meta.client) return
+        if (data.value) {
+            localStorage.setItem('profile', JSON.stringify(data.value))
+        }
+    }
+
+    hydrate()
+
     async function fetchProfile(force = false) {
         if (loaded.value && !force) return data.value
         if (inFlight) return inFlight
@@ -59,6 +80,7 @@ export const useProfileStore = defineStore('profile', () => {
                 data.value = response
                 loaded.value = true
                 error.value = null
+                persist()
                 return response
             })
             .catch((err) => {
@@ -87,6 +109,9 @@ export const useProfileStore = defineStore('profile', () => {
         loaded.value = false
         error.value = null
         inFlight = null
+        if (import.meta.client) {
+            localStorage.removeItem('profile')
+        }
     }
 
     const profile = computed(() => data.value?.profile ?? null)

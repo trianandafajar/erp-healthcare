@@ -16,6 +16,7 @@ onMounted(() => {
   if (display.smAndDown.value && customizer.Sidebar_drawer) {
     customizer.SET_SIDEBAR_DRAWER()
   }
+  if (profileStore.loaded) return
   profileStore.fetchProfile().catch(() => { })
 })
 

@@ -5,6 +5,15 @@ const DEFAULT_LOADING_COLOR = '#176D37'
 
 const authStore = useAuthStore()
 const profileStore = useProfileStore()
+const route = useRoute()
+
+const GUEST_ROUTES = ['/', '/login', '/register', '/forgot-password', '/verify']
+
+const showSkeletonForRoute = computed(() => {
+  return !GUEST_ROUTES.includes(route.path)
+})
+
+const showSkeleton = ref(true)
 
 const loadingBarColor = computed(() => {
   if (authStore.role === 'superadmin') return DEFAULT_LOADING_COLOR
@@ -24,11 +33,22 @@ useSeoMeta({
   description: DEFAULT_DESCRIPTION,
   ogDescription: DEFAULT_DESCRIPTION,
 })
+
+onMounted(async () => {
+  if (!profileStore.loaded) {
+    try {
+      await profileStore.fetchProfile()
+    } catch { /* ignore */ }
+  }
+  await new Promise(resolve => requestAnimationFrame(resolve))
+  showSkeleton.value = false
+})
 </script>
 
 <template>
-  <NuxtLoadingIndicator :color="loadingBarColor" :height="4" />
-  <NuxtLayout>
+  <NuxtLoadingIndicator v-if="!showSkeleton" :color="loadingBarColor" :height="4" />
+  <GlobalLoadingSkeleton v-if="showSkeleton && showSkeletonForRoute" />
+  <NuxtLayout v-else>
     <NuxtPage />
   </NuxtLayout>
 </template>

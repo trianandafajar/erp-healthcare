@@ -41,13 +41,17 @@ export async function ensureAuthState(force = false): Promise<EnsuredAuthState |
   }
 
   if (!force && authStore.isAuthenticated && authStore.role && authStore.permissions.length > 0) {
+    const emailVerified = profileStore.data
+      ? (profileStore.data.profile?.email_verified ?? false)
+      : (authStore.settings !== null)
+
     return {
       user: authStore.user,
       role: authStore.role,
       permissions: authStore.permissions,
       tenantId: authStore.tenantId,
       tenantSlug: authStore.tenantSlug,
-      emailVerified: profileStore.profile?.email_verified ?? false,
+      emailVerified,
       subscriptionPlan: authStore.subscriptionPlan,
       settings: authStore.settings,
     }
