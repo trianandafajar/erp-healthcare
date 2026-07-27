@@ -216,18 +216,14 @@ async function doUpgrade(plan: any) {
               </li>
             </ul>
 
-            <v-btn v-if="plan.title?.toLowerCase() !== currentPlan" variant="flat" rounded="sm"
-              :color="plan.is_recommended ? 'primary' : 'secondary'"
-              :loading="submitting && selectedPlan === plan.title?.toLowerCase()" :disabled="submitting" block
+            <v-btn v-if="plan.title?.toLowerCase() !== currentPlan" class="plan-action-btn"
+              :variant="plan.is_recommended ? 'flat' : 'outlined'" color="primary" rounded="sm" block
+              :loading="submitting && selectedPlan === plan.title?.toLowerCase()" :disabled="submitting"
               @click.stop="doUpgrade(plan)">
-              <span v-if="submitting && selectedPlan === plan.title?.toLowerCase()">
-                <v-icon icon="mdi-loading mdi-spin" size="18" class="mr-1" />
-                Processing...
-              </span>
-              <span v-else>Upgrade to {{ plan.title }}</span>
+              Upgrade to {{ plan.title }}
             </v-btn>
 
-            <v-btn v-else variant="tonal" color="grey" rounded="sm" block disabled>
+            <v-btn v-else class="plan-action-btn" variant="tonal" color="grey" rounded="sm" block disabled>
               Current Plan
             </v-btn>
           </div>
@@ -375,5 +371,22 @@ async function doUpgrade(plan: any) {
   gap: 8px;
   font-size: 0.875rem;
   color: rgba(var(--v-theme-on-surface), 0.7);
+}
+
+/* Force identical button size regardless of variant (flat/outlined/tonal
+   each have different default min-height/padding in Vuetify) */
+.plan-card :deep(.plan-action-btn.v-btn) {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: 44px !important;
+  box-sizing: border-box !important;
+}
+
+.plan-card :deep(.plan-action-btn.v-btn .v-btn__content) {
+  height: 44px !important;
+  line-height: 44px !important;
 }
 </style>
