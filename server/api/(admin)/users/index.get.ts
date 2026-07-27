@@ -66,7 +66,7 @@ export default defineEventHandler(async (event: any) => {
         role: p.user_roles?.[0]?.roles?.name ?? null,
         role_label: p.user_roles?.[0]?.roles?.label ?? null,
         is_owner: p.id === ownerId,
-        user_roles: undefined
+        user_roles: undefined,
     }))
 
     return {

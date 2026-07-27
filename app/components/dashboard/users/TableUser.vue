@@ -146,6 +146,7 @@ function formatDate(dateStr: string) {
 const dialog = ref(false)
 const modalMode = ref<'add' | 'edit' | 'delete'>('add')
 const selectedUser = ref<any>(null)
+const fetchingUser = ref(false)
 
 function openAdd() {
     selectedUser.value = null
@@ -153,10 +154,18 @@ function openAdd() {
     dialog.value = true
 }
 
-function openEdit(user: any) {
-    selectedUser.value = user
+async function openEdit(user: any) {
+    fetchingUser.value = true
     modalMode.value = 'edit'
     dialog.value = true
+    try {
+        const detail = await $fetch(`/api/users/${user.id}`)
+        selectedUser.value = detail
+    } catch {
+        selectedUser.value = user
+    } finally {
+        fetchingUser.value = false
+    }
 }
 
 function openDelete(user: any) {
@@ -170,7 +179,7 @@ function closeModal() {
     selectedUser.value = null
 }
 
-const actionLoading = computed(() => loading.value || pending.value)
+const actionLoading = computed(() => loading.value || pending.value || fetchingUser.value)
 
 async function handleSubmit(payload: any) {
     loading.value = true

@@ -8,6 +8,20 @@ const props = defineProps<{
         role: string
         status: string
         is_owner?: boolean
+        department_id?: string | null
+        specialization?: string
+        str_number?: string
+        sip_number?: string
+        phone?: string
+        biography?: string
+        experience_years?: number
+        consultation_fee?: number
+        is_available?: boolean
+        date_of_birth?: string
+        gender?: string | null
+        blood_type?: string | null
+        address?: string
+        room?: string
     } | null
     loading?: boolean
 }>()
@@ -69,6 +83,20 @@ watch(() => props.user, (u) => {
             email: u.email,
             role: u.role,
             status: u.status,
+            department_id: u.department_id ?? null,
+            specialization: u.specialization ?? '',
+            str_number: u.str_number ?? '',
+            sip_number: u.sip_number ?? '',
+            phone: u.phone ?? '',
+            biography: u.biography ?? '',
+            experience_years: u.experience_years ?? 0,
+            consultation_fee: u.consultation_fee ?? 0,
+            is_available: u.is_available ?? true,
+            date_of_birth: u.date_of_birth ?? '',
+            gender: u.gender ?? null,
+            blood_type: u.blood_type ?? null,
+            address: u.address ?? '',
+            room: u.room ?? '',
         }
     } else {
         form.value = {
