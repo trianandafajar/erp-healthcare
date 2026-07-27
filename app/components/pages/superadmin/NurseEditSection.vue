@@ -108,7 +108,7 @@ async function save() {
                 <v-text-field v-model="form.phone" label="Phone" variant="outlined" density="comfortable" prepend-inner-icon="mdi-phone" type="tel" inputmode="numeric" @keydown="e => { if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Delete' && e.key !== 'End' && e.key !== 'Home') e.preventDefault() }" />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-select v-model="form.department_id" :items="departments" item-title="name" item-value="id" label="Department" variant="outlined" density="comfortable" prepend-inner-icon="mdi-hospital-building" clearable />
+                <v-select v-model="form.department_id" :items="departments" item-title="name" item-value="id" label="Department" variant="outlined" density="comfortable" prepend-inner-icon="mdi-hospital-building" :rules="[v => !!v || 'Department is required']" />
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field v-model.number="form.experience_years" label="Experience (years)" type="number" variant="outlined" density="comfortable" prepend-inner-icon="mdi-briefcase" min="0" :rules="[v => v >= 0 || 'Must be non-negative']" @keydown="e => { if (e.key === '-') e.preventDefault() }" @update:model-value="val => { if (Number(val) < 0) form.experience_years = 0 }" />

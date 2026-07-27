@@ -10,6 +10,7 @@ export default defineEventHandler(async (event: any) => {
     } = await readBody(event)
 
     if (!id) throw createError({ statusCode: 400, message: 'User ID is required' })
+    if (!department_id) throw createError({ statusCode: 400, message: 'Department is required' })
 
     const { admin, tenantId, user } = await getTenantContext(event)
 

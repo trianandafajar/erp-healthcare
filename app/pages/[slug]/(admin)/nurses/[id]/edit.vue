@@ -282,12 +282,11 @@ function getInitials(name?: string | null) {
                         <v-row>
                             <v-col cols="12">
                                 <v-label class="text-caption font-weight-medium mb-1">
-                                    Department
-                                    <span class="text-medium-emphasis font-weight-regular">(optional)</span>
+                                    Department <span class="text-error">*</span>
                                 </v-label>
                                 <v-autocomplete v-model="form.department_id" :items="departments" item-value="id"
                                     item-title="name" placeholder="Select department..." variant="outlined"
-                                    density="compact" hide-details clearable prepend-inner-icon="mdi-hospital-building">
+                                    density="compact" :rules="[v => !!v || 'Department is required']" clearable prepend-inner-icon="mdi-hospital-building">
                                     <template #item="{ props, item }">
                                         <v-list-item v-bind="props">
                                             <template #append>
