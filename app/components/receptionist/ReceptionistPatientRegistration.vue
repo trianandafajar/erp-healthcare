@@ -129,17 +129,17 @@ async function handleSubmit(payload: any) {
         if (modalMode.value === 'add') {
             await $fetch('/api/patients', {
                 method: 'POST',
-                    body: {
-                            full_name: payload.full_name,
-                            date_of_birth: payload.date_of_birth,
-                            gender: payload.gender,
-                            phone: payload.phone,
-                            address: payload.address,
-                            blood_type: payload.blood_type,
-                            email: payload.email,
-                            description: payload.description,
-                            length_of_stay: payload.length_of_stay,
-                        }
+                body: {
+                    full_name: payload.full_name,
+                    date_of_birth: payload.date_of_birth,
+                    gender: payload.gender,
+                    phone: payload.phone,
+                    address: payload.address,
+                    blood_type: payload.blood_type,
+                    email: payload.email,
+                    description: payload.description,
+                    length_of_stay: payload.length_of_stay,
+                }
             })
             notify('Patient registered successfully')
         } else if (modalMode.value === 'edit') {
@@ -241,8 +241,12 @@ async function handleSubmit(payload: any) {
                                 <span class="text-caption font-weight-bold">{{ getInitials(patient.full_name) }}</span>
                             </v-avatar>
                             <div>
-                                <div class="text-body-2 font-weight-medium">{{ patient.full_name }}</div>
-                                <div class="text-caption text-medium-emphasis" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ patient.address }}</div>
+                                <div class="text-body-2 font-weight-medium"
+                                    style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                                    {{ patient.full_name }}</div>
+                                <div class="text-caption text-medium-emphasis"
+                                    style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    {{ patient.address }}</div>
                             </div>
                         </div>
                     </td>
