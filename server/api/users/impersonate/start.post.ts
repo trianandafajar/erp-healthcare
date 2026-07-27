@@ -56,29 +56,45 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 500, message: otpError?.message ?? 'Failed to create impersonation session.' })
     }
 
-    setCookie(event, 'admin_session_backup', JSON.stringify({
+    const cookies = parseCookies(event)
+
+    const backupRaw = cookies.admin_session_backup_stack || '[]'
+    const metaRaw = cookies.impersonation_meta_stack || '[]'
+
+    let backupStack: { access_token: string; refresh_token: string }[] = []
+    let metaStack: { name: string; role: string; by_role: string; return_to: string }[] = []
+    try { backupStack = JSON.parse(backupRaw) } catch { backupStack = [] }
+    try { metaStack = JSON.parse(metaRaw) } catch { metaStack = [] }
+
+    backupStack.push({
         access_token: actorSession.session.access_token,
         refresh_token: actorSession.session.refresh_token,
-    }), {
-        path: '/',
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        maxAge: 60 * 60,
     })
-
-    setCookie(event, 'impersonation_meta', JSON.stringify({
+    metaStack.push({
         name: targetName,
         role: targetUser.user.user_metadata?.role ?? '',
         by_role: actorRoleName,
         return_to: return_to ?? '',
-    }), {
-        path: '/',
-        httpOnly: false,
-        secure: true,
-        sameSite: 'lax',
-        maxAge: 60 * 60,
     })
+
+    const cookieOptions = {
+        path: '/',
+        secure: true,
+        sameSite: 'lax' as const,
+        maxAge: 60 * 60,
+    }
+
+    setCookie(event, 'admin_session_backup_stack', JSON.stringify(backupStack), {
+        ...cookieOptions,
+        httpOnly: true,
+    })
+    setCookie(event, 'impersonation_meta_stack', JSON.stringify(metaStack), {
+        ...cookieOptions,
+        httpOnly: false,
+    })
+
+    setCookie(event, 'admin_session_backup', '', { path: '/', maxAge: 0 })
+    setCookie(event, 'impersonation_meta', '', { path: '/', maxAge: 0 })
 
     await supabase.auth.setSession({
         access_token: otpData.session.access_token,

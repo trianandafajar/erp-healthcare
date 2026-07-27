@@ -3,11 +3,16 @@ export const useImpersonation = () => {
     const authStore = useAuthStore()
     const profileStore = useProfileStore()
 
-    const metaCookie = useCookie<any>('impersonation_meta', { default: () => null })
+    const metaStack = useCookie<any[]>('impersonation_meta_stack', { default: () => [] })
 
-    const isImpersonating = computed(() => !!metaCookie.value)
-    const impersonatedName = computed(() => metaCookie.value?.name ?? '')
-    const impersonatedRole = computed(() => metaCookie.value?.role ?? '')
+    const currentMeta = computed(() => {
+        const stack = metaStack.value
+        return stack?.length ? stack[stack.length - 1] : null
+    })
+    const isImpersonating = computed(() => (metaStack.value?.length ?? 0) > 0)
+    const impersonationDepth = computed(() => metaStack.value?.length ?? 0)
+    const impersonatedName = computed(() => currentMeta.value?.name ?? '')
+    const impersonatedRole = computed(() => currentMeta.value?.role ?? '')
 
     async function syncCurrentSessionProfile() {
         authStore.clearUser()
@@ -54,8 +59,9 @@ export const useImpersonation = () => {
         if (!supabase) return
 
         try {
-            const returnTo = metaCookie.value?.return_to
-            const actorRole = metaCookie.value?.by_role || 'admin'
+            const current = currentMeta.value
+            const returnTo = current?.return_to
+            const actorRole = current?.by_role || 'admin'
 
             const res = await $fetch<any>('/api/users/impersonate/stop', { method: 'POST' })
             if (res.access_token) {
@@ -78,6 +84,7 @@ export const useImpersonation = () => {
 
     return {
         isImpersonating,
+        impersonationDepth,
         impersonatedName,
         impersonatedRole,
         loginAs,

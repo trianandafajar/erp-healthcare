@@ -82,8 +82,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (!authState?.user) return
 
     const authStore = useAuthStore()
-    const impersonationMeta = useCookie<any>('impersonation_meta', { default: () => null })
-    const isImpersonating = !!impersonationMeta.value
+    const impersonationStack = useCookie<any[]>('impersonation_meta_stack', { default: () => [] })
+    const isImpersonating = (impersonationStack.value?.length ?? 0) > 0
 
     if (authState.role !== 'superadmin' && !isImpersonating) {
         if (!authState.emailVerified) {

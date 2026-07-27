@@ -54,7 +54,7 @@ function getInitials(name: string) {
     .toUpperCase()
 }
 
-const { isImpersonating, impersonatedName, impersonatedRole, exitImpersonation } = useImpersonation()
+const { isImpersonating, impersonationDepth, impersonatedName, impersonatedRole, exitImpersonation } = useImpersonation()
 const isExiting = ref(false)
 
 async function handleExit() {
@@ -83,6 +83,10 @@ async function handleExit() {
         class="ml-2 text-capitalize flex-shrink-0">
         {{ impersonatedRole }}
       </v-chip>
+      <v-chip v-if="impersonationDepth > 1 && !display.xs.value" size="x-small" variant="tonal" color="white"
+        label class="ml-1 flex-shrink-0" style="opacity: 0.8;">
+        Level {{ impersonationDepth }}
+      </v-chip>
     </div>
 
     <v-spacer class="d-none d-sm-flex" />
@@ -90,10 +94,10 @@ async function handleExit() {
     <v-btn v-if="display.mdAndUp.value" size="small" variant="outlined" color="white" :loading="isExiting"
       prepend-icon="mdi-logout-variant" class="mr-4 flex-shrink-0" style="border-color: rgba(255,255,255,0.6);"
       @click="handleExit">
-      Return to Admin Account
+      {{ impersonationDepth > 1 ? 'Back' : 'Return to Admin Account' }}
     </v-btn>
 
-    <v-tooltip v-else text="Return to Admin Account" location="bottom">
+    <v-tooltip v-else :text="impersonationDepth > 1 ? 'Back' : 'Return to Admin Account'" location="bottom">
       <template #activator="{ props }">
         <v-btn v-bind="props" icon size="small" variant="outlined" color="white" :loading="isExiting"
           class="mr-2 flex-shrink-0" style="border-color: rgba(255,255,255,0.6);" @click="handleExit">
