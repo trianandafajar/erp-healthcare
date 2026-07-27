@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import SubscriptionModal from '~/components/dashboard/superadmin/SubscriptionModal.vue'
+import { getContrastText } from '@/utils/color'
 
 const route = useRoute()
 const tenantId = route.params.id as string
@@ -350,13 +351,15 @@ async function handleSubscriptionSubmit(payload: any) {
                                     <v-card-text class="d-flex flex-column align-center py-5">
                                         <div class="rounded-xl mb-3 d-flex align-center justify-center"
                                             :style="{ backgroundColor: previewColor, width: '80px', height: '80px', borderRadius: '16px' }">
-                                            <v-icon icon="mdi-hospital-building" size="32" color="white" />
+                                            <v-icon icon="mdi-hospital-building" size="32" :color="getContrastText(previewColor)" />
                                         </div>
                                         <div class="text-body-2 font-weight-medium mb-1">Primary Color</div>
                                         <div class="text-caption font-mono" style="font-family: monospace;">{{ previewColor }}</div>
                                         <div class="d-flex ga-1 mt-2">
-                                            <v-chip size="x-small" :color="previewColor" variant="flat">Button</v-chip>
-                                            <v-chip size="x-small" :color="previewColor" variant="tonal">Chip</v-chip>
+                                            <v-chip size="x-small" :color="previewColor" variant="flat"
+                                                :text-color="getContrastText(previewColor)">Button</v-chip>
+                                            <v-chip size="x-small" :color="previewColor" variant="tonal"
+                                                :text-color="getContrastText(previewColor)">Chip</v-chip>
                                         </div>
                                     </v-card-text>
                                 </v-card>
