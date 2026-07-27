@@ -141,14 +141,16 @@ function regeneratePassword() {
                     <v-text-field v-model="form.admin_password" :type="showPassword ? 'text' : 'password'"
                         variant="outlined" density="compact" hide-details>
                         <template #append-inner>
-                            <v-btn icon variant="text" size="x-small" density="compact"
-                                @click="showPassword = !showPassword">
-                                <v-icon :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" size="18" />
-                            </v-btn>
-                            <v-btn icon variant="text" size="x-small" density="compact" @click="regeneratePassword"
-                                title="Generate new password">
-                                <v-icon icon="mdi-refresh" size="18" />
-                            </v-btn>
+                            <div class="d-flex align-center ga-1">
+                                <v-btn icon variant="text" size="small" density="comfortable" class="opacity-70"
+                                    @click="showPassword = !showPassword">
+                                    <v-icon :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" size="20" />
+                                </v-btn>
+                                <v-btn icon variant="text" size="small" density="comfortable" class="opacity-70"
+                                    @click="regeneratePassword" title="Generate new password">
+                                    <v-icon icon="mdi-refresh" size="20" />
+                                </v-btn>
+                            </div>
                         </template>
                     </v-text-field>
                 </v-col>
