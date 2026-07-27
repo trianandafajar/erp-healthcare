@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, reactive, computed, watch } from 'vue';
+import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
+
 definePageMeta({
     middleware: ['auth'],
 })
@@ -257,9 +260,9 @@ async function updateStatus(id: string, status: string) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="7" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="7" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
                 <tr v-else-if="filteredAppointments.length === 0">
@@ -270,31 +273,30 @@ async function updateStatus(id: string, status: string) {
                 </tr>
                 <tr v-else v-for="item in filteredAppointments" :key="item.id">
                     <td class="py-3">
-                        <div class="text-body-2 font-weight-medium">{{ item.patient?.full_name ?? '-' }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.patient?.medical_record_number ?? '-' }}
-                        </div>
+                        <span class="text-body-2 font-weight-medium d-block">{{ item.patient?.full_name ?? '-' }}</span>
+                        <span class="text-caption text-medium-emphasis">{{ item.patient?.medical_record_number ?? '-'
+                            }}</span>
                     </td>
-                    <td class="py-3 text-body-2">
-                        <div>{{ item.appointment_date }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.appointment_time?.slice(0, 5) ?? '-' }}
-                        </div>
+                    <td class="py-3 text-body-2 text-medium-emphasis">
+                        <span class="d-block">{{ item.appointment_date }}</span>
+                        <span class="text-caption">{{ item.appointment_time?.slice(0, 5) ?? '-' }}</span>
                     </td>
-                    <td class="py-3 text-body-2">
-                        <div>{{ item.doctor?.profile?.full_name ?? '-' }}</div>
-                        <div class="text-caption text-medium-emphasis">
+                    <td class="py-3 text-body-2 text-medium-emphasis">
+                        <span class="d-block">{{ item.doctor?.profile?.full_name ?? '-' }}</span>
+                        <span class="text-caption">
                             {{ item.department?.name ?? item.doctor?.department?.name ?? '-' }}
-                        </div>
+                        </span>
                     </td>
                     <td class="py-3">
-                        <v-chip size="small" variant="tonal" color="secondary">
+                        <v-chip size="small" variant="tonal" color="secondary" label>
                             {{ typeLabels[item.type] ?? item.type }}
                         </v-chip>
                     </td>
-                    <td class="py-3 text-body-2">
+                    <td class="py-3 text-body-2 text-medium-emphasis">
                         {{ item.queue_number ?? '-' }}
                     </td>
                     <td class="py-3">
-                        <v-chip size="small" variant="tonal" :color="statusColors[item.status] ?? 'default'">
+                        <v-chip size="small" variant="tonal" :color="statusColors[item.status] ?? 'default'" label>
                             {{ item.status.replace('_', ' ') }}
                         </v-chip>
                     </td>
@@ -317,7 +319,7 @@ async function updateStatus(id: string, status: string) {
             </tbody>
         </v-table>
 
-        <div class="px-4 py-2">
+        <div class="d-flex align-center justify-space-between px-4 py-2">
             <span class="text-caption text-medium-emphasis">
                 Showing {{ filteredAppointments.length }} of {{ appointments.length }} appointments
             </span>

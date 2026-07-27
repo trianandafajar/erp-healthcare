@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
+
 definePageMeta({
     middleware: ['auth'],
 })
@@ -77,51 +79,17 @@ function slotColor(remaining: number, max: number | null) {
         </div>
     </v-card-item>
 
-    <v-row class="mb-4">
-        <v-col cols="12" sm="4">
-            <v-card elevation="0" border rounded="lg">
-                <v-card-text>
-                    <div class="text-caption text-medium-emphasis">Total Schedules</div>
-                    <div class="text-h4">{{ summary.total }}</div>
-                </v-card-text>
-            </v-card>
-        </v-col>
-        <v-col cols="12" sm="4">
-            <v-card elevation="0" border rounded="lg">
-                <v-card-text>
-                    <div class="text-caption text-medium-emphasis">Available</div>
-                    <div class="text-h4 text-success">{{ summary.available }}</div>
-                </v-card-text>
-            </v-card>
-        </v-col>
-        <v-col cols="12" sm="4">
-            <v-card elevation="0" border rounded="lg">
-                <v-card-text>
-                    <div class="text-caption text-medium-emphasis">Full</div>
-                    <div class="text-h4 text-error">{{ summary.full }}</div>
-                </v-card-text>
-            </v-card>
-        </v-col>
-    </v-row>
-
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="px-4 py-3">
-            <v-row dense>
-                <v-col cols="12" md="5">
-                    <v-text-field v-model="search" placeholder="Search doctor, specialty, department, or day"
-                        prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable />
-                </v-col>
-                <v-col cols="12" sm="6" md="3">
-                    <v-select v-model="departmentFilter" :items="departmentOptions" label="Department"
-                        variant="outlined" density="compact" hide-details />
-                </v-col>
-                <v-col cols="12" sm="6" md="3">
-                    <v-select v-model="dayFilter" :items="dayOptions" item-title="label" item-value="value" label="Day"
-                        variant="outlined" density="compact" hide-details />
-                </v-col>
-            </v-row>
-            <div class="text-caption text-medium-emphasis mt-3">
-                Showing {{ filteredSchedules.length }} of {{ schedules.length }} schedules
+        <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+            <v-text-field v-model="search" placeholder="Search doctor, specialty, department, or day"
+                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
+                style="max-width: 320px" />
+            <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+                <v-select v-model="departmentFilter" :items="departmentOptions" label="Department" variant="outlined"
+                    density="compact" hide-details style="max-width: 200px" />
+
+                <v-select v-model="dayFilter" :items="dayOptions" item-title="label" item-value="value" label="Day"
+                    variant="outlined" density="compact" hide-details style="max-width: 170px" />
             </div>
         </div>
 
@@ -138,13 +106,10 @@ function slotColor(remaining: number, max: number | null) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="5" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="5" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
-                </tr>
-                <tr v-else-if="error">
-                    <td colspan="5" class="text-center py-8 text-medium-emphasis">Failed to load schedules.</td>
                 </tr>
                 <tr v-else-if="filteredSchedules.length === 0">
                     <td colspan="5" class="text-center py-8 text-medium-emphasis">

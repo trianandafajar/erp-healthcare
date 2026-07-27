@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
+
 definePageMeta({
     middleware: ['auth'],
 })
@@ -32,6 +34,10 @@ const queueDialog = ref(false)
 const selectedAppointment = ref<AppointmentRow | null>(null)
 const checkInResult = ref<{ queue_number: string | null; patient_name: string; doctor_name: string; department_name: string } | null>(null)
 const loading = ref(false)
+
+// pagination state (same convention as Departments page)
+const currentPage = ref(1)
+const itemsPerPage = 10
 
 const snackbar = ref(false)
 const snackbarMsg = ref('')
@@ -93,11 +99,25 @@ const filteredAppointments = computed(() => {
     })
 })
 
+// reset to page 1 whenever any filter changes (mirrors Departments' onSearch behavior)
+watch([search, statusFilter, doctorFilter, dateFilter], () => {
+    currentPage.value = 1
+})
+
+const totalAppointments = computed(() => filteredAppointments.value.length)
+const totalPages = computed(() => Math.max(1, Math.ceil(totalAppointments.value / itemsPerPage)))
+
+const paginatedAppointments = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage
+    return filteredAppointments.value.slice(start, start + itemsPerPage)
+})
+
 function resetFilters() {
     search.value = ''
     statusFilter.value = 'waiting'
     doctorFilter.value = 'all'
     dateFilter.value = ''
+    currentPage.value = 1
 }
 
 function requestCheckIn(item: AppointmentRow) {
@@ -144,31 +164,19 @@ async function confirmCheckIn() {
     </v-card-item>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="px-4 py-3">
-            <v-row dense align="center">
-                <v-col cols="12" md="4">
-                    <v-text-field v-model="search" placeholder="Search patient, MRN, doctor, or department"
-                        prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable />
-                </v-col>
-                <v-col cols="12" sm="6" md="2">
-                    <v-select v-model="statusFilter" :items="statusOptions" item-title="label" item-value="value"
-                        label="Status" variant="outlined" density="compact" hide-details />
-                </v-col>
-                <v-col cols="12" sm="6" md="3">
-                    <v-select v-model="doctorFilter" :items="doctorOptions" label="Doctor" variant="outlined"
-                        density="compact" hide-details />
-                </v-col>
-                <v-col cols="12" sm="6" md="2">
-                    <v-text-field v-model="dateFilter" label="Date" type="date" variant="outlined" density="compact"
-                        hide-details />
-                </v-col>
-                <v-col cols="12" sm="6" md="1" class="d-flex justify-end">
-                    <v-btn color="secondary" variant="tonal" size="small" icon="mdi-filter-remove-outline"
-                        @click="resetFilters" />
-                </v-col>
-            </v-row>
-            <div class="text-body-2 text-medium-emphasis mt-3">
-                Showing {{ filteredAppointments.length }} of {{ appointments.length }} appointments
+        <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+            <v-text-field v-model="search" placeholder="Search patient, MRN, doctor, or department"
+                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
+                style="max-width: 320px" />
+            <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+                <v-select v-model="statusFilter" :items="statusOptions" item-title="label" item-value="value"
+                    label="Status" variant="outlined" density="compact" hide-details style="max-width: 150px" />
+                <v-select v-model="doctorFilter" :items="doctorOptions" label="Doctor" variant="outlined"
+                    density="compact" hide-details style="max-width: 180px" />
+                <v-text-field v-model="dateFilter" label="Date" type="date" variant="outlined" density="compact"
+                    hide-details style="max-width: 160px" />
+                <v-btn color="secondary" variant="tonal" size="small" icon="mdi-filter-remove-outline"
+                    @click="resetFilters" />
             </div>
         </div>
 
@@ -186,18 +194,18 @@ async function confirmCheckIn() {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="6" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
-                <tr v-else-if="filteredAppointments.length === 0">
+                <tr v-else-if="paginatedAppointments.length === 0">
                     <td colspan="6" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-calendar-check-outline" size="32" class="mb-2 d-block mx-auto" />
                         No appointments found
                     </td>
                 </tr>
-                <tr v-else v-for="item in filteredAppointments" :key="item.id">
+                <tr v-else v-for="item in paginatedAppointments" :key="item.id">
                     <td class="py-3">
                         <div class="text-body-2 font-weight-medium">{{ item.patient?.full_name ?? '-' }}</div>
                         <div class="text-caption text-medium-emphasis">{{ item.patient?.medical_record_number ?? '-' }}
@@ -233,6 +241,14 @@ async function confirmCheckIn() {
                 </tr>
             </tbody>
         </v-table>
+
+        <div class="d-flex align-center justify-space-between px-4 py-2">
+            <span class="text-caption text-medium-emphasis">
+                Showing {{ paginatedAppointments.length }} of {{ totalAppointments }} appointments
+            </span>
+            <v-pagination v-if="totalPages > 1" v-model="currentPage" :length="totalPages" :total-visible="6"
+                density="compact" size="small" />
+        </div>
     </UiTitleCard>
 
     <v-dialog v-model="confirmDialog" max-width="520">
@@ -255,7 +271,8 @@ async function confirmCheckIn() {
                     </v-col>
                     <v-col cols="12" sm="6">
                         <div class="text-caption text-medium-emphasis">Doctor</div>
-                        <div class="text-body-1 font-weight-medium">{{ selectedAppointment.doctor?.profile?.full_name ?? '-' }}
+                        <div class="text-body-1 font-weight-medium">{{ selectedAppointment.doctor?.profile?.full_name ??
+                            '-' }}
                         </div>
                     </v-col>
                     <v-col cols="12" sm="6">
@@ -294,8 +311,7 @@ async function confirmCheckIn() {
             <v-card-actions class="px-6 pb-4">
                 <v-spacer />
                 <v-btn color="secondary" variant="tonal" @click="queueDialog = false">Close</v-btn>
-                <v-btn color="primary" variant="flat" prepend-icon="mdi-printer-outline"
-                    to="/receptionist/queue/print">
+                <v-btn color="primary" variant="flat" prepend-icon="mdi-printer-outline" to="/receptionist/queue/print">
                     Print
                 </v-btn>
             </v-card-actions>

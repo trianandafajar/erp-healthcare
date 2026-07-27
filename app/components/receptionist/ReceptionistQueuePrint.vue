@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
+
 definePageMeta({
     middleware: ['auth'],
 })
@@ -80,13 +82,13 @@ function printQueue() {
 </script>
 
 <template>
-    <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3 no-print">
+    <v-card-item class="pb-2 px-0 pt-0">
         <div>
-            <h2 class="text-h3 mb-1">Print Queue Number</h2>
-            <p class="text-medium-emphasis mb-0">Select a queue from the table, review the detail, and print the queue
-                ticket.</p>
+            <v-card-title class="text-h3">Print Queue Number</v-card-title>
+            <v-card-subtitle class="mt-1">Select a queue from the table, review the detail, and print the queue
+                ticket.</v-card-subtitle>
         </div>
-    </div>
+    </v-card-item>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md no-print">
         <div class="px-4 py-3 d-flex align-center justify-space-between flex-wrap ga-3">
@@ -114,9 +116,9 @@ function printQueue() {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="6" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
                 <tr v-else-if="filteredQueue.length === 0">
@@ -174,7 +176,7 @@ function printQueue() {
                 <div class="text-center py-3">
                     <div class="text-caption text-medium-emphasis text-uppercase mb-2">Queue Number</div>
                     <div class="detail-queue-number text-primary font-weight-bold">{{ selectedQueue.queue_number ?? '-'
-                        }}
+                    }}
                     </div>
                 </div>
                 <v-divider />
@@ -197,7 +199,7 @@ function printQueue() {
                 <div class="d-flex justify-space-between ga-4">
                     <span class="text-medium-emphasis">Appointment</span>
                     <span>{{ selectedQueue.appointment_date }} {{ selectedQueue.appointment_time?.slice(0, 5) ?? ''
-                        }}</span>
+                    }}</span>
                 </div>
                 <div class="d-flex justify-space-between ga-4">
                     <span class="text-medium-emphasis">Last Updated</span>
@@ -244,7 +246,7 @@ function printQueue() {
             <div class="ticket-row">
                 <span>Appointment</span>
                 <strong>{{ selectedQueue.appointment_date }} {{ selectedQueue.appointment_time?.slice(0, 5) ?? ''
-                    }}</strong>
+                }}</strong>
             </div>
             <div class="ticket-row">
                 <span>Updated</span>

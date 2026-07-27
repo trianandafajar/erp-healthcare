@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
+
 definePageMeta({
     middleware: ['auth'],
 })
@@ -157,43 +159,24 @@ async function updateStatus(id: string, status: string) {
     </v-card-item>
 
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="px-4 py-3">
-            <v-row dense>
-                <v-col cols="12" md="4">
-                    <v-text-field v-model="search"
-                        placeholder="Search queue number, patient, MRN, doctor, or department"
-                        prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable />
-                </v-col>
-                <v-col cols="12" sm="6" md="2">
-                    <v-select v-model="statusFilter" :items="statusOptions" item-title="label" item-value="value"
-                        label="Status" variant="outlined" density="compact" hide-details />
-                </v-col>
-                <v-col cols="12" sm="6" md="2">
-                    <v-select v-model="departmentFilter" :items="departmentOptions" label="Department"
-                        variant="outlined" density="compact" hide-details />
-                </v-col>
-                <v-col cols="12" sm="6" md="2">
-                    <v-select v-model="doctorFilter" :items="doctorOptions" label="Doctor" variant="outlined"
-                        density="compact" hide-details />
-                </v-col>
-                <v-col cols="6" sm="3" md="1">
-                    <v-text-field v-model="timeFrom" type="time" label="From" variant="outlined" density="compact"
-                        hide-details />
-                </v-col>
-                <v-col cols="6" sm="3" md="1">
-                    <v-text-field v-model="timeTo" type="time" label="To" variant="outlined" density="compact"
-                        hide-details />
-                </v-col>
-            </v-row>
-            <div class="d-flex align-center justify-space-between flex-wrap ga-2 mt-3">
-                <div class="text-caption text-medium-emphasis">
-                    Showing {{ filteredQueue.length }} of {{ appointments.length }} records
-                </div>
-                <v-btn size="small" variant="text" color="secondary" prepend-icon="mdi-filter-remove-outline"
-                    @click="resetFilters">
-                    Reset Filters
-                </v-btn>
-            </div>
+        <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
+            <v-text-field v-model="search"
+                placeholder="Search queue number, patient, MRN, doctor, or department"
+                prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable
+                style="max-width: 320px" />
+            <v-select v-model="statusFilter" :items="statusOptions" item-title="label" item-value="value"
+                label="Status" variant="outlined" density="compact" hide-details
+                style="max-width: 140px" />
+            <v-select v-model="departmentFilter" :items="departmentOptions" label="Department"
+                variant="outlined" density="compact" hide-details style="max-width: 170px" />
+            <v-select v-model="doctorFilter" :items="doctorOptions" label="Doctor" variant="outlined"
+                density="compact" hide-details style="max-width: 170px" />
+            <v-text-field v-model="timeFrom" type="time" label="From" variant="outlined" density="compact"
+                hide-details style="max-width: 140px" />
+            <v-text-field v-model="timeTo" type="time" label="To" variant="outlined" density="compact"
+                hide-details style="max-width: 140px" />
+            <v-btn size="small" variant="text" color="secondary" icon="mdi-filter-remove-outline"
+                @click="resetFilters" />
         </div>
 
         <v-divider />
@@ -210,9 +193,9 @@ async function updateStatus(id: string, status: string) {
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
+                <tr v-if="pending" v-for="i in 5" :key="i">
+                    <td colspan="6" style="border-bottom: none;">
+                        <v-skeleton-loader type="table-row" class="my-1" />
                     </td>
                 </tr>
                 <tr v-else-if="filteredQueue.length === 0">
