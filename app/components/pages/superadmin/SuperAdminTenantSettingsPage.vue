@@ -267,7 +267,7 @@ async function handleSubscriptionSubmit(payload: any) {
         </div>
         <div class="text-caption text-medium-emphasis mb-5">Manage {{ tenant?.name ?? 'tenant' }} preferences and appearance</div>
 
-        <v-card elevation="0" class="rounded-md">
+        <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" rounded="md" class="bg-surface">
             <v-tabs v-model="tab" color="primary" class="px-4 pt-2">
                 <v-tab value="appearance" class="text-none">
                     <v-icon start icon="mdi-palette" size="18" />
