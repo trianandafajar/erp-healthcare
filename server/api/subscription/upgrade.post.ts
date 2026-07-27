@@ -73,6 +73,7 @@ export default defineEventHandler(async (event) => {
       mode: 'subscription',
       line_items: [{ price: newPriceId, quantity: 1 }],
       client_reference_id: tenant.id,
+      customer_email: user.email,
       metadata: {
         tenant_id: tenant.id,
         upgrade: 'true',
@@ -89,6 +90,7 @@ export default defineEventHandler(async (event) => {
       mode: 'subscription',
       line_items: [{ price: newPriceId, quantity: 1 }],
       client_reference_id: tenant.id,
+      customer_email: user.email,
       metadata: {
         tenant_id: tenant.id,
         upgrade: 'true',
