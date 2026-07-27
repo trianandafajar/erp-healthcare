@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
 
   const { data: tenant } = await admin
     .from('tenants')
-    .select('id, name, subscription_plan, subscription_status')
+    .select('id, name, slug, subscription_plan, subscription_status')
     .eq('id', profile.tenant_id)
     .single()
 
@@ -64,24 +64,24 @@ export default defineEventHandler(async (event) => {
   const origin = getRequestURL(event).origin
 
   if (currentSub?.stripe_subscription_id && newPriceId) {
-    const subscription = await stripe.subscriptions.retrieve(currentSub.stripe_subscription_id)
-
-    const subscriptionItemId = subscription.items?.data?.[0]?.id
-    if (!subscriptionItemId) {
-      throw createError({ statusCode: 500, message: 'No subscription item found' })
-    }
-
-    await stripe.subscriptions.update(currentSub.stripe_subscription_id, {
-      items: [{
-        id: subscriptionItemId,
-        price: newPriceId,
-      }],
-      proration_behavior: 'create_prorations',
-      billing_cycle_anchor: 'now',
-      payment_behavior: 'pending_if_incomplete',
+    await stripe.subscriptions.cancel(currentSub.stripe_subscription_id, {
+      invoice_now: true,
+      prorate: true,
     })
 
-    return { success: true, requires_payment: false }
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      line_items: [{ price: newPriceId, quantity: 1 }],
+      client_reference_id: tenant.id,
+      metadata: {
+        tenant_id: tenant.id,
+        upgrade: 'true',
+      },
+      success_url: `${origin}/${tenant.slug}/settings?upgrade=success`,
+      cancel_url: `${origin}/${tenant.slug}/settings?upgrade=canceled`,
+    })
+
+    return { url: session.url, requires_payment: true }
   }
 
   if (newPriceId) {
@@ -93,8 +93,8 @@ export default defineEventHandler(async (event) => {
         tenant_id: tenant.id,
         upgrade: 'true',
       },
-      success_url: `${origin}/login?upgrade=success`,
-      cancel_url: `${origin}/settings?upgrade=canceled`,
+      success_url: `${origin}/${tenant.slug}/settings?upgrade=success`,
+      cancel_url: `${origin}/${tenant.slug}/settings?upgrade=canceled`,
     })
 
     return { url: session.url, requires_payment: true }
