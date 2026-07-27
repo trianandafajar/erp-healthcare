@@ -41,10 +41,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
                         if (p.tenant_id) {
                             const { data: sData } = await supabase
                                 .from('tenant_settings')
-                                .select('logo_url')
+                                .select('display_name, logo_url')
                                 .eq('tenant_id', p.tenant_id)
                                 .maybeSingle()
-                            settings = sData as { logo_url?: string | null } | null
+                            settings = sData as { display_name?: string | null; logo_url?: string | null } | null
                         }
                     }
                 }
