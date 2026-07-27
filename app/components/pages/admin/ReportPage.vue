@@ -210,14 +210,12 @@ const availableReports = computed(() => {
             <v-card-item class="pb-2 px-0 pt-0">
                 <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="mb-4">
                     <v-card elevation="0">
-                        <div class="d-flex justify-space-between align-center flex-wrap ga-3">
-                            <div>
-                                <v-card-title class="text-h3">Reports</v-card-title>
-                                <v-card-subtitle class="mt-1">
-                                    Overview of clinic activity — {{ activePeriodLabel }}
-                                </v-card-subtitle>
+                        <v-card-text>
+                            <div class="text-h5 font-weight-bold">Reports</div>
+                            <div class="text-caption text-medium-emphasis">
+                                Overview of clinic activity — {{ activePeriodLabel }}
                             </div>
-                        </div>
+                        </v-card-text>
                     </v-card>
                 </v-card>
 
@@ -317,10 +315,13 @@ const availableReports = computed(() => {
                                         :series="departmentChartSeries" />
                                 </ClientOnly>
                             </template>
-                            <div v-else class="d-flex align-center justify-center" style="height: 300px;">
+
+                            <div v-else class="d-flex justify-center align-center" style="height: 300px;">
                                 <div class="text-center text-medium-emphasis">
-                                    <v-icon icon="mdi-chart-donut" size="48" class="mb-2 d-block" />
-                                    <span class="text-body-2">No appointments in this period</span>
+                                    <v-icon icon="mdi-chart-donut" size="56" class="mb-3" />
+                                    <div class="text-body-2">
+                                        No appointments in this period
+                                    </div>
                                 </div>
                             </div>
                         </v-card-text>
@@ -336,25 +337,25 @@ const availableReports = computed(() => {
                             <v-card-subtitle>Most frequent diagnoses — {{ activePeriodLabel }}</v-card-subtitle>
                         </v-card-item>
                         <v-divider />
-                    <template v-if="topDiagnoses.length">
-                        <v-list density="comfortable">
-                            <v-list-item v-for="d in topDiagnoses" :key="d.rank">
-                                <template #prepend>
-                                    <v-avatar size="28" color="primary" variant="tonal">
-                                        <span class="text-caption font-weight-bold">{{ d.rank }}</span>
-                                    </v-avatar>
-                                </template>
-                                <v-list-item-title class="text-body-2">{{ d.name }}</v-list-item-title>
-                                <template #append>
-                                    <span class="text-body-2 font-weight-medium">{{ d.count }}</span>
-                                </template>
-                            </v-list-item>
-                        </v-list>
-                    </template>
-                    <div v-else class="pa-6 text-center text-medium-emphasis text-body-2">
-                        No diagnosis data for this period.
-                    </div>
-                </v-card>
+                        <template v-if="topDiagnoses.length">
+                            <v-list density="comfortable">
+                                <v-list-item v-for="d in topDiagnoses" :key="d.rank">
+                                    <template #prepend>
+                                        <v-avatar size="28" color="primary" variant="tonal">
+                                            <span class="text-caption font-weight-bold">{{ d.rank }}</span>
+                                        </v-avatar>
+                                    </template>
+                                    <v-list-item-title class="text-body-2">{{ d.name }}</v-list-item-title>
+                                    <template #append>
+                                        <span class="text-body-2 font-weight-medium">{{ d.count }}</span>
+                                    </template>
+                                </v-list-item>
+                            </v-list>
+                        </template>
+                        <div v-else class="pa-6 text-center text-medium-emphasis text-body-2">
+                            No diagnosis data for this period.
+                        </div>
+                    </v-card>
                 </v-card>
             </v-col>
 
@@ -365,39 +366,42 @@ const availableReports = computed(() => {
                             <div class="d-flex justify-space-between align-center">
                                 <div>
                                     <v-card-title class="text-h5">Generated Reports</v-card-title>
-                                <v-card-subtitle>Based on live clinic data — {{ activePeriodLabel }}</v-card-subtitle>
+                                    <v-card-subtitle>Based on live clinic data — {{ activePeriodLabel
+                                    }}</v-card-subtitle>
+                                </div>
+                                <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-plus" disabled>
+                                    New Report
+                                </v-btn>
                             </div>
-                            <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-plus" disabled>
-                                New Report
-                            </v-btn>
-                        </div>
-                    </v-card-item>
-                    <v-divider />
-                    <v-table density="comfortable">
-                        <thead class="bg-containerBg">
-                            <tr>
-                                <th v-for="h in reportTableHeaders" :key="h"
-                                    class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
-                                    {{ h }}
-                                </th>
-                                <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(r, i) in availableReports" :key="i">
-                                <td class="py-3 text-body-2 font-weight-medium">{{ r.name }}</td>
-                                <td class="py-3 text-body-2 text-medium-emphasis">{{ r.period }}</td>
-                                <td class="py-3 text-body-2 text-medium-emphasis">{{ r.generated }}</td>
-                                <td class="py-3">
-                                    <v-chip size="small" variant="tonal" color="secondary" label>{{ r.format }}</v-chip>
-                                </td>
-                                <td class="py-3 text-right">
-                                    <v-btn icon="mdi-download-outline" variant="text" size="small" disabled />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </v-table>
-                </v-card>
+                        </v-card-item>
+                        <v-divider />
+                        <v-table density="comfortable">
+                            <thead class="bg-containerBg">
+                                <tr>
+                                    <th v-for="h in reportTableHeaders" :key="h"
+                                        class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">
+                                        {{ h }}
+                                    </th>
+                                    <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">
+                                        Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(r, i) in availableReports" :key="i">
+                                    <td class="py-3 text-body-2 font-weight-medium">{{ r.name }}</td>
+                                    <td class="py-3 text-body-2 text-medium-emphasis">{{ r.period }}</td>
+                                    <td class="py-3 text-body-2 text-medium-emphasis">{{ r.generated }}</td>
+                                    <td class="py-3">
+                                        <v-chip size="small" variant="tonal" color="secondary" label>{{ r.format
+                                        }}</v-chip>
+                                    </td>
+                                    <td class="py-3 text-right">
+                                        <v-btn icon="mdi-download-outline" variant="text" size="small" disabled />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </v-table>
+                    </v-card>
                 </v-card>
             </v-col>
         </template>
