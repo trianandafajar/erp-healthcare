@@ -15,10 +15,21 @@ const canResend = computed(() => cooldown.value === 0 && !resending.value)
 
 let cooldownTimer: NodeJS.Timeout | null = null
 
-onMounted(() => {
+onMounted(async () => {
     const queryEmail = route.query.email as string
     if (queryEmail) {
         email.value = queryEmail
+        try {
+            await $fetch('/api/auth/send-verification-otp', {
+                method: 'POST',
+                body: { email: email.value },
+            })
+            cooldown.value = 30
+        } catch (err: any) {
+            if (err?.data?.message !== 'Email already verified') {
+                errorMsg.value = err?.data?.message || 'Failed to send verification code'
+            }
+        }
     } else {
         errorMsg.value = 'No email provided'
     }
