@@ -45,14 +45,17 @@ const passwordScore = computed(() => {
 
 const passwordStrength = computed(() => {
     const score = passwordScore.value
-
     if (!password.value) return { label: '', color: '', percent: 0 }
     if (score <= 2) return { label: 'Weak', color: 'error', percent: 33 }
-    if (score <= 4) return { label: 'Medium', color: 'warning', percent: 66 }
+    if (score <= 4 || score <= 5) return { label: 'Medium', color: 'warning', percent: 66 }
     return { label: 'Strong', color: 'success', percent: 100 }
 })
 
 async function register() {
+    if(passwordScore.value < 6) {
+        errorMsg.value = 'Your password is not strong enough'
+        return
+    }
     if (password.value !== confirmPassword.value) {
         errorMsg.value = 'Passwords do not match'
         return
