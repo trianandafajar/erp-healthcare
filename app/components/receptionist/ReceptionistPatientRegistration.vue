@@ -192,7 +192,7 @@ async function handleSubmit(payload: any) {
         </div>
     </v-card-item>
 
-    <UiTitleCard class-name="px-0 pb-0 rounded-md">
+    <UiTitleCard class-name="px-0 pb-0 rounded-md" >
         <div class="d-flex align-center justify-space-between gap-3 px-4 py-3 flex-wrap">
             <v-text-field v-model="search" placeholder="Search by name, MRN, or phone..."
                 prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details clearable

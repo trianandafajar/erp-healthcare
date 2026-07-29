@@ -329,7 +329,7 @@ const statusColor: Record<string, string> = {
                 <v-window-item value="overview" class="pa-4">
                     <v-row>
                         <v-col cols="12" md="6">
-                            <v-card elevation="0" variant="outlined" class="rounded-md h-100">
+                            <v-card elevation="0" variant="outlined" :style="{borderColor: '#e0e0e0'}" class="rounded-md h-100">
                                 <v-card-item>
                                     <v-card-title class="text-subtitle-1 font-weight-bold">Tenant
                                         Information</v-card-title>
@@ -364,7 +364,7 @@ const statusColor: Record<string, string> = {
                         </v-col>
 
                         <v-col cols="12" md="6">
-                            <v-card elevation="0" variant="outlined" class="rounded-md h-100">
+                            <v-card elevation="0" variant="outlined" :style="{borderColor: '#e0e0e0'}" class="rounded-md h-100">
                                 <v-card-item>
                                     <v-card-title class="text-subtitle-1 font-weight-bold">Subscription</v-card-title>
                                 </v-card-item>
@@ -403,7 +403,7 @@ const statusColor: Record<string, string> = {
                         </v-col>
 
                         <v-col cols="12" md="4">
-                            <v-card elevation="0" variant="outlined" class="rounded-md h-100">
+                            <v-card elevation="0" variant="outlined" :style="{borderColor: '#e0e0e0'}" class="rounded-md h-100">
                                 <v-card-item>
                                     <v-card-title class="text-subtitle-1 font-weight-bold">Appointment
                                         Breakdown</v-card-title>
@@ -423,7 +423,7 @@ const statusColor: Record<string, string> = {
                         </v-col>
 
                         <v-col cols="12" md="8">
-                            <v-card elevation="0" variant="outlined" class="rounded-md h-100">
+                            <v-card elevation="0" variant="outlined" :style="{borderColor: '#e0e0e0'}" class="rounded-md h-100">
                                 <v-card-item>
                                     <v-card-title class="text-subtitle-1 font-weight-bold">Recent
                                         Appointments</v-card-title>
@@ -563,7 +563,7 @@ const statusColor: Record<string, string> = {
                             </v-col>
 
                             <v-col cols="12" md="4">
-                                <v-card variant="outlined" class="rounded-lg">
+                                <v-card variant="outlined" :style="{borderColor: '#e0e0e0'}"  class="rounded-lg">
                                     <v-card-item class="pb-2">
                                         <v-card-title class="text-subtitle-2 font-weight-bold d-flex align-center ga-2">
                                             <v-icon icon="mdi-information-outline" size="18" color="primary" />
@@ -571,7 +571,7 @@ const statusColor: Record<string, string> = {
                                         </v-card-title>
                                     </v-card-item>
                                     <v-divider />
-                                    <v-card-text class="py-4">
+                                    <v-card-text class="py-4" >
                                         <div class="d-flex align-center justify-space-between mb-3">
                                             <span class="text-caption text-medium-emphasis">Plan</span>
                                             <v-chip :color="getPlanColor(subscription.plan)" variant="tonal" size="x-small" class="text-capitalize">
@@ -623,7 +623,7 @@ const statusColor: Record<string, string> = {
                 <v-window-item value="branding" class="pa-4">
                     <v-row>
                         <v-col cols="12" md="7">
-                            <v-card elevation="0" variant="outlined" class="rounded-md h-100">
+                            <v-card elevation="0" variant="outlined"  :style="{borderColor: '#e0e0e0'}" class="rounded-md h-100">
                                 <v-card-item>
                                     <v-card-title class="text-subtitle-1 font-weight-bold">Display Name &
                                         Logo</v-card-title>
@@ -676,7 +676,7 @@ const statusColor: Record<string, string> = {
                         </v-col>
 
                         <v-col cols="12" md="5">
-                            <v-card elevation="0" variant="outlined" class="rounded-md h-100">
+                            <v-card elevation="0" variant="outlined" :style="{borderColor: '#e0e0e0'}" class="rounded-md h-100">
                                 <v-card-item>
                                     <v-card-title class="text-subtitle-1 font-weight-bold">Brand Color</v-card-title>
                                     <v-card-subtitle>Primary accent color used across the tenant's app</v-card-subtitle>

@@ -208,18 +208,18 @@ const availableReports = computed(() => {
     <v-row>
         <v-col cols="12">
             <v-card-item class="pb-2 px-0 pt-0">
-                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="mb-4">
+                <v-card elevation="0"  class="mb-4">
                     <v-card elevation="0">
                         <v-card-text>
-                            <div class="text-h5 font-weight-bold">Reports</div>
-                            <div class="text-caption text-medium-emphasis">
+                            <div class="text-h3">Reports</div>
+                            <div class="mt-1">
                                 Overview of clinic activity — {{ activePeriodLabel }}
                             </div>
                         </v-card-text>
                     </v-card>
                 </v-card>
 
-                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="pa-3 bg-surface">
+                <v-card elevation="0"  class="pa-3 bg-surface">
                     <div class="d-flex align-center gap-3 flex-wrap">
                         <v-btn-toggle v-model="filterMode" density="compact" variant="tonal" divided mandatory
                             color="primary">

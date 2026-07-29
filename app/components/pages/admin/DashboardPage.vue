@@ -5,7 +5,7 @@ import WidgetFive from '~/components/dashboard/WidgetFive.vue';
 </script>
 
 <template>
-    <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
+    <v-card elevation="0">
         <v-card elevation="0">
             <v-card-text>
                 <div class="text-h5 font-weight-bold">Admin Dashboard</div>
