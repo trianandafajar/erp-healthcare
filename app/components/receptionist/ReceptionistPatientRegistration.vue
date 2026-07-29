@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PatientModal from '../dashboard/patient/PatientModal.vue';
+import UiTitleCard from '../dashboard/UiTitleCard.vue';
 
 definePageMeta({
     middleware: ['auth'],

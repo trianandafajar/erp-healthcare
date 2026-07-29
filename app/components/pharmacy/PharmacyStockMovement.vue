@@ -95,9 +95,9 @@ const metaLabel = computed(() => (props.type === 'Incoming' ? 'Supplier' : 'Reas
         </div>
     </v-card-item>
 
-    <v-card elevation="0">
+    <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
         <v-card-text class="d-flex flex-column ga-4 px-0">
-            <div class="d-flex flex-wrap align-center ga-3">
+            <div class="d-flex flex-wrap align-center gap-3">
                 <v-text-field v-model="search" prepend-inner-icon="mdi-magnify" label="Search logs"
                     placeholder="Search medicine, reference, supplier, reason, or note" variant="outlined"
                     density="comfortable" hide-details class="pharmacy-log-search" />

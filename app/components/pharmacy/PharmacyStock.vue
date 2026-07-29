@@ -184,7 +184,7 @@ function formatDate(value: string) {
         </div>
     </v-card-item>
 
-    <v-card elevation="0">
+    <v-card  elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
         <v-card-text class="d-flex flex-column ga-4">
             <v-row dense>
                 <v-col cols="12" md="7">

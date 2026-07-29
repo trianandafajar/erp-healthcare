@@ -156,7 +156,7 @@ function formatDateTime(value: string) {
 
     <v-row>
         <v-col v-for="card in statCards" :key="card.title" cols="12" sm="6" lg="4">
-            <v-card elevation="0" border :to="card.to" class="h-100 pharmacy-stat-card">
+            <v-card  elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" :to="card.to" class="h-100 pharmacy-stat-card">
                 <v-card-text class="d-flex flex-column ga-2">
                     <div class="d-flex align-center justify-space-between">
                         <div class="text-caption text-medium-emphasis text-uppercase">{{ card.title }}</div>
@@ -173,7 +173,7 @@ function formatDateTime(value: string) {
 
     <v-row class="mt-4">
         <v-col cols="12" lg="7">
-            <v-card elevation="0" border class="h-100">
+            <v-card  elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
                 <v-card-item class="pb-2">
                     <v-card-title class="text-h5">Incoming Prescriptions</v-card-title>
                     <v-card-subtitle>Recently submitted prescriptions that need review</v-card-subtitle>
@@ -215,7 +215,7 @@ function formatDateTime(value: string) {
         </v-col>
 
         <v-col cols="12" lg="5">
-            <v-card elevation="0" border class="mb-4">
+            <v-card  elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="mb-4">
                 <v-card-item class="pb-2">
                     <v-card-title class="text-h5">Low Stock Alerts</v-card-title>
                     <v-card-subtitle>Medicines that need replenishment soon</v-card-subtitle>
@@ -243,7 +243,7 @@ function formatDateTime(value: string) {
                 </v-card-text>
             </v-card>
 
-            <v-card elevation="0" border>
+            <v-card  elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
                 <v-card-item class="pb-2">
                     <v-card-title class="text-h5">Recent Stock Movement</v-card-title>
                     <v-card-subtitle>Incoming and outgoing movement log</v-card-subtitle>

@@ -133,7 +133,7 @@ function statusColor(status: PrescriptionItem['status']) {
         </div>
     </v-card-item>
 
-    <v-card elevation="0">
+    <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }">
         <v-card-text class="d-flex flex-column ga-4">
             <v-alert v-if="feed.error.value" type="error" variant="tonal" density="comfortable" class="mb-1">
                 {{ feed.error.value?.message || 'Unable to load prescriptions.' }}

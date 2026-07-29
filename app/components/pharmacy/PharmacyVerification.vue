@@ -121,7 +121,7 @@ function statusColor(status: PrescriptionItem['status']) {
 
     <v-row v-if="isLoading">
         <v-col v-for="index in 4" :key="index" cols="12" lg="6">
-            <v-card elevation="0" class="pharmacy-skeleton-card h-100">
+            <v-card  elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="pharmacy-skeleton-card h-100">
                 <v-card-text class="d-flex flex-column ga-4">
                     <div class="d-flex align-start justify-space-between ga-3">
                         <div class="flex-grow-1">
