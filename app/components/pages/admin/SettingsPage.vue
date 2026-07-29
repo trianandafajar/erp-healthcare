@@ -339,7 +339,7 @@ async function saveGeneral() {
                         </div>
 
                         <div class="flex-shrink-0">
-                            <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="rounded-lg" max-width="220">
+                            <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="rounded-lg" max-width="220">
                                 <v-card-item class="pb-2">
                                     <v-card-title class="text-subtitle-2 font-weight-bold">Preview</v-card-title>
                                 </v-card-item>
@@ -354,9 +354,9 @@ async function saveGeneral() {
                                     }}</div>
                                     <div class="d-flex ga-1 mt-2">
                                         <v-chip size="x-small" :color="previewColor" variant="flat"
-                                            :text-color="getContrastText(previewColor)">Button</v-chip>
+                                            :style="{color:getContrastText(previewColor)}">Button</v-chip>
                                         <v-chip size="x-small" :color="previewColor" variant="tonal"
-                                            :text-color="getContrastText(previewColor)">Chip</v-chip>
+                                            :text-color="getContrastText(previewColor)" >Chip</v-chip>
                                     </div>
                                 </v-card-text>
                             </v-card>

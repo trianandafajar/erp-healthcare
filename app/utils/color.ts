@@ -15,7 +15,7 @@ function toLinear(c: number) {
 export function getContrastText(hex: string) {
   const { r, g, b } = hexToRgb(hex)
   const luminance = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
-  return luminance > 0.179 ? '#1a1a1a' : '#FFFFFF'
+  return luminance > 0.6 ? '#1a1a1a' : '#FFFFFF'
 }
 
 export function isValidHex(hex: string) {
