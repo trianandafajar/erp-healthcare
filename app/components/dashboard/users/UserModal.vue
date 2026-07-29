@@ -98,6 +98,8 @@ watch(() => props.user, (u) => {
             address: u.address ?? '',
             room: u.room ?? '',
         }
+                    console.log(form.value)
+
     } else {
         form.value = {
             full_name: '',
@@ -159,7 +161,7 @@ function onSubmit() {
             delete payload.address
             delete payload.room
         }
-        if (form.value.role !== 'doctor' && form.value.role !== 'nurse') {
+        if (form.value.role !== 'doctor' && form.value.role !== 'nurse' && form.value.role !== 'patient') {
             delete payload.phone
         }
         emit('submit', payload)

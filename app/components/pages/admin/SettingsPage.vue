@@ -339,7 +339,7 @@ async function saveGeneral() {
                         </div>
 
                         <div class="flex-shrink-0">
-                            <v-card variant="outlined" class="rounded-lg" max-width="220">
+                            <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="rounded-lg" max-width="220">
                                 <v-card-item class="pb-2">
                                     <v-card-title class="text-subtitle-2 font-weight-bold">Preview</v-card-title>
                                 </v-card-item>
@@ -453,7 +453,7 @@ async function saveGeneral() {
                             </v-col>
 
                             <v-col cols="12" md="4">
-                                <v-card variant="outlined" class="rounded-lg">
+                                <v-card variant="outlined" class="rounded-lg" :style="{ borderColor: '#e0e0e0' }">
                                     <v-card-item class="pb-2">
                                         <v-card-title class="text-subtitle-2 font-weight-bold d-flex align-center ga-2">
                                             <v-icon icon="mdi-information-outline" size="18" color="primary" />
@@ -585,7 +585,7 @@ async function saveGeneral() {
                         </div>
 
                         <div class="flex-shrink-0">
-                            <v-card variant="outlined" class="rounded-lg" max-width="220">
+                            <v-card variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="rounded-lg" max-width="220">
                                 <v-card-item class="pb-2">
                                     <v-card-title class="text-subtitle-2 font-weight-bold">Preview</v-card-title>
                                 </v-card-item>
