@@ -76,6 +76,7 @@ export default defineEventHandler(async (event) => {
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: tenant.id,
+      customer_email: user.email,
       success_url: `${origin}/${slug}/configure?checkout=success`,
       cancel_url: `${origin}/onboarding/subscription?canceled=true`,
     })
