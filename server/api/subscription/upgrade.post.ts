@@ -53,7 +53,6 @@ export default defineEventHandler(async (event) => {
     .select('id, title, stripe_price_id, stripe_price_id_yearly')
     .ilike('title', plan_name)
     .maybeSingle()
-
   if (!pricingPlan) {
     throw createError({ statusCode: 404, message: 'Pricing plan not found' })
   }
@@ -62,12 +61,22 @@ export default defineEventHandler(async (event) => {
   const newPriceId = cycle === 'yearly' ? pricingPlan.stripe_price_id_yearly : pricingPlan.stripe_price_id
 
   const origin = getRequestURL(event).origin
-
   if (currentSub?.stripe_subscription_id && newPriceId) {
-    await stripe.subscriptions.cancel(currentSub.stripe_subscription_id, {
-      invoice_now: true,
-      prorate: true,
-    })
+    try {
+      const subscription = await stripe.subscriptions.retrieve(currentSub.stripe_subscription_id);
+      if (subscription.status !== 'canceled') {
+        await stripe.subscriptions.cancel(currentSub.stripe_subscription_id, {
+          invoice_now: true,
+          prorate: true,
+        });
+      }
+    } catch (error: any) {
+      if (error.code === 'resource_missing') {
+        console.log('Subscription not found, proceeding with new subscription creation');
+      } else {
+        throw error;
+      }
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',

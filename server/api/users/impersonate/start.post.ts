@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const email = targetUser.user.email!
-    const targetName = targetUser.user.user_metadata?.full_name ?? email
+    const targetName = targetUser.user.user_metadata?.full_name ?? "Super Admin"
 
     const { data: actorSession } = await supabase.auth.getSession()
     if (!actorSession.session) {
@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
     })
     metaStack.push({
         name: targetName,
-        role: targetUser.user.user_metadata?.role ?? '',
+        role: targetUser.user.user_metadata?.role ?? 'superadmin',
         by_role: actorRoleName,
         return_to: return_to ?? '',
     })

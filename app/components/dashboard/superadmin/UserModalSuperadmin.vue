@@ -31,8 +31,8 @@ const { data } = await useFetch<{ roles: any[] }>('/api/roles')
 const roles = computed(() =>
     (data.value?.roles ?? []).map((r) => ({
         id: r.id,
-        name: r.name ?? '-',
-        label: r.label ?? '-',
+        value: r.name ?? '-',
+        title: r.label ?? '-',
     }))
 )
 
@@ -77,6 +77,7 @@ function onSubmit() {
     if (props.mode === 'delete') {
         emit('submit', { id: props.user?.id })
     } else {
+        console.log(form.value)
         emit('submit', {
             ...form.value,
             id: props.user?.id,
@@ -97,7 +98,6 @@ function onSubmit() {
         </v-card-title>
 
         <v-divider />
-
         <template v-if="mode === 'delete'">
             <v-card-text class="pa-5">
                 <div class="d-flex flex-column align-center text-center ga-3">
@@ -141,7 +141,7 @@ function onSubmit() {
                     </v-col>
                     <v-col cols="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Role</v-label>
-                        <v-select v-model="form.role" :items="roles" item-title="label" item-name="name"
+                        <v-select v-model="form.role" :items="roles" 
                             variant="outlined" density="compact" hide-details
                             :disabled="mode === 'edit' && user?.is_owner" />
                     </v-col>
