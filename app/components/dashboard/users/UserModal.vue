@@ -98,7 +98,6 @@ watch(() => props.user, (u) => {
             address: u.address ?? '',
             room: u.room ?? '',
         }
-                    console.log(form.value)
 
     } else {
         form.value = {

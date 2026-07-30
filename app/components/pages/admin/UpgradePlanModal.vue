@@ -234,9 +234,9 @@ async function doUpgrade(plan: any) {
 
       <v-card-actions class="pa-4 pt-3">
         <v-spacer />
-        <v-btn variant="outlined" color="primary" rounded="xl" @click="$emit('update:modelValue', false)">
+        <!-- <v-btn variant="outlined" color="primary" rounded="xl" @click="$emit('update:modelValue', false)">
           Close
-        </v-btn>
+        </v-btn> -->
       </v-card-actions>
     </v-card>
   </v-dialog>

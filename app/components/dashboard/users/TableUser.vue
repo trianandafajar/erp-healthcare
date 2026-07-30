@@ -10,6 +10,7 @@ const selectedRole = ref('all');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 const loading = ref(false)
+const profileStore = useProfileStore()
 
 interface RoleOption {
     value: string
@@ -19,10 +20,13 @@ interface RoleOption {
 const { data: rolesData } = await useFetch<{ roles: { name: string; label?: string }[] }>('/api/roles')
 
 const roles = computed<RoleOption[]>(() => {
-    const apiRoles: RoleOption[] = (rolesData.value?.roles ?? []).map((r) => ({
+    let apiRoles: RoleOption[] = (rolesData.value?.roles ?? []).map((r) => ({
         value: r.name,
         label: r.label ?? r.name
     }))
+        if(profileStore?.roles?.[0]?.name === 'admin') {
+        apiRoles =  apiRoles.filter(u => u.value !== 'superadmin' && u.value !== 'admin')
+    }
     return [{ value: 'all', label: 'All' }, ...apiRoles]
 })
 
@@ -87,7 +91,7 @@ const queryParams = computed(() => ({
     role: selectedRole.value !== 'all' ? selectedRole.value : undefined,
 }))
 
-const { data, pending, refresh } = await useFetch<{
+const {  data, pending, refresh } = await useFetch<{
     profiles: any[]
     total: number
     totalPages: number
@@ -105,13 +109,17 @@ const allUsers = computed(() =>
     }))
 )
 
+
 const users = computed(() => {
     let result = allUsers.value
 
     if (selectedRole.value !== 'all') {
         result = result.filter(u => u.role === selectedRole.value)
     }
+    if(profileStore?.roles?.[0]?.name === 'admin') {
+        result =  result.filter(u => u.role !== 'superadmin' && u.role !== 'admin')
 
+    }
     if (search.value) {
         const q = search.value.toLowerCase()
         result = result.filter(u =>
@@ -124,7 +132,7 @@ const users = computed(() => {
 })
 
 const totalPages = computed(() => data.value?.totalPages ?? 1)
-const totalUsers = computed(() => data.value?.total ?? 0)
+const totalUsers = computed(() => users.value?.length ?? 0)
 
 function getInitials(name: string) {
     return name
