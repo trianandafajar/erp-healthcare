@@ -148,6 +148,7 @@ async function openLoginAs(user: any) {
     isLoggingInAs.value = user.id
     try {
         await loginAs({ id: user.id, name: user.name, role: user.role })
+        showSnackbar(`Logged in as ${user.name} successfully.`)
     } catch (err: any) {
         showSnackbar(err?.data?.message || err?.message || 'Gagal masuk sebagai user ini.', 'error')
         isLoggingInAs.value = null
@@ -200,16 +201,19 @@ async function handleSubmit(payload: any) {
     try {
         if (modalMode.value === 'add') {
             await $fetch('/api/superadmin/users', { method: 'POST', body: payload })
+            showSnackbar('User created successfully')
         } else if (modalMode.value === 'edit') {
             await $fetch('/api/superadmin/users', { method: 'PUT', body: payload })
+            showSnackbar('User updated successfully')
         } else if (modalMode.value === 'delete') {
             await $fetch('/api/superadmin/users', { method: 'DELETE', body: payload })
+            showSnackbar('User removed successfully')
         }
 
         await refresh()
         closeModal()
     } catch (err: any) {
-        showSnackbar(err?.data?.message || 'Failed')
+        showSnackbar(err?.data?.message || 'Failed', 'error')
     } finally {
         loading.value = false
     }
