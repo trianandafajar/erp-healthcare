@@ -19,15 +19,17 @@ onMounted(async () => {
     const queryEmail = route.query.email as string
     if (queryEmail) {
         email.value = queryEmail
-        try {
-            await $fetch('/api/auth/send-verification-otp', {
-                method: 'POST',
-                body: { email: email.value },
-            })
-            cooldown.value = 30
-        } catch (err: any) {
-            if (err?.data?.message !== 'Email already verified') {
-                errorMsg.value = err?.data?.message || 'Failed to send verification code'
+        cooldown.value = 30
+        if (route.query.from === 'login') {
+            try {
+                await $fetch('/api/auth/send-verification-otp', {
+                    method: 'POST',
+                    body: { email: email.value },
+                })
+            } catch (err: any) {
+                if (err?.data?.message !== 'Email already verified') {
+                    errorMsg.value = err?.data?.message || 'Failed to send verification code'
+                }
             }
         }
     } else {

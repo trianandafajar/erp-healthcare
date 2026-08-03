@@ -100,7 +100,7 @@ async function validate() {
 
             if (!profile?.email_verified) {
                 authStore.setUser({ user, role, permissions: [], tenantId: null, tenantSlug: null })
-                await navigateTo(`/verify?email=${encodeURIComponent(email.value.trim())}`)
+                await navigateTo(`/verify?email=${encodeURIComponent(email.value.trim())}&from=login`)
                 return
             }
 
