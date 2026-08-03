@@ -37,7 +37,11 @@ const form = ref({
 })
 
 const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 const slugManuallyEdited = ref(false)
+const confirmPassword = ref('')
+const copied = ref(false)
+let copyTimeout: ReturnType<typeof setTimeout> | null = null
 
 function onNameChange(name: string) {
     if (!slugManuallyEdited.value) {
@@ -66,9 +70,21 @@ const valid = computed(() => {
         form.value.admin_full_name.trim() &&
         form.value.admin_email.trim() &&
         /.+@.+\..+/.test(form.value.admin_email.trim()) &&
-        form.value.admin_password.length >= 6
+        form.value.admin_password.length >= 6 &&
+        confirmPassword.value === form.value.admin_password
     )
 })
+
+async function copyPassword() {
+    try {
+        await navigator.clipboard.writeText(form.value.admin_password)
+        copied.value = true
+        if (copyTimeout) clearTimeout(copyTimeout)
+        copyTimeout = setTimeout(() => { copied.value = false }, 1500)
+    } catch {
+        copied.value = false
+    }
+}
 
 function onSubmit() {
     if (!valid.value) return
@@ -85,6 +101,9 @@ function onSubmit() {
 
 function regeneratePassword() {
     form.value.admin_password = generatePassword()
+    confirmPassword.value = ''
+    copied.value = false
+    if (copyTimeout) clearTimeout(copyTimeout)
 }
 </script>
 
@@ -150,9 +169,33 @@ function regeneratePassword() {
                                     @click="regeneratePassword" title="Generate new password">
                                     <v-icon icon="mdi-refresh" size="20" />
                                 </v-btn>
+                                <v-btn icon variant="text" size="small" density="comfortable" class="opacity-70"
+                                    @click="copyPassword" :title="copied ? 'Copied!' : 'Copy password'">
+                                    <v-icon :icon="copied ? 'mdi-check' : 'mdi-content-copy'" size="20"
+                                        :color="copied ? 'success' : undefined" />
+                                </v-btn>
                             </div>
                         </template>
                     </v-text-field>
+                </v-col>
+
+                <v-col cols="12" class="mt-3">
+                    <v-label class="text-caption font-weight-medium mb-1">Confirm Password <span
+                            class="text-error">*</span></v-label>
+                    <v-text-field v-model="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'"
+                        :error="!!confirmPassword && confirmPassword !== form.admin_password" variant="outlined"
+                        density="compact" hide-details>
+                        <template #append-inner>
+                            <v-btn icon variant="text" size="small" density="comfortable" class="opacity-70"
+                                @click="showConfirmPassword = !showConfirmPassword">
+                                <v-icon :icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'" size="20" />
+                            </v-btn>
+                        </template>
+                    </v-text-field>
+                    <div v-if="confirmPassword && confirmPassword !== form.admin_password"
+                        class="text-error text-caption mt-1">
+                        Passwords do not match
+                    </div>
                 </v-col>
 
                 <v-col cols="12" class="mt-4">
