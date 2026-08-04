@@ -126,8 +126,22 @@ function onSubmit() {
     })
 }
 
+const startEndError = computed(() =>
+    form.value.start_time && form.value.end_time && form.value.end_time <= form.value.start_time
+        ? 'End time must be after start time.'
+        : ''
+)
+
+const publicHoursError = computed(() =>
+    form.value.public_booking_start && form.value.public_booking_end
+        && form.value.public_booking_end <= form.value.public_booking_start
+        ? 'Public booking end must be after start.'
+        : ''
+)
+
 const isFormValid = computed(() =>
     form.value.start_time !== '' && form.value.end_time !== ''
+    && startEndError.value === '' && publicHoursError.value === ''
 )
 </script>
 
@@ -176,13 +190,13 @@ const isFormValid = computed(() =>
                     <v-col cols="12" sm="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Start Time</v-label>
                         <v-text-field v-model="form.start_time" type="time" variant="outlined" density="compact"
-                            hide-details />
+                            hide-details :error="!!startEndError" :error-messages="startEndError" />
                     </v-col>
 
                     <v-col cols="12" sm="6" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">End Time</v-label>
                         <v-text-field v-model="form.end_time" type="time" variant="outlined" density="compact"
-                            hide-details />
+                            hide-details :error="!!startEndError" :error-messages="startEndError" />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">
@@ -214,13 +228,13 @@ const isFormValid = computed(() =>
                         <v-col cols="12" sm="6" class="mt-1">
                             <v-label class="text-caption font-weight-medium mb-1">Public Start</v-label>
                             <v-text-field v-model="form.public_booking_start" type="time" variant="outlined"
-                                density="compact" hide-details />
+                                density="compact" hide-details :error="!!publicHoursError" :error-messages="publicHoursError" />
                         </v-col>
 
                         <v-col cols="12" sm="6" class="mt-1">
                             <v-label class="text-caption font-weight-medium mb-1">Public End</v-label>
                             <v-text-field v-model="form.public_booking_end" type="time" variant="outlined"
-                                density="compact" hide-details />
+                                density="compact" hide-details :error="!!publicHoursError" :error-messages="publicHoursError" />
                         </v-col>
                     </template>
 
@@ -235,8 +249,10 @@ const isFormValid = computed(() =>
             <v-btn variant="tonal" color="secondary" :disabled="loading" @click="emit('cancel')">
                 Cancel
             </v-btn>
-            <v-btn variant="flat" :color="config.confirmColor" :loading="loading" :disabled="loading"
-                :style="loading ? 'cursor: not-allowed; pointer-events: auto;' : ''" @click="onSubmit">
+            <v-btn variant="flat" :color="config.confirmColor" :loading="loading"
+                :disabled="loading || (mode !== 'delete' && !isFormValid)"
+                :style="(loading || (mode !== 'delete' && !isFormValid)) ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                @click="onSubmit">
                 {{ config.confirmLabel }}
             </v-btn>
         </v-card-actions>

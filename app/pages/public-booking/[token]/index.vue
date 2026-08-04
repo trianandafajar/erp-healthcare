@@ -86,28 +86,89 @@ function getActiveDays(): Set<number> {
     return set
 }
 
-function getHolidaySet(): Set<string> {
-    return new Set((config.value?.holidays ?? []).map(h => h.holiday_date))
+function holidayFor(d: Date): Holiday | null {
+    const key = toDateKey(d)
+    return (config.value?.holidays ?? []).find(h => h.holiday_date === key) ?? null
 }
 
-function toDateKey(d: Date): string {
+function isHoliday(d: Date): boolean {
+    return holidayFor(d) !== null
+}
+
+type DateStatus = 'past' | 'holiday' | 'closed' | 'available' | 'full'
+
+function dateStatus(d: Date | null): DateStatus {
+    if (!(d instanceof Date)) return 'closed'
+    if (isHoliday(d)) return 'holiday'
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (d < today) return 'past'
+    if (!getActiveDays().has(d.getDay())) return 'closed'
+    if (availabilityLoaded.value && !availableDates.value.has(toDateKey(d))) return 'full'
+    return 'available'
+}
+
+function dateAvailable(d: Date | null): boolean {
+    return dateStatus(d) === 'available'
+}
+
+function cellButtonStyle(d: Date | null): Record<string, string> {
+    if (!(d instanceof Date)) return {}
+    if (selectedDate && toDateKey(d) === toDateKey(selectedDate)) {
+        return { backgroundColor: brandColor.value, color: '#ffffff' }
+    }
+    const status = dateStatus(d)
+    if (status === 'available') return { backgroundColor: brandColor.value + '47', color: '#111827' }
+    if (status === 'full') return { backgroundColor: brandColor.value + '1a', color: '#9ca3af' }
+    if (status === 'holiday') return { backgroundColor: '#fee2e2', color: '#dc2626' }
+    if (status === 'closed' || status === 'past') return { backgroundColor: '#f3f4f6', color: '#d1d5db' }
+    return {}
+}
+
+function dateTooltip(d: Date | null): string | undefined {
+    if (!(d instanceof Date)) return undefined
+    const status = dateStatus(d)
+    if (status === 'holiday') {
+        const h = holidayFor(d)
+        return h?.name ? `Holiday: ${h.name}` : 'Holiday'
+    }
+    if (status === 'full') return 'Fully booked - no slots available'
+    if (status === 'past') return 'Past date'
+    if (status === 'closed') return 'Closed - not an opening day'
+    return undefined
+}
+
+function toDateKey(d: Date | null): string {
+    if (!(d instanceof Date)) return ''
     const y = d.getFullYear()
     const m = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
     return `${y}-${m}-${day}`
 }
 
-function dateAvailable(d: Date): boolean {
-    if (!config.value) return false
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    if (d < today) return false
-    if (getHolidaySet().has(toDateKey(d))) return false
-    return getActiveDays().has(d.getDay())
-}
-
 // ---- Calendar ----
 const calendarMonth = ref(new Date())
+
+const availableDates = ref<Set<string>>(new Set())
+const availabilityLoaded = ref(false)
+
+async function loadAvailability() {
+    const d = calendarMonth.value
+    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    availabilityLoaded.value = false
+    try {
+        const res = await $fetch<{ availableDates: string[] }>(`/api/public-booking/${token}/availability`, {
+            query: { month: monthKey },
+        })
+        availableDates.value = new Set(res.availableDates ?? [])
+    } catch {
+        availableDates.value = new Set()
+    } finally {
+        availabilityLoaded.value = true
+    }
+}
+
+watch(calendarMonth, loadAvailability, { immediate: true })
 
 const calendarCells = computed(() => {
     const year = calendarMonth.value.getFullYear()
@@ -377,19 +438,19 @@ const openingLabels = computed(() => {
 
                     <div class="grid grid-cols-7 gap-1 text-center">
                         <div v-for="(cell, i) in calendarCells" :key="'c-' + i" class="aspect-square">
-                            <button v-if="cell" type="button" :disabled="!dateAvailable(cell)" @click="selectDate(cell)"
-                                :class="[
-                                    'flex h-full w-full items-center justify-center rounded-lg text-sm font-medium transition-all',
-                                    !dateAvailable(cell) && 'cursor-not-allowed text-gray-300',
-                                    dateAvailable(cell) && !selectedDate && 'text-gray-700 hover:bg-gray-100',
-                                    selectedDate && toDateKey(cell) === toDateKey(selectedDate)
-                                        ? 'text-white shadow-sm'
-                                        : dateAvailable(cell) && 'hover:bg-gray-100',
-                                ]"
-                                :style="selectedDate && toDateKey(cell) === toDateKey(selectedDate) ? { backgroundColor: brandColor } : {}">
-                                <span :class="isToday(cell) ? 'font-extrabold underline' : ''">{{ cell.getDate()
-                                    }}</span>
-                            </button>
+                            <span v-if="cell" class="block h-full w-full"
+                                :title="dateTooltip(cell)">
+                                <button type="button" :disabled="!dateAvailable(cell)" @click="selectDate(cell)"
+                                    :class="[
+                                        'flex h-full w-full items-center justify-center rounded-lg text-sm font-medium transition-all',
+                                        dateStatus(cell) === 'available' ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed',
+                                        selectedDate && toDateKey(cell) === toDateKey(selectedDate) ? 'shadow-sm' : '',
+                                    ]"
+                                    :style="cellButtonStyle(cell)">
+                                    <span :class="isToday(cell) ? 'font-extrabold underline' : ''">{{
+                                        cell.getDate() }}</span>
+                                </button>
+                            </span>
                             <div v-else></div>
                         </div>
                     </div>
@@ -400,7 +461,15 @@ const openingLabels = computed(() => {
                             Available
                         </span>
                         <span class="inline-flex items-center gap-1">
-                            <span class="h-3 w-3 rounded bg-gray-200"></span>
+                            <span class="h-3 w-3 rounded" :style="{ backgroundColor: brandColor + '1a' }"></span>
+                            Full
+                        </span>
+                        <span class="inline-flex items-center gap-1">
+                            <span class="h-3 w-3 rounded" style="background-color: #fee2e2;"></span>
+                            Holiday
+                        </span>
+                        <span class="inline-flex items-center gap-1">
+                            <span class="h-3 w-3 rounded" style="background-color: #e5e7eb;"></span>
                             Closed / Past
                         </span>
                     </div>
