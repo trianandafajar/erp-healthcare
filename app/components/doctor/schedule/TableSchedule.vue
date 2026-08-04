@@ -14,6 +14,7 @@ interface DoctorSchedule {
     end_time: string
     max_patients: number
     is_active: boolean
+    public_booking_enabled: boolean
     public_booking_start?: string | null
     public_booking_end?: string | null
     created_at: string
@@ -35,32 +36,31 @@ const schedules = computed<DoctorSchedule[]>(() =>
     data.value?.doctor_schedules ?? []
 )
 
-const isPublicBooking = ref(false)
-const publicBookingLoading = ref(false)
+const togglingId = ref<string | null>(null)
 
-async function loadPublicBooking() {
+async function toggleDayPublicBooking(schedule: DoctorSchedule, value: boolean) {
+    togglingId.value = schedule.id
     try {
-        const res = await $fetch<{ is_public_booking: boolean }>('/api/doctor/public-booking')
-        isPublicBooking.value = res.is_public_booking ?? false
-    } catch { /* ignore */ }
-}
-
-onMounted(loadPublicBooking)
-
-async function togglePublicBooking(value: boolean) {
-    publicBookingLoading.value = true
-    try {
-        const res = await $fetch('/api/doctor/public-booking', {
+        await $fetch('/api/doctor/schedules', {
             method: 'PUT',
-            body: { is_public_booking: value },
+            body: {
+                id: schedule.id,
+                day_of_week: schedule.day_of_week,
+                start_time: schedule.start_time,
+                end_time: schedule.end_time,
+                max_patients: schedule.max_patients,
+                is_active: schedule.is_active,
+                public_booking_enabled: value,
+                public_booking_start: schedule.public_booking_start ?? null,
+                public_booking_end: schedule.public_booking_end ?? null,
+            },
         })
-        isPublicBooking.value = res.is_public_booking ?? value
-        notify(value ? 'Public booking enabled' : 'Public booking disabled')
+        await refresh()
+        notify(value ? 'Public booking enabled for this day' : 'Public booking disabled for this day')
     } catch (e: any) {
-        notify(e?.data?.message ?? 'Failed to update public booking', 'error')
-        isPublicBooking.value = !value
+        notify(e?.data?.message ?? 'Failed to update', 'error')
     } finally {
-        publicBookingLoading.value = false
+        togglingId.value = null
     }
 }
 
@@ -141,6 +141,7 @@ async function handleSubmit(payload: any) {
                     end_time: payload.end_time,
                     max_patients: payload.max_patients,
                     is_active: payload.is_active,
+                    public_booking_enabled: payload.public_booking_enabled,
                     public_booking_start: payload.public_booking_start,
                     public_booking_end: payload.public_booking_end,
                 }
@@ -156,6 +157,7 @@ async function handleSubmit(payload: any) {
                     end_time: payload.end_time,
                     max_patients: payload.max_patients,
                     is_active: payload.is_active,
+                    public_booking_enabled: payload.public_booking_enabled,
                     public_booking_start: payload.public_booking_start,
                     public_booking_end: payload.public_booking_end,
                 }
@@ -186,20 +188,10 @@ async function handleSubmit(payload: any) {
                 <v-card-title class="text-h3">My Schedule</v-card-title>
                 <v-card-subtitle class="mt-1">Manage your weekly availability</v-card-subtitle>
             </div>
-            <div class="d-flex align-center ga-4 flex-wrap">
-                <div class="d-flex align-center">
-                    <v-switch v-model="isPublicBooking" color="success" hide-details density="compact"
-                        :loading="publicBookingLoading" @update:model-value="togglePublicBooking" />
-                    <div class="ms-2">
-                        <div class="text-body-2 font-weight-medium">Public Booking</div>
-                        <div class="text-caption text-medium-emphasis">Allow patients to book online</div>
-                    </div>
-                </div>
-                <v-btn v-if="can('schedule.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
-                    density="comfortable" @click="openAdd">
-                    Add Schedule
-                </v-btn>
-            </div>
+            <v-btn v-if="can('schedule.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+                density="comfortable" @click="openAdd">
+                Add Schedule
+            </v-btn>
         </div>
     </v-card-item>
 
@@ -212,17 +204,18 @@ async function handleSubmit(payload: any) {
                     <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">End Time</th>
                     <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Max Patients</th>
                     <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Public Booking</th>
                     <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-if="pending">
-                    <td colspan="6" class="text-center py-8">
+                    <td colspan="7" class="text-center py-8">
                         <v-progress-circular indeterminate color="primary" />
                     </td>
                 </tr>
                 <tr v-else-if="paginatedSchedules.length === 0">
-                    <td colspan="6" class="text-center py-8 text-medium-emphasis">
+                    <td colspan="7" class="text-center py-8 text-medium-emphasis">
                         <v-icon icon="mdi-calendar-blank" size="32" class="mb-2 d-block mx-auto" />
                         No schedules found
                     </td>
@@ -239,8 +232,19 @@ async function handleSubmit(payload: any) {
                             {{ schedule.is_active ? 'Active' : 'Inactive' }}
                         </v-chip>
                     </td>
+                    <td class="py-3">
+                        <v-switch
+                            :model-value="schedule.public_booking_enabled"
+                            color="primary"
+                            hide-details
+                            density="compact"
+                            :disabled="togglingId === schedule.id"
+                            :loading="togglingId === schedule.id"
+                            @update:model-value="toggleDayPublicBooking(schedule, $event)"
+                        />
+                    </td>
                     <td class="py-3 text-right">
-                        <v-btn v-if="isPublicBooking && can('schedule.edit')" icon="mdi-clock-outline"
+                        <v-btn v-if="schedule.public_booking_enabled && can('schedule.edit')" icon="mdi-clock-outline"
                             variant="text" size="small" density="comfortable" class="me-1"
                             @click="openEdit(schedule)" />
                         <v-btn v-if="can('schedule.edit')" icon="mdi-pencil-outline" variant="text" size="small"
@@ -269,7 +273,7 @@ async function handleSubmit(payload: any) {
 
     <v-dialog v-model="dialog" max-width="480">
         <ScheduleModal :loading="actionLoading" :mode="modalMode" :schedule="selectedSchedule" :schedules="schedules"
-            :public-booking="isPublicBooking" @submit="handleSubmit" @cancel="closeModal" />
+            @submit="handleSubmit" @cancel="closeModal" />
     </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" location="bottom right" :timeout="3000">

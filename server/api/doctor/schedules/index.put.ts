@@ -9,6 +9,7 @@ export default defineEventHandler(async (event: any) => {
     end_time,
     max_patients,
     is_active,
+    public_booking_enabled,
     public_booking_start,
     public_booking_end,
   } = await readBody(event)
@@ -57,6 +58,7 @@ export default defineEventHandler(async (event: any) => {
       end_time,
       max_patients,
       is_active: is_active ?? true,
+      public_booking_enabled: public_booking_enabled ?? false,
       public_booking_start: public_booking_start ?? null,
       public_booking_end: public_booking_end ?? null,
     })

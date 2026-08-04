@@ -8,6 +8,7 @@ interface DoctorSchedule {
     end_time: string
     max_patients: number
     is_active: boolean
+    public_booking_enabled: boolean
     public_booking_start?: string | null
     public_booking_end?: string | null
 }
@@ -27,7 +28,6 @@ const props = defineProps<{
     schedule?: DoctorSchedule | null
     schedules?: DoctorSchedule[]
     loading: boolean
-    publicBooking?: boolean
 }>()
 
 const availableDays = computed(() => {
@@ -56,6 +56,7 @@ const form = ref({
     end_time: '',
     max_patients: 20,
     is_active: true,
+    public_booking_enabled: false,
     public_booking_start: '',
     public_booking_end: '',
 })
@@ -70,6 +71,7 @@ watch(
                 end_time: schedule.end_time.slice(0, 5),
                 max_patients: schedule.max_patients,
                 is_active: schedule.is_active,
+                public_booking_enabled: schedule.public_booking_enabled ?? false,
                 public_booking_start: schedule.public_booking_start?.slice(0, 5) ?? '',
                 public_booking_end: schedule.public_booking_end?.slice(0, 5) ?? '',
             }
@@ -80,6 +82,7 @@ watch(
                 end_time: '',
                 max_patients: 20,
                 is_active: true,
+                public_booking_enabled: false,
                 public_booking_start: '',
                 public_booking_end: '',
             }
@@ -211,7 +214,12 @@ const isFormValid = computed(() =>
                             density="compact" />
                     </v-col>
 
-                    <template v-if="publicBooking">
+                    <v-col cols="12" class="mt-3">
+                        <v-switch v-model="form.public_booking_enabled" color="primary"
+                            label="Public Booking (online)" hide-details density="compact" />
+                    </v-col>
+
+                    <template v-if="form.public_booking_enabled">
                         <v-col cols="12" class="mt-3">
                             <v-divider class="mb-2" />
                             <div class="d-flex align-center ga-2">
@@ -237,7 +245,6 @@ const isFormValid = computed(() =>
                                 density="compact" hide-details :error="!!publicHoursError" :error-messages="publicHoursError" />
                         </v-col>
                     </template>
-
                 </v-row>
             </v-card-text>
         </template>

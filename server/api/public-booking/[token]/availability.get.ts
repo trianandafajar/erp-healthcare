@@ -65,7 +65,6 @@ export default defineEventHandler(async (event: any) => {
         .from('doctors')
         .select('id')
         .eq('tenant_id', tenantId)
-        .eq('is_public_booking', true)
         .eq('is_available', true)
 
     if (doctorsError) throw createError({ statusCode: 500, message: doctorsError.message })
@@ -79,6 +78,7 @@ export default defineEventHandler(async (event: any) => {
             .select('doctor_id, day_of_week, start_time, end_time, public_booking_start, public_booking_end, max_patients')
             .in('doctor_id', doctorIds)
             .eq('is_active', true)
+            .eq('public_booking_enabled', true)
         if (error) throw createError({ statusCode: 500, message: error.message })
         schedules = data ?? []
     }

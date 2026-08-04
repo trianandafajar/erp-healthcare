@@ -25,6 +25,7 @@ export default defineEventHandler(async (event: any) => {
             end_time,
             max_patients,
             is_active,
+            public_booking_enabled,
             public_booking_start,
             public_booking_end,
             created_at

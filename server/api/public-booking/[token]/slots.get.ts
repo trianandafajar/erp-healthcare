@@ -77,7 +77,6 @@ export default defineEventHandler(async (event: any) => {
         .select('id, department_id')
         .eq('id', doctorId)
         .eq('tenant_id', tenantId)
-        .eq('is_public_booking', true)
         .eq('is_available', true)
         .maybeSingle()
 
@@ -93,6 +92,7 @@ export default defineEventHandler(async (event: any) => {
         .eq('tenant_id', tenantId)
         .eq('day_of_week', dayOfWeek)
         .eq('is_active', true)
+        .eq('public_booking_enabled', true)
         .maybeSingle()
 
     if (scheduleError) throw createError({ statusCode: 500, message: scheduleError.message })

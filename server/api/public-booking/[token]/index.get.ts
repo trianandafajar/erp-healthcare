@@ -35,7 +35,6 @@ export default defineEventHandler(async (event: any) => {
                     department:departments(name)
                 `)
                 .eq('tenant_id', tenantId)
-                .eq('is_public_booking', true)
                 .eq('is_available', true)
                 .order('created_at', { ascending: true })
                 .returns<any[]>(),
@@ -49,7 +48,22 @@ export default defineEventHandler(async (event: any) => {
     const tenantSettings = tenantSettingsRes.data
     const openingHours = openingHoursRes.data
     const holidays = holidaysRes.data
-    const doctors = doctorsRes.data
+    const allDoctors = doctorsRes.data ?? []
+
+    const doctorIds = allDoctors.map((d: any) => d.id)
+    let enabledDoctorIdSet: Set<string> | null = null
+    if (doctorIds.length) {
+        const { data: enabledSchedules } = await admin
+            .from('doctor_schedules')
+            .select('doctor_id')
+            .in('doctor_id', doctorIds)
+            .eq('public_booking_enabled', true)
+        const uniqueIds = new Set<string>()
+        for (const row of enabledSchedules ?? []) uniqueIds.add(row.doctor_id)
+        enabledDoctorIdSet = uniqueIds
+    }
+
+    const doctors = allDoctors.filter((d: any) => enabledDoctorIdSet?.has(d.id) ?? false)
 
     return {
         tenant: {
