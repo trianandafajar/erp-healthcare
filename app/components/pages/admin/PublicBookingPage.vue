@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import OpeningHoursModal, { type OpeningHour } from './OpeningHoursModal.vue'
+import type { OpeningHour } from './OpeningHoursModal.vue'
 import HolidayModal, { type Holiday } from './HolidayModal.vue'
 
 const DAY_NAMES = [
@@ -43,6 +43,7 @@ async function loadConfig() {
             opening_hours: data.opening_hours ?? [],
             holidays: data.holidays ?? [],
         }
+        syncHoursRows()
     } catch (e: any) {
         notify(e?.data?.message ?? 'Failed to load public booking configuration', 'error')
     } finally {
@@ -88,17 +89,6 @@ function getDayName(day: number) {
     return DAY_NAMES[day] ?? '-'
 }
 
-function formatTime(timeStr?: string) {
-    if (!timeStr) return '-'
-    const parts = timeStr.split(':')
-    const h = Number(parts[0])
-    const m = Number(parts[1])
-    if (Number.isNaN(h) || Number.isNaN(m)) return '-'
-    const period = h < 12 ? 'AM' : 'PM'
-    const hour12 = h % 12 || 12
-    return `${hour12}:${String(m).padStart(2, '0')} ${period}`
-}
-
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
@@ -106,52 +96,51 @@ function formatDate(dateStr?: string) {
     })
 }
 
-// ---- Opening hours modal ----
-const hoursDialog = ref(false)
-const hoursMode = ref<'add' | 'edit' | 'delete'>('add')
-const selectedHour = ref<OpeningHour | null>(null)
-
-function openHoursAdd() {
-    hoursMode.value = 'add'
-    selectedHour.value = null
-    hoursDialog.value = true
+// ---- Static opening hours editor (7 days) ----
+interface HoursRow {
+    day_of_week: number
+    start_time: string
+    end_time: string
+    is_active: boolean
 }
 
-function openHoursEdit(hour: OpeningHour) {
-    hoursMode.value = 'edit'
-    selectedHour.value = hour
-    hoursDialog.value = true
+const hoursRows = ref<HoursRow[]>(
+    Array.from({ length: 7 }, (_, i) => ({
+        day_of_week: i,
+        start_time: '',
+        end_time: '',
+        is_active: false,
+    }))
+)
+
+function syncHoursRows() {
+    for (const row of hoursRows.value) {
+        const existing = config.value.opening_hours.find(h => h.day_of_week === row.day_of_week)
+        row.start_time = existing?.start_time?.slice(0, 5) ?? ''
+        row.end_time = existing?.end_time?.slice(0, 5) ?? ''
+        row.is_active = existing?.is_active ?? false
+    }
 }
 
-function openHoursDelete(hour: OpeningHour) {
-    hoursMode.value = 'delete'
-    selectedHour.value = hour
-    hoursDialog.value = true
+function rowError(row: HoursRow): string {
+    if (!row.start_time && !row.end_time) return ''
+    if (!row.start_time || !row.end_time) return 'Fill both start & end'
+    if (row.end_time <= row.start_time) return 'End must be after start'
+    return ''
 }
 
-function closeHoursDialog() {
-    hoursDialog.value = false
-    selectedHour.value = null
-}
+const hoursInvalid = computed(() => hoursRows.value.some(r => rowError(r) !== ''))
 
-async function submitHours(payload: any) {
+async function saveHours() {
     saving.value = true
     try {
-        let next: OpeningHour[] = [...config.value.opening_hours]
-        if (hoursMode.value === 'delete') {
-            next = next.filter(h => h.id !== payload.id)
-        } else if (hoursMode.value === 'edit') {
-            next = next.map(h => h.id === payload.id ? { ...h, ...payload } : h)
-        } else {
-            next.push(payload)
-        }
         const data = await $fetch('/api/public-booking', {
             method: 'PUT',
-            body: { opening_hours: next },
+            body: { opening_hours: hoursRows.value },
         })
-        config.value.opening_hours = data.opening_hours ?? next
+        config.value.opening_hours = data.opening_hours ?? []
+        syncHoursRows()
         notify('Opening hours saved successfully')
-        closeHoursDialog()
     } catch (e: any) {
         notify(e?.data?.message ?? 'Failed to save opening hours', 'error')
     } finally {
@@ -260,62 +249,56 @@ async function submitHoliday(payload: any) {
             <v-col cols="12" xl="7">
                 <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="bg-surface h-100">
                     <v-card-item class="pb-2">
-                        <div class="d-flex justify-space-between align-center">
+                        <div class="d-flex justify-space-between align-center flex-wrap ga-2">
                             <div>
                                 <v-card-title class="text-h6 font-weight-bold">Booking Open</v-card-title>
                                 <v-card-subtitle class="text-caption text-medium-emphasis mt-1">
-                                    Operating hours when patients can book appointments.
+                                    Set operating hours for each day. Leave empty to close that day.
                                 </v-card-subtitle>
                             </div>
-                            <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" density="comfortable"
-                                @click="openHoursAdd">
-                                Add Hours
+                            <v-btn color="primary" variant="flat" prepend-icon="mdi-content-save"
+                                density="comfortable" :loading="saving" :disabled="saving || hoursInvalid"
+                                :style="(saving || hoursInvalid) ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                                @click="saveHours">
+                                Save
                             </v-btn>
                         </div>
                     </v-card-item>
 
                     <v-divider />
 
-                    <v-table class="bordered-table" hover density="comfortable">
+                    <v-table class="bordered-table" density="comfortable">
                         <thead class="bg-containerBg">
                             <tr>
-                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Day</th>
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase"
+                                    style="width: 130px;">Day</th>
                                 <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Start
                                 </th>
                                 <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">End</th>
-                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status
-                                </th>
-                                <th class="text-no-wrap text-right text-caption font-weight-bold text-uppercase">Actions
+                                <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Active
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="loading">
-                                <td colspan="5" class="text-center py-8">
+                                <td colspan="4" class="text-center py-8">
                                     <v-progress-circular indeterminate color="primary" />
                                 </td>
                             </tr>
-                            <tr v-else-if="config.opening_hours.length === 0">
-                                <td colspan="5" class="text-center py-8 text-medium-emphasis">
-                                    <v-icon icon="mdi-calendar-clock" size="32" class="mb-2 d-block mx-auto" />
-                                    No opening hours configured
+                            <tr v-for="row in hoursRows" v-else :key="row.day_of_week">
+                                <td class="py-2 text-body-2 font-weight-medium">{{ getDayName(row.day_of_week) }}</td>
+                                <td class="py-2">
+                                    <v-text-field v-model="row.start_time" type="time" variant="outlined"
+                                        density="compact" hide-details :error="rowError(row) !== ''"
+                                        :error-messages="rowError(row)" />
                                 </td>
-                            </tr>
-                            <tr v-else v-for="hour in config.opening_hours" :key="hour.id">
-                                <td class="py-3 text-body-2 font-weight-medium">{{ getDayName(hour.day_of_week) }}</td>
-                                <td class="py-3 text-body-2">{{ formatTime(hour.start_time) }}</td>
-                                <td class="py-3 text-body-2">{{ formatTime(hour.end_time) }}</td>
-                                <td class="py-3">
-                                    <v-chip :color="hour.is_active ? 'success' : 'default'" variant="tonal"
-                                        size="small">
-                                        {{ hour.is_active ? 'Active' : 'Inactive' }}
-                                    </v-chip>
+                                <td class="py-2">
+                                    <v-text-field v-model="row.end_time" type="time" variant="outlined"
+                                        density="compact" hide-details :error="rowError(row) !== ''"
+                                        :error-messages="rowError(row)" />
                                 </td>
-                                <td class="py-3 text-right">
-                                    <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="secondary"
-                                        density="comfortable" @click="openHoursEdit(hour)" />
-                                    <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error"
-                                        density="comfortable" @click="openHoursDelete(hour)" />
+                                <td class="py-2">
+                                    <v-switch v-model="row.is_active" color="success" hide-details density="compact" />
                                 </td>
                             </tr>
                         </tbody>
@@ -379,11 +362,6 @@ async function submitHoliday(payload: any) {
                 </v-card>
             </v-col>
         </v-row>
-
-        <v-dialog v-model="hoursDialog" max-width="480">
-            <OpeningHoursModal :loading="saving" :mode="hoursMode" :hour="selectedHour" :hours="config.opening_hours"
-                @submit="submitHours" @cancel="closeHoursDialog" />
-        </v-dialog>
 
         <v-dialog v-model="holidayDialog" max-width="440">
             <HolidayModal :loading="saving" :mode="holidayMode" :holiday="selectedHoliday" @submit="submitHoliday"
