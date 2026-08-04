@@ -293,8 +293,7 @@ const openingLabels = computed(() => {
 </script>
 
 <template>
-    <div class="min-h-screen" :style="{ backgroundColor: '#f6f8f7' }">
-        <!-- Header -->
+    <div class="flex min-h-screen flex-col" :style="{ backgroundColor: '#f6f8f7' }">
         <header class="border-b bg-white">
             <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
                 <div class="flex items-center gap-3 min-w-0">
@@ -314,20 +313,18 @@ const openingLabels = computed(() => {
             </div>
         </header>
 
-        <main class="mx-auto max-w-5xl px-4 py-8">
+        <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
             <!-- Loading -->
             <div v-if="pending" class="flex justify-center py-24">
                 <v-progress-circular indeterminate :color="brandColor" />
             </div>
 
-            <!-- Error -->
             <div v-else-if="errorMsg" class="rounded-2xl border bg-white px-6 py-16 text-center">
                 <v-icon icon="mdi-calendar-remove" size="48" color="error" class="mb-3" />
                 <h2 class="text-xl font-bold text-gray-900">Booking Unavailable</h2>
                 <p class="mt-2 text-sm text-gray-500">{{ errorMsg }}</p>
             </div>
 
-            <!-- Success -->
             <div v-else-if="booked" class="mx-auto max-w-lg rounded-2xl border bg-white px-6 py-14 text-center">
                 <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full"
                     :style="{ backgroundColor: brandColor + '1a' }">
@@ -349,9 +346,7 @@ const openingLabels = computed(() => {
                 </button>
             </div>
 
-            <!-- Booking flow -->
             <div v-else class="grid gap-6 lg:grid-cols-5">
-                <!-- Step 1: Calendar -->
                 <section class="rounded-2xl border bg-white p-5 lg:col-span-2">
                     <div class="mb-4">
                         <div class="flex items-center justify-between">
@@ -392,7 +387,8 @@ const openingLabels = computed(() => {
                                         : dateAvailable(cell) && 'hover:bg-gray-100',
                                 ]"
                                 :style="selectedDate && toDateKey(cell) === toDateKey(selectedDate) ? { backgroundColor: brandColor } : {}">
-                                <span :class="isToday(cell) ? 'font-extrabold underline' : ''">{{ cell.getDate() }}</span>
+                                <span :class="isToday(cell) ? 'font-extrabold underline' : ''">{{ cell.getDate()
+                                    }}</span>
                             </button>
                             <div v-else></div>
                         </div>
@@ -410,7 +406,6 @@ const openingLabels = computed(() => {
                     </div>
                 </section>
 
-                <!-- Steps 2 & 3 -->
                 <section class="space-y-6 lg:col-span-3">
                     <!-- Step 2: Doctors -->
                     <div class="rounded-2xl border bg-white p-5">
@@ -425,15 +420,15 @@ const openingLabels = computed(() => {
                                 @update:model-value="selectedDoctor = null" />
                         </div>
 
-                        <div v-if="config && filteredDoctors.length === 0" class="py-8 text-center text-sm text-gray-400">
+                        <div v-if="config && filteredDoctors.length === 0"
+                            class="py-8 text-center text-sm text-gray-400">
                             <v-icon icon="mdi-doctor" size="36" class="mb-2 d-block mx-auto" />
                             No doctors available for online booking.
                         </div>
 
                         <div v-else class="space-y-3">
                             <button v-for="doc in filteredDoctors" :key="doc.id" type="button"
-                                @click="selectDoctor(doc.id)"
-                                :class="[
+                                @click="selectDoctor(doc.id)" :class="[
                                     'flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all',
                                     selectedDoctor === doc.id
                                         ? 'border-transparent shadow-sm'
@@ -457,7 +452,6 @@ const openingLabels = computed(() => {
                         </div>
                     </div>
 
-                    <!-- Step 3: Slots -->
                     <div v-if="selectedDoctor" class="rounded-2xl border bg-white p-5">
                         <div class="mb-4">
                             <div class="text-sm font-semibold text-gray-500">Step 3</div>
@@ -475,22 +469,19 @@ const openingLabels = computed(() => {
                             No available time slots for this date.
                         </div>
                         <div v-else class="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                            <button v-for="slot in slots" :key="slot" type="button" @click="selectedSlot = slot"
-                                :class="[
-                                    'rounded-lg border px-2 py-2.5 text-sm font-semibold transition-all',
-                                    selectedSlot === slot
-                                        ? 'text-white shadow-sm'
-                                        : 'border-gray-200 text-gray-700 hover:border-gray-400',
-                                ]"
+                            <button v-for="slot in slots" :key="slot" type="button" @click="selectedSlot = slot" :class="[
+                                'rounded-lg border px-2 py-2.5 text-sm font-semibold transition-all',
+                                selectedSlot === slot
+                                    ? 'text-white shadow-sm'
+                                    : 'border-gray-200 text-gray-700 hover:border-gray-400',
+                            ]"
                                 :style="selectedSlot === slot ? { backgroundColor: brandColor, borderColor: brandColor } : {}">
                                 {{ formatTime(slot) }}
                             </button>
                         </div>
                     </div>
 
-                    <!-- Step 4: Patient form -->
-                    <div v-if="selectedDate && selectedDoctor && selectedSlot"
-                        class="rounded-2xl border bg-white p-5">
+                    <div v-if="selectedDate && selectedDoctor && selectedSlot" class="rounded-2xl border bg-white p-5">
                         <div class="mb-4">
                             <div class="text-sm font-semibold text-gray-500">Step 4</div>
                             <h2 class="text-base font-bold text-gray-900">Your Details</h2>
@@ -536,7 +527,8 @@ const openingLabels = computed(() => {
                                     </select>
                                 </div>
                                 <div class="sm:col-span-2">
-                                    <label class="mb-1 block text-xs font-semibold text-gray-700">Chief Complaint</label>
+                                    <label class="mb-1 block text-xs font-semibold text-gray-700">Chief
+                                        Complaint</label>
                                     <textarea v-model="form.chief_complaint" rows="2"
                                         class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-gray-500 focus:outline-none"
                                         placeholder="Describe your symptoms (optional)"></textarea>
@@ -552,8 +544,7 @@ const openingLabels = computed(() => {
                                 <button type="submit" :disabled="submitting"
                                     class="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                                     :style="{ backgroundColor: brandColor }">
-                                    <v-icon v-if="submitting" icon="mdi-loading" size="18"
-                                        class="animate-spin" />
+                                    <v-icon v-if="submitting" icon="mdi-loading" size="18" class="animate-spin" />
                                     {{ submitting ? 'Booking...' : 'Confirm Booking' }}
                                 </button>
                             </div>

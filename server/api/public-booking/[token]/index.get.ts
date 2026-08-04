@@ -19,7 +19,7 @@ export default defineEventHandler(async (event: any) => {
 
     const tenantId = settings.tenant_id
 
-    const [{ data: tenant }, { data: tenantSettings }, { data: openingHours }, { data: holidays }, { data: doctors }] =
+    const [tenantRes, tenantSettingsRes, openingHoursRes, holidaysRes, doctorsRes] =
         await Promise.all([
             admin.from('tenants').select('id, name, slug, brand_color').eq('id', tenantId).single(),
             admin.from('tenant_settings').select('display_name, logo_url').eq('tenant_id', tenantId).maybeSingle(),
@@ -31,8 +31,7 @@ export default defineEventHandler(async (event: any) => {
                     id,
                     specialization,
                     department_id,
-                    photo_url,
-                    profile:profiles(full_name),
+                    profile:profiles(full_name, avatar_url),
                     department:departments(name)
                 `)
                 .eq('tenant_id', tenantId)
@@ -41,6 +40,16 @@ export default defineEventHandler(async (event: any) => {
                 .order('created_at', { ascending: true })
                 .returns<any[]>(),
         ])
+
+    for (const res of [tenantRes, tenantSettingsRes, openingHoursRes, holidaysRes, doctorsRes]) {
+        if (res.error) throw createError({ statusCode: 500, message: res.error.message })
+    }
+
+    const tenant = tenantRes.data
+    const tenantSettings = tenantSettingsRes.data
+    const openingHours = openingHoursRes.data
+    const holidays = holidaysRes.data
+    const doctors = doctorsRes.data
 
     return {
         tenant: {
@@ -59,7 +68,7 @@ export default defineEventHandler(async (event: any) => {
             specialization: d.specialization ?? null,
             department_id: d.department_id ?? null,
             department_name: d.department?.name ?? null,
-            photo_url: d.photo_url ?? null,
+            photo_url: d.profile?.avatar_url ?? null,
         })),
     }
 })

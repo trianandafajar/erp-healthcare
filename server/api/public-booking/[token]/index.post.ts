@@ -122,10 +122,12 @@ export default defineEventHandler(async (event: any) => {
         toMinutes(schedule.public_booking_end ?? schedule.end_time),
     )
 
+    const gridStartMin = Math.ceil(startMin / SLOT_MINUTES) * SLOT_MINUTES
+
     if (slotMin % SLOT_MINUTES !== 0) {
         throw createError({ statusCode: 400, message: `Time must be on a ${SLOT_MINUTES}-minute grid` })
     }
-    if (slotMin < startMin || slotMin + SLOT_MINUTES > endMin) {
+    if (slotMin < gridStartMin || slotMin + SLOT_MINUTES > endMin) {
         throw createError({ statusCode: 400, message: 'Selected time is outside the available booking window' })
     }
 

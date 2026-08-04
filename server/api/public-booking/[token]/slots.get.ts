@@ -51,18 +51,17 @@ export default defineEventHandler(async (event: any) => {
     const todayStr = new Date().toISOString().split('T')[0]
     const isToday = date === todayStr
 
-    // 1. Holiday check
-    const { data: holiday } = await admin
+    const { data: holiday, error: holidayError } = await admin
         .from('public_booking_holidays')
         .select('id')
         .eq('tenant_id', tenantId)
         .eq('holiday_date', date)
         .maybeSingle()
 
+    if (holidayError) throw createError({ statusCode: 500, message: holidayError.message })
     if (holiday) return { date, slots: [] }
 
-    // 2. Opening hours for that day
-    const { data: openingHour } = await admin
+    const { data: openingHour, error: openingError } = await admin
         .from('public_booking_opening_hours')
         .select('*')
         .eq('tenant_id', tenantId)
@@ -70,10 +69,10 @@ export default defineEventHandler(async (event: any) => {
         .eq('is_active', true)
         .maybeSingle()
 
+    if (openingError) throw createError({ statusCode: 500, message: openingError.message })
     if (!openingHour) return { date, slots: [] }
 
-    // 3. Doctor exists and allows public booking
-    const { data: doctor } = await admin
+    const { data: doctor, error: doctorError } = await admin
         .from('doctors')
         .select('id, department_id')
         .eq('id', doctorId)
@@ -82,12 +81,12 @@ export default defineEventHandler(async (event: any) => {
         .eq('is_available', true)
         .maybeSingle()
 
+    if (doctorError) throw createError({ statusCode: 500, message: doctorError.message })
     if (!doctor) {
         throw createError({ statusCode: 404, message: 'Doctor not available for public booking' })
     }
 
-    // 4. Doctor schedule for that day
-    const { data: schedule } = await admin
+    const { data: schedule, error: scheduleError } = await admin
         .from('doctor_schedules')
         .select('*')
         .eq('doctor_id', doctorId)
@@ -96,9 +95,9 @@ export default defineEventHandler(async (event: any) => {
         .eq('is_active', true)
         .maybeSingle()
 
+    if (scheduleError) throw createError({ statusCode: 500, message: scheduleError.message })
     if (!schedule) return { date, slots: [] }
 
-    // 5. Effective window: max(start) / min(end) of opening hours & doctor schedule
     const startMin = Math.max(
         toMinutes(openingHour.start_time),
         toMinutes(schedule.public_booking_start ?? schedule.start_time),
@@ -108,9 +107,10 @@ export default defineEventHandler(async (event: any) => {
         toMinutes(schedule.public_booking_end ?? schedule.end_time),
     )
 
-    if (endMin <= startMin) return { date, slots: [] }
+    const gridStartMin = Math.ceil(startMin / SLOT_MINUTES) * SLOT_MINUTES
 
-    // 6. Count existing bookings per time slot
+    if (endMin <= gridStartMin) return { date, slots: [] }
+
     const { data: appointments } = await admin
         .from('appointments')
         .select('appointment_time')
@@ -129,9 +129,8 @@ export default defineEventHandler(async (event: any) => {
     const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1
     const maxPatients = schedule.max_patients ?? 20
 
-    // 7. Generate 30-minute slots
     const slots: string[] = []
-    for (let t = startMin; t + SLOT_MINUTES <= endMin; t += SLOT_MINUTES) {
+    for (let t = gridStartMin; t + SLOT_MINUTES <= endMin; t += SLOT_MINUTES) {
         const timeStr = toTimeStr(t)
         if (isToday && t <= nowMin) continue
         if ((bookedByTime[timeStr] ?? 0) >= maxPatients) continue
