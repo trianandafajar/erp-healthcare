@@ -10,7 +10,9 @@ const route = useRoute()
 const GUEST_ROUTES = ['/', '/login', '/register', '/forgot-password', '/verify']
 
 const showSkeletonForRoute = computed(() => {
-  return !GUEST_ROUTES.includes(route.path)
+  if (GUEST_ROUTES.includes(route.path)) return false
+  if (route.path.startsWith('/public-booking/')) return false
+  return true
 })
 
 const showSkeleton = ref(true)

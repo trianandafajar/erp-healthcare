@@ -12,6 +12,7 @@ import {
   BarChartOutlined,
   BuildOutlined,
   SettingOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons-vue';
 
 export interface menu {
@@ -57,6 +58,7 @@ export function getSidebarItems(slug: string): menu[] {
     { title: 'Log Activity', icon: HistoryOutlined, to: `${base}/log-activity` },
 
     { header: 'Settings' },
+    { title: 'Public Appointment', icon: CalendarOutlined, to: `${base}/public-booking` },
     { title: 'Settings', icon: SettingOutlined, to: `${base}/settings` },
   ]
 }
