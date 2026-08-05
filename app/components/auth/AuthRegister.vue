@@ -52,6 +52,8 @@ const passwordStrength = computed(() => {
 })
 
 async function register() {
+    if (loading.value) return
+
     if(passwordScore.value < 6) {
         errorMsg.value = 'Your password is not strong enough'
         return
@@ -161,7 +163,7 @@ async function register() {
             </h6>
         </div>
 
-        <v-btn color="primary" block class="mt-4" variant="flat" size="large" :loading="loading" @click="register">
+        <v-btn color="primary" block class="mt-4" variant="flat" size="large" :loading="loading" :disabled="loading" @click="register">
             Create Account
         </v-btn>
     </v-form>

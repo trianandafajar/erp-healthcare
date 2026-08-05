@@ -18,6 +18,7 @@ const emailRules = [
 ]
 
 async function validate() {
+    if (isSubmitting.value) return
     if (!email.value) return
 
     email.value = email.value.trim()
@@ -55,8 +56,8 @@ async function validate() {
                 hide-details="auto" variant="outlined" color="primary"></v-text-field>
         </div>
 
-        <v-btn color="primary" :loading="isSubmitting" block class="mt-5" variant="flat" size="large" :disabled="valid"
-            type="submit">
+        <v-btn color="primary" :loading="isSubmitting" block class="mt-5" variant="flat" size="large"
+            :disabled="valid || isSubmitting" type="submit">
             Send Email
         </v-btn>
 

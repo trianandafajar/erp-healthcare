@@ -33,6 +33,8 @@ const emailRules = [
 ]
 
 async function validate() {
+    if (isSubmitting.value) return
+
     isSubmitting.value = true
     apiError.value = ''
 
@@ -221,7 +223,7 @@ async function validate() {
             </div>
         </div>
 
-        <v-btn color="primary" :loading="isSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
+        <v-btn color="primary" :loading="isSubmitting" :disabled="isSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
             Login
         </v-btn>
 

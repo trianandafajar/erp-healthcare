@@ -13,6 +13,16 @@ export default defineEventHandler(async (event) => {
 
     const admin = supabaseAdmin()
 
+    const { data: existingProfile } = await admin
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle()
+
+    if (existingProfile) {
+        throw createError({ statusCode: 409, message: 'An account with this email already exists.' })
+    }
+
     const { data, error } = await admin.auth.admin.createUser({
         email,
         password,

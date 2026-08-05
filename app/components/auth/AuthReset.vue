@@ -83,6 +83,8 @@ const passwordStrength = computed(() => {
 })
 
 async function validate() {
+    if (isSubmitting.value) return
+
     if (password.value !== confirmPassword.value) {
         apiError.value = 'Passwords do not match'
         return
@@ -173,7 +175,7 @@ async function validate() {
             </v-text-field>
         </div>
 
-        <v-btn color="primary" :loading="isSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
+        <v-btn color="primary" :loading="isSubmitting" :disabled="isSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
             Reset Password
         </v-btn>
 
