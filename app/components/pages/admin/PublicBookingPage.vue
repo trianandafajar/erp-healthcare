@@ -225,29 +225,43 @@ async function submitHoliday(payload: any) {
 
                 <v-divider class="my-4" />
 
-                <template v-if="config.enabled && config.token">
-                    <v-label class="text-caption font-weight-medium mb-2 d-block">Public booking URL</v-label>
-                    <div class="d-flex align-center ga-2 flex-wrap">
-                        <v-text-field :model-value="publicUrl" readonly variant="outlined" density="compact"
-                            hide-details style="max-width: 520px;" class="flex-grow-1" />
-                        <v-btn variant="tonal" color="primary" prepend-icon="mdi-content-copy" @click="copyUrl">
-                            Copy
-                        </v-btn>
-                        <v-btn variant="tonal" color="secondary" prepend-icon="mdi-open-in-new" :href="publicUrl"
-                            target="_blank" rel="noopener">
-                            Open
-                        </v-btn>
+                <template v-if="config.enabled">
+                    <div v-if="savingToggle" class="d-flex align-center ga-3">
+                        <v-progress-circular indeterminate size="22" color="primary" />
+                        <div>
+                            <div class="text-body-2 font-weight-medium">Generating public booking URL...</div>
+                            <div class="text-caption text-medium-emphasis">Please wait a moment</div>
+                        </div>
                     </div>
-                    <div class="text-caption text-medium-emphasis mt-2">
-                        Share this link with your patients to let them book appointments online.
-                    </div>
+                    <template v-else-if="config.token">
+                        <v-label class="text-caption font-weight-medium mb-2 d-block">Public booking URL</v-label>
+                        <div class="d-flex align-center ga-2 flex-wrap">
+                            <v-text-field :model-value="publicUrl" readonly variant="outlined" density="compact"
+                                hide-details style="max-width: 520px;" class="flex-grow-1" />
+                            <v-btn variant="tonal" color="primary" prepend-icon="mdi-content-copy" @click="copyUrl">
+                                Copy
+                            </v-btn>
+                            <v-btn variant="tonal" color="secondary" prepend-icon="mdi-open-in-new" :href="publicUrl"
+                                target="_blank" rel="noopener">
+                                Open
+                            </v-btn>
+                        </div>
+                        <div class="text-caption text-medium-emphasis mt-2">
+                            Share this link with your patients to let them book appointments online.
+                        </div>
+                    </template>
                 </template>
             </v-card-text>
         </v-card>
 
+        <v-alert v-if="!config.enabled" type="info" variant="tonal" density="comfortable" class="mb-5">
+            Public booking is disabled. Enable it above to configure opening hours and holidays.
+        </v-alert>
+
         <v-row>
             <v-col cols="12" xl="7">
-                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="bg-surface h-100">
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0', position: 'relative' }"
+                    class="bg-surface h-100">
                     <v-card-item class="pb-2">
                         <div class="d-flex justify-space-between align-center flex-wrap ga-2">
                             <div>
@@ -257,8 +271,8 @@ async function submitHoliday(payload: any) {
                                 </v-card-subtitle>
                             </div>
                             <v-btn color="primary" variant="flat" prepend-icon="mdi-content-save"
-                                density="comfortable" :loading="saving" :disabled="saving || hoursInvalid"
-                                :style="(saving || hoursInvalid) ? 'cursor: not-allowed; pointer-events: auto;' : ''"
+                                density="comfortable" :loading="saving" :disabled="saving || hoursInvalid || !config.enabled"
+                                :style="(saving || hoursInvalid || !config.enabled) ? 'cursor: not-allowed; pointer-events: auto;' : ''"
                                 @click="saveHours">
                                 Save
                             </v-btn>
@@ -303,11 +317,19 @@ async function submitHoliday(payload: any) {
                             </tr>
                         </tbody>
                     </v-table>
+
+                    <div v-if="!config.enabled && !loading" class="d-flex align-center justify-center"
+                        style="position: absolute; inset: 0; z-index: 10; border-radius: inherit; background: rgba(15,15,15,0.45); cursor: not-allowed; user-select: none;">
+                        <v-avatar color="primary" variant="flat" size="48">
+                            <v-icon icon="mdi-lock" size="24" color="white" />
+                        </v-avatar>
+                    </div>
                 </v-card>
             </v-col>
 
             <v-col cols="12" xl="5">
-                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="bg-surface">
+                <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0', position: 'relative' }"
+                    class="bg-surface">
                     <v-card-item class="pb-2">
                         <div class="d-flex justify-space-between align-center">
                             <div>
@@ -317,7 +339,7 @@ async function submitHoliday(payload: any) {
                                 </v-card-subtitle>
                             </div>
                             <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" density="comfortable"
-                                @click="openHolidayAdd">
+                                :disabled="!config.enabled" @click="openHolidayAdd">
                                 Add Holiday
                             </v-btn>
                         </div>
@@ -354,11 +376,19 @@ async function submitHoliday(payload: any) {
                                 <td class="py-3 text-body-2">{{ holiday.name || '-' }}</td>
                                 <td class="py-3 text-right">
                                     <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error"
-                                        density="comfortable" @click="openHolidayDelete(holiday)" />
+                                        density="comfortable" :disabled="!config.enabled"
+                                        @click="openHolidayDelete(holiday)" />
                                 </td>
                             </tr>
                         </tbody>
                     </v-table>
+
+                    <div v-if="!config.enabled && !loading" class="d-flex align-center justify-center"
+                        style="position: absolute; inset: 0; z-index: 10; border-radius: inherit; background: rgba(15,15,15,0.45); cursor: not-allowed; user-select: none;">
+                        <v-avatar color="primary" variant="flat" size="48">
+                            <v-icon icon="mdi-lock" size="24" color="white" />
+                        </v-avatar>
+                    </div>
                 </v-card>
             </v-col>
         </v-row>
