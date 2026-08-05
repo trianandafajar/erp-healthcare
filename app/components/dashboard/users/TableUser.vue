@@ -194,16 +194,19 @@ async function handleSubmit(payload: any) {
     try {
         if (modalMode.value === 'add') {
             await $fetch('/api/users', { method: 'POST', body: payload })
+            showSnackbar('User created successfully')
         } else if (modalMode.value === 'edit') {
             await $fetch('/api/users', { method: 'PUT', body: payload })
+            showSnackbar('User updated successfully')
         } else if (modalMode.value === 'delete') {
             await $fetch('/api/users', { method: 'DELETE', body: payload })
+            showSnackbar('User removed successfully')
         }
 
         await refreshNuxtData()
         closeModal()
     } catch (err: any) {
-        showSnackbar(err?.data?.message || 'Failed')
+        showSnackbar(err?.data?.message || 'Failed', 'error')
     } finally {
         loading.value = false
     }
