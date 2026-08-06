@@ -219,7 +219,6 @@ export default defineEventHandler(async (event: any) => {
     })
 
     // 10. Notify doctor + receptionists + admins
-    const doctorRecipientIds = await getRecipientIdsByRoles(admin, ['doctor'], null)
     const receptionistRecipientIds = await getRecipientIdsByRoles(admin, ['receptionist'], null)
     const adminRecipientIds = await getRecipientIdsByRoles(admin, ['admin'], null)
 
@@ -231,26 +230,24 @@ export default defineEventHandler(async (event: any) => {
         data: Record<string, any>
     }[] = []
 
-    if (doctorRecipientIds.includes(doctor_id)) {
-        notifications.push({
-            user_id: doctor_id,
-            type: 'appointment_new',
-            title: 'New appointment assigned',
-            body: `You have a new public booking on ${appointment_date} at ${appointment_time}.`,
-            data: {
-                entity_type: 'appointment',
-                entity_id: appointment.id,
-                patient_id: patientId,
-                doctor_id,
-                department_id: doctor.department_id ?? null,
-                appointment_date,
-                appointment_time,
-                type: 'appointment',
-                audience_role: 'doctor',
-                redirect_to: '/doctor/appointments',
-            },
-        })
-    }
+    notifications.push({
+        user_id: doctor_id,
+        type: 'appointment_new',
+        title: 'New appointment assigned',
+        body: `New public booking from ${patientData.full_name} on ${appointment_date} at ${appointment_time}.`,
+        data: {
+            entity_type: 'appointment',
+            entity_id: appointment.id,
+            patient_id: patientId,
+            doctor_id,
+            department_id: doctor.department_id ?? null,
+            appointment_date,
+            appointment_time,
+            type: 'appointment',
+            audience_role: 'doctor',
+            redirect_to: '/doctor/appointments',
+        },
+    })
 
     notifications.push(
         ...receptionistRecipientIds.map((user_id) => ({

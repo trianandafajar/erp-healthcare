@@ -55,6 +55,11 @@ const sidebarMenu = shallowRef<MenuItem[]>([
     to: `/${slug}/doctor/schedule`,
   },
   {
+    title: 'Appointments Calendar',
+    icon: CalendarOutlined,
+    to: `/${slug}/doctor/appointments`,
+  },
+  {
     title: "Today's Patients",
     icon: TeamOutlined,
     to: `/${slug}/doctor/patients/today`,
