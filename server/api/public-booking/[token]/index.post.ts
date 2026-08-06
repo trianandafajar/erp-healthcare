@@ -1,8 +1,6 @@
 import { supabaseAdmin } from '~~/server/utils/supabase'
 import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
 
-const SLOT_MINUTES = 30
-
 function toMinutes(timeStr: string | null | undefined): number {
     if (!timeStr) return 0
     const parts = timeStr.split(':')
@@ -112,22 +110,16 @@ export default defineEventHandler(async (event: any) => {
         throw createError({ statusCode: 400, message: 'Doctor is not available on this day' })
     }
 
-    // 5. Validate slot is on the 30-min grid and within the effective window
-    const startMin = Math.max(
-        toMinutes(openingHour.start_time),
-        toMinutes(schedule.public_booking_start ?? schedule.start_time),
-    )
-    const endMin = Math.min(
-        toMinutes(openingHour.end_time),
-        toMinutes(schedule.public_booking_end ?? schedule.end_time),
-    )
-
-    const gridStartMin = Math.ceil(startMin / SLOT_MINUTES) * SLOT_MINUTES
-
-    if (slotMin % SLOT_MINUTES !== 0) {
-        throw createError({ statusCode: 400, message: `Time must be on a ${SLOT_MINUTES}-minute grid` })
+    const duration = schedule.public_booking_duration_minutes
+    if (!duration || duration < 5) {
+        throw createError({ statusCode: 400, message: 'Doctor has no consultation duration set for public booking' })
     }
-    if (slotMin < gridStartMin || slotMin + SLOT_MINUTES > endMin) {
+
+    // 5. Validate slot is on the doctor's duration grid within the opening hours window
+    const startMin = toMinutes(openingHour.start_time)
+    const endMin = toMinutes(openingHour.end_time)
+
+    if (slotMin < startMin || (slotMin - startMin) % duration !== 0 || slotMin + duration > endMin) {
         throw createError({ statusCode: 400, message: 'Selected time is outside the available booking window' })
     }
 

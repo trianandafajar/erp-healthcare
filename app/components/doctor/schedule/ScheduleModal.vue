@@ -9,8 +9,7 @@ interface DoctorSchedule {
     max_patients: number
     is_active: boolean
     public_booking_enabled: boolean
-    public_booking_start?: string | null
-    public_booking_end?: string | null
+    public_booking_duration_minutes?: number | null
 }
 
 const DAY_OPTIONS = [
@@ -57,8 +56,7 @@ const form = ref({
     max_patients: 20,
     is_active: true,
     public_booking_enabled: false,
-    public_booking_start: '',
-    public_booking_end: '',
+    public_booking_duration_minutes: null as number | null,
 })
 
 watch(
@@ -72,8 +70,7 @@ watch(
                 max_patients: schedule.max_patients,
                 is_active: schedule.is_active,
                 public_booking_enabled: schedule.public_booking_enabled ?? false,
-                public_booking_start: schedule.public_booking_start?.slice(0, 5) ?? '',
-                public_booking_end: schedule.public_booking_end?.slice(0, 5) ?? '',
+                public_booking_duration_minutes: schedule.public_booking_duration_minutes ?? null,
             }
         } else if (props.mode === 'add') {
             form.value = {
@@ -83,8 +80,7 @@ watch(
                 max_patients: 20,
                 is_active: true,
                 public_booking_enabled: false,
-                public_booking_start: '',
-                public_booking_end: '',
+                public_booking_duration_minutes: null,
             }
         }
     },
@@ -123,8 +119,9 @@ function onSubmit() {
     }
     emit('submit', {
         ...form.value,
-        public_booking_start: form.value.public_booking_start || null,
-        public_booking_end: form.value.public_booking_end || null,
+        public_booking_duration_minutes: form.value.public_booking_enabled
+            ? Number(form.value.public_booking_duration_minutes)
+            : null,
         id: props.mode === 'edit' ? props.schedule?.id : undefined,
     })
 }
@@ -135,16 +132,18 @@ const startEndError = computed(() =>
         : ''
 )
 
-const publicHoursError = computed(() =>
-    form.value.public_booking_start && form.value.public_booking_end
-        && form.value.public_booking_end <= form.value.public_booking_start
-        ? 'Public booking end must be after start.'
-        : ''
-)
+const durationError = computed(() => {
+    if (!form.value.public_booking_enabled) return ''
+    const duration = Number(form.value.public_booking_duration_minutes)
+    if (!form.value.public_booking_duration_minutes || !Number.isInteger(duration) || duration < 5) {
+        return 'Required, minimum 5 minutes.'
+    }
+    return ''
+})
 
 const isFormValid = computed(() =>
     form.value.start_time !== '' && form.value.end_time !== ''
-    && startEndError.value === '' && publicHoursError.value === ''
+    && startEndError.value === '' && durationError.value === ''
 )
 </script>
 
@@ -223,26 +222,22 @@ const isFormValid = computed(() =>
                         <v-col cols="12" class="mt-3">
                             <v-divider class="mb-2" />
                             <div class="d-flex align-center ga-2">
-                                <v-icon icon="mdi-calendar-clock" size="18" color="primary" />
+                                <v-icon icon="mdi-clock-outline" size="18" color="primary" />
                                 <v-label class="text-caption font-weight-bold text-uppercase">
-                                    Public Booking Hours
+                                    Public Booking
                                 </v-label>
                             </div>
                             <div class="text-caption text-medium-emphasis mt-1">
-                                Hours patients can book online. Leave empty to use the schedule time above.
+                                Time slots are divided automatically from the clinic opening hours.
                             </div>
                         </v-col>
 
-                        <v-col cols="12" sm="6" class="mt-1">
-                            <v-label class="text-caption font-weight-medium mb-1">Public Start</v-label>
-                            <v-text-field v-model="form.public_booking_start" type="time" variant="outlined"
-                                density="compact" hide-details :error="!!publicHoursError" :error-messages="publicHoursError" />
-                        </v-col>
-
-                        <v-col cols="12" sm="6" class="mt-1">
-                            <v-label class="text-caption font-weight-medium mb-1">Public End</v-label>
-                            <v-text-field v-model="form.public_booking_end" type="time" variant="outlined"
-                                density="compact" hide-details :error="!!publicHoursError" :error-messages="publicHoursError" />
+                        <v-col cols="12" class="mt-1">
+                            <v-label class="text-caption font-weight-medium mb-1">Duration per Examination (minutes)</v-label>
+                            <v-text-field v-model.number="form.public_booking_duration_minutes" type="number" min="5"
+                                variant="outlined" density="compact" hide-details :error="!!durationError"
+                                :error-messages="durationError" suffix="min" placeholder="e.g. 30"
+                                @keydown="e => { if (e.key === '-' || e.key === '.') e.preventDefault() }" />
                         </v-col>
                     </template>
                 </v-row>

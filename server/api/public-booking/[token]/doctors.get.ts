@@ -7,13 +7,9 @@ export default defineEventHandler(async (event: any) => {
 
     const query = getQuery(event)
     const date = typeof query.date === 'string' ? query.date : ''
-    const doctorId = typeof query.doctor_id === 'string' ? query.doctor_id : ''
 
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         throw createError({ statusCode: 400, message: 'Invalid date. Expected YYYY-MM-DD.' })
-    }
-    if (!doctorId) {
-        throw createError({ statusCode: 400, message: 'doctor_id is required' })
     }
 
     const admin = supabaseAdmin()
@@ -46,7 +42,7 @@ export default defineEventHandler(async (event: any) => {
         .maybeSingle()
 
     if (holidayError) throw createError({ statusCode: 500, message: holidayError.message })
-    if (holiday) return { date, slots: [] }
+    if (holiday) return { date, doctors: [] }
 
     const { data: openingHour, error: openingError } = await admin
         .from('public_booking_opening_hours')
@@ -57,69 +53,76 @@ export default defineEventHandler(async (event: any) => {
         .maybeSingle()
 
     if (openingError) throw createError({ statusCode: 500, message: openingError.message })
-    if (!openingHour) return { date, slots: [] }
+    if (!openingHour) return { date, doctors: [] }
 
-    const { data: doctor, error: doctorError } = await admin
+    const { data: doctors, error: doctorsError } = await admin
         .from('doctors')
-        .select('id, department_id')
-        .eq('id', doctorId)
+        .select('id')
         .eq('tenant_id', tenantId)
         .eq('is_available', true)
-        .maybeSingle()
+        .returns<{ id: string }[]>()
 
-    if (doctorError) throw createError({ statusCode: 500, message: doctorError.message })
-    if (!doctor) {
-        throw createError({ statusCode: 404, message: 'Doctor not available for public booking' })
-    }
+    if (doctorsError) throw createError({ statusCode: 500, message: doctorsError.message })
 
-    const { data: schedule, error: scheduleError } = await admin
+    const doctorIds = (doctors ?? []).map((d) => d.id)
+    if (!doctorIds.length) return { date, doctors: [] }
+
+    const { data: schedules, error: schedulesError } = await admin
         .from('doctor_schedules')
-        .select('*')
-        .eq('doctor_id', doctorId)
+        .select('doctor_id, max_patients, public_booking_duration_minutes')
+        .in('doctor_id', doctorIds)
         .eq('tenant_id', tenantId)
         .eq('day_of_week', dayOfWeek)
         .eq('is_active', true)
         .eq('public_booking_enabled', true)
-        .maybeSingle()
 
-    if (scheduleError) throw createError({ statusCode: 500, message: scheduleError.message })
-    if (!schedule) return { date, slots: [] }
+    if (schedulesError) throw createError({ statusCode: 500, message: schedulesError.message })
+    if (!schedules?.length) return { date, doctors: [] }
 
-    const duration = schedule.public_booking_duration_minutes
-    if (!duration || duration < 5) return { date, slots: [] }
+    const scheduleDoctorIds = schedules.map((s: any) => s.doctor_id)
 
-    const startMin = toMinutes(openingHour.start_time)
-    const endMin = toMinutes(openingHour.end_time)
-
-    if (endMin <= startMin) return { date, slots: [] }
-
-    const { data: appointments } = await admin
+    const { data: appointments, error: appointmentsError } = await admin
         .from('appointments')
-        .select('appointment_time')
-        .eq('doctor_id', doctorId)
+        .select('doctor_id, appointment_time')
+        .in('doctor_id', scheduleDoctorIds)
         .eq('tenant_id', tenantId)
         .eq('appointment_date', date)
         .in('status', ['waiting', 'in_progress'])
-        .returns<{ appointment_time: string }[]>()
+        .returns<{ doctor_id: string; appointment_time: string }[]>()
 
-    const bookedByTime: Record<string, number> = {}
+    if (appointmentsError) throw createError({ statusCode: 500, message: appointmentsError.message })
+
+    const bookedByDoctor = new Map<string, Record<string, number>>()
     for (const appt of appointments ?? []) {
+        const map = bookedByDoctor.get(appt.doctor_id) ?? {}
         const key = (appt.appointment_time ?? '').slice(0, 5)
-        bookedByTime[key] = (bookedByTime[key] ?? 0) + 1
+        map[key] = (map[key] ?? 0) + 1
+        bookedByDoctor.set(appt.doctor_id, map)
     }
 
+    const startMin = toMinutes(openingHour.start_time)
+    const endMin = toMinutes(openingHour.end_time)
     const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1
-    const maxPatients = schedule.max_patients ?? 20
 
-    const slots = computeDoctorSlots({
-        startMin,
-        endMin,
-        duration,
-        maxPatients,
-        bookedByTime,
-        isToday,
-        nowMin,
-    })
+    const result: { id: string; slots: string[] }[] = []
+    for (const schedule of schedules) {
+        const duration = schedule.public_booking_duration_minutes
+        if (!duration || duration < 5) continue
 
-    return { date, slots }
+        const slots = computeDoctorSlots({
+            startMin,
+            endMin,
+            duration,
+            maxPatients: schedule.max_patients ?? 20,
+            bookedByTime: bookedByDoctor.get(schedule.doctor_id) ?? {},
+            isToday,
+            nowMin,
+        })
+
+        if (slots.length) {
+            result.push({ id: schedule.doctor_id, slots })
+        }
+    }
+
+    return { date, doctors: result }
 })

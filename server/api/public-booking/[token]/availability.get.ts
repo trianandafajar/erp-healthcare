@@ -1,7 +1,5 @@
 import { supabaseAdmin } from '~~/server/utils/supabase'
 
-const SLOT_MINUTES = 30
-
 function toMinutes(timeStr: string | null | undefined): number {
     if (!timeStr) return 0
     const parts = timeStr.split(':')
@@ -75,7 +73,7 @@ export default defineEventHandler(async (event: any) => {
     if (doctorIds.length) {
         const { data, error } = await admin
             .from('doctor_schedules')
-            .select('doctor_id, day_of_week, start_time, end_time, public_booking_start, public_booking_end, max_patients')
+            .select('doctor_id, day_of_week, max_patients, public_booking_duration_minutes')
             .in('doctor_id', doctorIds)
             .eq('is_active', true)
             .eq('public_booking_enabled', true)
@@ -136,23 +134,19 @@ export default defineEventHandler(async (event: any) => {
             const schedule = doctorSchedules.find((s: any) => s.day_of_week === dow)
             if (!schedule) continue
 
-            const startMin = Math.max(
-                toMinutes(openingHour.start_time),
-                toMinutes(schedule.public_booking_start ?? schedule.start_time),
-            )
-            const endMin = Math.min(
-                toMinutes(openingHour.end_time),
-                toMinutes(schedule.public_booking_end ?? schedule.end_time),
-            )
-            const gridStartMin = Math.ceil(startMin / SLOT_MINUTES) * SLOT_MINUTES
-            if (endMin <= gridStartMin) continue
+            const duration = schedule.public_booking_duration_minutes
+            if (!duration || duration < 5) continue
+
+            const startMin = toMinutes(openingHour.start_time)
+            const endMin = toMinutes(openingHour.end_time)
+            if (endMin <= startMin) continue
 
             const booked = bookedByDateDoctor.get(`${dateKey}|${doctorId}`) ?? new Map<string, number>()
             const maxPatients = schedule.max_patients ?? 20
             const isToday = dateKey === todayStr
             const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1
 
-            for (let t = gridStartMin; t + SLOT_MINUTES <= endMin; t += SLOT_MINUTES) {
+            for (let t = startMin; t + duration <= endMin; t += duration) {
                 if (isToday && t <= nowMin) continue
                 const timeStr = `${pad(Math.floor(t / 60))}:${pad(t % 60)}`
                 if ((booked.get(timeStr) ?? 0) >= maxPatients) continue

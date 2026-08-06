@@ -10,8 +10,7 @@ export default defineEventHandler(async (event: any) => {
     max_patients,
     is_active,
     public_booking_enabled,
-    public_booking_start,
-    public_booking_end,
+    public_booking_duration_minutes,
   } = await readBody(event)
 
   if (
@@ -25,6 +24,10 @@ export default defineEventHandler(async (event: any) => {
       statusCode: 400,
       message: 'id, day_of_week, start_time, end_time, and max_patients are required',
     })
+  }
+
+  if (public_booking_enabled && !public_booking_duration_minutes) {
+    throw createError({ statusCode: 400, message: 'Duration per examination is required when public booking is enabled' })
   }
 
   const { admin, tenantId, user } = await getTenantContext(event)
@@ -59,8 +62,9 @@ export default defineEventHandler(async (event: any) => {
       max_patients,
       is_active: is_active ?? true,
       public_booking_enabled: public_booking_enabled ?? false,
-      public_booking_start: public_booking_start ?? null,
-      public_booking_end: public_booking_end ?? null,
+      public_booking_duration_minutes: public_booking_enabled
+        ? public_booking_duration_minutes
+        : null,
     })
     .eq('id', id)
     .eq('tenant_id', tenantId)

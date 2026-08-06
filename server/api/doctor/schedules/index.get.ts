@@ -26,8 +26,7 @@ export default defineEventHandler(async (event: any) => {
             max_patients,
             is_active,
             public_booking_enabled,
-            public_booking_start,
-            public_booking_end,
+            public_booking_duration_minutes,
             created_at
         `)
         .eq('doctor_id', doctor.id)

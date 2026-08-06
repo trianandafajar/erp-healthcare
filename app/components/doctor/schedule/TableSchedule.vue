@@ -15,8 +15,7 @@ interface DoctorSchedule {
     max_patients: number
     is_active: boolean
     public_booking_enabled: boolean
-    public_booking_start?: string | null
-    public_booking_end?: string | null
+    public_booking_duration_minutes?: number | null
     created_at: string
 }
 
@@ -51,8 +50,9 @@ async function toggleDayPublicBooking(schedule: DoctorSchedule, value: boolean) 
                 max_patients: schedule.max_patients,
                 is_active: schedule.is_active,
                 public_booking_enabled: value,
-                public_booking_start: schedule.public_booking_start ?? null,
-                public_booking_end: schedule.public_booking_end ?? null,
+                public_booking_duration_minutes: value
+                    ? schedule.public_booking_duration_minutes ?? null
+                    : null,
             },
         })
         await refresh()
@@ -142,8 +142,7 @@ async function handleSubmit(payload: any) {
                     max_patients: payload.max_patients,
                     is_active: payload.is_active,
                     public_booking_enabled: payload.public_booking_enabled,
-                    public_booking_start: payload.public_booking_start,
-                    public_booking_end: payload.public_booking_end,
+                    public_booking_duration_minutes: payload.public_booking_duration_minutes,
                 }
             })
             notify('Schedule created successfully')
@@ -158,8 +157,7 @@ async function handleSubmit(payload: any) {
                     max_patients: payload.max_patients,
                     is_active: payload.is_active,
                     public_booking_enabled: payload.public_booking_enabled,
-                    public_booking_start: payload.public_booking_start,
-                    public_booking_end: payload.public_booking_end,
+                    public_booking_duration_minutes: payload.public_booking_duration_minutes,
                 }
             })
             notify('Schedule updated successfully')
@@ -233,15 +231,21 @@ async function handleSubmit(payload: any) {
                         </v-chip>
                     </td>
                     <td class="py-3">
-                        <v-switch
-                            :model-value="schedule.public_booking_enabled"
-                            color="primary"
-                            hide-details
-                            density="compact"
-                            :disabled="togglingId === schedule.id"
-                            :loading="togglingId === schedule.id"
-                            @update:model-value="toggleDayPublicBooking(schedule, $event)"
-                        />
+                        <div class="d-flex align-center ga-2">
+                            <v-switch
+                                :model-value="schedule.public_booking_enabled"
+                                color="primary"
+                                hide-details
+                                density="compact"
+                                :disabled="togglingId === schedule.id"
+                                :loading="togglingId === schedule.id"
+                                @update:model-value="toggleDayPublicBooking(schedule, $event)"
+                            />
+                            <v-chip v-if="schedule.public_booking_enabled && schedule.public_booking_duration_minutes"
+                                color="primary" variant="tonal" size="small">
+                                {{ schedule.public_booking_duration_minutes }} min
+                            </v-chip>
+                        </div>
                     </td>
                     <td class="py-3 text-right">
                         <v-btn v-if="schedule.public_booking_enabled && can('schedule.edit')" icon="mdi-clock-outline"

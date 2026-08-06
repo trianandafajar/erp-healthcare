@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useTheme } from 'vuetify'
 import { getContrastText, isValidHex } from '@/utils/color'
 
@@ -78,14 +78,6 @@ onMounted(loadConfig)
 
 const brandColor = computed(() => config.value?.tenant?.brand_color ?? '#176D37')
 
-function getActiveDays(): Set<number> {
-    const set = new Set<number>()
-    for (const h of config.value?.opening_hours ?? []) {
-        if (h.is_active) set.add(h.day_of_week)
-    }
-    return set
-}
-
 function holidayFor(d: Date): Holiday | null {
     const key = toDateKey(d)
     return (config.value?.holidays ?? []).find(h => h.holiday_date === key) ?? null
@@ -95,16 +87,14 @@ function isHoliday(d: Date): boolean {
     return holidayFor(d) !== null
 }
 
-type DateStatus = 'past' | 'holiday' | 'closed' | 'available' | 'full'
+type DateStatus = 'past' | 'holiday' | 'available'
 
 function dateStatus(d: Date | null): DateStatus {
-    if (!(d instanceof Date)) return 'closed'
+    if (!(d instanceof Date)) return 'available'
     if (isHoliday(d)) return 'holiday'
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     if (d < today) return 'past'
-    if (!getActiveDays().has(d.getDay())) return 'closed'
-    if (availabilityLoaded.value && !availableDates.value.has(toDateKey(d))) return 'full'
     return 'available'
 }
 
@@ -119,9 +109,8 @@ function cellButtonStyle(d: Date | null): Record<string, string> {
     }
     const status = dateStatus(d)
     if (status === 'available') return { backgroundColor: brandColor.value + '47', color: '#111827' }
-    if (status === 'full') return { backgroundColor: brandColor.value + '1a', color: '#9ca3af' }
     if (status === 'holiday') return { backgroundColor: '#fee2e2', color: '#dc2626' }
-    if (status === 'closed' || status === 'past') return { backgroundColor: '#f3f4f6', color: '#d1d5db' }
+    if (status === 'past') return { backgroundColor: '#f3f4f6', color: '#d1d5db' }
     return {}
 }
 
@@ -132,9 +121,7 @@ function dateTooltip(d: Date | null): string | undefined {
         const h = holidayFor(d)
         return h?.name ? `Holiday: ${h.name}` : 'Holiday'
     }
-    if (status === 'full') return 'Fully booked - no slots available'
     if (status === 'past') return 'Past date'
-    if (status === 'closed') return 'Closed - not an opening day'
     return undefined
 }
 
@@ -148,27 +135,6 @@ function toDateKey(d: Date | null): string {
 
 // ---- Calendar ----
 const calendarMonth = ref(new Date())
-
-const availableDates = ref<Set<string>>(new Set())
-const availabilityLoaded = ref(false)
-
-async function loadAvailability() {
-    const d = calendarMonth.value
-    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    availabilityLoaded.value = false
-    try {
-        const res = await $fetch<{ availableDates: string[] }>(`/api/public-booking/${token}/availability`, {
-            query: { month: monthKey },
-        })
-        availableDates.value = new Set(res.availableDates ?? [])
-    } catch {
-        availableDates.value = new Set()
-    } finally {
-        availabilityLoaded.value = true
-    }
-}
-
-watch(calendarMonth, loadAvailability, { immediate: true })
 
 const calendarCells = computed(() => {
     const year = calendarMonth.value.getFullYear()
@@ -200,10 +166,39 @@ function isToday(d: Date) {
 
 const selectedDate = ref<Date | null>(null)
 
+const availableDoctorIds = ref<Set<string>>(new Set())
+const doctorSlots = ref<Record<string, string[]>>({})
+const dateDoctorsLoading = ref(false)
+
+async function loadDoctorsForDate(d: Date) {
+    dateDoctorsLoading.value = true
+    try {
+        const res = await $fetch<{ doctors: { id: string; slots: string[] }[] }>(
+            `/api/public-booking/${token}/doctors`,
+            { query: { date: toDateKey(d) } }
+        )
+        const ids = new Set<string>()
+        const slotsMap: Record<string, string[]> = {}
+        for (const doc of res.doctors ?? []) {
+            ids.add(doc.id)
+            slotsMap[doc.id] = doc.slots ?? []
+        }
+        availableDoctorIds.value = ids
+        doctorSlots.value = slotsMap
+    } catch {
+        availableDoctorIds.value = new Set()
+        doctorSlots.value = {}
+    } finally {
+        dateDoctorsLoading.value = false
+    }
+}
+
 function selectDate(d: Date) {
     if (!dateAvailable(d)) return
     selectedDate.value = d
+    selectedDoctor.value = null
     selectedSlot.value = null
+    loadDoctorsForDate(d)
 }
 
 const selectedDateLabel = computed(() => {
@@ -226,14 +221,20 @@ const specializations = computed(() => {
 })
 
 const filteredDoctors = computed(() => {
-    const doctors = config.value?.doctors ?? []
-    if (!specializationFilter.value) return doctors
-    return doctors.filter(d => d.specialization === specializationFilter.value)
+    let doctors = config.value?.doctors ?? []
+    if (specializationFilter.value) {
+        doctors = doctors.filter(d => d.specialization === specializationFilter.value)
+    }
+    if (selectedDate.value) {
+        doctors = doctors.filter(d => availableDoctorIds.value.has(d.id))
+    }
+    return doctors
 })
 
 function selectDoctor(id: string) {
     selectedDoctor.value = selectedDoctor.value === id ? null : id
     selectedSlot.value = null
+    slots.value = selectedDoctor.value ? (doctorSlots.value[selectedDoctor.value] ?? []) : []
 }
 
 const selectedDoctorObj = computed(() =>
@@ -242,25 +243,7 @@ const selectedDoctorObj = computed(() =>
 
 // ---- Slots ----
 const slots = ref<string[]>([])
-const slotsLoading = ref(false)
 const selectedSlot = ref<string | null>(null)
-
-watch([selectedDate, selectedDoctor], async ([date, doctorId]) => {
-    selectedSlot.value = null
-    slots.value = []
-    if (!date || !doctorId) return
-    slotsLoading.value = true
-    try {
-        const res = await $fetch<{ slots: string[] }>(`/api/public-booking/${token}/slots`, {
-            query: { date: toDateKey(date), doctor_id: doctorId },
-        })
-        slots.value = res.slots ?? []
-    } catch {
-        slots.value = []
-    } finally {
-        slotsLoading.value = false
-    }
-})
 
 // ---- Form ----
 const form = ref({
@@ -323,6 +306,8 @@ function reset() {
     specializationFilter.value = ''
     selectedSlot.value = null
     slots.value = []
+    availableDoctorIds.value = new Set()
+    doctorSlots.value = {}
     form.value = { full_name: '', email: '', phone: '', date_of_birth: '', gender: '', chief_complaint: '' }
     booked.value = false
     bookedSummary.value = null
@@ -461,16 +446,12 @@ const openingLabels = computed(() => {
                             Available
                         </span>
                         <span class="inline-flex items-center gap-1">
-                            <span class="h-3 w-3 rounded" :style="{ backgroundColor: brandColor + '1a' }"></span>
-                            Full
-                        </span>
-                        <span class="inline-flex items-center gap-1">
                             <span class="h-3 w-3 rounded" style="background-color: #fee2e2;"></span>
                             Holiday
                         </span>
                         <span class="inline-flex items-center gap-1">
                             <span class="h-3 w-3 rounded" style="background-color: #e5e7eb;"></span>
-                            Closed / Past
+                            Past
                         </span>
                     </div>
                 </section>
@@ -489,10 +470,14 @@ const openingLabels = computed(() => {
                                 @update:model-value="selectedDoctor = null" />
                         </div>
 
-                        <div v-if="config && filteredDoctors.length === 0"
+                        <div v-if="dateDoctorsLoading" class="py-8 text-center text-sm text-gray-400">
+                            <v-progress-circular indeterminate size="28" :color="brandColor" />
+                        </div>
+
+                        <div v-else-if="config && filteredDoctors.length === 0"
                             class="py-8 text-center text-sm text-gray-400">
                             <v-icon icon="mdi-doctor" size="36" class="mb-2 d-block mx-auto" />
-                            No doctors available for online booking.
+                            {{ selectedDate ? 'No doctors available on this date.' : 'No doctors available for online booking.' }}
                         </div>
 
                         <div v-else class="space-y-3">
@@ -530,9 +515,6 @@ const openingLabels = computed(() => {
 
                         <div v-if="!selectedDate" class="py-6 text-center text-sm text-gray-400">
                             Please select a date first.
-                        </div>
-                        <div v-else-if="slotsLoading" class="flex justify-center py-8">
-                            <v-progress-circular indeterminate size="28" :color="brandColor" />
                         </div>
                         <div v-else-if="slots.length === 0" class="py-8 text-center text-sm text-gray-400">
                             No available time slots for this date.
