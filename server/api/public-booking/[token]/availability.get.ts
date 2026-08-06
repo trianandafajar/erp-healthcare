@@ -73,7 +73,7 @@ export default defineEventHandler(async (event: any) => {
     if (doctorIds.length) {
         const { data, error } = await admin
             .from('doctor_schedules')
-            .select('doctor_id, day_of_week, max_patients, public_booking_duration_minutes')
+            .select('doctor_id, day_of_week, start_time, end_time, max_patients, public_booking_duration_minutes')
             .in('doctor_id', doctorIds)
             .eq('is_active', true)
             .eq('public_booking_enabled', true)
@@ -137,8 +137,8 @@ export default defineEventHandler(async (event: any) => {
             const duration = schedule.public_booking_duration_minutes
             if (!duration || duration < 5) continue
 
-            const startMin = toMinutes(openingHour.start_time)
-            const endMin = toMinutes(openingHour.end_time)
+            const startMin = Math.max(toMinutes(openingHour.start_time), toMinutes(schedule.start_time))
+            const endMin = Math.min(toMinutes(openingHour.end_time), toMinutes(schedule.end_time))
             if (endMin <= startMin) continue
 
             const booked = bookedByDateDoctor.get(`${dateKey}|${doctorId}`) ?? new Map<string, number>()

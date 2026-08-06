@@ -88,8 +88,8 @@ export default defineEventHandler(async (event: any) => {
     const duration = schedule.public_booking_duration_minutes
     if (!duration || duration < 5) return { date, slots: [] }
 
-    const startMin = toMinutes(openingHour.start_time)
-    const endMin = toMinutes(openingHour.end_time)
+    const startMin = Math.max(toMinutes(openingHour.start_time), toMinutes(schedule.start_time))
+    const endMin = Math.min(toMinutes(openingHour.end_time), toMinutes(schedule.end_time))
 
     if (endMin <= startMin) return { date, slots: [] }
 

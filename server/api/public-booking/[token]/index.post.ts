@@ -115,9 +115,9 @@ export default defineEventHandler(async (event: any) => {
         throw createError({ statusCode: 400, message: 'Doctor has no consultation duration set for public booking' })
     }
 
-    // 5. Validate slot is on the doctor's duration grid within the opening hours window
-    const startMin = toMinutes(openingHour.start_time)
-    const endMin = toMinutes(openingHour.end_time)
+    // 5. Validate slot is on the doctor's duration grid within the intersection of opening hours and doctor schedule
+    const startMin = Math.max(toMinutes(openingHour.start_time), toMinutes(schedule.start_time))
+    const endMin = Math.min(toMinutes(openingHour.end_time), toMinutes(schedule.end_time))
 
     if (slotMin < startMin || (slotMin - startMin) % duration !== 0 || slotMin + duration > endMin) {
         throw createError({ statusCode: 400, message: 'Selected time is outside the available booking window' })

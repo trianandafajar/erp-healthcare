@@ -69,7 +69,7 @@ export default defineEventHandler(async (event: any) => {
 
     const { data: schedules, error: schedulesError } = await admin
         .from('doctor_schedules')
-        .select('doctor_id, max_patients, public_booking_duration_minutes')
+        .select('doctor_id, start_time, end_time, max_patients, public_booking_duration_minutes')
         .in('doctor_id', doctorIds)
         .eq('tenant_id', tenantId)
         .eq('day_of_week', dayOfWeek)
@@ -100,14 +100,16 @@ export default defineEventHandler(async (event: any) => {
         bookedByDoctor.set(appt.doctor_id, map)
     }
 
-    const startMin = toMinutes(openingHour.start_time)
-    const endMin = toMinutes(openingHour.end_time)
     const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1
 
     const result: { id: string; slots: string[] }[] = []
     for (const schedule of schedules) {
         const duration = schedule.public_booking_duration_minutes
         if (!duration || duration < 5) continue
+
+        const startMin = Math.max(toMinutes(openingHour.start_time), toMinutes(schedule.start_time))
+        const endMin = Math.min(toMinutes(openingHour.end_time), toMinutes(schedule.end_time))
+        if (endMin <= startMin) continue
 
         const slots = computeDoctorSlots({
             startMin,
