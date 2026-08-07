@@ -121,7 +121,7 @@ function isSelected(doctorId: string, slot: string): boolean {
 
             <div class="d-flex justify-space-between mt-4">
                 <v-btn variant="tonal" color="secondary" size="large" @click="emit('back')">
-                    Back
+                Back
                 </v-btn>
                 <v-btn color="primary" variant="flat" size="large" :disabled="!canContinue" @click="emit('next')">
                     Continue

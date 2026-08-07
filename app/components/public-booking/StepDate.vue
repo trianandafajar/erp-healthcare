@@ -139,8 +139,20 @@ function select(d: Date) {
                     {{ d }}
                 </div>
                 <div v-for="(cell, i) in cells" :key="'c-' + i" class="booking-cal-cell">
-                    <button v-if="cell" type="button" :disabled="dateStatus(cell) !== 'available'"
-                        :title="dateStatus(cell) === 'holiday' ? (holidayFor(cell)?.name ?? 'Holiday') : undefined"
+                    <v-tooltip v-if="cell && dateStatus(cell) === 'holiday'" :text="holidayFor(cell)?.name ?? 'Holiday'"
+                        location="top">
+                        <template #activator="{ props: tooltipProps }">
+                            <div v-bind="tooltipProps" class="booking-cal-btn booking-cal-holiday"
+                                :style="cellStyle(cell)">
+                                <span class="booking-cal-daynum"
+                                    :class="isToday(cell) ? 'text-decoration-underline font-weight-bold' : ''">
+                                    {{ cell.getDate() }}
+                                </span>
+                                <span class="booking-cal-badge">{{ holidayFor(cell)?.name ?? 'Libur' }}</span>
+                            </div>
+                        </template>
+                    </v-tooltip>
+                    <button v-else-if="cell" type="button" :disabled="dateStatus(cell) !== 'available'"
                         class="booking-cal-btn" :style="cellStyle(cell)" @click="select(cell)">
                         <span :class="isToday(cell) ? 'text-decoration-underline font-weight-bold' : ''">
                             {{ cell.getDate() }}
@@ -216,5 +228,30 @@ function select(d: Date) {
     width: 14px;
     height: 14px;
     border-radius: 4px;
+}
+
+.booking-cal-holiday {
+    flex-direction: column;
+    gap: 1px;
+    padding: 2px;
+    cursor: not-allowed;
+}
+
+.booking-cal-daynum {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.booking-cal-badge {
+    font-size: 0.5rem;
+    background: red;
+    color: #fff;
+    padding: 1px 4px;
+    border-radius: 5px;
+    max-width: 92%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.1;
 }
 </style>
