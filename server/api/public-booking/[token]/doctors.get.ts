@@ -69,7 +69,7 @@ export default defineEventHandler(async (event: any) => {
 
     const { data: schedules, error: schedulesError } = await admin
         .from('doctor_schedules')
-        .select('doctor_id, start_time, end_time, max_patients, public_booking_duration_minutes')
+        .select('doctor_id, start_time, end_time, public_booking_duration_minutes')
         .in('doctor_id', doctorIds)
         .eq('tenant_id', tenantId)
         .eq('day_of_week', dayOfWeek)
@@ -115,7 +115,6 @@ export default defineEventHandler(async (event: any) => {
             startMin,
             endMin,
             duration,
-            maxPatients: schedule.max_patients ?? 20,
             bookedByTime: bookedByDoctor.get(schedule.doctor_id) ?? {},
             isToday,
             nowMin,

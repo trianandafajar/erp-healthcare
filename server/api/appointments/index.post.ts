@@ -16,7 +16,12 @@ export default defineEventHandler(async (event: any) => {
         .select()
         .single()
 
-  if (error) throw createError({ statusCode: 400, message: error.message })
+  if (error) {
+    if (error.code === '23505') {
+      throw createError({ statusCode: 409, message: 'This time slot is already booked for this doctor' })
+    }
+    throw createError({ statusCode: 400, message: error.message })
+  }
 
   await admin.rpc('log_activity', {
     p_actor_id: user?.id,

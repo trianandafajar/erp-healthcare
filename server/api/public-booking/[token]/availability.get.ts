@@ -73,7 +73,7 @@ export default defineEventHandler(async (event: any) => {
     if (doctorIds.length) {
         const { data, error } = await admin
             .from('doctor_schedules')
-            .select('doctor_id, day_of_week, start_time, end_time, max_patients, public_booking_duration_minutes')
+            .select('doctor_id, day_of_week, start_time, end_time, public_booking_duration_minutes')
             .in('doctor_id', doctorIds)
             .eq('is_active', true)
             .eq('public_booking_enabled', true)
@@ -142,14 +142,13 @@ export default defineEventHandler(async (event: any) => {
             if (endMin <= startMin) continue
 
             const booked = bookedByDateDoctor.get(`${dateKey}|${doctorId}`) ?? new Map<string, number>()
-            const maxPatients = schedule.max_patients ?? 20
             const isToday = dateKey === todayStr
             const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1
 
             for (let t = startMin; t + duration <= endMin; t += duration) {
                 if (isToday && t <= nowMin) continue
                 const timeStr = `${pad(Math.floor(t / 60))}:${pad(t % 60)}`
-                if ((booked.get(timeStr) ?? 0) >= maxPatients) continue
+                if ((booked.get(timeStr) ?? 0) >= 1) continue
                 hasSlot = true
                 break
             }

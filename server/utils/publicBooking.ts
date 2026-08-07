@@ -14,7 +14,6 @@ export interface DoctorSlotOptions {
     startMin: number
     endMin: number
     duration: number
-    maxPatients: number
     bookedByTime: Record<string, number>
     isToday: boolean
     nowMin: number
@@ -24,7 +23,6 @@ export function computeDoctorSlots({
     startMin,
     endMin,
     duration,
-    maxPatients,
     bookedByTime,
     isToday,
     nowMin,
@@ -36,7 +34,7 @@ export function computeDoctorSlots({
     for (let t = startMin; t + duration <= endMin; t += duration) {
         const timeStr = toTimeStr(t)
         if (isToday && t <= nowMin) continue
-        if ((bookedByTime[timeStr] ?? 0) >= maxPatients) continue
+        if ((bookedByTime[timeStr] ?? 0) >= 1) continue
         slots.push(timeStr)
     }
     return slots

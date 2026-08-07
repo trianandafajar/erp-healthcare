@@ -68,6 +68,12 @@ export default defineEventHandler(async (event) => {
     .single()
 
   if (error) {
+    if (error.code === '23505') {
+      throw createError({
+        statusCode: 409,
+        message: 'This time slot is already booked',
+      })
+    }
     throw createError({
       statusCode: 400,
       message: error.message,

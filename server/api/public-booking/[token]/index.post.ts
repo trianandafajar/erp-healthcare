@@ -123,8 +123,7 @@ export default defineEventHandler(async (event: any) => {
         throw createError({ statusCode: 400, message: 'Selected time is outside the available booking window' })
     }
 
-    // 6. Capacity check
-    const maxPatients = schedule.max_patients ?? 20
+    // 6. Capacity check (1 booking per time slot)
     const { count: bookedCount } = await admin
         .from('appointments')
         .select('id', { count: 'exact', head: true })
@@ -134,7 +133,7 @@ export default defineEventHandler(async (event: any) => {
         .eq('appointment_time', appointment_time)
         .in('status', ['waiting', 'in_progress'])
 
-    if ((bookedCount ?? 0) >= maxPatients) {
+    if ((bookedCount ?? 0) >= 1) {
         throw createError({ statusCode: 400, message: 'This time slot is no longer available' })
     }
 

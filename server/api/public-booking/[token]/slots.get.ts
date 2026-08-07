@@ -109,13 +109,11 @@ export default defineEventHandler(async (event: any) => {
     }
 
     const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1
-    const maxPatients = schedule.max_patients ?? 20
 
     const slots = computeDoctorSlots({
         startMin,
         endMin,
         duration,
-        maxPatients,
         bookedByTime,
         isToday,
         nowMin,

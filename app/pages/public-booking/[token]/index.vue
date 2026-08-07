@@ -170,19 +170,24 @@ const availableDoctorIds = ref<Set<string>>(new Set())
 const doctorSlots = ref<Record<string, string[]>>({})
 const dateDoctorsLoading = ref(false)
 
+async function fetchDoctorsForDate(d: Date): Promise<{ ids: Set<string>; slotsMap: Record<string, string[]> }> {
+    const res = await $fetch<{ doctors: { id: string; slots: string[] }[] }>(
+        `/api/public-booking/${token}/doctors`,
+        { query: { date: toDateKey(d) } }
+    )
+    const ids = new Set<string>()
+    const slotsMap: Record<string, string[]> = {}
+    for (const doc of res.doctors ?? []) {
+        ids.add(doc.id)
+        slotsMap[doc.id] = doc.slots ?? []
+    }
+    return { ids, slotsMap }
+}
+
 async function loadDoctorsForDate(d: Date) {
     dateDoctorsLoading.value = true
     try {
-        const res = await $fetch<{ doctors: { id: string; slots: string[] }[] }>(
-            `/api/public-booking/${token}/doctors`,
-            { query: { date: toDateKey(d) } }
-        )
-        const ids = new Set<string>()
-        const slotsMap: Record<string, string[]> = {}
-        for (const doc of res.doctors ?? []) {
-            ids.add(doc.id)
-            slotsMap[doc.id] = doc.slots ?? []
-        }
+        const { ids, slotsMap } = await fetchDoctorsForDate(d)
         availableDoctorIds.value = ids
         doctorSlots.value = slotsMap
     } catch {
@@ -270,6 +275,22 @@ async function submitBooking() {
 
     submitting.value = true
     try {
+        // Re-fetch slots so an already-booked time is detected before submitting
+        const { ids, slotsMap } = await fetchDoctorsForDate(selectedDate.value)
+        availableDoctorIds.value = ids
+        doctorSlots.value = slotsMap
+        const freshSlots = slotsMap[selectedDoctor.value] ?? []
+        if (selectedDoctor.value && !freshSlots.includes(selectedSlot.value)) {
+            slots.value = freshSlots
+            selectedSlot.value = null
+            if (freshSlots.length) {
+                formError.value = 'That time has just been booked. Please select another time.'
+            } else {
+                formError.value = 'This doctor has no remaining slots for this date.'
+            }
+            return
+        }
+
         const res = await $fetch(`/api/public-booking/${token}`, {
             method: 'POST',
             body: {
@@ -293,6 +314,7 @@ async function submitBooking() {
             doctor: doctor?.full_name ?? 'Doctor',
         }
         booked.value = true
+        loadDoctorsForDate(selectedDate.value)
     } catch (e: any) {
         formError.value = e?.data?.message ?? 'Failed to create booking. Please try again.'
     } finally {
