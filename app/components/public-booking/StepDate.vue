@@ -96,6 +96,11 @@ function isSelected(d: Date): boolean {
     return props.selectedDate != null && toDateKey(props.selectedDate) === toDateKey(d)
 }
 
+function shortName(name: string | null): string {
+    const s = (name ?? 'Libur').trim()
+    return s.length > 6 ? `${s.slice(0, 6)}…` : s
+}
+
 function cellStyle(d: Date): Record<string, string> {
     if (isSelected(d)) {
         return { backgroundColor: 'rgb(var(--v-theme-primary))', color: '#fff' }
@@ -148,7 +153,7 @@ function select(d: Date) {
                                     :class="isToday(cell) ? 'text-decoration-underline font-weight-bold' : ''">
                                     {{ cell.getDate() }}
                                 </span>
-                                <span class="booking-cal-badge">{{ holidayFor(cell)?.name ?? 'Libur' }}</span>
+                                <span class="booking-cal-badge">{{ shortName(holidayFor(cell)?.name) }}</span>
                             </div>
                         </template>
                     </v-tooltip>
@@ -249,6 +254,7 @@ function select(d: Date) {
     padding: 1px 4px;
     border-radius: 5px;
     max-width: 92%;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
