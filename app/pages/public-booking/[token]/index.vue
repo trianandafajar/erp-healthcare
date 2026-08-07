@@ -116,10 +116,6 @@ function reset() {
                         <div class="text-caption text-grey">Online Booking</div>
                     </div>
                 </div>
-                <div v-if="openingLabels.length" class="d-none d-md-block text-right">
-                    <div class="text-caption font-weight-bold text-uppercase text-grey">Opening Hours</div>
-                    <div class="text-caption text-grey-darken-1">{{ openingLabels.join(' • ') }}</div>
-                </div>
             </div>
         </header>
 
