@@ -6,7 +6,7 @@ import BookingWizard from '@/components/public-booking/BookingWizard.vue'
 
 definePageMeta({
     skipTenantCheck: true,
-    layout: 'blank',
+    layout: 'public-booking',
 })
 
 const route = useRoute()
