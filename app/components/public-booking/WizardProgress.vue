@@ -47,19 +47,13 @@ function circleStyle(index: number): Record<string, string> {
                         {{ i + 1 }}
                     </span>
                 </div>
-                <div
-                    class="text-caption font-weight-medium mt-2 text-center"
-                    :class="i === current - 1 ? 'text-primary' : i < current - 1 ? '' : 'text-medium-emphasis'"
-                >
+                <div class="text-caption font-weight-medium mt-2 text-center"
+                    :class="i === current - 1 ? 'text-primary' : i < current - 1 ? '' : 'text-medium-emphasis'">
                     {{ step.label }}
                 </div>
             </div>
-            <div
-                v-if="i < steps.length - 1"
-                class="mx-2"
-                style="height: 2px; border-radius: 2px; flex: 1 1 0;"
-                :style="{ backgroundColor: i < current - 1 ? 'rgb(var(--v-theme-primary))' : '#e0e0e0' }"
-            ></div>
+            <div v-if="i < steps.length - 1" class="mx-2" style="height: 2px; border-radius: 2px; flex: 1 1 0;"
+                :style="{ backgroundColor: i < current - 1 ? 'rgb(var(--v-theme-primary))' : '#e0e0e0' }"></div>
         </template>
     </div>
 </template>

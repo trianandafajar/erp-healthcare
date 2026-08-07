@@ -216,8 +216,7 @@ async function submitBooking() {
 
 <template>
     <div class="d-flex flex-column ga-6">
-        <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface"
-            :style="{ borderColor: '#e0e0e0' }">
+        <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface" :style="{ borderColor: '#e0e0e0' }">
             <v-card-text class="pa-4">
                 <WizardProgress :steps="steps" :current="currentStep" />
             </v-card-text>
@@ -228,8 +227,7 @@ async function submitBooking() {
         </v-alert>
 
         <StepDate v-if="currentStep === 1" :holidays="holidays" :opening-hours="openingHours"
-            :selected-date="selectedDate" @select="onSelectDate"
-            @next="goTo(2)" />
+            :selected-date="selectedDate" @select="onSelectDate" @next="goTo(2)" />
 
         <StepDoctorTime v-else-if="currentStep === 2" :doctors="filteredDoctors" :doctor-slots="doctorSlots"
             :selected-doctor="selectedDoctor" :selected-slot="selectedSlot" :loading="dateDoctorsLoading"

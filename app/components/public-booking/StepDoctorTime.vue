@@ -63,9 +63,9 @@ function isSelected(doctorId: string, slot: string): boolean {
                         {{ selectedDateLabel || 'Select a date first' }}
                     </v-card-subtitle>
                 </div>
-                <v-select v-if="specializations.length" :model-value="specializationFilter"
-                    :items="specializations" label="Specialization" variant="outlined" density="compact"
-                    clearable hide-details style="max-width: 220px;"
+                <v-select v-if="specializations.length" :model-value="specializationFilter" :items="specializations"
+                    label="Specialization" variant="outlined" density="compact" clearable hide-details
+                    style="max-width: 220px;"
                     @update:model-value="(v: any) => emit('update:specializationFilter', v ?? '')" />
             </div>
         </v-card-item>
@@ -75,12 +75,10 @@ function isSelected(doctorId: string, slot: string): boolean {
                 <v-progress-circular indeterminate color="primary" />
             </div>
 
-            <v-empty-state v-else-if="!selectedDate" icon="mdi-calendar-blank-outline"
-                title="Select a date first" text="Go back to Step 1 and pick an available date."
-                class="py-8" />
+            <v-empty-state v-else-if="!selectedDate" icon="mdi-calendar-blank-outline" title="Select a date first"
+                text="Go back to Step 1 and pick an available date." class="py-8" />
 
-            <v-empty-state v-else-if="doctors.length === 0" icon="mdi-doctor"
-                title="No doctors available on this date"
+            <v-empty-state v-else-if="doctors.length === 0" icon="mdi-doctor" title="No doctors available on this date"
                 text="There are no doctors with open schedules for the selected date." class="py-8" />
 
             <div v-else class="d-flex flex-column ga-3">
@@ -112,8 +110,7 @@ function isSelected(doctorId: string, slot: string): boolean {
                             <v-chip v-for="slot in doctorSlots[doc.id] ?? []" :key="slot"
                                 :color="isSelected(doc.id, slot) ? 'primary' : undefined"
                                 :variant="isSelected(doc.id, slot) ? 'flat' : 'tonal'"
-                                :append-icon="isSelected(doc.id, slot) ? 'mdi-check' : undefined"
-                                rounded="sm"
+                                :append-icon="isSelected(doc.id, slot) ? 'mdi-check' : undefined" rounded="sm"
                                 @click="emit('select-slot', doc.id, slot)">
                                 {{ formatTime(slot) }}
                             </v-chip>
@@ -123,12 +120,10 @@ function isSelected(doctorId: string, slot: string): boolean {
             </div>
 
             <div class="d-flex justify-space-between mt-4">
-                <v-btn variant="tonal" color="secondary" prepend-icon="mdi-arrow-left" size="large"
-                    @click="emit('back')">
+                <v-btn variant="tonal" color="secondary" size="large" @click="emit('back')">
                     Back
                 </v-btn>
-                <v-btn color="primary" variant="flat" prepend-icon="mdi-arrow-right" size="large" :disabled="!canContinue"
-                    @click="emit('next')">
+                <v-btn color="primary" variant="flat" size="large" :disabled="!canContinue" @click="emit('next')">
                     Continue
                 </v-btn>
             </div>

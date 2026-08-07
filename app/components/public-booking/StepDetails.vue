@@ -71,27 +71,26 @@ function onKeydownNumeric(e: KeyboardEvent) {
                         <v-text-field v-model="form.email" label="Email *" type="email" variant="outlined"
                             placeholder="you@email.com" required class="flex-grow-1" />
                         <v-text-field v-model="form.phone" label="Phone" type="tel" variant="outlined"
-                            placeholder="08xxxxxxxxxx" class="flex-grow-1"
-                            @keydown="onKeydownNumeric" />
+                            placeholder="08xxxxxxxxxx" class="flex-grow-1" @keydown="onKeydownNumeric" />
                     </div>
 
                     <div class="d-flex flex-column flex-md-row ga-4">
-                        <v-text-field v-model="form.date_of_birth" label="Date of Birth" type="date"
-                            variant="outlined" class="flex-grow-1" />
-                        <v-select v-model="form.gender" :items="[{ title: 'Male', value: 'male' }, { title: 'Female', value: 'female' }]"
+                        <v-text-field v-model="form.date_of_birth" label="Date of Birth" type="date" variant="outlined"
+                            class="flex-grow-1" />
+                        <v-select v-model="form.gender"
+                            :items="[{ title: 'Male', value: 'male' }, { title: 'Female', value: 'female' }]"
                             label="Gender" variant="outlined" clearable class="flex-grow-1" />
                     </div>
 
-                    <v-textarea v-model="form.chief_complaint" label="Chief Complaint" variant="outlined"
-                        rows="2" placeholder="Describe your symptoms (optional)" />
+                    <v-textarea v-model="form.chief_complaint" label="Chief Complaint" variant="outlined" rows="2"
+                        placeholder="Describe your symptoms (optional)" />
 
                     <div class="d-flex justify-space-between mt-2">
-                        <v-btn variant="tonal" color="secondary" prepend-icon="mdi-arrow-left" size="large"
+                        <v-btn color="secondary" variant="tonal" size="large" density="comfortable"
                             @click="emit('back')">
                             Back
                         </v-btn>
-                        <v-btn color="primary" variant="flat" type="submit" prepend-icon="mdi-arrow-right"
-                            size="large" :disabled="!canContinue">
+                        <v-btn color="primary" variant="flat" type="submit" size="large" :disabled="!canContinue">
                             Continue
                         </v-btn>
                     </div>

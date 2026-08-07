@@ -45,8 +45,7 @@ const genderLabel = computed(() => {
                 <v-list-subheader class="text-caption font-weight-bold text-uppercase">Appointment</v-list-subheader>
                 <v-list-item prepend-icon="mdi-calendar-check" title="Date" :subtitle="dateLabel" />
                 <v-list-item prepend-icon="mdi-doctor" title="Doctor" :subtitle="doctorName" />
-                <v-list-item prepend-icon="mdi-clock-outline" title="Time"
-                    :subtitle="time ? formatTime(time) : '-'" />
+                <v-list-item prepend-icon="mdi-clock-outline" title="Time" :subtitle="time ? formatTime(time) : '-'" />
 
                 <v-divider class="my-2" />
 
@@ -63,12 +62,11 @@ const genderLabel = computed(() => {
             </v-list>
 
             <div class="d-flex justify-space-between mt-4">
-                <v-btn variant="tonal" color="secondary" prepend-icon="mdi-arrow-left" size="large" :disabled="submitting"
-                    @click="emit('back')">
+                <v-btn variant="tonal" color="secondary" size="large" :disabled="submitting" @click="emit('back')">
                     Back
                 </v-btn>
-                <v-btn color="primary" variant="flat" prepend-icon="mdi-check" size="large" :loading="submitting"
-                    :disabled="submitting" @click="emit('confirm')">
+                <v-btn color="primary" variant="flat" size="large" :loading="submitting" :disabled="submitting"
+                    @click="emit('confirm')">
                     Confirm Booking
                 </v-btn>
             </div>

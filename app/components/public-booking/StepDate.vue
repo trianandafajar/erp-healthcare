@@ -154,17 +154,18 @@ function select(d: Date) {
                     <span class="text-caption text-medium-emphasis">Holiday</span>
                 </div>
                 <div class="d-flex align-center ga-2">
-                    <span class="booking-swatch" style="background-color: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.12);"></span>
+                    <span class="booking-swatch"
+                        style="background-color: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.12);"></span>
                     <span class="text-caption text-medium-emphasis">Past</span>
                 </div>
             </div>
 
             <div class="d-flex justify-end mt-4">
-                <v-btn color="primary" variant="flat" prepend-icon="mdi-arrow-right" size="large"
-                    :disabled="!selectedDate"
+                <v-btn color="primary" variant="flat" size="large" density="comfortable" :disabled="!selectedDate"
                     @click="emit('next')">
                     Continue
                 </v-btn>
+
             </div>
         </v-card-text>
     </v-card>
