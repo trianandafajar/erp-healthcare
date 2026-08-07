@@ -73,7 +73,14 @@ const calendarTitle = computed(() =>
     month.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 )
 
+const canGoPrev = computed(() => {
+    const now = new Date()
+    return month.value.getFullYear() > now.getFullYear() ||
+        (month.value.getFullYear() === now.getFullYear() && month.value.getMonth() > now.getMonth())
+})
+
 function prevMonth() {
+    if (!canGoPrev.value) return
     month.value = new Date(month.value.getFullYear(), month.value.getMonth() - 1, 1)
 }
 
@@ -119,7 +126,8 @@ function select(d: Date) {
         <v-card-text class="pa-4 pt-2">
             <div class="d-flex align-center justify-space-between mb-3">
                 <v-btn icon="mdi-chevron-left" variant="tonal" density="comfortable" color="primary"
-                    @click="prevMonth" />
+                    :disabled="!canGoPrev" @click="prevMonth"
+                    :style="!canGoPrev ? 'cursor: not-allowed; pointer-events: auto;' : ''" />
                 <div class="text-subtitle-1 font-weight-bold">{{ calendarTitle }}</div>
                 <v-btn icon="mdi-chevron-right" variant="tonal" density="comfortable" color="primary"
                     @click="nextMonth" />
