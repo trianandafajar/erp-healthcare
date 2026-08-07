@@ -48,6 +48,8 @@ const config = computed(() => ({
     },
 }[props.mode]))
 
+const todayMin = new Date().toLocaleDateString('en-CA')
+
 const holidayLabel = computed(() => {
     if (!props.holiday?.holiday_date) return '-'
     return new Date(props.holiday.holiday_date + 'T00:00:00').toLocaleDateString('en-US', {
@@ -103,8 +105,8 @@ function onSubmit() {
                 <v-row dense>
                     <v-col cols="12">
                         <v-label class="text-caption font-weight-medium mb-1">Date</v-label>
-                        <v-text-field v-model="form.holiday_date" type="date" variant="outlined" density="compact"
-                            hide-details />
+                        <v-text-field v-model="form.holiday_date" type="date" :min="todayMin" variant="outlined"
+                            density="compact" hide-details />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">

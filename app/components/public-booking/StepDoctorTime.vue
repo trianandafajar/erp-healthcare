@@ -58,7 +58,7 @@ function isSelected(doctorId: string, slot: string): boolean {
         <v-card-item class="pa-4 pb-2">
             <div class="d-flex flex-wrap align-center justify-space-between ga-3">
                 <div>
-                    <v-card-title class="text-h5 px-0">Select Doctor & Time</v-card-title>
+                    <v-card-title class="text-h5 px-0">Seladdect Doctor & Time</v-card-title>
                     <v-card-subtitle class="mt-1 px-0">
                         {{ selectedDateLabel || 'Select a date first' }}
                     </v-card-subtitle>
