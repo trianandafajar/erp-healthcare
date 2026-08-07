@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '~~/server/utils/supabase'
+import { nowInTz } from '~~/server/utils/publicBooking'
 
 function toMinutes(timeStr: string | null | undefined): number {
     if (!timeStr) return 0
@@ -115,7 +116,8 @@ export default defineEventHandler(async (event: any) => {
         bookedByDateDoctor.set(key, byTime)
     }
 
-    const todayStr = new Date().toISOString().split('T')[0]
+    const now = nowInTz()
+    const todayStr = now.dateKey
     const availableDates: string[] = []
 
     const daysInMonth = new Date(year, monthIdx + 1, 0).getDate()
@@ -143,7 +145,7 @@ export default defineEventHandler(async (event: any) => {
 
             const booked = bookedByDateDoctor.get(`${dateKey}|${doctorId}`) ?? new Map<string, number>()
             const isToday = dateKey === todayStr
-            const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1
+            const nowMin = isToday ? now.minutes : -1
 
             for (let t = startMin; t + duration <= endMin; t += duration) {
                 if (isToday && t <= nowMin) continue

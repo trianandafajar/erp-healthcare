@@ -10,6 +10,23 @@ export function toTimeStr(minutes: number): string {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
+export function nowInTz(tz = 'Asia/Jakarta'): { dateKey: string; minutes: number } {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: tz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+    }).formatToParts(new Date())
+    const m = Object.fromEntries(parts.map(p => [p.type, p.value]))
+    return {
+        dateKey: `${m.year}-${m.month}-${m.day}`,
+        minutes: Number(m.hour) * 60 + Number(m.minute),
+    }
+}
+
 export interface DoctorSlotOptions {
     startMin: number
     endMin: number

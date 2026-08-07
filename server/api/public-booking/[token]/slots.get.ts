@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '~~/server/utils/supabase'
-import { toMinutes, computeDoctorSlots } from '~~/server/utils/publicBooking'
+import { toMinutes, computeDoctorSlots, nowInTz } from '~~/server/utils/publicBooking'
 
 export default defineEventHandler(async (event: any) => {
     const token = getRouterParam(event, 'token')
@@ -35,8 +35,8 @@ export default defineEventHandler(async (event: any) => {
         throw createError({ statusCode: 400, message: 'Invalid date' })
     }
     const dayOfWeek = parsedDate.getDay()
-    const todayStr = new Date().toISOString().split('T')[0]
-    const isToday = date === todayStr
+    const now = nowInTz()
+    const isToday = date === now.dateKey
 
     const { data: holiday, error: holidayError } = await admin
         .from('public_booking_holidays')
@@ -108,7 +108,7 @@ export default defineEventHandler(async (event: any) => {
         bookedByTime[key] = (bookedByTime[key] ?? 0) + 1
     }
 
-    const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1
+    const nowMin = isToday ? now.minutes : -1
 
     const slots = computeDoctorSlots({
         startMin,
