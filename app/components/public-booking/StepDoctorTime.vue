@@ -30,6 +30,11 @@ const emit = defineEmits<{
 
 const canContinue = computed(() => !!props.selectedDoctor && !!props.selectedSlot)
 
+const specializationItems = computed(() => [
+    { title: 'All', value: '' },
+    ...props.specializations.map(s => ({ title: s, value: s })),
+])
+
 function formatTime(t: string): string {
     const parts = (t ?? '').split(':')
     if (parts.length < 2) return t
@@ -58,14 +63,14 @@ function isSelected(doctorId: string, slot: string): boolean {
         <v-card-item class="pa-4 pb-2">
             <div class="d-flex flex-wrap align-center justify-space-between ga-3">
                 <div>
-                    <v-card-title class="text-h5 px-0">Seladdect Doctor & Time</v-card-title>
+                    <v-card-title class="text-h5 px-0">Select Doctor & Time</v-card-title>
                     <v-card-subtitle class="mt-1 px-0">
                         {{ selectedDateLabel || 'Select a date first' }}
                     </v-card-subtitle>
                 </div>
-                <v-select v-if="specializations.length" :model-value="specializationFilter" :items="specializations"
-                    label="Specialization" variant="outlined" density="compact" clearable hide-details
-                    style="max-width: 220px;"
+                <v-autocomplete v-if="specializations.length" :model-value="specializationFilter" :items="specializationItems"
+                    label="Specialization" variant="outlined" density="compact"
+                    clearable hide-details style="max-width: 220px;"
                     @update:model-value="(v: any) => emit('update:specializationFilter', v ?? '')" />
             </div>
         </v-card-item>
