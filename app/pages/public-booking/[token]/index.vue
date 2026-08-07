@@ -120,8 +120,8 @@ function reset() {
         </header>
 
         <main class="mx-auto w-100 flex-1 px-4 py-8" style="max-width: 900px;">
-            <div v-if="pending" class="d-flex justify-center" style="padding: 96px 0;">
-                <v-progress-circular indeterminate color="primary" />
+            <div v-if="pending" class="d-flex align-center justify-center" style="min-height: 60vh;">
+                <v-progress-circular indeterminate color="primary" size="48" />
             </div>
 
             <div v-else-if="errorMsg" class="d-flex flex-column align-center text-center" style="padding: 64px;">
