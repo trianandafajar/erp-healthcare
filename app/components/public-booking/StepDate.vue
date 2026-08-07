@@ -7,8 +7,16 @@ interface Holiday {
     name: string | null
 }
 
+interface OpeningHour {
+    day_of_week: number
+    start_time: string
+    end_time: string
+    is_active: boolean
+}
+
 const props = defineProps<{
     holidays: Holiday[]
+    openingHours: OpeningHour[]
     selectedDate: Date | null
 }>()
 
@@ -35,11 +43,17 @@ function holidayFor(d: Date): Holiday | null {
 
 type DateStatus = 'past' | 'holiday' | 'available'
 
+function isDayActive(d: Date): boolean {
+    const dow = d.getDay()
+    return (props.openingHours ?? []).some(h => h.day_of_week === dow && h.is_active)
+}
+
 function dateStatus(d: Date): DateStatus {
     if (holidayFor(d)) return 'holiday'
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     if (d < today) return 'past'
+    if (!isDayActive(d)) return 'past'
     return 'available'
 }
 

@@ -156,7 +156,7 @@ function reset() {
 
             <div v-else>
                 <BookingWizard v-if="config" :key="wizardKey" :token="token" :holidays="config.holidays"
-                    :doctors="config.doctors" @booked="onBooked" />
+                    :doctors="config.doctors" :opening-hours="config.opening_hours" @booked="onBooked" />
             </div>
         </main>
 

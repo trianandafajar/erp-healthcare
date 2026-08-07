@@ -22,10 +22,18 @@ interface Doctor {
     photo_url: string | null
 }
 
+interface OpeningHour {
+    day_of_week: number
+    start_time: string
+    end_time: string
+    is_active: boolean
+}
+
 const props = defineProps<{
     token: string
     holidays: Holiday[]
     doctors: Doctor[]
+    openingHours: OpeningHour[]
 }>()
 
 const emit = defineEmits<{
@@ -219,7 +227,8 @@ async function submitBooking() {
             {{ formError }}
         </v-alert>
 
-        <StepDate v-if="currentStep === 1" :holidays="holidays" :selected-date="selectedDate" @select="onSelectDate"
+        <StepDate v-if="currentStep === 1" :holidays="holidays" :opening-hours="openingHours"
+            :selected-date="selectedDate" @select="onSelectDate"
             @next="goTo(2)" />
 
         <StepDoctorTime v-else-if="currentStep === 2" :doctors="filteredDoctors" :doctor-slots="doctorSlots"
