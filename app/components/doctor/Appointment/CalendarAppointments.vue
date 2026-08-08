@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -41,6 +41,11 @@ const calendarTitle = ref('')
 const selectedDateKey = ref('')
 const appointments = ref<CalendarAppointment[]>([])
 const loading = ref(false)
+const viewTab = ref<'calendar' | 'table'>('calendar')
+
+onMounted(() => {
+    loadAppointments(toDateKey(new Date()))
+})
 
 const calendarEvents = computed(() =>
     appointments.value.map((appt) => {
@@ -164,100 +169,120 @@ const statusLegend = [
         </div>
     </v-card-item>
 
-    <UiTitleCard class-name="px-0 pb-0 rounded-md">
-        <div class="calendar-shell pa-4">
-            <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-3">
-                <div class="d-flex align-center ga-2">
-                    <v-btn icon="mdi-chevron-left" variant="flat" color="primary" density="comfortable"
-                        @click="prevDay" />
-                    <v-btn icon="mdi-chevron-right" variant="flat" color="primary" density="comfortable"
-                        @click="nextDay" />
-                    <v-btn variant="tonal" color="secondary" density="comfortable" @click="goToday">
-                        Today
-                    </v-btn>
-                </div>
+    <v-tabs v-model="viewTab" color="primary" density="comfortable" grow class="mb-3">
+        <v-tab value="calendar" prepend-icon="mdi-calendar-month">Kalender</v-tab>
+        <v-tab value="table" prepend-icon="mdi-table">Tabel</v-tab>
+    </v-tabs>
 
-                <div class="text-subtitle-1 font-weight-bold">{{ calendarTitle }}</div>
-
-                <div class="d-flex flex-wrap align-center ga-2">
-                    <v-chip v-for="item in statusLegend" :key="item.status" :color="item.color"
-                        :variant="item.status === 'done' || item.status === 'cancelled' ? 'flat' : 'tonal'" size="small"
-                        label>
-                        {{ item.label }}
-                    </v-chip>
-                </div>
-            </div>
-
-            <FullCalendar ref="calendarRef" :options="calendarOptions">
-                <template #eventContent="arg">
-                    <div class="calendar-event">
-                        <div class="calendar-event-title">{{ arg.event.extendedProps.patientName }}</div>
-                        <div class="calendar-event-subtitle">{{ arg.event.extendedProps.time }}</div>
-                    </div>
-                </template>
-            </FullCalendar>
-        </div>
-    </UiTitleCard>
-
-    <UiTitleCard class-name="px-0 pb-0 rounded-md mt-4">
-        <div class="d-flex align-center justify-space-between flex-wrap ga-2 px-4 pt-4">
-            <div>
-                <v-card-title class="text-h5">Appointments</v-card-title>
-                <v-card-subtitle class="mt-1">
-                    {{ selectedDateLabel || 'Select a date' }}
-                </v-card-subtitle>
-            </div>
-            <v-chip color="primary" variant="tonal" v-if="!loading">
-                {{ appointments.length }} appointment{{ appointments.length === 1 ? '' : 's' }}
-            </v-chip>
-        </div>
-
-        <v-table class="bordered-table" hover density="comfortable">
-            <thead class="bg-containerBg">
-                <tr>
-                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Time</th>
-                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Queue</th>
-                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
-                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Type</th>
-                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
-                    <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Chief Complaint</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-if="loading">
-                    <td colspan="6" class="text-center py-8">
-                        <v-progress-circular indeterminate color="primary" />
-                    </td>
-                </tr>
-                <tr v-else-if="appointments.length === 0">
-                    <td colspan="6" class="text-center py-8 text-medium-emphasis">
-                        <v-icon icon="mdi-calendar-blank" size="32" class="mb-2 d-block mx-auto" />
-                        No appointments on this date
-                    </td>
-                </tr>
-                <tr v-else v-for="appt in appointments" :key="appt.id">
-                    <td class="py-3 text-body-2 font-weight-medium">{{ formatTime(appt.appointment_time) }}</td>
-                    <td class="py-3 text-body-2">{{ appt.queue_number ?? '-' }}</td>
-                    <td class="py-3">
-                        <div class="text-body-2 font-weight-medium">{{ appt.patients?.full_name ?? 'Patient' }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ appt.patients?.medical_record_number ?? '-' }}
+    <v-window v-model="viewTab">
+        <v-window-item value="calendar">
+            <UiTitleCard class-name="px-0 pb-0 rounded-md">
+                <div class="calendar-shell pa-4">
+                    <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-3">
+                        <div class="d-flex align-center ga-2">
+                            <v-btn icon="mdi-chevron-left" variant="flat" color="primary" density="comfortable"
+                                @click="prevDay" />
+                            <v-btn icon="mdi-chevron-right" variant="flat" color="primary" density="comfortable"
+                                @click="nextDay" />
+                            <v-btn variant="tonal" color="secondary" density="comfortable" @click="goToday">
+                                Today
+                            </v-btn>
                         </div>
-                    </td>
-                    <td class="py-3">
-                        <v-chip color="secondary" variant="tonal" size="small" label>
-                            {{ appt.type }}
+
+                        <div class="text-subtitle-1 font-weight-bold">{{ calendarTitle }}</div>
+
+                        <div class="d-flex flex-wrap align-center ga-2">
+                            <v-chip v-for="item in statusLegend" :key="item.status" :color="item.color"
+                                :variant="item.status === 'done' || item.status === 'cancelled' ? 'flat' : 'tonal'" size="small"
+                                label>
+                                {{ item.label }}
+                            </v-chip>
+                        </div>
+                    </div>
+
+                    <FullCalendar ref="calendarRef" :options="calendarOptions">
+                        <template #eventContent="arg">
+                            <div class="calendar-event">
+                                <div class="calendar-event-title">{{ arg.event.extendedProps.patientName }}</div>
+                                <div class="calendar-event-subtitle">{{ arg.event.extendedProps.time }}</div>
+                            </div>
+                        </template>
+                    </FullCalendar>
+                </div>
+            </UiTitleCard>
+        </v-window-item>
+
+        <v-window-item value="table">
+            <UiTitleCard class-name="px-0 pb-0 rounded-md">
+                <div class="d-flex flex-wrap align-center justify-space-between ga-2 px-4 pt-4">
+                    <div>
+                        <v-card-title class="text-h5">Appointments</v-card-title>
+                        <v-card-subtitle class="mt-1">
+                            {{ selectedDateLabel || 'Select a date' }}
+                        </v-card-subtitle>
+                    </div>
+                    <div class="d-flex align-center ga-2">
+                        <v-btn icon="mdi-chevron-left" variant="flat" color="primary" density="comfortable"
+                            @click="prevDay" />
+                        <v-btn icon="mdi-chevron-right" variant="flat" color="primary" density="comfortable"
+                            @click="nextDay" />
+                        <v-btn variant="tonal" color="secondary" density="comfortable" @click="goToday">
+                            Today
+                        </v-btn>
+                        <v-chip color="primary" variant="tonal" v-if="!loading">
+                            {{ appointments.length }} appointment{{ appointments.length === 1 ? '' : 's' }}
                         </v-chip>
-                    </td>
-                    <td class="py-3">
-                        <v-chip :color="statusColor(appt.status)" :variant="statusVariant(appt.status)" size="small">
-                            {{ appt.status }}
-                        </v-chip>
-                    </td>
-                    <td class="py-3 text-body-2 text-medium-emphasis">{{ appt.chief_complaint || '-' }}</td>
-                </tr>
-            </tbody>
-        </v-table>
-    </UiTitleCard>
+                    </div>
+                </div>
+
+                <v-table class="bordered-table" hover density="comfortable">
+                    <thead class="bg-containerBg">
+                        <tr>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Time</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Queue</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Patient</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Type</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Status</th>
+                            <th class="text-no-wrap text-left text-caption font-weight-bold text-uppercase">Chief Complaint</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="loading">
+                            <td colspan="6" class="text-center py-8">
+                                <v-progress-circular indeterminate color="primary" />
+                            </td>
+                        </tr>
+                        <tr v-else-if="appointments.length === 0">
+                            <td colspan="6" class="text-center py-8 text-medium-emphasis">
+                                <v-icon icon="mdi-calendar-blank" size="32" class="mb-2 d-block mx-auto" />
+                                No appointments on this date
+                            </td>
+                        </tr>
+                        <tr v-else v-for="appt in appointments" :key="appt.id">
+                            <td class="py-3 text-body-2 font-weight-medium">{{ formatTime(appt.appointment_time) }}</td>
+                            <td class="py-3 text-body-2">{{ appt.queue_number ?? '-' }}</td>
+                            <td class="py-3">
+                                <div class="text-body-2 font-weight-medium">{{ appt.patients?.full_name ?? 'Patient' }}</div>
+                                <div class="text-caption text-medium-emphasis">{{ appt.patients?.medical_record_number ?? '-' }}
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <v-chip color="secondary" variant="tonal" size="small" label>
+                                    {{ appt.type }}
+                                </v-chip>
+                            </td>
+                            <td class="py-3">
+                                <v-chip :color="statusColor(appt.status)" :variant="statusVariant(appt.status)" size="small">
+                                    {{ appt.status }}
+                                </v-chip>
+                            </td>
+                            <td class="py-3 text-body-2 text-medium-emphasis">{{ appt.chief_complaint || '-' }}</td>
+                        </tr>
+                    </tbody>
+                </v-table>
+            </UiTitleCard>
+        </v-window-item>
+    </v-window>
 </template>
 
 <style scoped>
