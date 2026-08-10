@@ -12,6 +12,9 @@ const isSubmitting = ref(false)
 const apiError = ref('')
 const verifiedMsg = ref('')
 
+const runtimeConfig = useRuntimeConfig()
+const instantLoginEnabled = computed(() => !!runtimeConfig.public.instantSuperadminLogin)
+
 onMounted(() => {
     if (route.query.verified === 'true') {
         verifiedMsg.value = 'Email verified successfully! You can now log in.'
@@ -32,6 +35,137 @@ const emailRules = [
     (v: string) => /.+@.+\..+/.test(v.trim()) || 'E-mail must be valid'
 ]
 
+async function completeLogin(emailForVerify: string) {
+    const supabase = useSupabase()
+    if (!supabase) {
+        throw new Error('Supabase client is unavailable')
+    }
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select(`
+            roles (
+                name,
+                label,
+                role_permissions (
+                    permissions (
+                        name,
+                        module,
+                        category
+                    )
+                )
+            )
+        `)
+        .eq('user_id', user!.id)
+        .single()
+
+    if (roleError) throw roleError
+
+    const role = (roleData as any)?.roles?.name
+
+    const permissions: string[] = (roleData as any)?.roles?.role_permissions
+        ?.map((rp: any) => rp.permissions?.name)
+        .filter(Boolean) ?? []
+
+    const authStore = useAuthStore()
+    const profileStore = useProfileStore()
+
+    const isSuperAdmin = role === 'superadmin'
+
+    let tenantId: string | null = null
+    let tenantSlug: string | null = null
+
+    if (!isSuperAdmin) {
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('tenant_id, email_verified, tenants(slug)')
+            .eq('id', user!.id)
+            .single()
+
+        if (profileError) {
+            apiError.value = 'Failed to load profile.'
+            return
+        }
+
+        if (!profile?.email_verified) {
+            authStore.setUser({ user, role, permissions: [], tenantId: null, tenantSlug: null })
+            await navigateTo(`/verify?email=${encodeURIComponent(emailForVerify)}&from=login`)
+            return
+        }
+
+        if (!profile?.tenant_id) {
+            authStore.setUser({ user, role, permissions: [], tenantId: null, tenantSlug: null })
+            await navigateTo('/onboarding/subscription')
+            return
+        }
+
+        tenantId = profile.tenant_id
+        tenantSlug = (profile as any).tenants?.slug
+
+        if (!tenantSlug) {
+            apiError.value = 'Tenant data is invalid.'
+            return
+        }
+    }
+
+    let subscriptionPlan: string | null = null
+    let settingsData: { logo_url?: string | null } | null = null
+    if (!isSuperAdmin && tenantId) {
+        const { data: tenantInfo } = await supabase
+            .from('tenants')
+            .select('subscription_plan')
+            .eq('id', tenantId)
+            .single()
+        subscriptionPlan = (tenantInfo as any)?.subscription_plan ?? null
+
+        const { data: sData } = await supabase
+            .from('tenant_settings')
+            .select('logo_url, display_name')
+            .eq('tenant_id', tenantId)
+            .maybeSingle()
+        settingsData = sData as { logo_url?: string | null; display_name?: string | null } | null
+    }
+
+    authStore.setUser({
+        user,
+        role,
+        permissions,
+        tenantId,
+        tenantSlug,
+        subscriptionPlan: subscriptionPlan ?? 'starter',
+        settings: settingsData,
+    })
+
+    await profileStore.fetchProfile(true)
+
+    if (!isSuperAdmin) {
+        const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settingsData, tenantSlug, role)
+        if (onboardingPath) {
+            await navigateTo(onboardingPath)
+            return
+        }
+    }
+
+    const redirectMap: Record<string, string> = {
+        superadmin: 'super-admin/dashboard',
+        admin: 'dashboard',
+        doctor: 'doctor/dashboard',
+        specialist: 'doctor/dashboard',
+        pharmacy: 'pharmacy/dashboard',
+        nurse: 'nurse/dashboard',
+        receptionist: 'receptionist/dashboard',
+        patient: 'patient/dashboard',
+    }
+
+    const path = redirectMap[role] ?? 'dashboard'
+
+    // Superadmin tidak butuh prefix tenant slug di URL
+    const target = isSuperAdmin ? `/${path}` : `/${tenantSlug}/${path}`
+    await navigateTo(target)
+}
+
 async function validate() {
     if (isSubmitting.value) return
 
@@ -47,137 +181,30 @@ async function validate() {
             }
         })
 
-        const supabase = useSupabase()
-        if (!supabase) {
-            throw new Error('Supabase client is unavailable')
-        }
-
-        const { data: { user } } = await supabase.auth.getUser()
-
-        const { data: roleData, error: roleError } = await supabase
-            .from('user_roles')
-            .select(`
-                roles (
-                    name,
-                    label,
-                    role_permissions (
-                        permissions (
-                            name,
-                            module,
-                            category
-                        )
-                    )
-                )
-            `)
-            .eq('user_id', user!.id)
-            .single()
-
-        if (roleError) throw roleError
-
-        const role = (roleData as any)?.roles?.name
-
-        const permissions: string[] = (roleData as any)?.roles?.role_permissions
-            ?.map((rp: any) => rp.permissions?.name)
-            .filter(Boolean) ?? []
-
-        const authStore = useAuthStore()
-        const profileStore = useProfileStore()
-
-        const isSuperAdmin = role === 'superadmin'
-
-        let tenantId: string | null = null
-        let tenantSlug: string | null = null
-
-        if (!isSuperAdmin) {
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('tenant_id, email_verified, tenants(slug)')
-                .eq('id', user!.id)
-                .single()
-
-            if (profileError) {
-                apiError.value = 'Failed to load profile.'
-                return
-            }
-
-            if (!profile?.email_verified) {
-                authStore.setUser({ user, role, permissions: [], tenantId: null, tenantSlug: null })
-                await navigateTo(`/verify?email=${encodeURIComponent(email.value.trim())}&from=login`)
-                return
-            }
-
-            if (!profile?.tenant_id) {
-                authStore.setUser({ user, role, permissions: [], tenantId: null, tenantSlug: null })
-                await navigateTo('/onboarding/subscription')
-                return
-            }
-
-            tenantId = profile.tenant_id
-            tenantSlug = (profile as any).tenants?.slug
-
-            if (!tenantSlug) {
-                apiError.value = 'Tenant data is invalid.'
-                return
-            }
-        }
-
-        let subscriptionPlan: string | null = null
-        let settingsData: { logo_url?: string | null } | null = null
-        if (!isSuperAdmin && tenantId) {
-            const { data: tenantInfo } = await supabase
-                .from('tenants')
-                .select('subscription_plan')
-                .eq('id', tenantId)
-                .single()
-            subscriptionPlan = (tenantInfo as any)?.subscription_plan ?? null
-
-            const { data: sData } = await supabase
-                .from('tenant_settings')
-                .select('logo_url, display_name')
-                .eq('tenant_id', tenantId)
-                .maybeSingle()
-            settingsData = sData as { logo_url?: string | null; display_name?: string | null } | null
-        }
-
-        authStore.setUser({
-            user,
-            role,
-            permissions,
-            tenantId,
-            tenantSlug,
-            subscriptionPlan: subscriptionPlan ?? 'starter',
-            settings: settingsData,
-        })
-
-        await profileStore.fetchProfile(true)
-
-        if (!isSuperAdmin) {
-            const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settingsData, tenantSlug, role)
-            if (onboardingPath) {
-                await navigateTo(onboardingPath)
-                return
-            }
-        }
-
-        const redirectMap: Record<string, string> = {
-            superadmin: 'super-admin/dashboard',
-            admin: 'dashboard',
-            doctor: 'doctor/dashboard',
-            specialist: 'doctor/dashboard',
-            pharmacy: 'pharmacy/dashboard',
-            nurse: 'nurse/dashboard',
-            receptionist: 'receptionist/dashboard',
-            patient: 'patient/dashboard',
-        }
-
-        const path = redirectMap[role] ?? 'dashboard'
-
-        // Superadmin tidak butuh prefix tenant slug di URL
-        const target = isSuperAdmin ? `/${path}` : `/${tenantSlug}/${path}`
-        await navigateTo(target)
+        await completeLogin(email.value.trim())
 
     } catch (err: any) {
         apiError.value = err?.data?.message || err?.message || 'Login failed.'
+    } finally {
+        isSubmitting.value = false
+    }
+}
+
+async function performInstantLogin() {
+    if (isSubmitting.value) return
+
+    isSubmitting.value = true
+    apiError.value = ''
+
+    try {
+        await $fetch('/api/auth/superadmin-instant-login', {
+            method: 'POST',
+        })
+
+        await completeLogin('')
+
+    } catch (err: any) {
+        apiError.value = err?.data?.message || err?.message || 'Instant login failed.'
     } finally {
         isSubmitting.value = false
     }
@@ -226,6 +253,15 @@ async function validate() {
         <v-btn color="primary" :loading="isSubmitting" :disabled="isSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
             Login
         </v-btn>
+
+        <template v-if="instantLoginEnabled">
+            <v-divider class="my-5"></v-divider>
+
+            <v-btn color="secondary" variant="outlined" block size="large" :loading="isSubmitting"
+                :disabled="isSubmitting" @click="performInstantLogin">
+                Login as Superadmin
+            </v-btn>
+        </template>
 
         <div v-if="apiError" class="mt-2">
             <v-alert color="error">{{ apiError }}</v-alert>

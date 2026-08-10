@@ -44,9 +44,12 @@ export default defineNuxtConfig({
   runtimeConfig: {
     supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
     stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    superadminEmail: process.env.SUPERADMIN_EMAIL,
+    instantSuperadminLogin: process.env.ENABLE_INSTANT_SUPERADMIN_LOGIN === 'true',
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseKey: process.env.SUPABASE_KEY,
+      instantSuperadminLogin: process.env.ENABLE_INSTANT_SUPERADMIN_LOGIN === 'true',
     },
     resendApiKey: process.env.RESEND_API_KEY,
   },

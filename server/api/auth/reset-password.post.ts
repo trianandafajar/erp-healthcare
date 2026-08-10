@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
         config.supabaseServiceKey
     )
 
-    const { data: { users }, error: listError } = await adminSupabase.auth.admin.listUsers()
+    const { data: { users }, error: listError } = await adminSupabase.auth.admin.listUsers({ page: 1, perPage: 1000 })
     const user = users?.find(u => u.email === tokenData.email)
 
     if (listError || !user) {
