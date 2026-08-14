@@ -2,7 +2,7 @@
 import { SaveOutlined, LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons-vue'
 
 definePageMeta({
-    middleware: ['auth', 'permission', 'profile-layout'],
+    middleware: ['authorize', 'profile-layout'],
 })
 
 useSeoMeta({ title: 'My Profile' })

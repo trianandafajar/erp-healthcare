@@ -3,7 +3,7 @@ import ReceptionistDashboard from '~/components/receptionist/ReceptionistDashboa
 
 definePageMeta({
     layout: 'receptionist',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     role: 'receptionist',
     permissions: ['dashboard.view'],
 })

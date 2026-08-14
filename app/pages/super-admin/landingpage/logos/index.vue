@@ -3,7 +3,7 @@ import TableLogos from '~/components/dashboard/landingpage/TableLogos.vue'
 
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     // permissions: ['landingpage.logos.view'],
 })
 

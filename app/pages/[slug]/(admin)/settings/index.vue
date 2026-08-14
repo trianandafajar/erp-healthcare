@@ -3,7 +3,8 @@ import SettingsPage from '~/components/pages/admin/SettingsPage.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth'],
+    middleware: ['authorize'],
+    roles: ['admin'],
 })
 
 useSeoMeta({

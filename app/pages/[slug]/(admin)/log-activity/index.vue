@@ -3,7 +3,8 @@ import TableLog from '~/components/dashboard/LogActivity/TableLog.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth'],
+    middleware: ['authorize'],
+    roles: ['admin'],
 })
 
 useSeoMeta({

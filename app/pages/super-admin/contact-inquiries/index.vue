@@ -3,7 +3,7 @@ import TableContactInquiries from '~/components/dashboard/superadmin/TableContac
 
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth'],
+    middleware: ['authorize'],
 })
 
 useSeoMeta({

@@ -5,7 +5,7 @@ import TableReferral from '~/components/doctor/referal/TableReferral.vue';
 
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['referrals.view'],
 })
 

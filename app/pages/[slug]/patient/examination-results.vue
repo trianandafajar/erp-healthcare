@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'patient',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['examination.view'],
 })
 const { can } = usePermission()

@@ -6,7 +6,7 @@ import { getDashboardPath } from '~/utils/roleRedirect'
 
 definePageMeta({
   layout: false,
-  middleware: ['auth'],
+  middleware: ['authorize'],
   skipTenantCheck: true,
 })
 

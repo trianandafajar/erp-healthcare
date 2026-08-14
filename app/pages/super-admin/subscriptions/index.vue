@@ -3,7 +3,7 @@ import TableSubscriptions from '~/components/dashboard/superadmin/TableSubscript
 
 definePageMeta({
   layout: 'superadmin',
-  middleware: ['auth'],
+  middleware: ['authorize'],
 })
 
 useSeoMeta({

@@ -8,7 +8,7 @@ import {
 
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['dashboard.view'],
 })
 

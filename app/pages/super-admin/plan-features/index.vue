@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth'],
+    middleware: ['authorize'],
 })
 
 useSeoMeta({

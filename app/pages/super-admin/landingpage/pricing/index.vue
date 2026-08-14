@@ -3,7 +3,7 @@ import TablePricingPlans from '~/components/dashboard/landingpage/TablePricingPl
 
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['landingpage.pricing.view'],
 })
 

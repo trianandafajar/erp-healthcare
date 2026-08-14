@@ -3,7 +3,7 @@ import ReceptionistQueuePrint from '~/components/receptionist/ReceptionistQueueP
 
 definePageMeta({
     layout: 'receptionist',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     role: 'receptionist',
     permissions: ['queue.view'],
 })

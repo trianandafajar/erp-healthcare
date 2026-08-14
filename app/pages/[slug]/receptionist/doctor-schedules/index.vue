@@ -3,7 +3,7 @@ import ReceptionistDoctorSchedules from '~/components/receptionist/ReceptionistD
 
 definePageMeta({
     layout: 'receptionist',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     role: 'receptionist',
     permissions: ['schedule.view'],
 })

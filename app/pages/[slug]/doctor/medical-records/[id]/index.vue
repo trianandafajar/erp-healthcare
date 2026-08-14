@@ -4,7 +4,7 @@ import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['medical.view'],
 })
 

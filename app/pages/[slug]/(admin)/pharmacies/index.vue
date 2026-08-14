@@ -3,7 +3,8 @@ import TablePharmacy from '~/components/dashboard/pharmacies/TablePharmacy.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['pharmacy.view'],
 })
 

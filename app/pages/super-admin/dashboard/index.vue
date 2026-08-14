@@ -5,7 +5,7 @@ import SuperAdminTenantsTable from '~/components/dashboard/superadmin/SuperAdmin
 
 definePageMeta({
   layout: 'superadmin',
-  middleware: ['auth'],
+  middleware: ['authorize'],
 })
 
 useSeoMeta({

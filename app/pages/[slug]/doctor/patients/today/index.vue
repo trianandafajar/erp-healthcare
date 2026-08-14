@@ -4,7 +4,7 @@ import TableAppoint from '~/components/doctor/Appointment/TableAppoint.vue';
 
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['appointment.view'],
 })
 

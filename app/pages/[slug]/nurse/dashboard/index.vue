@@ -3,7 +3,7 @@ import NurseDashboard from '~/components/nurse/NurseDashboard.vue'
 
 definePageMeta({
     layout: 'nurse',
-    middleware: ['auth', 'role', 'permission', 'plan'],
+    middleware: ['authorize'],
     role: 'nurse',
     requiredFeature: 'nurse_module',
     permissions: ['dashboard.view'],

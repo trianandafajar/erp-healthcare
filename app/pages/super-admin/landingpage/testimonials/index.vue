@@ -3,7 +3,7 @@ import TableTestimonials from '~/components/dashboard/landingpage/TableTestimoni
 
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['landingpage.testimonials.view'],
 })
 

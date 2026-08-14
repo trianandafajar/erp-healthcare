@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['doctor.view'],
 })
 

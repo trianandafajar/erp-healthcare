@@ -3,7 +3,7 @@ import TableUsersSuperadmin from '~/components/dashboard/superadmin/TableUsersSu
 
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth']
+    middleware: ['authorize']
 })
 
 useSeoMeta({

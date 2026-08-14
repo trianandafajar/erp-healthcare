@@ -3,7 +3,8 @@ import TablePermissions from '~/components/dashboard/permissions/TablePermission
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['permission.view'],
 })
 

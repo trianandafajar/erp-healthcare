@@ -4,7 +4,7 @@ import ContentEditor from '~/components/dashboard/landingpage/ContentEditor.vue'
 
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['landingpage.industries.edit'],
 })
 

@@ -3,7 +3,8 @@ import TableReceptionist from '~/components/dashboard/receptionists/TableRecepti
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['receptionist.view'],
 })
 

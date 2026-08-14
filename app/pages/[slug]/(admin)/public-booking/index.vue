@@ -3,7 +3,8 @@ import PublicBookingPage from '~/components/pages/admin/PublicBookingPage.vue'
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['public-booking.view'],
 })
 </script>

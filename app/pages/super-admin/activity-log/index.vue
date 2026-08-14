@@ -4,7 +4,7 @@ import TableLog from '~/components/dashboard/LogActivity/TableLog.vue';
 
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['log.view'],
 })
 

@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 definePageMeta({
-    middleware: ['auth', 'role', 'permission', 'plan'],
+    middleware: ['authorize'],
     role: 'nurse',
     requiredFeature: 'nurse_module',
 })

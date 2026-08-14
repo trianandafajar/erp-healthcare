@@ -3,7 +3,7 @@ import CalendarAppointments from '~/components/doctor/Appointment/CalendarAppoin
 
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['appointment.view'],
 })
 </script>

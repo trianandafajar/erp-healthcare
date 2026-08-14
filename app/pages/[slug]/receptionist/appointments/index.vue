@@ -3,7 +3,7 @@ import ReceptionistAppointments from '~/components/receptionist/ReceptionistAppo
 
 definePageMeta({
     layout: 'receptionist',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     role: 'receptionist',
     permissions: ['appointment.view'],
 })

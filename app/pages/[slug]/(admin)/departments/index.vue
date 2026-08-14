@@ -3,7 +3,8 @@ import TableDepartments from '~/components/dashboard/departments/TableDepartment
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['department.view'],
 })
 

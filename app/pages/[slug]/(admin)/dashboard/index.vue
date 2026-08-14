@@ -3,7 +3,8 @@ import DashboardPage from '~/components/pages/admin/DashboardPage.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['dashboard.view'],
 })
 

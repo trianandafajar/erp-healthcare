@@ -3,7 +3,7 @@ import ReferralModal from '~/components/doctor/referal/ReferralModal.vue'
 
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['examination.view'],
 })
 

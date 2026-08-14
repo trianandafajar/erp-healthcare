@@ -3,7 +3,7 @@ import ReceptionistPatientRegistration from '~/components/receptionist/Reception
 
 definePageMeta({
     layout: 'receptionist',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     role: 'receptionist',
     permissions: ['patient-regist.view'],
 })

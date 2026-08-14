@@ -4,7 +4,7 @@ import AuthFooter from '~/components/auth/AuthFooter.vue'
 
 definePageMeta({
   layout: false,
-  middleware: ['auth'],
+  middleware: ['authorize'],
 })
 
 const route = useRoute()

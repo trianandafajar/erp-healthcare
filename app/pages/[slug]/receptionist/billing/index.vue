@@ -3,7 +3,7 @@ import ReceptionistBilling from '~/components/receptionist/ReceptionistBilling.v
 
 definePageMeta({
     layout: 'receptionist',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     role: 'receptionist',
     permissions: ['billing.view'],
 })

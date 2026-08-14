@@ -1,4 +1,4 @@
-type EnsuredAuthState = {
+export type EnsuredAuthState = {
   user: any
   role: string | null
   permissions: string[]

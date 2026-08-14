@@ -3,7 +3,7 @@ import TableIndustries from '~/components/dashboard/landingpage/TableIndustries.
 
 definePageMeta({
     layout: 'superadmin',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['landingpage.industries.view'],
 })
 

@@ -3,7 +3,8 @@ import TableNurse from '~/components/dashboard/nurses/TableNurse.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['nurse.view'],
 })
 

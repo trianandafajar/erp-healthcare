@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['patient-history.view'],
 })
 

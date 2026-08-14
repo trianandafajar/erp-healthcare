@@ -4,7 +4,7 @@ import TableExamination from '~/components/doctor/examination/TableExamination.v
 
 definePageMeta({
     layout: 'doctor',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     permissions: ['examination.view'],
 })
 useSeoMeta({

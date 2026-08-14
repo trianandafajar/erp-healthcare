@@ -3,7 +3,7 @@ import TableTenants from '~/components/dashboard/superadmin/TableTenants.vue'
 
 definePageMeta({
   layout: 'superadmin',
-  middleware: ['auth'],
+  middleware: ['authorize'],
 })
 
 useSeoMeta({

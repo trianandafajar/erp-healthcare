@@ -3,7 +3,8 @@ import Reportpage from '~/components/pages/admin/ReportPage.vue';
 
 definePageMeta({
     layout: 'default',
-    middleware: ['auth', 'permission', 'plan'],
+    middleware: ['authorize'],
+    roles: ['admin'],
     permissions: ['report.view'],
     requiredFeature: 'reports',
 })

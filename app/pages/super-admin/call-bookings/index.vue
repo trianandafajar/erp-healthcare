@@ -4,7 +4,7 @@ import CallBookingsCalendarSkeleton from '~/components/dashboard/superadmin/Call
 
 definePageMeta({
   layout: 'superadmin',
-  middleware: ['auth'],
+  middleware: ['authorize'],
 })
 
 useSeoMeta({

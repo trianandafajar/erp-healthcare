@@ -3,7 +3,7 @@ import ReceptionistQueue from '~/components/receptionist/ReceptionistQueue.vue'
 
 definePageMeta({
     layout: 'receptionist',
-    middleware: ['auth', 'permission'],
+    middleware: ['authorize'],
     role: 'receptionist',
     permissions: ['queue.view'],
 })

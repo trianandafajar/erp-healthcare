@@ -5,7 +5,7 @@ import TenantDetailPage from '~/components/pages/superadmin/TenantDetailPage.vue
 
 definePageMeta({
   layout: 'superadmin',
-  middleware: ['auth'],
+  middleware: ['authorize'],
 })
 
 useSeoMeta({
