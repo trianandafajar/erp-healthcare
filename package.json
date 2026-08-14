@@ -5,9 +5,15 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "dev:e2e": "nuxt dev --port 3100",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:setup": "supabase start && supabase db reset && docker exec -i supabase_db_erp-healthcare psql -U postgres -d postgres -v ON_ERROR_STOP=1 < supabase/seed_dummy.sql && docker exec -i supabase_db_erp-healthcare psql -U postgres -d postgres -v ON_ERROR_STOP=1 < supabase/seed_e2e.sql"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
@@ -38,12 +44,16 @@
     "vuetify": "^3.7.6"
   },
   "devDependencies": {
+    "@nuxt/test-utils": "^4.1.0",
     "@nuxtjs/tailwindcss": "^6.14.0",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^26.0.0",
     "@types/sortablejs": "^1.15.9",
+    "happy-dom": "^20.11.2",
     "sass": "^1.77.1",
     "tailwind-bootstrap-grid": "^7.0.0",
-    "vite-plugin-vuetify": "^2.1.3"
+    "vite-plugin-vuetify": "^2.1.3",
+    "vitest": "^4.1.10"
   }
 }
