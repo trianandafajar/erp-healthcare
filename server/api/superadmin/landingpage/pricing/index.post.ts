@@ -1,6 +1,14 @@
+import { isShortText, isNonEmptyString, isFiniteNumber, checkFormat } from '~~/server/utils/validate'
+
 export default withSuperadmin(async (event) => {
     const body = await readBody(event)
     const { title, subtitle, price, yearly_price, currency, button_label, button_link, is_recommended, badge_text, sort_order } = body
+
+    checkFormat(isNonEmptyString(title) && isShortText(title, 120), 'title', 'title of at most 120 characters')
+    if (subtitle !== undefined) checkFormat(typeof subtitle === 'string' && subtitle.length <= 300, 'subtitle', 'subtitle of at most 300 characters')
+    if (price !== undefined) checkFormat(isFiniteNumber(price) && price >= 0, 'price', 'non-negative number')
+    if (yearly_price !== undefined) checkFormat(yearly_price === null || (isFiniteNumber(yearly_price) && yearly_price >= 0), 'yearly price', 'non-negative number')
+    if (currency !== undefined) checkFormat(typeof currency === 'string' && /^[A-Za-z]{3}$/.test(currency), 'currency', '3-letter currency code')
 
     const product = await stripe.products.create({
         name: title || '',

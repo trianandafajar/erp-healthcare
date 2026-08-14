@@ -1,4 +1,5 @@
 import { requirePlanFeature } from "~~/server/utils/planGuard"
+import { isUUID, checkField } from "~~/server/utils/validate"
 
 export default defineEventHandler(async (event) => {
     requirePlanFeature(event, 'nurse_module')
@@ -6,9 +7,7 @@ export default defineEventHandler(async (event) => {
     const admin = supabaseAdmin()
     const body = await readBody(event)
 
-    if (!body?.id) {
-        throw createError({ statusCode: 400, message: 'Procedure ID is required' })
-    }
+    checkField(isUUID(body?.id), 'Invalid procedure id')
 
     const {
         data: { user },

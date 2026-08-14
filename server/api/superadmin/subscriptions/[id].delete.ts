@@ -1,8 +1,10 @@
+import { isUUID, checkField } from '~~/server/utils/validate'
+
 export default withSuperadmin(async (event) => {
     const { user } = event.context
 
     const id = getRouterParam(event, 'id')
-    if (!id) throw createError({ statusCode: 400, message: 'Missing subscription id' })
+    checkField(isUUID(id), 'Invalid subscription id')
 
     const admin = supabaseAdmin()
 

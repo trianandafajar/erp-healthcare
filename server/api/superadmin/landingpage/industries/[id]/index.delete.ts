@@ -1,6 +1,10 @@
+import { isUUID, checkField } from '~~/server/utils/validate'
+
 export default withSuperadmin(async (event) => {
     const admin = supabaseAdmin()
     const id = getRouterParam(event, 'id')
+
+    checkField(isUUID(id), 'Invalid industry id')
 
     const { error } = await admin
         .from('landingpage_industries')

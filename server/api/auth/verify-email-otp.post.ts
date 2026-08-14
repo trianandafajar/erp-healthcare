@@ -1,9 +1,10 @@
+import { isEmail, checkFormat } from '~~/server/utils/validate'
+
 export default defineEventHandler(async (event) => {
     const { email, otp } = await readBody(event)
 
-    if (!email || !otp) {
-        throw createError({ statusCode: 400, message: 'Email and OTP are required' })
-    }
+    checkFormat(isEmail(email), 'email', 'valid email address')
+    checkFormat(typeof otp === 'string' && /^\d{6}$/.test(otp), 'otp', '6-digit code')
 
     const supabase = supabaseAdmin()
 

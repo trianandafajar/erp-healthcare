@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
+import { isNonEmptyString, checkFormat } from '~~/server/utils/validate'
 
 export default defineEventHandler(async (event) => {
     const { token, password } = await readBody(event)
 
-    if (!token || !password) {
-        throw createError({ statusCode: 400, message: 'Token and password are required' })
-    }
+    checkFormat(isNonEmptyString(token) && token.length <= 200, 'token', 'valid reset token')
+    checkFormat(typeof password === 'string' && password.length >= 8, 'password', 'password of at least 8 characters')
 
     const supabase = serverSupabase(event)
     const config = useRuntimeConfig()

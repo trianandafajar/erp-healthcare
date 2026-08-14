@@ -1,10 +1,17 @@
+import { isUUID, isEnum, checkField, checkFormat } from '~~/server/utils/validate'
+
+const SUBSCRIPTION_PLANS = ['free', 'starter', 'basic', 'pro', 'professional', 'enterprise']
+const SUBSCRIPTION_STATUSES = ['active', 'suspended', 'trial', 'cancelled']
+
 export default withSuperadmin(async (event) => {
     const { user } = event.context
 
     const id = getRouterParam(event, 'id')
-    if (!id) throw createError({ statusCode: 400, message: 'Missing subscription id' })
+    checkField(isUUID(id), 'Invalid subscription id')
 
     const body = await readBody(event)
+    if (body.plan !== undefined) checkFormat(isEnum(body.plan, SUBSCRIPTION_PLANS), 'plan', `one of: ${SUBSCRIPTION_PLANS.join(', ')}`)
+    if (body.status !== undefined) checkFormat(isEnum(body.status, SUBSCRIPTION_STATUSES), 'status', `one of: ${SUBSCRIPTION_STATUSES.join(', ')}`)
     const admin = supabaseAdmin()
 
     const allowed = ['plan', 'status', 'billing_cycle', 'amount', 'currency', 'start_date', 'next_billing', 'trial_ends', 'payment_method']

@@ -1,12 +1,16 @@
 import { getRecipientIdsByRoles, insertNotifications } from '~~/server/utils/notifications'
+import { isEmail, isShortText, isNonEmptyString, isDateYMD, checkFormat } from '~~/server/utils/validate'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { name, email, phone, message, booking_date, booking_time } = body
 
-    if (!name || !email || !booking_date || !booking_time) {
-        throw createError({ statusCode: 400, message: 'name, email, booking_date, and booking_time are required' })
-    }
+    checkFormat(isNonEmptyString(name) && isShortText(name, 120), 'name', 'name of at most 120 characters')
+    checkFormat(isEmail(email), 'email', 'valid email address')
+    checkFormat(isDateYMD(booking_date), 'booking date', 'valid date')
+    checkFormat(isNonEmptyString(booking_time) && booking_time.length <= 10, 'booking time', 'valid time')
+    if (phone !== undefined) checkFormat(typeof phone === 'string' && phone.length <= 30, 'phone', 'phone number of at most 30 characters')
+    if (message !== undefined) checkFormat(typeof message === 'string' && message.length <= 1000, 'message', 'message of at most 1000 characters')
 
     const admin = supabaseAdmin()
 

@@ -1,12 +1,11 @@
 import { Resend } from 'resend'
 import { randomInt } from 'crypto'
+import { isEmail, checkFormat } from '~~/server/utils/validate'
 
 export default defineEventHandler(async (event) => {
     const { email } = await readBody(event)
 
-    if (!email) {
-        throw createError({ statusCode: 400, message: 'Email is required' })
-    }
+    checkFormat(isEmail(email), 'email', 'valid email address')
 
     const supabase = supabaseAdmin()
     const config = useRuntimeConfig()
@@ -17,12 +16,8 @@ export default defineEventHandler(async (event) => {
         .eq('email', email)
         .maybeSingle()
 
-    if (!profile) {
-        throw createError({ statusCode: 404, message: 'User not found' })
-    }
-
-    if (profile.email_verified) {
-        throw createError({ statusCode: 400, message: 'Email already verified' })
+    if (!profile || profile.email_verified) {
+        return { message: 'Verification code sent to your email' }
     }
 
     const otp = String(randomInt(100000, 999999))

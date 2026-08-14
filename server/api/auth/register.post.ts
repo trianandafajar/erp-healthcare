@@ -1,15 +1,16 @@
 import { Resend } from 'resend'
 import { randomInt } from 'crypto'
+import { isEmail, isShortText, isNonEmptyString, checkFormat, isEnum } from '~~/server/utils/validate'
+
+const VALID_REGISTER_ROLES = ['admin', 'doctor', 'specialist', 'nurse', 'pharmacy', 'receptionist', 'patient']
 
 export default defineEventHandler(async (event) => {
     const { email, password, full_name, role = 'admin', tenant_name, tenant_slug } = await readBody(event)
 
-    if (!email || !password || !full_name) {
-        throw createError({
-            statusCode: 400,
-            message: 'Email, password, and full name are required.',
-        })
-    }
+    checkFormat(isEmail(email), 'email', 'valid email address')
+    checkFormat(typeof password === 'string' && password.length >= 8, 'password', 'password of at least 8 characters')
+    checkFormat(isNonEmptyString(full_name) && isShortText(full_name, 120), 'full name', 'name of at most 120 characters')
+    checkFormat(isEnum(role, VALID_REGISTER_ROLES), 'role', `valid role (${VALID_REGISTER_ROLES.join(', ')})`)
 
     const admin = supabaseAdmin()
 
@@ -20,7 +21,10 @@ export default defineEventHandler(async (event) => {
         .maybeSingle()
 
     if (existingProfile) {
-        throw createError({ statusCode: 409, message: 'An account with this email already exists.' })
+        return {
+            message: 'Registration successful. Please check your email for the verification code.',
+            redirect: `/verify?email=${encodeURIComponent(email)}`,
+        }
     }
 
     const { data, error } = await admin.auth.admin.createUser({

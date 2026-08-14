@@ -1,4 +1,8 @@
 import { requirePlanFeature } from "~~/server/utils/planGuard"
+import { isUUID, isShortText, isNonEmptyString, isISO8601, isEnum, checkField, checkFormat } from "~~/server/utils/validate"
+
+const PROCEDURE_STATUSES = ['Planned', 'In Progress', 'Completed', 'Cancelled', 'Postponed']
+const PROCEDURE_PRIORITIES = ['Low', 'Medium', 'High', 'Urgent']
 
 export default defineEventHandler(async (event) => {
     requirePlanFeature(event, 'nurse_module')
@@ -6,9 +10,14 @@ export default defineEventHandler(async (event) => {
     const admin = supabaseAdmin()
     const body = await readBody(event)
 
-    if (!body?.id) {
-        throw createError({ statusCode: 400, message: 'Procedure ID is required' })
-    }
+    checkField(isUUID(body?.id), 'Invalid procedure id')
+    checkField(isUUID(body?.patient_id), 'Invalid patient id')
+    checkFormat(isNonEmptyString(body?.procedure_name) && isShortText(body?.procedure_name, 200), 'procedure name', 'name of at most 200 characters')
+    checkFormat(isISO8601(body?.scheduled_at), 'scheduled at', 'valid date')
+    if (body?.ended_at != null) checkFormat(isISO8601(body?.ended_at), 'ended at', 'valid date')
+    checkFormat(isEnum(body?.priority ?? 'Medium', PROCEDURE_PRIORITIES), 'priority', `one of: ${PROCEDURE_PRIORITIES.join(', ')}`)
+    checkFormat(isEnum(body?.status ?? 'Planned', PROCEDURE_STATUSES), 'status', `one of: ${PROCEDURE_STATUSES.join(', ')}`)
+    if (body?.notes != null) checkFormat(typeof body.notes === 'string' && body.notes.length <= 2000, 'notes', 'notes of at most 2000 characters')
 
     const {
         data: { user },

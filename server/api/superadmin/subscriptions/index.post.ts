@@ -1,10 +1,15 @@
+import { isUUID, isEnum, checkField, checkFormat } from '~~/server/utils/validate'
+
+const SUBSCRIPTION_PLANS = ['free', 'starter', 'basic', 'pro', 'professional', 'enterprise']
+const SUBSCRIPTION_STATUSES = ['active', 'suspended', 'trial', 'cancelled']
+
 export default withSuperadmin(async (event) => {
     const { user } = event.context
 
     const body = await readBody(event)
-    if (!body.tenant_id || !body.plan) {
-        throw createError({ statusCode: 400, message: 'tenant_id and plan are required' })
-    }
+    checkField(isUUID(body.tenant_id), 'Invalid tenant id')
+    checkFormat(isEnum(body.plan, SUBSCRIPTION_PLANS), 'plan', `one of: ${SUBSCRIPTION_PLANS.join(', ')}`)
+    if (body.status !== undefined) checkFormat(isEnum(body.status, SUBSCRIPTION_STATUSES), 'status', `one of: ${SUBSCRIPTION_STATUSES.join(', ')}`)
 
     const admin = supabaseAdmin()
 

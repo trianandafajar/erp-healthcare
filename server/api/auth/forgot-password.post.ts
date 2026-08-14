@@ -1,12 +1,11 @@
 import { Resend } from 'resend'
 import { randomBytes } from 'crypto'
+import { isEmail, checkFormat } from '~~/server/utils/validate'
 
 export default defineEventHandler(async (event) => {
     const { email } = await readBody(event)
 
-    if (!email) {
-        throw createError({ statusCode: 400, message: 'Email is required' })
-    }
+    checkFormat(isEmail(email), 'email', 'valid email address')
 
     const supabase = serverSupabase(event)
     const config = useRuntimeConfig()

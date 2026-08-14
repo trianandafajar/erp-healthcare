@@ -2,15 +2,23 @@ function slugify(text: string) {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
 }
 
+import { isUUID, isShortText, isNonEmptyString, isFiniteNumber, checkField, checkFormat } from '~~/server/utils/validate'
+
 export default withSuperadmin(async (event) => {
     const id = getRouterParam(event, 'id')
     const body = await readBody(event)
 
+    checkField(isUUID(id), 'Invalid plan id')
     const allowed = ['title', 'subtitle', 'price', 'yearly_price', 'currency', 'button_label', 'button_link', 'is_recommended', 'badge_text', 'sort_order', 'is_active']
     const updates: Record<string, any> = {}
     for (const key of allowed) {
         if (body[key] !== undefined) updates[key] = body[key]
     }
+    if (updates.title !== undefined) checkFormat(isNonEmptyString(updates.title) && isShortText(updates.title, 120), 'title', 'title of at most 120 characters')
+    if (updates.subtitle !== undefined) checkFormat(typeof updates.subtitle === 'string' && updates.subtitle.length <= 300, 'subtitle', 'subtitle of at most 300 characters')
+    if (updates.price !== undefined) checkFormat(isFiniteNumber(updates.price) && updates.price >= 0, 'price', 'non-negative number')
+    if (updates.yearly_price !== undefined) checkFormat(updates.yearly_price === null || (isFiniteNumber(updates.yearly_price) && updates.yearly_price >= 0), 'yearly price', 'non-negative number')
+    if (updates.currency !== undefined) checkFormat(typeof updates.currency === 'string' && /^[A-Za-z]{3}$/.test(updates.currency), 'currency', '3-letter currency code')
     updates.updated_at = new Date().toISOString()
 
     const admin = supabaseAdmin()
