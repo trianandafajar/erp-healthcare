@@ -33,8 +33,10 @@ const photoFile = ref<File | null>(null)
 const photoPreview = ref<string>('')
 const uploadingPhoto = ref(false)
 const photoError = ref<string>('')
-const photoInputRef = ref<HTMLInputElement | null>(null)
+const formError = ref<string>('')
 const isDragging = ref(false)
+
+const requiredRule = (message: string) => (v: string) => !!v?.trim() || message
 
 function triggerFileInput() {
     photoInputRef.value?.click()
@@ -112,6 +114,7 @@ async function uploadPhoto(): Promise<string> {
 watch(
     () => props.industry,
     (industry) => {
+        formError.value = ''
         if (props.mode === 'edit' && industry) {
             form.value = {
                 title: industry.title,
@@ -166,6 +169,16 @@ async function onSubmit() {
         return
     }
 
+    if (!form.value.title.trim()) {
+        formError.value = 'Title is required'
+        return
+    }
+    if (!form.value.description.trim()) {
+        formError.value = 'Description is required'
+        return
+    }
+    formError.value = ''
+
     try {
         if (photoFile.value) {
             await uploadPhoto()
@@ -217,11 +230,14 @@ async function onSubmit() {
 
         <template v-else>
             <v-card-text class="pa-4" style="max-height: 480px; overflow-y: auto;">
+                <v-alert v-if="formError" type="error" variant="tonal" density="compact" class="mb-4">
+                    {{ formError }}
+                </v-alert>
                 <v-row dense>
                     <v-col cols="12">
                         <v-label class="text-caption font-weight-medium mb-1">Title</v-label>
-                        <v-text-field v-model="form.title" placeholder="e.g. Hospitals" variant="outlined"
-                            density="compact" hide-details="auto" />
+                        <v-text-field v-model="form.title" :rules="[requiredRule('Title is required')]"
+                            placeholder="e.g. Hospitals" variant="outlined" density="compact" hide-details="auto" />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">
@@ -235,8 +251,9 @@ async function onSubmit() {
 
                     <v-col cols="12" class="mt-3">
                         <v-label class="text-caption font-weight-medium mb-1">Description</v-label>
-                        <v-textarea v-model="form.description" placeholder="Describe this industry..."
-                            variant="outlined" density="compact" rows="3" hide-details />
+                        <v-textarea v-model="form.description" :rules="[requiredRule('Description is required')]"
+                            placeholder="Describe this industry..." variant="outlined" density="compact" rows="3"
+                            hide-details="auto" />
                     </v-col>
 
                     <v-col cols="12" class="mt-3">

@@ -11,7 +11,7 @@ export default withSuperadmin(async (event) => {
         Object.entries(body).filter(([key]) => allowed.includes(key))
     )
     if (updates.title !== undefined) checkFormat(isNonEmptyString(updates.title) && isShortText(updates.title, 120), 'title', 'title of at most 120 characters')
-    if (updates.description !== undefined) checkFormat(typeof updates.description === 'string' && updates.description.length <= 1000, 'description', 'description of at most 1000 characters')
+    if (updates.description !== undefined) checkFormat(isNonEmptyString(updates.description) && updates.description.length <= 1000, 'description', 'description of at most 1000 characters')
     if (updates.image_url !== undefined) checkFormat(typeof updates.image_url === 'string' && updates.image_url.length <= 500, 'image url', 'valid image url')
     if (updates.slug != null) checkFormat(isSlug(updates.slug), 'slug', 'valid slug')
     if (updates.sort_order !== undefined) checkFormat(isInt(updates.sort_order), 'sort order', 'valid integer')
