@@ -72,7 +72,7 @@ onMounted(() => {
     if (path) {
       return navigateTo(path, { replace: true })
     }
-    return navigateTo(getDashboardPath(authStore.role, authStore.tenantSlug), { replace: true })
+    return navigateTo(getDashboardPath(authStore.role, authStore.tenantSlug) ?? '/403', { replace: true })
   }
 
   if (route.query.canceled === 'true') {

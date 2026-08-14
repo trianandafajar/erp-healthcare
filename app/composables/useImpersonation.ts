@@ -49,6 +49,11 @@ export const useImpersonation = () => {
 
             await syncCurrentSessionProfile()
             const dashboard = getDashboardPath(authStore.role, authStore.tenantSlug)
+            if (!dashboard) {
+                await $fetch('/api/users/impersonate/stop', { method: 'POST' }).catch(() => {})
+                await syncCurrentSessionProfile().catch(() => {})
+                throw new Error('User tidak memiliki tenant/role yang valid. Login-as dibatalkan.')
+            }
             await navigateTo(dashboard)
         } catch (err: any) {
             throw err
@@ -75,7 +80,7 @@ export const useImpersonation = () => {
             } else if (actorRole === 'superadmin') {
                 await navigateTo('/super-admin/users-management')
             } else {
-                await navigateTo(authStore.tenantSlug ? `/${authStore.tenantSlug}/users-management` : '/dashboard')
+                await navigateTo(authStore.tenantSlug ? `/${authStore.tenantSlug}/users-management` : (getDashboardPath(authStore.role, authStore.tenantSlug) ?? '/onboarding/subscription'))
             }
         } catch (err: any) {
             console.error('Failed to exit impersonation:', err)

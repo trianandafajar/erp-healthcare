@@ -64,7 +64,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
                 })
 
                 if (!role || role === 'superadmin') {
-                    return navigateTo(getDashboardPath(role, tenantSlug), { replace: true })
+                    const dashboard = getDashboardPath(role, tenantSlug)
+                    if (dashboard) return navigateTo(dashboard, { replace: true })
                 }
 
                 const onboardingPath = getOnboardingPath(tenantId, subscriptionPlan, settings, tenantSlug, role)
@@ -72,7 +73,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
                     return navigateTo(onboardingPath, { replace: true })
                 }
 
-                return navigateTo(getDashboardPath(role, tenantSlug), { replace: true })
+                const dashboard = getDashboardPath(role, tenantSlug)
+                if (dashboard) return navigateTo(dashboard, { replace: true })
             }
         } catch {}
         return
@@ -102,5 +104,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
         }
     }
 
-    return navigateTo(getDashboardPath(authState.role, authStore.tenantSlug), { replace: true })
+    const tenantSlug = authState.tenantSlug ?? authStore.tenantSlug
+    const dashboard = getDashboardPath(authState.role, tenantSlug)
+    if (dashboard) {
+        return navigateTo(dashboard, { replace: true })
+    }
 })

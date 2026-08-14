@@ -16,7 +16,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
             : getAllowedRolesForPath(to.path)
 
     if (requiredRoles && !requiredRoles.includes(role)) {
-        return navigateTo(getDashboardPath(role, authStore.tenantSlug), { replace: true })
+        return navigateTo(getDashboardPath(role, authStore.tenantSlug) ?? '/403', { replace: true })
     }
 
     const permissions = to.meta.permissions as string[] | undefined
@@ -37,7 +37,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
             const upgrade = useUpgradeStore()
             upgrade.show(feature, label)
 
-            return navigateTo(getDashboardPath(authStore.role, authStore.tenantSlug), { replace: true })
+            return navigateTo(getDashboardPath(authStore.role, authStore.tenantSlug) ?? '/403', { replace: true })
         }
     }
 })

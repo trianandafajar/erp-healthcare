@@ -29,6 +29,9 @@ export default defineNuxtPlugin(async () => {
             }
         }
 
-        await navigateTo(getDashboardPath(authState.role, authStore.tenantSlug), { replace: true })
+        const dashboard = getDashboardPath(authState.role, authStore.tenantSlug ?? authState.tenantSlug)
+        if (dashboard) {
+            await navigateTo(dashboard, { replace: true })
+        }
     }
 })

@@ -9,10 +9,10 @@ export const DASHBOARD_BY_ROLE: Record<string, string> = {
     patient: '/patient/dashboard',
 }
 
-export function getDashboardPath(role?: string | null, tenantSlug?: string | null): string {
-    if (!role) return '/dashboard'
-    const path = DASHBOARD_BY_ROLE[role] ?? '/dashboard'
+export function getDashboardPath(role?: string | null, tenantSlug?: string | null): string | null {
+    if (!role || !DASHBOARD_BY_ROLE[role]) return null
+    const path = DASHBOARD_BY_ROLE[role]
     if (role === 'superadmin') return path
     if (tenantSlug) return `/${tenantSlug}${path}`
-    return path
+    return null
 }

@@ -14,5 +14,5 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (role && allowedRoles.includes(role)) return
 
     const authStore = useAuthStore()
-    return navigateTo(getDashboardPath(role, authStore.tenantSlug), { replace: true })
+    return navigateTo(getDashboardPath(role, authStore.tenantSlug) ?? '/403', { replace: true })
 })
