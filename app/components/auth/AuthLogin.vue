@@ -9,6 +9,7 @@ const showPassword = ref(false)
 const password = ref('')
 const email = ref('')
 const isSubmitting = ref(false)
+const isInstantSubmitting = ref(false)
 const apiError = ref('')
 const verifiedMsg = ref('')
 
@@ -167,7 +168,7 @@ async function completeLogin(emailForVerify: string) {
 }
 
 async function validate() {
-    if (isSubmitting.value) return
+    if (isSubmitting.value || isInstantSubmitting.value) return
 
     isSubmitting.value = true
     apiError.value = ''
@@ -191,9 +192,9 @@ async function validate() {
 }
 
 async function performInstantLogin() {
-    if (isSubmitting.value) return
+    if (isSubmitting.value || isInstantSubmitting.value) return
 
-    isSubmitting.value = true
+    isInstantSubmitting.value = true
     apiError.value = ''
 
     try {
@@ -206,7 +207,7 @@ async function performInstantLogin() {
     } catch (err: any) {
         apiError.value = err?.data?.message || err?.message || 'Instant login failed.'
     } finally {
-        isSubmitting.value = false
+        isInstantSubmitting.value = false
     }
 }
 </script>
@@ -224,13 +225,14 @@ async function performInstantLogin() {
             <v-label>Email Address</v-label>
             <v-text-field aria-label="email address" placeholder="youremail@example.com" v-model="email"
                 :rules="emailRules" class="mt-2" required hide-details="auto" variant="outlined"
-                color="primary"></v-text-field>
+                :disabled="isSubmitting || isInstantSubmitting" color="primary"></v-text-field>
         </div>
 
         <div>
             <v-label>Password</v-label>
             <v-text-field aria-label="password" v-model="password" placeholder="Enter your password"
                 :rules="passwordRules" required variant="outlined" color="primary" hide-details="auto"
+                :disabled="isSubmitting || isInstantSubmitting"
                 :type="showPassword ? 'text' : 'password'" class="mt-2">
                 <template v-slot:append-inner>
                     <span @click="showPassword = !showPassword"
@@ -244,21 +246,21 @@ async function performInstantLogin() {
 
         <div class="d-flex align-center mt-4 mb-7 mb-sm-0">
             <v-checkbox v-model="checkbox" label="Keep me sign in" color="primary" class="ms-n2"
-                hide-details></v-checkbox>
+                :disabled="isSubmitting || isInstantSubmitting" hide-details></v-checkbox>
             <div class="ml-auto">
                 <NuxtLink to="/forgot-password" class="text-darkText link-hover">Forgot Password?</NuxtLink>
             </div>
         </div>
 
-        <v-btn color="primary" :loading="isSubmitting" :disabled="isSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
+        <v-btn color="primary" :loading="isSubmitting" :disabled="isSubmitting || isInstantSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
             Login
         </v-btn>
 
         <template v-if="instantLoginEnabled">
             <v-divider class="my-5"></v-divider>
 
-            <v-btn color="secondary" variant="outlined" block size="large" :loading="isSubmitting"
-                :disabled="isSubmitting" @click="performInstantLogin">
+            <v-btn color="secondary" variant="outlined" block size="large" :loading="isInstantSubmitting"
+                :disabled="isSubmitting || isInstantSubmitting" @click="performInstantLogin">
                 Login as Superadmin
             </v-btn>
         </template>
