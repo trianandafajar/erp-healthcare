@@ -1,5 +1,8 @@
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
 export default defineEventHandler(async (event) => {
-  const { id } = await readBody(event)
+  const body = await readBodyObject(event)
+  const id = body?.id
 
   if (!id) {
     throw createError({
@@ -8,12 +11,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const admin = supabaseAdmin()
-  const supabase = serverSupabase(event)
+  checkFormat(isUUID(id), 'ID', 'UUID')
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { admin, tenantId, user } = await getTenantContext(event)
 
   const { data: before } = await admin
     .from('appointments')
@@ -25,12 +25,14 @@ export default defineEventHandler(async (event) => {
       )
     `)
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single()
 
   const { error } = await admin
     .from('appointments')
     .delete()
     .eq('id', id)
+    .eq('tenant_id', tenantId)
 
   if (error) {
     throw createError({

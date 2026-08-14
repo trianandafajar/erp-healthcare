@@ -1,5 +1,8 @@
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
 export default defineEventHandler(async (event) => {
-    const { id } = await readBody(event)
+    const body = await readBodyObject(event)
+    const id = body?.id
 
     if (!id) {
         throw createError({
@@ -8,7 +11,27 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const admin = supabaseAdmin()
+    checkFormat(isUUID(id), 'ID', 'UUID')
+
+    const { admin, tenantId, user } = await getTenantContext(event)
+
+    if (user.id === id) {
+        throw createError({ statusCode: 400, message: 'You cannot delete your own account' })
+    }
+
+    const { data: targetProfile, error: profileError } = await admin
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', id)
+        .maybeSingle()
+
+    if (profileError || !targetProfile) {
+        throw createError({ statusCode: 404, message: 'User not found' })
+    }
+
+    if (targetProfile.tenant_id !== tenantId) {
+        throw createError({ statusCode: 403, message: 'Forbidden' })
+    }
 
     const { error: patientDeleteError } = await admin
         .from('patients')

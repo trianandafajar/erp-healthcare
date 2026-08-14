@@ -25,11 +25,16 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    checkField(isEnum(payload.type, ['Incoming', 'Outgoing']), 'type', 'enum (Incoming/Outgoing)')
+    const quantity = toRequiredNumber(payload.quantity, 'quantity')
+    checkField(isInt(quantity, { min: 1 }), 'Quantity must be a positive integer')
+    if (payload.stockId) checkFormat(isUUID(payload.stockId), 'stockId', 'UUID')
+    if (payload.expiredDate) checkFormat(isISO8601(payload.expiredDate), 'expiredDate', 'date')
+
     const { data: { user } } = await serverSupabase(event).auth.getUser()
     const admin = supabaseAdmin()
     const medicineName = payload.medicineName.trim()
     const dosage = payload.dosage.trim()
-    const quantity = Number(payload.quantity)
     const now = new Date().toISOString()
     const reference = `${payload.type === 'Incoming' ? 'IN' : 'OUT'}-${Date.now()}`
 

@@ -54,8 +54,19 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    if (payload.expiredDate) {
+        checkFormat(isISO8601(payload.expiredDate), 'expiredDate', 'date')
+    }
+
+    const quantity = toFiniteNumber(payload.quantity, 0)
+    const minimumStock = toFiniteNumber(payload.minimumStock, 20)
+    checkField(quantity !== null && quantity >= 0, 'Quantity must be a valid number')
+    checkField(minimumStock !== null && minimumStock >= 0, 'Minimum stock must be a valid number')
+
     const admin = supabaseAdmin()
-    const expiredDate = new Date(payload.expiredDate).toISOString().slice(0, 10)
+    const expiredDate = payload.expiredDate
+        ? new Date(payload.expiredDate).toISOString().slice(0, 10)
+        : new Date().toISOString().slice(0, 10)
 
     const record = {
         medicine_name: payload.medicineName.trim(),
@@ -63,8 +74,8 @@ export default defineEventHandler(async (event) => {
         supplier: payload.supplier.trim(),
         batch_number: payload.batchNumber.trim(),
         expired_date: expiredDate,
-        quantity: Number(payload.quantity ?? 0),
-        minimum_stock: Number(payload.minimumStock ?? 20),
+        quantity,
+        minimum_stock: minimumStock,
         unit: payload.unit?.trim() || 'tablet',
     }
 

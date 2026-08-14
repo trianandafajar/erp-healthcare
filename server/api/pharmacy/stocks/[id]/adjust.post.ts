@@ -3,8 +3,9 @@ import { requirePlanFeature } from "~~/server/utils/planGuard"
 export default defineEventHandler(async (event) => {
     requirePlanFeature(event, 'pharmacy_module')
     const id = getRouterParam(event, 'id')
-    const body = await readBody<{ quantityDelta?: number }>(event)
-    const quantityDelta = Number(body?.quantityDelta ?? 0)
+    const body = await readBodyObject(event)
+    const quantityDelta = toRequiredNumber(body?.quantityDelta ?? 0, 'quantityDelta')
+    checkField(isInt(quantityDelta), 'Quantity delta must be an integer')
 
     if (!id) {
         throw createError({
@@ -13,6 +14,8 @@ export default defineEventHandler(async (event) => {
             message: 'Stock id is required',
         })
     }
+
+    checkFormat(isUUID(id), 'ID', 'UUID')
 
     const { data: { user } } = await serverSupabase(event).auth.getUser()
     const admin = supabaseAdmin()

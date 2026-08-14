@@ -1,12 +1,37 @@
+import { requireUser } from '~~/server/utils/authGuard'
+
 export default defineEventHandler(async (event) => {
-    const body = await readBody(event)
+    const { user } = await requireUser(event)
+    const body = await readBodyObject(event)
     const tenantId = body?.tenant_id
 
     if (!tenantId) {
         throw createError({ statusCode: 400, message: 'tenant_id is required' })
     }
 
+    checkFormat(isUUID(tenantId), 'tenant_id', 'UUID')
+
     const admin = supabaseAdmin()
+
+    const { data: tenantData, error: tenantError } = await admin
+        .from('tenants')
+        .select('id, name, owner_id')
+        .eq('id', tenantId)
+        .maybeSingle()
+
+    if (tenantError || !tenantData) throw createError({ statusCode: 404, message: 'Tenant not found' })
+
+    const { data: userRoles } = await admin
+        .from('user_roles')
+        .select('roles(name)')
+        .eq('user_id', user.id)
+        .returns<any[]>()
+
+    const isSuperadmin = userRoles?.some((r: any) => r.roles?.name === 'superadmin')
+
+    if (!isSuperadmin && tenantData.owner_id !== user.id) {
+        throw createError({ statusCode: 403, message: 'Forbidden' })
+    }
 
     const { data: subscription } = await admin
         .from('tenant_subscriptions')
@@ -17,14 +42,6 @@ export default defineEventHandler(async (event) => {
     let customerId = subscription?.stripe_customer_id
 
     if (!customerId) {
-        const { data: tenantData } = await admin
-            .from('tenants')
-            .select('name, owner_id')
-            .eq('id', tenantId)
-            .single()
-
-        if (!tenantData) throw createError({ statusCode: 404, message: 'Tenant not found' })
-
         const { data: ownerData } = await admin
             .from('profiles')
             .select('full_name')

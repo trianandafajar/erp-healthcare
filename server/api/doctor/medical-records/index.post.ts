@@ -30,6 +30,9 @@ export default defineEventHandler(async (event: any) => {
     })
   }
 
+  checkFormat(isUUID(appointment_id), 'appointment_id', 'UUID')
+  checkFormat(isUUID(patient_id), 'patient_id', 'UUID')
+
   const { admin, tenantId, user } = await getTenantContext(event)
 
   if (!user) {
@@ -56,10 +59,10 @@ export default defineEventHandler(async (event: any) => {
       tenant_id: tenantId,
 
       blood_pressure,
-      temperature: temperature != null ? Number(temperature) : null,
-      heart_rate: heart_rate != null ? Number(heart_rate) : null,
-      weight: weight != null ? Number(weight) : null,
-      height: height != null ? Number(height) : null,
+      temperature: toFiniteNumber(temperature),
+      heart_rate: toFiniteNumber(heart_rate),
+      weight: toFiniteNumber(weight),
+      height: toFiniteNumber(height),
 
       subjective,
       objective,

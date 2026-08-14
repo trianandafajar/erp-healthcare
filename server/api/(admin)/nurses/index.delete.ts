@@ -1,22 +1,26 @@
+import { getTenantContext } from "~~/server/utils/getTenantContext"
+
 export default defineEventHandler(async (event) => {
-  const { id } = await readBody(event)
+  const body = await readBodyObject(event)
+  const id = body?.id
 
   if (!id) throw createError({ statusCode: 400, message: 'Nurse ID is required' })
+  checkFormat(isUUID(id), 'ID', 'UUID')
 
-  const admin = supabaseAdmin()
-  const supabase = serverSupabase(event)
-  const { data: { user } } = await supabase.auth.getUser()
+  const { admin, tenantId, user } = await getTenantContext(event)
 
   const { data: before } = await admin
     .from('nurses')
     .select('*, profiles(full_name)')
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single()
 
   const { error } = await admin
     .from('nurses')
     .delete()
     .eq('id', id)
+    .eq('tenant_id', tenantId)
 
   if (error) throw createError({ statusCode: 400, message: error.message })
 

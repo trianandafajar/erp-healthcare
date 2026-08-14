@@ -9,7 +9,9 @@ export default defineEventHandler(async (event: any) => {
         throw createError({ statusCode: 400, message: 'Doctor ID is required' })
     }
 
-    const body = await readBody(event)
+    checkFormat(isUUID(doctorId), 'ID', 'UUID')
+
+    const body = await readBodyObject(event)
     const { day_of_week, start_time, end_time, max_patients } = body
 
     if (day_of_week === undefined || !start_time || !end_time) {
@@ -19,6 +21,16 @@ export default defineEventHandler(async (event: any) => {
         })
     }
 
+    checkField(isInt(day_of_week, { min: 0, max: 6 }), 'Day of week must be an integer between 0 and 6')
+    checkField(isNonEmptyString(start_time), 'Start time is invalid')
+    checkField(isNonEmptyString(end_time), 'End time is invalid')
+
+    let maxPatients: number | null = null
+    if (max_patients !== undefined && max_patients !== null && max_patients !== '') {
+        maxPatients = toRequiredNumber(max_patients, 'max_patients')
+        checkField(isInt(maxPatients, { min: 1 }), 'Max patients must be a positive integer')
+    }
+
     const { data, error } = await admin
         .from('doctor_schedules')
         .insert({
@@ -26,7 +38,7 @@ export default defineEventHandler(async (event: any) => {
             day_of_week,
             start_time,
             end_time,
-            max_patients: max_patients ?? null,
+            max_patients: maxPatients,
             is_active: true,
             tenant_id: tenantId,
         })

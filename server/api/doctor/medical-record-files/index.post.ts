@@ -1,5 +1,23 @@
 import { getTenantContext } from "~~/server/utils/getTenantContext"
 
+const ALLOWED_FILE_TYPES = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+]
+
+const ALLOWED_CATEGORIES = [
+    'general',
+    'lab',
+    'imaging',
+    'prescription',
+    'referral',
+    'other',
+] as const
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024
+
 export default defineEventHandler(async (event: any) => {
     const { admin, tenantId, user } = await getTenantContext(event)
 
@@ -35,7 +53,25 @@ export default defineEventHandler(async (event: any) => {
         })
     }
 
-    const fileName = `${Date.now()}-${file.filename}`
+    checkFormat(isUUID(medicalRecordId), 'medical_record_id', 'UUID')
+    checkField(isShortText(title, 200), 'Title is too long')
+    checkField(ALLOWED_CATEGORIES.includes(category as any), 'Invalid category')
+
+    const fileType = file.type ?? ''
+    if (!ALLOWED_FILE_TYPES.includes(fileType)) {
+        throw createError({ statusCode: 400, message: 'Invalid file type. Only PDF and image files are allowed' })
+    }
+
+    if (file.data.length > MAX_FILE_SIZE) {
+        throw createError({ statusCode: 400, message: 'File too large. Maximum size is 10MB' })
+    }
+
+    if (file.data.length === 0) {
+        throw createError({ statusCode: 400, message: 'File is empty' })
+    }
+
+    const ext = file.filename?.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'file'
+    const fileName = `${crypto.randomUUID()}.${ext}`
 
     const filePath = `${medicalRecordId}/${fileName}`
 
