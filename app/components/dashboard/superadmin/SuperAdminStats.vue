@@ -33,7 +33,7 @@ const stats = computed(() => [
     to: '/super-admin/users-management',
   },
   {
-    name: 'Active Subsc',
+    name: 'Active Subs',
     earn: dummyStats.activeSubscriptions.toLocaleString(),
     percent: null,
     color: 'warning',
