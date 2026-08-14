@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default withSuperadmin(async (event) => {
     const admin = supabaseAdmin()
     const id = getRouterParam(event, 'id')
     const body = await readBody(event)

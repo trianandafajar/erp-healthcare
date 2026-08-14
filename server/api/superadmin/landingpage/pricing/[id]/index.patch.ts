@@ -2,7 +2,7 @@ function slugify(text: string) {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
 }
 
-export default defineEventHandler(async (event) => {
+export default withSuperadmin(async (event) => {
     const id = getRouterParam(event, 'id')
     const body = await readBody(event)
 

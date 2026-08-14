@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default withSuperadmin(async (event) => {
     const admin = supabaseAdmin()
     const tenantId = getRouterParam(event, 'id')
 

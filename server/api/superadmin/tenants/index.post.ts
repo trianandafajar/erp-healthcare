@@ -1,16 +1,4 @@
-export default defineEventHandler(async (event) => {
-    const supabase = serverSupabase(event)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw createError({ statusCode: 401, message: 'Unauthorized' })
-
-    const { data: userRoles } = await supabase
-        .from('user_roles')
-        .select('roles(name)')
-        .eq('user_id', user.id)
-
-    const isSuperadmin = userRoles?.some((r: any) => r.roles?.name === 'superadmin')
-    if (!isSuperadmin) throw createError({ statusCode: 403, message: 'Forbidden' })
-
+export default withSuperadmin(async (event) => {
     const body = await readBody(event)
     const { tenant_name, admin_email, admin_password, admin_full_name, subscription_plan, billing_cycle } = body
 

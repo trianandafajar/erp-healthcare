@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default withSuperadmin(async (event) => {
     const admin = supabaseAdmin()
     const body = await readBody(event)
     const { title, description, image_url, sort_order, slug } = body

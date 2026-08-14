@@ -2,7 +2,7 @@ function slugify(text: string) {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
 }
 
-export default defineEventHandler(async () => {
+export default withSuperadmin(async () => {
     const admin = supabaseAdmin()
 
     const { data: plans, error: plansError } = await admin

@@ -1,4 +1,5 @@
-export default defineEventHandler(async (event) => {
+export default withSuperadmin(async (event) => {
+    const { user } = event.context
     const { email, password, full_name, role, status, tenant_id } = await readBody(event)
 
     if (!email || !password || !full_name || !role || !tenant_id) {
@@ -7,18 +8,6 @@ export default defineEventHandler(async (event) => {
             message: 'Email, password, full name, role, and tenant are required.',
         })
     }
-
-    const supabase = serverSupabase(event)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw createError({ statusCode: 401, message: 'Unauthorized' })
-
-    const { data: userRoles } = await supabase
-        .from('user_roles')
-        .select('roles(name)')
-        .eq('user_id', user.id)
-
-    const isSuperadmin = userRoles?.some((r: any) => r.roles?.name === 'superadmin')
-    if (!isSuperadmin) throw createError({ statusCode: 403, message: 'Forbidden' })
 
     const admin = supabaseAdmin()
 
