@@ -1,5 +1,5 @@
 import { createStorage } from 'unstorage'
-import { memoryDriver } from 'unstorage/drivers/memory'
+import memoryDriver from 'unstorage/drivers/memory'
 
 let storage: ReturnType<typeof createStorage> | null = null
 
