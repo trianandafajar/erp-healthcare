@@ -2,6 +2,8 @@
 import { ref, computed, watch } from 'vue';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 
+const { getSignal } = useAbortController()
+
 const { billing, updateBillingStatus, createBilling } = useBilling()
 
 const createDialog = useState('billing-create-dialog', () => false)
@@ -44,7 +46,8 @@ watch(
         }
         try {
             const res = await $fetch<{ medicalRecords: any[] }>(
-                `/api/patients/${patientId}/medical-records`
+                `/api/patients/${patientId}/medical-records`,
+                { signal: getSignal() }
             )
             medicalRecords.value = res.medicalRecords ?? []
             if (medicalRecords.value.length === 1) {

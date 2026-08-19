@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { refDebounced } from '@vueuse/core'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import UserModal from './UserModal.vue';
 
 const { can } = usePermission()
 
 const search = ref('');
+const debouncedSearch = refDebounced(search, 300);
 const selectedRole = ref('all');
 const currentPage = ref(1);
 const itemsPerPage = 10;
@@ -65,14 +67,9 @@ async function openLoginAs(user: any) {
     }
 }
 
-let searchTimeout: NodeJS.Timeout | null = null
-
-watch(search, () => {
-    if (searchTimeout) clearTimeout(searchTimeout)
-    searchTimeout = setTimeout(() => {
-        currentPage.value = 1
-        refresh()
-    }, 300)
+watch(debouncedSearch, () => {
+    currentPage.value = 1
+    refresh()
 })
 
 watch(selectedRole, () => {
@@ -87,7 +84,7 @@ watch(currentPage, () => {
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
     role: selectedRole.value !== 'all' ? selectedRole.value : undefined,
 }))
 

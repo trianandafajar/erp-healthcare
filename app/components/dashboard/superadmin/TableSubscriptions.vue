@@ -33,7 +33,7 @@ const tenants = ref<TenantOption[]>([])
 const loading = ref(false)
 
 const search = ref('')
-const debouncedSearch = refDebounced(search, 400)
+const debouncedSearch = refDebounced(search, 300)
 const planFilter = ref('All Plan')
 const statusFilter = ref('All Status')
 const currentPage = ref(1)

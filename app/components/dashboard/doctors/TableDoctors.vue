@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { refDebounced } from '@vueuse/core'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import DoctorModal from './DoctorModal.vue';
 
@@ -25,6 +26,7 @@ interface Doctor {
 }
 
 const search = ref('');
+const debouncedSearch = refDebounced(search, 300);
 const filterDepartment = ref('');
 const filterAvailable = ref('');
 const currentPage = ref(1);
@@ -37,7 +39,7 @@ const slug = computed(() => route.params.slug as string)
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
     department: filterDepartment.value || undefined,
     available: filterAvailable.value || undefined,
 }))
@@ -84,7 +86,7 @@ watch(
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalDoctors = computed(() => data.value?.total ?? 0)
 
-watch([search, filterDepartment, filterAvailable, currentPage], () => { refresh() })
+watch([debouncedSearch, filterDepartment, filterAvailable, currentPage], () => { refresh() })
 
 function formatDate(dateStr?: string) {
     if (!dateStr) return '-'

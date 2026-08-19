@@ -42,6 +42,7 @@ const selectedDateKey = ref('')
 const appointments = ref<CalendarAppointment[]>([])
 const loading = ref(false)
 const viewTab = ref<'calendar' | 'table'>('calendar')
+const { getSignal } = useAbortController()
 
 onMounted(() => {
     loadAppointments(toDateKey(new Date()))
@@ -107,6 +108,7 @@ async function loadAppointments(dateKey: string) {
     try {
         const res = await $fetch<{ appointments: CalendarAppointment[] }>('/api/doctor/appointments', {
             query: { date: dateKey },
+            signal: getSignal(),
         })
         appointments.value = res.appointments ?? []
     } catch {

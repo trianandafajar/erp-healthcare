@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { refDebounced } from '@vueuse/core';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import PatientModal from './PatientModal.vue';
 
@@ -27,6 +28,7 @@ interface Patient {
 const { can } = usePermission()
 
 const search = ref('');
+const debouncedSearch = refDebounced(search, 300);
 const bloodTypeFilter = ref('all');
 const accountFilter = ref('all');
 const genderFilter = ref('all');
@@ -36,7 +38,7 @@ const itemsPerPage = 10;
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
     gender: genderFilter.value !== 'all' ? genderFilter.value : undefined,
     bloodType: bloodTypeFilter.value !== 'all' ? bloodTypeFilter.value : undefined,
     account: accountFilter.value !== 'all' ? accountFilter.value : undefined,
@@ -94,7 +96,7 @@ function onFilterChange() {
     currentPage.value = 1
 }
 
-watch([search, genderFilter, bloodTypeFilter, accountFilter, currentPage], () => { refresh() })
+watch([debouncedSearch, genderFilter, bloodTypeFilter, accountFilter, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name

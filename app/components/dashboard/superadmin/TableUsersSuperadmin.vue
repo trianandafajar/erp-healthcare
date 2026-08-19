@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { refDebounced } from '@vueuse/core';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import UserModalSuperadmin from './UserModalSuperadmin.vue';
 
 const search = ref('');
+const debouncedSearch = refDebounced(search, 300);
 const selectedRole = ref('all');
 const selectedTenant = ref('all');
 const currentPage = ref(1);
@@ -63,7 +65,7 @@ function showSnackbar(msg: string, color = 'success') {
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
     role: selectedRole.value !== 'all' ? selectedRole.value : undefined,
     tenant_id: selectedTenant.value !== 'all' ? selectedTenant.value : undefined,
 }))
@@ -91,7 +93,7 @@ const users = computed(() =>
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalUsers = computed(() => data.value?.total ?? 0)
 
-watch([search, selectedRole, selectedTenant], () => {
+watch([debouncedSearch, selectedRole, selectedTenant], () => {
     currentPage.value = 1
 })
 

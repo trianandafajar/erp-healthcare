@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { refDebounced } from '@vueuse/core';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import TenantCreateModal from './TenantCreateModal.vue';
 
@@ -26,6 +27,7 @@ interface Tenant {
 }
 
 const search = ref('')
+const debouncedSearch = refDebounced(search, 300)
 const planFilter = ref('All')
 const currentPage = ref(1)
 const itemsPerPage = 10
@@ -35,7 +37,7 @@ const planOptions = ['All', 'free', 'basic', 'pro', 'enterprise']
 const queryParams = computed(() => ({
   page: currentPage.value,
   limit: itemsPerPage,
-  search: search.value || undefined,
+  search: debouncedSearch.value || undefined,
   plan: planFilter.value !== 'All' ? planFilter.value : undefined,
 }))
 
@@ -49,7 +51,7 @@ const tenants = computed(() => data.value?.tenants ?? [])
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalTenants = computed(() => data.value?.total ?? 0)
 
-watch([search, planFilter, currentPage], () => { refresh() })
+watch([debouncedSearch, planFilter, currentPage], () => { refresh() })
 
 function getRowNumber(index: number) {
   return (currentPage.value - 1) * itemsPerPage + index + 1

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { MailOutlined } from '@ant-design/icons-vue'
+import { refDebounced } from '@vueuse/core'
 import { useNotifications } from '~/composables/useNotifications'
 
 type Inquiry = {
@@ -22,13 +23,14 @@ const replyBody = ref('')
 const sending = ref(false)
 
 const search = ref('')
+const debouncedSearch = refDebounced(search, 300)
 const currentPage = ref(1)
 const itemsPerPage = 10
 
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
 }))
 
 const { data, pending, refresh } = await useFetch<{
@@ -41,7 +43,7 @@ const inquiries = computed(() => data.value?.inquiries ?? [])
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalInquiries = computed(() => data.value?.total ?? 0)
 
-watch([search, currentPage], () => { refresh() })
+watch([debouncedSearch, currentPage], () => { refresh() })
 
 function toggleExpand(id: string) {
     expanded.value = expanded.value === id ? null : id

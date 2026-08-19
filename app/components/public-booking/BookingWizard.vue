@@ -56,6 +56,7 @@ const specializationFilter = ref('')
 const availableDoctorIds = ref<Set<string>>(new Set())
 const doctorSlots = ref<Record<string, string[]>>({})
 const dateDoctorsLoading = ref(false)
+const { getSignal } = useAbortController()
 
 const form = ref<PatientForm>({
     full_name: '',
@@ -109,7 +110,7 @@ function toDateKey(d: Date): string {
 async function fetchDoctorsForDate(d: Date): Promise<{ ids: Set<string>; slotsMap: Record<string, string[]> }> {
     const res = await $fetch<{ doctors: { id: string; slots: string[] }[] }>(
         `/api/public-booking/${props.token}/doctors`,
-        { query: { date: toDateKey(d) } }
+        { query: { date: toDateKey(d) }, signal: getSignal() }
     )
     const ids = new Set<string>()
     const slotsMap: Record<string, string[]> = {}

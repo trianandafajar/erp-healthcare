@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { refDebounced } from '@vueuse/core';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import DepartmentModal from './DepartmentModal.vue';
 
@@ -19,13 +20,14 @@ const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
 const search = ref('');
+const debouncedSearch = refDebounced(search, 300);
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
 }))
 
 const { data, pending, refresh } = await useFetch<{
@@ -60,7 +62,7 @@ function formatDate(dateStr?: string) {
     });
 }
 
-watch([search, currentPage], () => { refresh() })
+watch([debouncedSearch, currentPage], () => { refresh() })
 
 const dialog = ref(false)
 const modalMode = ref<'add' | 'delete'>('add')

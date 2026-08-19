@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PatientModal from '../dashboard/patient/PatientModal.vue';
+import { refDebounced } from '@vueuse/core';
 import UiTitleCard from '../dashboard/UiTitleCard.vue';
 
 definePageMeta({
@@ -25,6 +26,7 @@ interface Patient {
 const { can } = usePermission()
 
 const search = ref('')
+const debouncedSearch = refDebounced(search, 300)
 const genderFilter = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 10
@@ -32,7 +34,7 @@ const itemsPerPage = 10
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
     gender: genderFilter.value !== 'all' ? genderFilter.value : undefined,
 }))
 
@@ -69,7 +71,7 @@ const genderOptions = [
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalPatients = computed(() => data.value?.total ?? 0)
 
-watch([search, genderFilter, currentPage], () => { refresh() })
+watch([debouncedSearch, genderFilter, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()

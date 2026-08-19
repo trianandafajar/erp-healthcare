@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { refDebounced } from '@vueuse/core';
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import NurseModal from './NurseModal.vue';
 
@@ -20,6 +21,7 @@ const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
 const search = ref('');
+const debouncedSearch = refDebounced(search, 300);
 const filterDepartment = ref('');
 const filterAvailable = ref('');
 const currentPage = ref(1);
@@ -28,7 +30,7 @@ const itemsPerPage = 10;
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
     department: filterDepartment.value || undefined,
     available: filterAvailable.value || undefined,
 }))
@@ -110,7 +112,7 @@ function onFilterChange() {
     currentPage.value = 1
 }
 
-watch([search, filterDepartment, filterAvailable, currentPage], () => { refresh() })
+watch([debouncedSearch, filterDepartment, filterAvailable, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name

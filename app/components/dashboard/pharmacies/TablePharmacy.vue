@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { refDebounced } from '@vueuse/core'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue';
 import PharmacyModal from './PharmacyModal.vue';
 
 const { can } = usePermission()
 
 const search = ref('');
+const debouncedSearch = refDebounced(search, 300);
 const currentPage = ref(1);
 const itemsPerPage = 10;
 const loading = ref(false)
@@ -23,7 +25,7 @@ function showSnackbar(msg: string, color = 'success') {
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
 }))
 
 const { data, pending, refresh } = await useFetch<{
@@ -45,7 +47,7 @@ const pharmacists = computed(() =>
 const totalPages = computed(() => data.value?.totalPages ?? 1)
 const totalItems = computed(() => data.value?.total ?? 0)
 
-watch([search, currentPage], () => { refresh() })
+watch([debouncedSearch, currentPage], () => { refresh() })
 
 function getInitials(name: string) {
     return name

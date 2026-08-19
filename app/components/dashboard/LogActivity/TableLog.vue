@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { refDebounced } from '@vueuse/core'
 import UiTitleCard from '~/components/dashboard/UiTitleCard.vue'
 
 definePageMeta({
@@ -22,6 +23,7 @@ const props = defineProps<{
 }>()
 
 const search = ref('')
+const debouncedSearch = refDebounced(search, 300)
 const actionFilter = ref('all')
 const moduleFilter = ref('all')
 const dateFrom = ref<string | null>(null)
@@ -33,7 +35,7 @@ const itemsPerPage = 10
 const queryParams = computed(() => ({
     page: currentPage.value,
     limit: itemsPerPage,
-    search: search.value || undefined,
+    search: debouncedSearch.value || undefined,
     action: actionFilter.value !== 'all' ? actionFilter.value : undefined,
     module: moduleFilter.value !== 'all' ? moduleFilter.value : undefined,
     from: dateFrom.value || undefined,
@@ -104,7 +106,7 @@ function onFilterChange() {
 }
 
 watch(
-    [search, actionFilter, moduleFilter, dateFrom, dateTo, currentPage],
+    [debouncedSearch, actionFilter, moduleFilter, dateFrom, dateTo, currentPage],
     () => {
         refresh()
     }
