@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, nextTick, onMounted } from 'vue'
-import { animate } from 'animejs'
+import { ref, computed, watch } from 'vue'
 import Header from '~/components/landingpage/Header.vue'
 import Footer from '~/components/landingpage/Footer.vue'
 
@@ -49,11 +48,28 @@ const tabs = [
     { value: 'contact', label: 'Contact Us', icon: 'mdi-email-outline' },
 ]
 
+const pageMeta = computed(() => {
+    const tab = tabs.find((t) => t.value === activePage.value) ?? tabs[0]
+    const meta: Record<string, { subtitle: string; badge: string }> = {
+        about: { subtitle: 'Who we are and what we stand for', badge: 'Updated January 2026' },
+        privacy: { subtitle: 'How we collect, use, and protect your data', badge: 'Effective 1 Jan 2026 · v2.1' },
+        terms: { subtitle: 'The rules that govern platform usage', badge: 'Effective 1 Jan 2026 · v1.4' },
+        help: { subtitle: 'Answers to the most common questions', badge: '' },
+        contact: { subtitle: "We'd love to hear from you", badge: '' },
+    }
+    return {
+        icon: tab?.icon ?? 'mdi-information-outline',
+        title: pageTitles[activePage.value] ?? 'Legal',
+        subtitle: meta[activePage.value]?.subtitle ?? '',
+        badge: meta[activePage.value]?.badge ?? '',
+    }
+})
+
 const stats = [
-    { label: 'Founded', value: '2026', icon: 'mdi-calendar-star', color: '#176D37' },
-    { label: 'Headquarters', value: 'Semarang', icon: 'mdi-map-marker', color: '#176D37' },
-    { label: 'Industry', value: 'Health Tech', icon: 'mdi-hospital-building', color: '#176D37' },
-    { label: 'Platform', value: 'Healthcare ERP', icon: 'mdi-layers', color: '#176D37' },
+    { label: 'Founded', value: '2026', icon: 'mdi-calendar-star' },
+    { label: 'Headquarters', value: 'Semarang', icon: 'mdi-map-marker' },
+    { label: 'Industry', value: 'Health Tech', icon: 'mdi-hospital-building' },
+    { label: 'Platform', value: 'Healthcare ERP', icon: 'mdi-layers' },
 ]
 
 const team = [
@@ -81,10 +97,10 @@ const team = [
 ]
 
 const values = [
-    { icon: 'mdi-heart-pulse', color: '#176D37', title: 'Patient-first', desc: 'Every feature is designed with patient safety and experience at the center.' },
-    { icon: 'mdi-shield-check', color: '#176D37', title: 'Data security', desc: 'Medical data is encrypted, access-controlled, and never shared.' },
-    { icon: 'mdi-lightning-bolt', color: '#176D37', title: 'Efficiency', desc: 'Streamlined workflows so clinicians can focus on care.' },
-    { icon: 'mdi-handshake', color: '#176D37', title: 'Partnership', desc: 'Built together with healthcare professionals on the frontline.' },
+    { icon: 'mdi-heart-pulse', title: 'Patient-first', desc: 'Every feature is designed with patient safety and experience at the center.' },
+    { icon: 'mdi-shield-check', title: 'Data security', desc: 'Medical data is encrypted, access-controlled, and never shared.' },
+    { icon: 'mdi-lightning-bolt', title: 'Efficiency', desc: 'Streamlined workflows so clinicians can focus on care.' },
+    { icon: 'mdi-handshake', title: 'Partnership', desc: 'Built together with healthcare professionals on the frontline.' },
 ]
 
 const privacyTab = ref('collection')
@@ -96,46 +112,44 @@ const privacyTabs = [
     { value: 'security', label: 'Security', icon: 'mdi-shield-lock-outline' },
 ]
 
-const privacySections: Record<string, { icon: string; color: string; title: string; body: string; highlight?: string }[]> = {
+const privacySections: Record<string, { icon: string; title: string; body: string; highlight?: string }[]> = {
     collection: [
-        { icon: 'mdi-account-outline', color: '#176D37', title: 'Account information', body: 'We collect your full name, email, role, and department when you are provisioned as a user. This is used for authentication and permission assignment.' },
-        { icon: 'mdi-medical-bag', color: '#176D37', title: 'Patient & clinical data', body: 'The platform processes patient demographics, medical records, appointments, prescriptions, lab results, and billing. All governed by applicable health data regulations.', highlight: 'We never sell or share patient data with third parties.' },
-        { icon: 'mdi-history', color: '#176D37', title: 'Usage & audit logs', body: 'System activity including logins, data access, and configuration changes are logged for security monitoring and compliance auditing.' },
+        { icon: 'mdi-account-outline', title: 'Account information', body: 'We collect your full name, email, role, and department when you are provisioned as a user. This is used for authentication and permission assignment.' },
+        { icon: 'mdi-history', title: 'Usage & audit logs', body: 'System activity including logins, data access, and configuration changes are logged for security monitoring and compliance auditing.' },
+        { icon: 'mdi-medical-bag', title: 'Patient & clinical data', body: 'The platform processes patient demographics, medical records, appointments, prescriptions, lab results, and billing. All governed by applicable health data regulations.', highlight: 'We never sell or share patient data with third parties.' },
     ],
     usage: [
-        { icon: 'mdi-hospital', color: '#176D37', title: 'Platform operation', body: 'Data is used exclusively to operate the ERP — powering appointments, clinical documentation, pharmacy, billing, and RBAC.' },
-        { icon: 'mdi-chart-bar', color: '#176D37', title: 'Analytics & improvement', body: 'Anonymized, aggregated usage statistics help us identify bottlenecks and prioritize new features. No individual is identifiable from this data.' },
-        { icon: 'mdi-bell-outline', color: '#176D37', title: 'Notifications', body: 'Your contact info may be used for system alerts and maintenance notices. Marketing is never sent without explicit opt-in.' },
+        { icon: 'mdi-hospital', title: 'Platform operation', body: 'Data is used exclusively to operate the ERP — powering appointments, clinical documentation, pharmacy, billing, and RBAC.' },
+        { icon: 'mdi-chart-bar', title: 'Analytics & improvement', body: 'Anonymized, aggregated usage statistics help us identify bottlenecks and prioritize new features. No individual is identifiable from this data.' },
+        { icon: 'mdi-bell-outline', title: 'Notifications', body: 'Your contact info may be used for system alerts and maintenance notices. Marketing is never sent without explicit opt-in.' },
     ],
     rights: [
-        { icon: 'mdi-eye-outline', color: '#176D37', title: 'Right to access', body: 'You may request a copy of your personal data at any time by contacting your system administrator or our support team.' },
-        { icon: 'mdi-pencil-outline', color: '#176D37', title: 'Right to correction', body: 'If any information we hold is inaccurate, you have the right to request a correction. Clinical data corrections must be made by authorized staff.' },
-        { icon: 'mdi-delete-outline', color: '#176D37', title: 'Right to deletion', body: 'You may request deletion of your account data, subject to legal retention requirements. Medical records follow minimum retention periods mandated by Indonesian health law.' },
+        { icon: 'mdi-eye-outline', title: 'Right to access', body: 'You may request a copy of your personal data at any time by contacting your system administrator or our support team.' },
+        { icon: 'mdi-pencil-outline', title: 'Right to correction', body: 'If any information we hold is inaccurate, you have the right to request a correction. Clinical data corrections must be made by authorized staff.' },
+        { icon: 'mdi-delete-outline', title: 'Right to deletion', body: 'You may request deletion of your account data, subject to legal retention requirements. Medical records follow minimum retention periods mandated by Indonesian health law.' },
     ],
     security: [
-        { icon: 'mdi-lock-outline', color: '#176D37', title: 'Encryption', body: 'All data is encrypted in transit (TLS 1.3) and at rest (AES-256). Backups are encrypted with the same standard.' },
-        { icon: 'mdi-account-key-outline', color: '#176D37', title: 'Access control', body: 'Granular RBAC ensures each user can only view and modify data permitted by their role and department.' },
-        { icon: 'mdi-clipboard-list-outline', color: '#176D37', title: 'Audit trails', body: 'All sensitive operations are logged with actor ID, timestamp, and action details for full traceability.' },
+        { icon: 'mdi-lock-outline', title: 'Encryption', body: 'All data is encrypted in transit (TLS 1.3) and at rest (AES-256). Backups are encrypted with the same standard.' },
+        { icon: 'mdi-account-key-outline', title: 'Access control', body: 'Granular RBAC ensures each user can only view and modify data permitted by their role and department.' },
+        { icon: 'mdi-clipboard-list-outline', title: 'Audit trails', body: 'All sensitive operations are logged with actor ID, timestamp, and action details for full traceability.' },
     ],
 }
 
 const openPanel = ref<number | null>(0)
-const termAnswerRefs = reactive<any[]>([])
 
 const terms = [
-    { title: 'Acceptance of terms', icon: 'mdi-file-sign', color: '#176D37', body: `By accessing the HealthData ERP Healthcare ERP platform, you agree to be bound by these Terms of Service. If you do not agree, you may not use the platform.\n\nThese terms apply to all users including administrators, doctors, nurses, pharmacists, and any staff granted access by your organization.` },
-    { title: 'Platform access & accounts', icon: 'mdi-account-key', color: '#176D37', body: `Access is provisioned by your organization's administrator. Each account is personal and non-transferable. You are responsible for maintaining the confidentiality of your credentials.\n\nUsers may only access modules and data within the scope of their assigned role. Attempting to access data outside your permitted scope is a violation of these terms.` },
-    { title: 'Acceptable use', icon: 'mdi-check-decagram', color: '#176D37', body: `You agree to use the platform only for lawful healthcare purposes. You must not:\n\n• Process data unrelated to legitimate healthcare operations\n• Attempt to reverse-engineer or redistribute any part of the platform\n• Introduce malicious code or unauthorized automation\n• Share credentials or use another user's account` },
-    { title: 'Data ownership & confidentiality', icon: 'mdi-database-lock', color: '#176D37', body: `All patient and organizational data remains the property of your organization. HealthData ERP acts as a data processor on your behalf.\n\nYou acknowledge the platform processes sensitive medical information and agree to comply with applicable Indonesian health data regulations.` },
-    { title: 'Limitation of liability', icon: 'mdi-shield-alert-outline', color: '#176D37', body: `The platform is a clinical support tool and does not replace professional medical judgment. HealthData ERP shall not be liable for clinical decisions made based on platform data.\n\nTotal liability for any claim shall not exceed fees paid by your organization in the three months preceding the claim.` },
-    { title: 'Changes to these terms', icon: 'mdi-file-edit-outline', color: '#176D37', body: `We may update these Terms from time to time. We will update the version number and notify administrators via email or in-platform notification.\n\nContinued use of the platform after changes take effect constitutes acceptance of the revised terms.` },
+    { title: 'Acceptance of terms', icon: 'mdi-file-sign', body: `By accessing the HealthData ERP Healthcare ERP platform, you agree to be bound by these Terms of Service. If you do not agree, you may not use the platform.\n\nThese terms apply to all users including administrators, doctors, nurses, pharmacists, and any staff granted access by your organization.` },
+    { title: 'Platform access & accounts', icon: 'mdi-account-key', body: `Access is provisioned by your organization's administrator. Each account is personal and non-transferable. You are responsible for maintaining the confidentiality of your credentials.\n\nUsers may only access modules and data within the scope of their assigned role. Attempting to access data outside your permitted scope is a violation of these terms.` },
+    { title: 'Acceptable use', icon: 'mdi-check-decagram', body: `You agree to use the platform only for lawful healthcare purposes. You must not:\n\n• Process data unrelated to legitimate healthcare operations\n• Attempt to reverse-engineer or redistribute any part of the platform\n• Introduce malicious code or unauthorized automation\n• Share credentials or use another user's account` },
+    { title: 'Data ownership & confidentiality', icon: 'mdi-database-lock', body: `All patient and organizational data remains the property of your organization. HealthData ERP acts as a data processor on your behalf.\n\nYou acknowledge the platform processes sensitive medical information and agree to comply with applicable Indonesian health data regulations.` },
+    { title: 'Limitation of liability', icon: 'mdi-shield-alert-outline', body: `The platform is a clinical support tool and does not replace professional medical judgment. HealthData ERP shall not be liable for clinical decisions made based on platform data.\n\nTotal liability for any claim shall not exceed fees paid by your organization in the three months preceding the claim.` },
+    { title: 'Changes to these terms', icon: 'mdi-file-edit-outline', body: `We may update these Terms from time to time. We will update the version number and notify administrators via email or in-platform notification.\n\nContinued use of the platform after changes take effect constitutes acceptance of the revised terms.` },
 ]
 
 const faqCategories = [
     {
         title: 'General',
         icon: 'mdi-help-circle-outline',
-        color: '#176D37',
         items: [
             {
                 question: 'What is HealthData ERP Healthcare ERP?',
@@ -150,7 +164,6 @@ const faqCategories = [
     {
         title: 'Account & Login',
         icon: 'mdi-account-circle-outline',
-        color: '#176D37',
         items: [
             {
                 question: 'I forgot my password. What should I do?',
@@ -165,7 +178,6 @@ const faqCategories = [
     {
         title: 'Appointments',
         icon: 'mdi-calendar-check-outline',
-        color: '#176D37',
         items: [
             {
                 question: 'How do I create a new appointment?',
@@ -180,7 +192,6 @@ const faqCategories = [
     {
         title: 'Security & Privacy',
         icon: 'mdi-shield-lock-outline',
-        color: '#176D37',
         items: [
             {
                 question: 'Is patient data secure?',
@@ -196,13 +207,22 @@ const faqCategories = [
 
 const selectedCategory = ref(faqCategories[0]?.title ?? '')
 const openIndex = ref<number | null>(null)
-const helpAnswerRefs = reactive<any[]>([])
+
+const filteredFaqs = computed(() => {
+    const cat = faqCategories.find(c => c.title === selectedCategory.value)
+    return cat?.items ?? []
+})
+
+function selectCategory(title: string) {
+    selectedCategory.value = title
+    openIndex.value = null
+}
 
 const contactInfo = [
-    { icon: 'mdi-email-outline', label: 'Email', value: 'support@healthdata-erp.com', color: '#176D37' },
-    { icon: 'mdi-phone-outline', label: 'Phone', value: '+62 24 1234 5678', color: '#176D37' },
-    { icon: 'mdi-map-marker-outline', label: 'Address', value: 'Semarang, Indonesia', color: '#176D37' },
-    { icon: 'mdi-clock-outline', label: 'Working Hours', value: 'Mon–Fri, 08:00–17:00', color: '#176D37' },
+    { icon: 'mdi-email-outline', label: 'Email', value: 'support@healthdata-erp.com' },
+    { icon: 'mdi-phone-outline', label: 'Phone', value: '+62 24 1234 5678' },
+    { icon: 'mdi-map-marker-outline', label: 'Address', value: 'Semarang, Indonesia' },
+    { icon: 'mdi-clock-outline', label: 'Working Hours', value: 'Mon–Fri, 08:00–17:00' },
 ]
 
 const contactForm = ref({
@@ -214,10 +234,12 @@ const contactForm = ref({
 
 const isSubmitting = ref(false)
 const isSubmitted = ref(false)
+const submitError = ref('')
 
 async function handleSubmit() {
     if (!contactForm.value.name || !contactForm.value.email || !contactForm.value.message) return
     isSubmitting.value = true
+    submitError.value = ''
     try {
         await $fetch('/api/contact/send', {
             method: 'POST',
@@ -226,511 +248,429 @@ async function handleSubmit() {
         isSubmitted.value = true
         contactForm.value = { name: '', email: '', subject: '', message: '' }
         setTimeout(() => { isSubmitted.value = false }, 4000)
-    } catch {
+    } catch (e: any) {
+        submitError.value = e?.data?.message ?? 'Failed to send your message. Please try again.'
     } finally {
         isSubmitting.value = false
     }
 }
-
-const filteredFaqs = computed(() => {
-    const cat = faqCategories.find(c => c.title === selectedCategory.value)
-    return cat?.items ?? []
-})
-
-function animateOpen(el: HTMLElement | null) {
-    if (!el) return
-    el.getAnimations?.().forEach((a) => a.cancel())
-
-    el.style.display = 'block'
-    el.style.overflow = 'hidden'
-
-    const targetHeight = el.scrollHeight
-
-    el.style.height = '0px'
-    el.style.opacity = '0'
-
-    void el.offsetHeight
-
-    animate(el, {
-        height: [0, targetHeight],
-        opacity: [0, 1],
-        duration: 300,
-        ease: 'outCubic',
-        onComplete: () => {
-            el.style.height = 'auto'
-            el.style.overflow = 'visible'
-        },
-    })
-}
-function animateClose(el: HTMLElement | null, done?: () => void) {
-    if (!el) { done?.(); return }
-    const startHeight = el.scrollHeight
-    el.style.overflow = 'hidden'
-    el.style.height = startHeight + 'px'
-    animate(el, {
-        height: [startHeight, 0],
-        opacity: [1, 0],
-        duration: 250,
-        ease: 'inCubic',
-        onComplete: () => {
-            el.style.display = 'none'
-            done?.()
-        },
-    })
-}
-
-function togglePanel(index: number) {
-    const newIndex = openPanel.value === index ? null : index
-    const prevEl = openPanel.value !== null ? termAnswerRefs[openPanel.value] : null
-
-    if (prevEl) {
-        animateClose(prevEl, () => {
-            openPanel.value = newIndex
-            if (newIndex !== null) {
-                nextTick(() => animateOpen(termAnswerRefs[newIndex]))
-            }
-        })
-    } else {
-        openPanel.value = newIndex
-        if (newIndex !== null) {
-            nextTick(() => animateOpen(termAnswerRefs[newIndex]))
-        }
-    }
-}
-
-function toggleItem(index: number) {
-    const newIndex = openIndex.value === index ? null : index
-    const prevEl = openIndex.value !== null ? helpAnswerRefs[openIndex.value] : null
-
-    if (prevEl) {
-        animateClose(prevEl, () => {
-            openIndex.value = newIndex
-            if (newIndex !== null) {
-                nextTick(() => animateOpen(helpAnswerRefs[newIndex]))
-            }
-        })
-    } else {
-        openIndex.value = newIndex
-        if (newIndex !== null) {
-            nextTick(() => animateOpen(helpAnswerRefs[newIndex]))
-        }
-    }
-}
-
-function selectCategory(catTitle: string) {
-    const prevEl = openIndex.value !== null ? helpAnswerRefs[openIndex.value] : null
-    if (prevEl) {
-        animateClose(prevEl, () => {
-            selectedCategory.value = catTitle
-            openIndex.value = null
-        })
-    } else {
-        selectedCategory.value = catTitle
-        openIndex.value = null
-    }
-}
-
-onMounted(() => {
-    nextTick(() => {
-        const el = termAnswerRefs[0]
-        if (el) {
-            el.style.display = 'block'
-            el.style.height = 'auto'
-            el.style.opacity = '1'
-        }
-    })
-})
 </script>
 
 <template>
     <Header always-shadow />
 
-    <div class="min-h-screen bg-gray-50 pt-16 md:pt-[72px]">
-        <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
-            <!-- navigation -->
-            <div class="flex flex-wrap gap-2 mb-8 md:mb-10">
-                <button v-for="tab in tabs" :key="tab.value"
-                    class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-full border-2 transition-all duration-200 cursor-pointer"
-                    :class="activePage === tab.value
-                        ? 'border-[#176D37] bg-[#176D37]/10 text-[#176D37]'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-800'"
-                    @click="activePage = tab.value">
-                    <v-icon :icon="tab.icon" size="18" />
-                    {{ tab.label }}
-                </button>
+    <div class="bg-containerBg legal-shell">
+        <v-container class="py-8" style="max-width: 1120px">
+            <!-- navigation tabs -->
+            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface mb-6" style="border-color: #e0e0e0">
+                <v-tabs v-model="activePage" color="primary" show-arrows density="default" height="46">
+                    <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value" class="text-none mx-1 px-3">
+                        <v-icon :icon="tab.icon" size="18" class="mr-2" />
+                        <span>{{ tab.label }}</span>
+                    </v-tab>
+                </v-tabs>
+            </v-card>
+
+            <!-- shared page header -->
+            <div class="d-flex align-center ga-4 mb-6">
+                <v-avatar color="primary" variant="tonal" size="50" rounded="12">
+                    <v-icon :icon="pageMeta.icon" color="primary" size="26" />
+                </v-avatar>
+                <div>
+                    <div class="text-h6 text-darkText font-weight-bold">{{ pageMeta.title }}</div>
+                    <div class="d-flex flex-wrap align-center ga-2 mt-1">
+                        <span class="text-body-2 text-lightText">{{ pageMeta.subtitle }}</span>
+                        <v-chip v-if="pageMeta.badge" size="x-small" variant="tonal" color="primary" label>
+                            {{ pageMeta.badge }}
+                        </v-chip>
+                    </div>
+                </div>
             </div>
 
+            <!-- About Us -->
             <template v-if="activePage === 'about'">
-                <div class="mb-8">
-                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900">About Us</h1>
-                    <p class="mt-2 text-gray-500">Last updated &middot; January 2026</p>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div v-for="stat in stats" :key="stat.label"
-                        class="flex items-center gap-3 p-6 bg-white border-[1.5px] border-[#e0e0e0] rounded-md">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                            :style="{ backgroundColor: stat.color + '1a' }">
-                            <v-icon :icon="stat.icon" size="20" :color="stat.color" />
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500">{{ stat.label }}</div>
-                            <div class="text-sm font-bold text-gray-900">{{ stat.value }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-12 gap-6 mb-8">
-                    <div class="md:col-span-7 bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[#176D37]/10">
-                                <v-icon icon="mdi-bullseye-arrow" size="18" color="#176D37" />
+                <v-row class="mb-6">
+                    <v-col v-for="stat in stats" :key="stat.label" cols="6" md="3">
+                        <v-card elevation="0" variant="outlined" rounded="md"
+                            class="bg-surface pa-4 d-flex align-center ga-3" style="border-color: #e0e0e0">
+                            <v-avatar color="primary" variant="tonal" size="40" rounded="lg">
+                                <v-icon :icon="stat.icon" color="primary" size="20" />
+                            </v-avatar>
+                            <div>
+                                <div class="text-caption text-lightText">{{ stat.label }}</div>
+                                <div class="text-body-2 font-weight-bold text-darkText">{{ stat.value }}</div>
                             </div>
-                            <h2 class="text-lg font-semibold text-gray-900">Our Mission</h2>
-                        </div>
-                        <p class="text-sm text-gray-600 leading-relaxed">
-                            HealthData ERP is dedicated to transforming healthcare operations
-                            through intelligent, integrated ERP solutions.
-                            We empower hospitals and clinics to deliver better patient outcomes by
-                            streamlining clinical, administrative, and
-                            financial workflows under one unified platform.
-                        </p>
-                    </div>
+                        </v-card>
+                    </v-col>
+                </v-row>
 
-                    <div class="md:col-span-5 bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[#176D37]/10">
-                                <v-icon icon="mdi-account-group" size="18" color="#176D37" />
+                <v-row class="mb-6">
+                    <v-col cols="12" md="7">
+                        <v-card class="bg-surface pa-6" elevation="0" variant="outlined" rounded="md"
+                            style="border-color: #e0e0e0">
+                            <div class="d-flex align-center ga-3 mb-4">
+                                <v-avatar color="primary" variant="tonal" size="36" rounded="lg">
+                                    <v-icon icon="mdi-bullseye-arrow" color="primary" size="18" />
+                                </v-avatar>
+                                <div class="text-h6 text-darkText font-weight-bold">Our Mission</div>
                             </div>
-                            <h2 class="text-lg font-semibold text-gray-900">Core Team</h2>
-                        </div>
-                        <div class="space-y-3">
-                            <div v-for="member in team" :key="member.name" class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                                    :style="{
-                                        backgroundColor: member.color,
-                                        color: member.textColor
-                                    }">
-                                    {{ member.initials }}
+                            <p class="text-body-2 text-medium-emphasis mb-0" style="line-height: 1.7">
+                                HealthData ERP is dedicated to transforming healthcare operations
+                                through intelligent, integrated ERP solutions.
+                                We empower hospitals and clinics to deliver better patient outcomes by
+                                streamlining clinical, administrative, and
+                                financial workflows under one unified platform.
+                            </p>
+                        </v-card>
+                    </v-col>
+
+                    <v-col cols="12" md="5">
+                        <v-card class="bg-surface pa-6" elevation="0" variant="outlined" rounded="md"
+                            style="border-color: #e0e0e0">
+                            <div class="d-flex align-center ga-3 mb-4">
+                                <v-avatar color="primary" variant="tonal" size="36" rounded="lg">
+                                    <v-icon icon="mdi-account-group" color="primary" size="18" />
+                                </v-avatar>
+                                <div class="text-h6 text-darkText font-weight-bold">Core Team</div>
+                            </div>
+                            <div class="d-flex flex-column ga-3">
+                                <div v-for="member in team" :key="member.name" class="d-flex align-center ga-3">
+                                    <v-avatar size="36" class="text-xs font-weight-bold"
+                                        :style="{ backgroundColor: member.color, color: member.textColor }">
+                                        {{ member.initials }}
+                                    </v-avatar>
+                                    <div>
+                                        <div class="text-body-2 font-weight-medium text-darkText">{{ member.name }}
+                                        </div>
+                                        <div class="text-caption text-lightText">{{ member.role }}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ member.name }}</div>
-                                    <div class="text-xs text-gray-500">{{ member.role }}</div>
-                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        </v-card>
+                    </v-col>
+                </v-row>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div v-for="val in values" :key="val.title"
-                        class="text-center p-6 bg-white border-[1.5px] border-[#e0e0e0] rounded-md">
-                        <div class="w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-3"
-                            :style="{ backgroundColor: val.color + '1a' }">
-                            <v-icon :icon="val.icon" size="22" :color="val.color" />
-                        </div>
-                        <div class="text-sm font-bold text-gray-900 mb-1">{{ val.title }}</div>
-                        <div class="text-xs text-gray-500 leading-relaxed">{{ val.desc }}</div>
-                    </div>
-                </div>
+                <v-row>
+                    <v-col v-for="val in values" :key="val.title" cols="6" md="3">
+                        <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface pa-5 text-center"
+                            style="border-color: #e0e0e0">
+                            <v-avatar color="primary" variant="tonal" size="44" rounded="lg" class="mb-3"
+                                style="display: flex; margin-inline: auto">
+                                <v-icon :icon="val.icon" color="primary" size="22" />
+                            </v-avatar>
+                            <div class="text-body-2 font-weight-bold text-darkText mb-1">{{ val.title }}</div>
+                            <div class="text-caption text-medium-emphasis" style="line-height: 1.6">{{ val.desc }}</div>
+                        </v-card>
+                    </v-col>
+                </v-row>
             </template>
 
             <!-- Privacy Policy -->
             <template v-else-if="activePage === 'privacy'">
-                <div class="mb-8">
-                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Privacy Policy</h1>
-                    <p class="mt-2 text-gray-500">Effective date &middot; 1 January 2026 &middot; Version 2.1</p>
-                </div>
-
-                <div class="grid md:grid-cols-4 gap-6">
-                    <div class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
-                        <div class="space-y-2">
-                            <button v-for="tab in privacyTabs" :key="tab.value" @click="privacyTab = tab.value"
-                                class="relative flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-all duration-300"
-                                :class="privacyTab === tab.value
-                                    ? 'bg-[#176D37]/10 text-[#176D37] font-medium'
-                                    : 'text-gray-600 hover:bg-gray-100'">
-                                <span
-                                    class="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-1 rounded-r-full bg-[#176D37] transition-all duration-300"
-                                    :class="privacyTab === tab.value ? 'opacity-100' : 'opacity-0'" />
-
-                                <v-icon :icon="tab.icon" size="20" />
-                                <span>{{ tab.label }}</span>
-                            </button>
+                <v-row>
+                    <v-col cols="12" md="3">
+                        <div class="d-none d-md-block">
+                            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface pa-4"
+                                style="border-color: #e0e0e0">
+                                <v-tabs v-model="privacyTab" direction="vertical" color="primary" density="compact">
+                                    <v-tab v-for="t in privacyTabs" :key="t.value" :value="t.value"
+                                        class="justify-start text-none">
+                                        <v-icon :icon="t.icon" size="16" class="ml-3 mr-3" />
+                                        <span>{{ t.label }}</span>
+                                    </v-tab>
+                                </v-tabs>
+                            </v-card>
                         </div>
-                    </div>
-                    <div class="md:col-span-3">
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div v-for="item in privacySections[privacyTab]" :key="item.title"
-                                class="bg-white rounded-md p-5 border-[1.5px] border-[#e0e0e0]">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-10 h-10 rounded-full flex items-center justify-center"
-                                        :style="{ backgroundColor: item.color + '1a' }">
-                                        <v-icon :icon="item.icon" :color="item.color" size="20" />
+
+                        <div class="d-md-none">
+                            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface mb-1 pa-2"
+                                style="border-color: #e0e0e0">
+                                <v-tabs v-model="privacyTab" color="primary" density="compact" show-arrows>
+                                    <v-tab v-for="t in privacyTabs" :key="t.value" :value="t.value" class="text-none">
+                                        <v-icon :icon="t.icon" size="16" class="mr-1" />
+                                        <span>{{ t.label }}</span>
+                                    </v-tab>
+                                </v-tabs>
+                            </v-card>
+                        </div>
+                    </v-col>
+
+                    <v-col cols="12" md="9">
+                        <v-row>
+                            <v-col v-for="item in privacySections[privacyTab]" :key="item.title" cols="12" sm="6">
+                                <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface pa-5"
+                                    style="border-color: #e0e0e0">
+                                    <div class="d-flex align-center ga-3 mb-3">
+                                        <v-avatar color="primary" variant="tonal" size="40" rounded="lg">
+                                            <v-icon :icon="item.icon" color="primary" size="20" />
+                                        </v-avatar>
+                                        <div class="text-subtitle-1 font-weight-semibold text-darkText">{{ item.title }}
+                                        </div>
                                     </div>
-
-                                    <h3 class="font-semibold text-gray-900">
-                                        {{ item.title }}
-                                    </h3>
-                                </div>
-
-                                <p class="text-sm text-gray-600 leading-relaxed">
-                                    {{ item.body }}
-                                </p>
-
-                                <div v-if="item.highlight"
-                                    class="mt-4 p-3 rounded-lg bg-[#176D37]/5 border border-[#176D37]/15 flex gap-2">
-                                    <v-icon icon="mdi-information-outline" size="18" color="#176D37" />
-
-                                    <p class="text-xs text-[#176D37]">
-                                        {{ item.highlight }}
+                                    <p class="text-body-2 text-medium-emphasis mb-0" style="line-height: 1.7">
+                                        {{ item.body }}
                                     </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+                                    <v-alert v-if="item.highlight" color="primary" variant="tonal" density="compact"
+                                        rounded="md" class="mt-4">
+                                        <div class="d-flex align-start ga-2">
+                                            <v-icon icon="mdi-information-outline" size="16" class="mt-0.5" />
+                                            <span class="text-body-2">{{ item.highlight }}</span>
+                                        </div>
+                                    </v-alert>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-col>
+                </v-row>
             </template>
 
             <!-- Terms of Service -->
             <template v-else-if="activePage === 'terms'">
-                <div class="mb-8">
-                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
-                        Terms of Service
-                    </h1>
-                    <p class="mt-2 text-gray-500">
-                        Effective date &middot; 1 January 2026 &middot; Version 1.4
-                    </p>
-                </div>
-
-                <div class="grid md:grid-cols-4 gap-6">
-                    <div class="md:col-span-1">
-                        <div class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-4 sticky top-24">
-                            <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">
-                                In this document
-                            </div>
-
-                            <div class="space-y-1">
-                                <button v-for="(term, i) in terms" :key="i" @click="togglePanel(i)"
-                                    class="relative flex items-center gap-2 w-full px-4 py-3 rounded-lg text-left transition-all duration-300"
-                                    :class="openPanel === i
-                                        ? 'bg-[#176D37]/10 text-[#176D37] font-medium'
-                                        : 'text-gray-600 hover:bg-gray-100'">
-                                    <span
-                                        class="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-1 rounded-r-full bg-[#176D37] transition-all duration-300"
-                                        :class="openPanel === i ? 'opacity-100' : 'opacity-0'" />
-
-                                    <v-icon :icon="term.icon" size="16" />
-
-                                    {{ i + 1 }}. {{ term.title }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="md:col-span-3 space-y-3">
-                        <div v-for="(term, i) in terms" :key="i"
-                            class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md overflow-hidden">
-                            <button @click="togglePanel(i)"
-                                class="flex items-center justify-between w-full px-5 py-4 text-left hover:bg-gray-50 transition-colors">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                                        :style="{ backgroundColor: term.color + '1a' }">
-                                        <v-icon :icon="term.icon" size="16" :color="term.color" />
-                                    </div>
-
-                                    <span class="text-sm font-medium text-gray-900">
+                <v-row>
+                    <v-col cols="12" md="3">
+                        <div class="d-none d-md-block">
+                            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface pa-3"
+                                style="border-color: #e0e0e0; position: sticky; top: 88px">
+                                <div class="text-caption font-weight-bold text-lightText text-uppercase px-3 pt-2 pb-1">
+                                    In this document
+                                </div>
+                                <v-list density="compact">
+                                    <v-list-item v-for="(term, i) in terms" :key="i" :active="openPanel === i"
+                                        color="primary" rounded="lg" class="my-0.5"
+                                        @click="openPanel = openPanel === i ? null : i">
+                                        <template #prepend>
+                                            <v-icon :icon="term.icon" size="16" />
+                                        </template>
                                         {{ i + 1 }}. {{ term.title }}
-                                    </span>
-                                </div>
-
-                                <v-icon :icon="openPanel === i ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="20"
-                                    class="text-gray-400 transition-transform duration-300"
-                                    :class="{ 'rotate-180': openPanel === i }" />
-                            </button>
-
-                            <div :ref="el => termAnswerRefs[i] = el" style="display:none" class="px-5 pb-5">
-                                <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                                    {{ term.body }}
-                                </div>
-                            </div>
+                                    </v-list-item>
+                                </v-list>
+                            </v-card>
                         </div>
-                    </div>
-                </div>
+
+                        <div class="d-md-none">
+                            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface mb-1"
+                                style="border-color: #e0e0e0">
+                                <v-slide-group show-arrows class="pa-3">
+                                    <v-slide-group-item v-for="(term, i) in terms" :key="i">
+                                        <v-chip :active="openPanel === i"
+                                            :color="openPanel === i ? 'primary' : 'default'" variant="tonal" label
+                                            class="ma-1" @click="openPanel = openPanel === i ? null : i">
+                                            {{ i + 1 }}. {{ term.title }}
+                                        </v-chip>
+                                    </v-slide-group-item>
+                                </v-slide-group>
+                            </v-card>
+                        </div>
+                    </v-col>
+
+                    <v-col cols="12" md="9">
+                        <div class="pa-2">
+                            <v-expansion-panels v-model="openPanel" variant="outlined" rounded="md">
+                                <v-expansion-panel v-for="(term, i) in terms" :key="i">
+                                    <v-expansion-panel-title class="text-body-1 px-4">
+                                        <div class="d-flex align-center ga-3">
+                                            <v-avatar color="primary" variant="tonal" size="30" rounded="8">
+                                                <v-icon :icon="term.icon" color="primary" size="14" />
+                                            </v-avatar>
+                                            <span class="font-weight-medium text-darkText">{{ i + 1 }}. {{ term.title
+                                            }}</span>
+                                        </div>
+                                    </v-expansion-panel-title>
+                                    <v-expansion-panel-text class="text-body-2 text-medium-emphasis"
+                                        style="white-space: pre-line; line-height: 1.7">
+                                        {{ term.body }}
+                                    </v-expansion-panel-text>
+                                </v-expansion-panel>
+                            </v-expansion-panels>
+                        </div>
+                    </v-col>
+                </v-row>
             </template>
 
+            <!-- Help Center -->
             <template v-else-if="activePage === 'help'">
-                <div class="mb-8">
-                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
-                        Frequently Asked Questions
-                    </h1>
-                    <p class="mt-2 text-gray-500">
-                        Find answers to common questions about the platform
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
-                        <div class="space-y-2">
-                            <button v-for="cat in faqCategories" :key="cat.title" @click="selectCategory(cat.title)"
-                                class="relative flex items-center w-full px-4 py-3 rounded-lg text-left transition-all duration-300"
-                                :class="selectedCategory === cat.title
-                                    ? 'bg-[#176D37]/10 text-[#176D37] font-medium'
-                                    : 'text-gray-600 hover:bg-gray-100'">
-                                <span
-                                    class="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-1 rounded-r-full bg-[#176D37] transition-all duration-300"
-                                    :class="selectedCategory === cat.title ? 'opacity-100' : 'opacity-0'" />
-
-                                {{ cat.title }}
-                            </button>
-                        </div>
-                    </div>
-                    <div class="md:col-span-3 space-y-3">
-                        <div v-if="filteredFaqs.length === 0" class="text-center py-12 text-gray-400">
-                            There are no questions for this category.
+                <v-row>
+                    <v-col cols="12" md="3">
+                        <div class="d-none d-md-block">
+                            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface pa-3"
+                                style="border-color: #e0e0e0; position: sticky; top: 88px">
+                                <v-list density="compact">
+                                    <v-list-item v-for="cat in faqCategories" :key="cat.title"
+                                        :active="selectedCategory === cat.title" color="primary" rounded="lg"
+                                        class="my-0.5" @click="selectCategory(cat.title)">
+                                        <template #prepend>
+                                            <v-icon :icon="cat.icon" size="16" />
+                                        </template>
+                                        {{ cat.title }}
+                                    </v-list-item>
+                                </v-list>
+                            </v-card>
                         </div>
 
-                        <div v-for="(item, i) in filteredFaqs" :key="i"
-                            class="bg-white border-[1.5px] border-[#e0e0e0] rounded-md overflow-hidden">
-                            <button @click="toggleItem(i)"
-                                class="flex items-center justify-between w-full px-5 py-4 text-left hover:bg-gray-50 transition-colors">
-                                <span class="text-sm font-medium text-gray-900">
-                                    {{ item.question }}
-                                </span>
+                        <div class="d-md-none">
+                            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface mb-1"
+                                style="border-color: #e0e0e0">
+                                <v-slide-group show-arrows class="pa-3">
+                                    <v-slide-group-item v-for="cat in faqCategories" :key="cat.title">
+                                        <v-chip :active="selectedCategory === cat.title"
+                                            :color="selectedCategory === cat.title ? 'primary' : 'default'"
+                                            variant="tonal" label class="ma-1" @click="selectCategory(cat.title)">
+                                            <v-icon :icon="cat.icon" size="14" class="mr-1" />
+                                            {{ cat.title }}
+                                        </v-chip>
+                                    </v-slide-group-item>
+                                </v-slide-group>
+                            </v-card>
+                        </div>
+                    </v-col>
 
-                                <v-icon :icon="openIndex === i ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="20"
-                                    class="text-gray-400 transition-transform duration-300"
-                                    :class="{ 'rotate-180': openIndex === i }" />
-                            </button>
-
-                            <div :ref="el => helpAnswerRefs[i] = el" style="display:none" class="px-5 pb-5">
-                                <p class="text-sm text-gray-600 leading-relaxed">
-                                    {{ item.answer }}
-                                </p>
+                    <v-col cols="12" md="9">
+                        <div class="pa-2">
+                            <div v-if="filteredFaqs.length === 0" class="text-center py-12 text-medium-emphasis">
+                                There are no questions for this category.
                             </div>
+                            <v-expansion-panels v-else v-model="openIndex" variant="outlined" rounded="md">
+                                <v-expansion-panel v-for="(item, i) in filteredFaqs" :key="i">
+                                    <v-expansion-panel-title class="text-body-1 font-weight-medium text-darkText px-4">
+                                        {{ item.question }}
+                                    </v-expansion-panel-title>
+                                    <v-expansion-panel-text class="text-body-2 text-medium-emphasis"
+                                        style="line-height: 1.7">
+                                        {{ item.answer }}
+                                    </v-expansion-panel-text>
+                                </v-expansion-panel>
+                            </v-expansion-panels>
                         </div>
-                    </div>
-                </div>
+                    </v-col>
+                </v-row>
             </template>
 
+            <!-- Contact Us -->
             <template v-else-if="activePage === 'contact'">
-                <div class="mb-8">
-                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Contact Us</h1>
-                    <p class="mt-2 text-gray-500">We'd love to hear from you. Get in touch with our team.</p>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div v-for="item in contactInfo" :key="item.label"
-                        class="flex items-center gap-3 p-6 bg-white border-[1.5px] border-[#e0e0e0] rounded-md">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                            :style="{ backgroundColor: item.color + '1a' }">
-                            <v-icon :icon="item.icon" size="20" :color="item.color" />
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500">{{ item.label }}</div>
-                            <div class="text-sm font-bold text-gray-900">{{ item.value }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-5 gap-6">
-                    <div class="md:col-span-3 bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-5">Send us a message</h2>
-
-                        <div v-if="isSubmitted"
-                            class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 flex items-start gap-3">
-                            <v-icon icon="mdi-check-circle" size="22" color="#16a34a" />
-                            <div>
-                                <p class="text-sm font-medium text-green-800">Message sent successfully!</p>
-                                <p class="text-xs text-green-600 mt-0.5">We'll get back to you within 24 hours.</p>
+                <v-row class="mb-6">
+                    <v-col v-for="item in contactInfo" :key="item.label" cols="6" md="3">
+                        <v-card elevation="0" variant="outlined" rounded="md"
+                            class="bg-surface pa-4 d-flex align-center ga-3" style="border-color: #e0e0e0">
+                            <v-avatar color="primary" variant="tonal" size="40" rounded="lg" class="flex-shrink-0">
+                                <v-icon :icon="item.icon" color="primary" size="20" />
+                            </v-avatar>
+                            <div style="min-width: 0">
+                                <div class="text-caption text-lightText text-no-wrap text-truncate">{{ item.label }}
+                                </div>
+                                <div class="text-body-2 font-weight-bold text-darkText text-no-wrap text-truncate"
+                                    style="min-width: 0">{{ item.value }}</div>
                             </div>
-                        </div>
+                        </v-card>
+                    </v-col>
+                </v-row>
 
-                        <form @submit.prevent="handleSubmit" class="contactForm space-y-5">
-                            <div class="grid sm:grid-cols-2 gap-5">
+                <v-row>
+                    <v-col cols="12" md="7">
+                        <v-card class="bg-surface pa-6" elevation="0" variant="outlined" rounded="md"
+                            style="border-color: #e0e0e0">
+                            <div class="text-h6 text-darkText font-weight-bold mb-5">Send us a message</div>
+
+                            <v-alert v-if="isSubmitted" type="success" variant="tonal" density="compact" rounded="md"
+                                class="mb-6">
+                                <div class="text-body-2 font-weight-medium">Message sent successfully!</div>
+                                <div class="text-caption">We'll get back to you within 24 hours.</div>
+                            </v-alert>
+
+                            <v-alert v-if="submitError" type="error" variant="tonal" density="compact" rounded="md"
+                                class="mb-6">
+                                <div class="text-body-2">{{ submitError }}</div>
+                            </v-alert>
+
+                            <form @submit.prevent="handleSubmit" class="contactForm">
+                                <v-row>
+                                    <v-col cols="12" sm="6">
+                                        <v-label>Full Name</v-label>
+                                        <v-text-field v-model="contactForm.name" placeholder="Your name" required
+                                            density="comfortable" variant="outlined" hide-details="auto" class="mt-2" />
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <v-label>Email Address</v-label>
+                                        <v-text-field v-model="contactForm.email" type="email"
+                                            placeholder="you@example.com" required density="comfortable"
+                                            variant="outlined" hide-details="auto" class="mt-2" />
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <v-label>Subject</v-label>
+                                        <v-text-field v-model="contactForm.subject" placeholder="How can we help?"
+                                            density="comfortable" variant="outlined" hide-details="auto" class="mt-2" />
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <v-label>Message</v-label>
+                                        <v-textarea v-model="contactForm.message"
+                                            placeholder="Tell us more about your inquiry..." required rows="5"
+                                            density="comfortable" variant="outlined" hide-details="auto" class="mt-2" />
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <v-btn color="primary" size="large" block type="submit" :loading="isSubmitting"
+                                            :disabled="!contactForm.name || !contactForm.email || !contactForm.message">
+                                            <v-icon v-if="!isSubmitting" icon="mdi-send-outline" size="18"
+                                                class="mr-2" />
+                                            {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+                                        </v-btn>
+                                    </v-col>
+                                </v-row>
+                            </form>
+                        </v-card>
+                    </v-col>
+
+                    <v-col cols="12" md="5">
+                        <v-card class="bg-surface pa-6" elevation="0" variant="outlined" rounded="md"
+                            style="border-color: #e0e0e0">
+                            <div class="text-h6 text-darkText font-weight-bold mb-5">Contact Information</div>
+                            <div v-for="item in contactInfo" :key="item.label" class="d-flex align-start ga-3 mb-4">
+                                <v-avatar color="primary" variant="tonal" size="36" rounded="lg" class="mt-0.5">
+                                    <v-icon :icon="item.icon" color="primary" size="18" />
+                                </v-avatar>
                                 <div>
-                                    <v-label>Full Name</v-label>
-                                    <v-text-field v-model="contactForm.name" placeholder="Your name" required
-                                        hide-details="auto" variant="outlined" color="primary" class="mt-2">
-                                    </v-text-field>
-                                </div>
-                                <div>
-                                    <v-label>Email Address</v-label>
-                                    <v-text-field v-model="contactForm.email" type="email" placeholder="you@example.com"
-                                        required hide-details="auto" variant="outlined" color="primary" class="mt-2">
-                                    </v-text-field>
+                                    <div class="text-caption text-lightText">{{ item.label }}</div>
+                                    <div class="text-body-2 font-weight-medium text-darkText">{{ item.value }}</div>
                                 </div>
                             </div>
+
+                            <v-divider class="my-4" />
 
                             <div>
-                                <v-label>Subject</v-label>
-                                <v-text-field v-model="contactForm.subject" placeholder="How can we help?"
-                                    hide-details="auto" variant="outlined" color="primary" class="mt-2">
-                                </v-text-field>
-                            </div>
-
-                            <div>
-                                <v-label>Message</v-label>
-                                <v-textarea v-model="contactForm.message"
-                                    placeholder="Tell us more about your inquiry..." required rows="5"
-                                    hide-details="auto" variant="outlined" color="primary" class="mt-2">
-                                </v-textarea>
-                            </div>
-
-                            <v-btn color="primary" :loading="isSubmitting" block class="mt-2" variant="flat"
-                                size="large" :disabled="!contactForm.name || !contactForm.email || !contactForm.message"
-                                type="submit">
-                                <v-icon v-if="!isSubmitting" icon="mdi-send-outline" size="18" class="mr-2" />
-                                {{ isSubmitting ? 'Sending...' : 'Send Message' }}
-                            </v-btn>
-                        </form>
-                    </div>
-
-                    <div class="md:col-span-2 bg-white border-[1.5px] border-[#e0e0e0] rounded-md p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-5">Contact Information</h2>
-                        <div class="space-y-5">
-                            <div v-for="item in contactInfo" :key="item.label" class="flex items-start gap-3">
-                                <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                                    :style="{ backgroundColor: item.color + '1a' }">
-                                    <v-icon :icon="item.icon" size="18" :color="item.color" />
-                                </div>
-                                <div>
-                                    <div class="text-xs text-gray-500">{{ item.label }}</div>
-                                    <div class="text-sm font-medium text-gray-900">{{ item.value }}</div>
+                                <div class="text-body-1 font-weight-semibold text-darkText mb-3">Follow Us</div>
+                                <div class="d-flex ga-2">
+                                    <v-btn icon rounded="circle" color="grey-lighten-3" size="40" min-width="40"
+                                        variant="flat" class="text-grey-darken-1">
+                                        <v-icon icon="mdi-linkedin" />
+                                    </v-btn>
+                                    <v-btn icon rounded="circle" color="grey-lighten-3" size="40" min-width="40"
+                                        variant="flat" class="text-grey-darken-1">
+                                        <v-icon icon="mdi-twitter" />
+                                    </v-btn>
+                                    <v-btn icon rounded="circle" color="grey-lighten-3" size="40" min-width="40"
+                                        variant="flat" class="text-grey-darken-1">
+                                        <v-icon icon="mdi-github" />
+                                    </v-btn>
                                 </div>
                             </div>
-                        </div>
-
-                        <hr class="my-5 border-gray-200" />
-
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Follow Us</h3>
-                            <div class="flex gap-3">
-                                <a href="#"
-                                    class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 hover:bg-[#176D37]/10 text-gray-500 hover:text-[#176D37] transition-all duration-200">
-                                    <v-icon icon="mdi-linkedin" size="18" />
-                                </a>
-                                <a href="#"
-                                    class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 hover:bg-[#176D37]/10 text-gray-500 hover:text-[#176D37] transition-all duration-200">
-                                    <v-icon icon="mdi-twitter" size="18" />
-                                </a>
-                                <a href="#"
-                                    class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 hover:bg-[#176D37]/10 text-gray-500 hover:text-[#176D37] transition-all duration-200">
-                                    <v-icon icon="mdi-github" size="18" />
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                        </v-card>
+                    </v-col>
+                </v-row>
             </template>
-        </div>
+        </v-container>
     </div>
 
     <Footer />
 </template>
 
 <style lang="scss">
+.legal-shell {
+    min-height: 100vh;
+    padding-top: 64px;
+
+    @media (min-width: 768px) {
+        padding-top: 72px;
+    }
+}
+
 .contactForm {
     .v-field__input {
         padding-left: 14px;
