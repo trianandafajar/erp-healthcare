@@ -231,13 +231,13 @@ async function handleSubmit(payload: any) {
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
-        <div class="d-flex justify-space-between align-center">
-            <div>
-                <v-card-title class="text-h3">Patients Management</v-card-title>
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+            <div class="min-w-0">
+                <v-card-title class="text-h5 text-md-h3">Patients Management</v-card-title>
                 <v-card-subtitle class="mt-1">Manage patient records, including walk-in registrations</v-card-subtitle>
             </div>
             <v-btn v-if="can('patient.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
-                density="comfortable" @click="openAdd">
+                density="comfortable" class="flex-shrink-0" @click="openAdd">
                 Add Patient
             </v-btn>
         </div>

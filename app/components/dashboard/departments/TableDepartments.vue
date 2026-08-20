@@ -149,13 +149,13 @@ function openView(department: Department) {
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
-        <div class="d-flex justify-space-between align-center">
-            <div>
-                <v-card-title class="text-h3">Departments Management</v-card-title>
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+            <div class="min-w-0">
+                <v-card-title class="text-h5 text-md-h3">Departments Management</v-card-title>
                 <v-card-subtitle class="mt-1">Manage and organize departments / poli</v-card-subtitle>
             </div>
             <v-btn v-if="can('department.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
-                density="comfortable" @click="openAdd">
+                density="comfortable" class="flex-shrink-0" @click="openAdd">
                 Add Department
             </v-btn>
         </div>
