@@ -81,8 +81,8 @@ function formatDate(dateStr: string) {
 
 <template>
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
-        <div>
-            <h2 class="text-h3 mb-1">Examination Results</h2>
+        <div class="min-w-0">
+            <h2 class="text-h5 text-md-h3 mb-1">Examination Results</h2>
             <p class="text-medium-emphasis mb-0">View and download your available examination reports.</p>
         </div>
     </div>

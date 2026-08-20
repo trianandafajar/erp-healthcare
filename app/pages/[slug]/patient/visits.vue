@@ -73,8 +73,8 @@ function statusColor(status: string) {
 
 <template>
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
-        <div>
-            <h2 class="text-h3 mb-1">Visit History</h2>
+        <div class="min-w-0">
+            <h2 class="text-h5 text-md-h3 mb-1">Visit History</h2>
             <p class="text-medium-emphasis mb-0">Track your previous and upcoming clinical visits.</p>
         </div>
     </div>

@@ -66,8 +66,8 @@ function handleAction(item: { invoiceNumber: string; status: string }) {
 
 <template>
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
-        <div>
-            <h2 class="text-h3 mb-1">Payments</h2>
+        <div class="min-w-0">
+            <h2 class="text-h5 text-md-h3 mb-1">Payments</h2>
             <p class="text-medium-emphasis mb-0">Track your invoices, billing status, and payment actions.</p>
         </div>
     </div>

@@ -61,8 +61,8 @@ const filteredSchedules = computed(() => {
 
 <template>
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
-        <div>
-            <h2 class="text-h3 mb-1">Doctor Schedules</h2>
+        <div class="min-w-0">
+            <h2 class="text-h5 text-md-h3 mb-1">Doctor Schedules</h2>
             <p class="text-medium-emphasis mb-0">Browse available doctors and choose the best schedule for your visit.
             </p>
         </div>

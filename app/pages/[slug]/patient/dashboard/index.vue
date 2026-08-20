@@ -96,12 +96,13 @@ async function goTo(path: string) {
 
 <template>
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
-        <div>
-            <h2 class="text-h3 mb-1">Patient Dashboard</h2>
+        <div class="min-w-0">
+            <h2 class="text-h5 text-md-h3 mb-1">Patient Dashboard</h2>
             <p class="text-medium-emphasis mb-0">A quick overview of your health activity, appointments, and billing.
             </p>
         </div>
-        <v-btn color="primary" prepend-icon="mdi-calendar-plus" :to="`/${slug}/patient/book-appointment`">
+        <v-btn color="primary" prepend-icon="mdi-calendar-plus" class="flex-shrink-0"
+            :to="`/${slug}/patient/book-appointment`">
             Book Appointment
         </v-btn>
     </div>

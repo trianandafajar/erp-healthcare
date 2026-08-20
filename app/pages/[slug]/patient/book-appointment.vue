@@ -297,11 +297,12 @@ await loadAppointments()
 
 <template>
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
-        <div>
-            <h2 class="text-h3 mb-1">Book Appointment</h2>
+        <div class="min-w-0">
+            <h2 class="text-h5 text-md-h3 mb-1">Book Appointment</h2>
             <p class="text-medium-emphasis mb-0">Manage your appointment requests and preferred doctor schedules.</p>
         </div>
-        <v-btn v-if="can('book-appt.create')" color="primary" prepend-icon="mdi-calendar-plus" @click="openCreate">
+        <v-btn v-if="can('book-appt.create')" color="primary" prepend-icon="mdi-calendar-plus" class="flex-shrink-0"
+            @click="openCreate">
             Book Appointment
         </v-btn>
     </div>
