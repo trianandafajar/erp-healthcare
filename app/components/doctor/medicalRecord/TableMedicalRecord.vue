@@ -67,19 +67,17 @@ function openDetail(record: MedicalRecord) {
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
-        <v-card-item class="pb-2 px-0 pt-0">
-            <div class="d-flex justify-space-between align-center">
-                <div>
-                    <v-card-title class="text-h3">
-                        Medical Records
-                    </v-card-title>
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+            <div class="min-w-0">
+                <v-card-title class="text-h5 text-md-h3">
+                    Medical Records
+                </v-card-title>
 
-                    <v-card-subtitle class="mt-1">
-                        View and manage patient medical records
-                    </v-card-subtitle>
-                </div>
+                <v-card-subtitle class="mt-1">
+                    View and manage patient medical records
+                </v-card-subtitle>
             </div>
-        </v-card-item>
+        </div>
     </v-card-item>
     <UiTitleCard class-name="px-0 pb-0 rounded-md">
         <v-table class="bordered-table" hover density="comfortable">

@@ -163,9 +163,9 @@ const statusLegend = [
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
-        <div class="d-flex justify-space-between align-center flex-wrap ga-3">
-            <div>
-                <v-card-title class="text-h3">Appointments Calendar</v-card-title>
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+            <div class="min-w-0">
+                <v-card-title class="text-h5 text-md-h3">Appointments Calendar</v-card-title>
                 <v-card-subtitle class="mt-1">View all appointments for the selected day</v-card-subtitle>
             </div>
         </div>

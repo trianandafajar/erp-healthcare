@@ -80,9 +80,9 @@ function openExamination(record: Examination) {
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
-        <div class="d-flex justify-space-between align-center">
-            <div>
-                <v-card-title class="text-h3">
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+            <div class="min-w-0">
+                <v-card-title class="text-h5 text-md-h3">
                     Examinations
                 </v-card-title>
 

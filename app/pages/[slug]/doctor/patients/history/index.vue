@@ -64,7 +64,7 @@ function openHistory(patientId: string) {
     <v-row>
         <v-col cols="12">
             <v-card-item class="pb-2 px-0 pt-0">
-                <v-card-title class="text-h3">Patient History</v-card-title>
+                <v-card-title class="text-h5 text-md-h3">Patient History</v-card-title>
                 <v-card-subtitle class="mt-1">Select a patient to view their complete activity
                     timeline</v-card-subtitle>
             </v-card-item>

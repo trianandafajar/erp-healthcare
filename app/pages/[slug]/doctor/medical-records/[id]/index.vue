@@ -111,11 +111,11 @@ function formatTime(timeStr?: string) {
         <!-- Header -->
         <v-card variant="flat" class="mb-4">
             <v-card-item>
-                <div class="d-flex justify-space-between align-center">
-                    <div class="d-flex align-center ga-3">
-                        <v-btn icon="mdi-arrow-left" variant="text"
+                <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                    <div class="d-flex align-center ga-3 min-w-0">
+                        <v-btn icon="mdi-arrow-left" variant="text" class="flex-shrink-0"
                             @click="navigateTo(`/${slug}/doctor/medical-records`)" />
-                        <div>
+                        <div class="min-w-0">
                             <div class="text-h6 font-weight-bold">Medical Record Detail</div>
                             <div class="text-caption text-medium-emphasis">
                                 MRN: {{ record.patients?.medical_record_number }}
@@ -123,7 +123,7 @@ function formatTime(timeStr?: string) {
                         </div>
                     </div>
 
-                    <div class="d-flex align-center ga-2">
+                    <div class="d-flex align-center ga-2 flex-shrink-0">
                         <v-chip color="success" variant="tonal" prepend-icon="mdi-check-circle-outline">
                             {{ record.appointments?.status }}
                         </v-chip>

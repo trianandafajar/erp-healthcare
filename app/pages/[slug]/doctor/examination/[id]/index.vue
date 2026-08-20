@@ -365,14 +365,15 @@ async function uploadAttachments(
         <v-col cols="12">
             <v-card>
                 <v-card-item class="pb-2">
-                    <div class="d-flex justify-space-between align-center">
-                        <div>
-                            <v-card-title class="text-h3">Patient Examination</v-card-title>
+                    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                        <div class="min-w-0">
+                            <v-card-title class="text-h5 text-md-h3">Patient Examination</v-card-title>
                             <v-card-subtitle class="mt-1">
                                 Complete the patient's medical assessment and treatment plan
                             </v-card-subtitle>
                         </div>
-                        <v-chip color="secondary" variant="tonal" size="small" prepend-icon="mdi-calendar-clock">
+                        <v-chip color="secondary" variant="tonal" size="small" prepend-icon="mdi-calendar-clock"
+                            class="flex-shrink-0">
                             Current Visit
                         </v-chip>
                     </div>

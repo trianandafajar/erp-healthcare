@@ -58,7 +58,7 @@ function formatDate(dateStr?: string | null) {
     <v-row>
         <v-col cols="12">
             <v-card-item class="pb-2 px-0 pt-0">
-                <v-card-title class="text-h3">Referrals</v-card-title>
+                <v-card-title class="text-h5 text-md-h3">Referrals</v-card-title>
                 <v-card-subtitle class="mt-1">Track patients you've referred and referrals sent to you</v-card-subtitle>
             </v-card-item>
         </v-col>
