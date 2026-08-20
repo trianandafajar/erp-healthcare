@@ -113,9 +113,9 @@ async function validate() {
 </script>
 
 <template>
-    <div class="d-flex justify-space-between align-center">
+    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
         <h3 class="text-h5 mb-0">Reset Password</h3>
-        <NuxtLink to="/login" class="text-primary text-decoration-none">Back to Login</NuxtLink>
+        <NuxtLink to="/login" class="text-primary text-decoration-none flex-shrink-0">Back to Login</NuxtLink>
     </div>
 
     <div v-if="tokenChecking" class="mt-7 text-center">

@@ -213,9 +213,9 @@ async function performInstantLogin() {
 </script>
 
 <template>
-    <div class="d-flex justify-space-between align-center">
-        <h3 class="text-h3 text-center mb-0">Login</h3>
-        <NuxtLink to="/register" class="text-primary text-decoration-none">Don't Have an account?</NuxtLink>
+    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+        <h3 class="text-h5 text-md-h3 text-center mb-0">Login</h3>
+        <NuxtLink to="/register" class="text-primary text-decoration-none flex-shrink-0">Don't Have an account?</NuxtLink>
     </div>
 
     <v-alert v-if="verifiedMsg" type="success" class="mt-4 mb-2">{{ verifiedMsg }}</v-alert>

@@ -219,13 +219,13 @@ async function updateStatus(id: string, status: string) {
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
-        <div class="d-flex justify-space-between align-center">
-            <div>
-                <v-card-title class="text-h3">Appointments</v-card-title>
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+            <div class="min-w-0">
+                <v-card-title class="text-h5 text-md-h3">Appointments</v-card-title>
                 <v-card-subtitle class="mt-1">Manage patient visit schedules and appointment status</v-card-subtitle>
             </div>
             <v-btn v-if="can('appointment.create')" color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
-                density="comfortable" @click="openCreate">
+                density="comfortable" class="flex-shrink-0" @click="openCreate">
                 Create Appointment
             </v-btn>
         </div>

@@ -363,13 +363,14 @@ const availableReports = computed(() => {
                 <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0' }" class="h-100">
                     <v-card elevation="0" class="h-100">
                         <v-card-item>
-                            <div class="d-flex justify-space-between align-center">
-                                <div>
+                            <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                                <div class="min-w-0">
                                     <v-card-title class="text-h5">Generated Reports</v-card-title>
                                     <v-card-subtitle>Based on live clinic data — {{ activePeriodLabel
                                     }}</v-card-subtitle>
                                 </div>
-                                <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-plus" disabled>
+                                <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-plus"
+                                    class="flex-shrink-0" disabled>
                                     New Report
                                 </v-btn>
                             </div>

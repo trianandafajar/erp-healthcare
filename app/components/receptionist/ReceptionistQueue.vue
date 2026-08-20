@@ -146,13 +146,14 @@ async function updateStatus(id: string, status: string) {
 
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
-        <div class="d-flex justify-space-between align-center">
-            <div>
-                <v-card-title class="text-h3">Patient Queue</v-card-title>
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+            <div class="min-w-0">
+                <v-card-title class="text-h5 text-md-h3">Patient Queue</v-card-title>
                 <v-card-subtitle class="mt-1">Monitor queue numbers and update patient status at the front
                     desk</v-card-subtitle>
             </div>
-            <v-btn color="secondary" variant="tonal" prepend-icon="mdi-printer-outline" to="/receptionist/queue/print">
+            <v-btn color="secondary" variant="tonal" prepend-icon="mdi-printer-outline" class="flex-shrink-0"
+                to="/receptionist/queue/print">
                 Print Number
             </v-btn>
         </div>

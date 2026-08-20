@@ -157,7 +157,7 @@ async function confirmCheckIn() {
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
         <div>
-            <v-card-title class="text-h3">Patient Check-in</v-card-title>
+            <v-card-title class="text-h5 text-md-h3">Patient Check-in</v-card-title>
             <v-card-subtitle class="mt-1">Search scheduled appointments, check patients in, and generate queue
                 numbers</v-card-subtitle>
         </div>

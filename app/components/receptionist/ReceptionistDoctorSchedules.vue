@@ -73,7 +73,7 @@ function slotColor(remaining: number, max: number | null) {
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
         <div>
-            <v-card-title class="text-h3">Doctor Schedules</v-card-title>
+            <v-card-title class="text-h5 text-md-h3">Doctor Schedules</v-card-title>
             <v-card-subtitle class="mt-1">Browse available doctors and schedules for patient
                 appointments</v-card-subtitle>
         </div>

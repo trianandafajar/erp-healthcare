@@ -84,7 +84,7 @@ function printQueue() {
 <template>
     <v-card-item class="pb-2 px-0 pt-0">
         <div>
-            <v-card-title class="text-h3">Print Queue Number</v-card-title>
+            <v-card-title class="text-h5 text-md-h3">Print Queue Number</v-card-title>
             <v-card-subtitle class="mt-1">Select a queue from the table, review the detail, and print the queue
                 ticket.</v-card-subtitle>
         </div>

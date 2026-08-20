@@ -331,15 +331,15 @@ async function submitHoliday(payload: any) {
                 <v-card elevation="0" variant="outlined" :style="{ borderColor: '#e0e0e0', position: 'relative' }"
                     class="bg-surface">
                     <v-card-item class="pb-2">
-                        <div class="d-flex justify-space-between align-center">
-                            <div>
+                        <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                            <div class="min-w-0">
                                 <v-card-title class="text-h6 font-weight-bold">Holidays</v-card-title>
                                 <v-card-subtitle class="text-caption text-medium-emphasis mt-1">
                                     Dates when the clinic is closed.
                                 </v-card-subtitle>
                             </div>
                             <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" density="comfortable"
-                                :disabled="!config.enabled" @click="openHolidayAdd">
+                                class="flex-shrink-0" :disabled="!config.enabled" @click="openHolidayAdd">
                                 Add Holiday
                             </v-btn>
                         </div>

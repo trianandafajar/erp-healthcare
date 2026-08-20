@@ -86,9 +86,9 @@ async function register() {
 </script>
 
 <template>
-    <div class="d-flex justify-space-between align-center">
-        <h3 class="text-h3 text-center mb-0">Sign up</h3>
-        <NuxtLink to="/login" class="text-primary text-decoration-none">Already have an account?</NuxtLink>
+    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+        <h3 class="text-h5 text-md-h3 text-center mb-0">Sign up</h3>
+        <NuxtLink to="/login" class="text-primary text-decoration-none flex-shrink-0">Already have an account?</NuxtLink>
     </div>
 
     <v-alert v-if="errorMsg" type="error" class="mt-4">{{ errorMsg }}</v-alert>

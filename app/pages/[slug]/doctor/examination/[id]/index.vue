@@ -384,9 +384,9 @@ async function uploadAttachments(
         <v-col cols="12">
             <v-card>
                 <v-card-item>
-                    <div class="d-flex justify-space-between align-center">
-                        <v-card-title>Patient Information</v-card-title>
-                        <div v-if="patient" class="d-flex align-center ga-3">
+                    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                        <v-card-title class="min-w-0">Patient Information</v-card-title>
+                        <div v-if="patient" class="d-flex align-center ga-3 flex-shrink-0">
                             <v-avatar size="34" color="primary" variant="tonal">
                                 <span class="text-caption font-weight-bold">
                                     {{ getInitials(patient.full_name ?? '') }}
@@ -432,9 +432,10 @@ async function uploadAttachments(
         <v-col cols="12">
             <v-card>
                 <v-card-item>
-                    <div class="d-flex justify-space-between align-center">
-                        <v-card-title>Vital Signs</v-card-title>
-                        <v-chip size="small" variant="tonal" color="secondary" prepend-icon="mdi-heart-pulse">
+                    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                        <v-card-title class="min-w-0">Vital Signs</v-card-title>
+                        <v-chip size="small" variant="tonal" color="secondary" prepend-icon="mdi-heart-pulse"
+                            class="flex-shrink-0">
                             Current visit
                         </v-chip>
                     </div>
@@ -477,9 +478,9 @@ async function uploadAttachments(
         <v-col cols="12">
             <v-card>
                 <v-card-item>
-                    <div class="d-flex justify-space-between align-center">
-                        <v-card-title>Medical Assessment (SOAP)</v-card-title>
-                        <v-chip size="small" variant="tonal" color="secondary">
+                    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                        <v-card-title class="min-w-0">Medical Assessment (SOAP)</v-card-title>
+                        <v-chip size="small" variant="tonal" color="secondary" class="flex-shrink-0">
                             All fields required
                         </v-chip>
                     </div>
@@ -530,9 +531,9 @@ async function uploadAttachments(
         <v-col cols="12">
             <v-card>
                 <v-card-item>
-                    <div class="d-flex justify-space-between align-center">
-                        <v-card-title>Prescriptions</v-card-title>
-                        <v-btn color="primary" prepend-icon="mdi-plus" @click="addMedicine">
+                    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                        <v-card-title class="min-w-0">Prescriptions</v-card-title>
+                        <v-btn color="primary" prepend-icon="mdi-plus" class="flex-shrink-0" @click="addMedicine">
                             Add Medicine
                         </v-btn>
                     </div>
@@ -603,8 +604,8 @@ async function uploadAttachments(
         <v-col cols="12">
             <v-card>
                 <v-card-item>
-                    <div class="d-flex justify-space-between align-center">
-                        <div>
+                    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+                        <div class="min-w-0">
                             <v-card-title>
                                 Examination Attachments
                             </v-card-title>
