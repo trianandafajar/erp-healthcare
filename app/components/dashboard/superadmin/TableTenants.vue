@@ -160,14 +160,14 @@ const snackbarColor = ref('success')
 
 <template>
   <v-card-item class="pb-2 px-0 pt-0">
-    <div class="d-flex justify-space-between align-center">
-      <div>
-        <v-card-title class="text-h3">Tenants Management</v-card-title>
+    <div class="d-flex flex-wrap align-center justify-space-between ga-3">
+      <div class="min-w-0">
+        <v-card-title class="text-h5 text-md-h3">Tenants Management</v-card-title>
         <v-card-subtitle class="mt-1">
           Manage all registered tenants and their subscriptions
         </v-card-subtitle>
       </div>
-      <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus"
+      <v-btn color="primary" variant="flat" size="large" prepend-icon="mdi-plus" class="flex-shrink-0"
         density="comfortable" @click="createDialog = true">
         Add Tenant
       </v-btn>
