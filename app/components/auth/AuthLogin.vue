@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
+import { useRateLimitLockout } from '~~/composables/useRateLimitLockout'
+
 const route = useRoute()
+
+const { lockoutSeconds, isLocked, errorMsg, handle429, clear } = useRateLimitLockout()
 
 const checkbox = ref(false)
 const showPassword = ref(false)
@@ -185,7 +189,11 @@ async function validate() {
         await completeLogin(email.value.trim())
 
     } catch (err: any) {
-        apiError.value = err?.data?.message || err?.message || 'Login failed.'
+        if (err?.statusCode === 429) {
+            handle429(err)
+        } else {
+            apiError.value = err?.data?.message || err?.message || 'Login failed.'
+        }
     } finally {
         isSubmitting.value = false
     }
@@ -252,7 +260,7 @@ async function performInstantLogin() {
             </div>
         </div>
 
-        <v-btn color="primary" :loading="isSubmitting" :disabled="isSubmitting || isInstantSubmitting" block class="mt-5" variant="flat" size="large" type="submit">
+        <v-btn color="primary" :loading="isSubmitting" :disabled="isSubmitting || isInstantSubmitting || isLocked" block class="mt-5" variant="flat" size="large" type="submit">
             Login
         </v-btn>
 
@@ -260,13 +268,13 @@ async function performInstantLogin() {
             <v-divider class="my-5"></v-divider>
 
             <v-btn color="secondary" variant="outlined" block size="large" :loading="isInstantSubmitting"
-                :disabled="isSubmitting || isInstantSubmitting" @click="performInstantLogin">
+                :disabled="isSubmitting || isInstantSubmitting || isLocked" @click="performInstantLogin">
                 Login as Superadmin
             </v-btn>
         </template>
 
-        <div v-if="apiError" class="mt-2">
-            <v-alert color="error">{{ apiError }}</v-alert>
+        <div v-if="apiError || errorMsg" class="mt-2">
+            <v-alert color="error">{{ apiError || errorMsg }}</v-alert>
         </div>
     </v-form>
 </template>

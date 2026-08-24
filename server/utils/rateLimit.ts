@@ -60,6 +60,7 @@ export async function enforceRateLimit(event: any, options: Partial<RateLimitOpt
             statusCode: 429,
             statusMessage: 'Too Many Requests',
             message: 'Too many requests. Please try again later.',
+            data: { retryAfter, limit },
         })
     }
 
