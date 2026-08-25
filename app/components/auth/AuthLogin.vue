@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons-vue'
 
-import { useRateLimitLockout } from '~~/composables/useRateLimitLockout'
+import { useRateLimitLockout } from '~/composables/useRateLimitLockout'
 
 const route = useRoute()
 

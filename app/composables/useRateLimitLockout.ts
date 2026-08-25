@@ -10,8 +10,7 @@ export function useRateLimitLockout() {
     function handle429(err: any) {
         const retryAfter =
             err?.data?.retryAfter ??
-            parseInt(err?.response?.headers?.get?.('retry-after') ?? '', 10) ||
-            60
+            (parseInt(err?.response?.headers?.get?.('retry-after') ?? '', 10) || 60)
 
         lockoutSeconds.value = retryAfter
         errorMsg.value = `Too many attempts. Please try again in ${lockoutSeconds.value} seconds.`
