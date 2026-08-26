@@ -429,7 +429,7 @@ async function handleSubmit() {
                 <v-row>
                     <v-col cols="12" md="3">
                         <div class="d-none d-md-block">
-                            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface pa-3"
+                            <v-card elevation="0" variant="outlined" rounded="md" class="bg-surface pa-4"
                                 style="border-color: #e0e0e0; position: sticky; top: 88px">
                                 <div class="text-caption font-weight-bold text-lightText text-uppercase px-3 pt-2 pb-1">
                                     In this document
@@ -464,25 +464,23 @@ async function handleSubmit() {
                     </v-col>
 
                     <v-col cols="12" md="9">
-                        <div class="pa-2">
-                            <v-expansion-panels v-model="openPanel" variant="outlined" rounded="md">
-                                <v-expansion-panel v-for="(term, i) in terms" :key="i">
-                                    <v-expansion-panel-title class="text-body-1 px-4">
-                                        <div class="d-flex align-center ga-3">
-                                            <v-avatar color="primary" variant="tonal" size="30" rounded="8">
-                                                <v-icon :icon="term.icon" color="primary" size="14" />
-                                            </v-avatar>
-                                            <span class="font-weight-medium text-darkText">{{ i + 1 }}. {{ term.title
-                                            }}</span>
-                                        </div>
-                                    </v-expansion-panel-title>
-                                    <v-expansion-panel-text class="text-body-2 text-medium-emphasis"
-                                        style="white-space: pre-line; line-height: 1.7">
-                                        {{ term.body }}
-                                    </v-expansion-panel-text>
-                                </v-expansion-panel>
-                            </v-expansion-panels>
-                        </div>
+                        <v-expansion-panels v-model="openPanel" variant="outlined" rounded="md">
+                            <v-expansion-panel v-for="(term, i) in terms" :key="i">
+                                <v-expansion-panel-title class="text-body-1 px-4">
+                                    <div class="d-flex align-center ga-3">
+                                        <v-avatar color="primary" variant="tonal" size="30" rounded="8">
+                                            <v-icon :icon="term.icon" color="primary" size="14" />
+                                        </v-avatar>
+                                        <span class="font-weight-medium text-darkText">{{ i + 1 }}. {{ term.title
+                                        }}</span>
+                                    </div>
+                                </v-expansion-panel-title>
+                                <v-expansion-panel-text class="text-body-2 text-medium-emphasis"
+                                    style="white-space: pre-line; line-height: 1.7">
+                                    {{ term.body }}
+                                </v-expansion-panel-text>
+                            </v-expansion-panel>
+                        </v-expansion-panels>
                     </v-col>
                 </v-row>
             </template>
